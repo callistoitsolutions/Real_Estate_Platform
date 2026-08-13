@@ -1,4 +1,4 @@
-{% include "admin_user/admin_header.html" %}
+{% include "rm_panel/rm_header.html" %}
 {% load static %}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -9,7 +9,7 @@
   :root {
     --primary: #667eea;
     --primary-dark: #5a67d8;
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
     --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
     --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
     --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -276,72 +276,7 @@
                   <div class="form-group">
                     <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="text-danger">*</span></label>
                     <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
-                      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-                        <input type="radio" name="listed_by_type" id="listedBySelf" value="self" {% if prop.listed_by_type == 'self' or not prop.listed_by_type %}checked{% endif %} onchange="Change_Fields(true)"> Listed by Self
-                      </label>
-                      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-                        <input type="radio" name="listed_by_type" id="listedByOther" value="other" {% if prop.listed_by_type == 'other' %}checked{% endif %} onchange="Change_Fields(true)"> Listed for Other User
-                      </label>
                     </div>
-
-                    <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
-                    <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
-                    <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
-                    <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
-                    <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
-
-                    <div id="listedByOtherWrapper" style="{% if prop.listed_by_type != 'other' %}display:none;{% endif %}">
-                      <div class="search-select" id="assignedToSearchSelect">
-                        <div class="search-select-control" id="assignedToControl" tabindex="0">
-                          <span class="search-select-value ss-placeholder" id="assignedToValueLabel" style="color:black;">
-                            {% if prop.listed_by_id %}
-                              {% for user in user_obj %}
-                                {% if prop.listed_by_id == user.user_id %}
-                                  {{ user.user_id }} - {{ user.user_name }} - {{ user.user_role }} - {{ user.user_phone }}
-                                {% endif %}
-                              {% endfor %}
-                            {% else %}
-                              -- Select Team Member --
-                            {% endif %}
-                          </span>
-                          <i class="fas fa-chevron-down search-select-arrow"></i>
-                        </div>
-                        <div class="search-select-panel" id="assignedToPanel">
-                          <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
-                          <div class="search-select-options" id="assignedToOptions">
-                            {% regroup user_obj by user_role as grouped_users %}
-                            {% for group in grouped_users %}
-                            <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
-                            {% for user in group.list %}
-                            <div class="search-select-option {% if prop.listed_by_id == user.user_id %}selected{% endif %}" data-value="{{ user.id }}-{{user.user_role}}"
-                              data-name="{{ user.user_name }}" data-role="{{ user.user_role }}"
-                              data-phone="{{ user.user_phone }}" data-uid="{{ user.user_id }}"
-                              data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
-                              {{ user.user_id }} - {{user.user_name}} - {{user.user_role}} - {{user.user_phone}}
-                            </div>
-                            {% endfor %}
-                            {% endfor %}
-                            <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <select id="assigned_to" name="assigned_to" data-initial="{{ prop.assigned_to|default:'' }}" style="display:none;">
-                      <option value="">-- Select Team Member --</option>
-                      {% regroup user_obj by user_role as grouped_users %}
-                      {% for group in grouped_users %}
-                      <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
-                        {% for user in group.list %}
-                        <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
-                          {{ user.user_name }} - {{ user.user_role }}
-                        </option>
-                        {% endfor %}
-                      </optgroup>
-                      {% endfor %}
-                    </select>
-
-                    <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
                   </div>
                 </div>
               </div>
@@ -350,10 +285,15 @@
 
               <div class="row" id="user_data_div">
                 <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_id|default:'' }}"></div></div>
+
                 <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_name|default:'' }}"></div></div>
+
                 <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_email|default:'' }}"></div></div>
+
                 <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_contact|default:'' }}"></div></div>
+
                 <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_role|default:'' }}"></div></div>
+
               </div>
             </div>
           </div>
@@ -1347,69 +1287,21 @@
           </div>
 
           <div class="form-section">
-            <div class="section-header"><i class="fas fa-upload"></i> Listing Status and Approval</div>
-            <div class="section-body">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label class="form-label mt-2">Listing Status <span class="required">*</span></label>
-                    <select class="form-select" name="listing_status" id="listing_status">
-                      <option value="">Select Status</option>
-                      <option value="Active" {% if prop.listing_status == "Active" %}selected{% endif %}>Active</option>
-                      <option value="Inactive" {% if prop.listing_status == "Inactive" %}selected{% endif %}>Inactive</option>
-                      <option value="Sold" {% if prop.listing_status == "Sold" %}selected{% endif %}>Sold</option>
-                      <option value="Rented" {% if prop.listing_status == "Rented" %}selected{% endif %}>Rented</option>
-                      <option value="Draft" {% if prop.listing_status == "Draft" %}selected{% endif %}>Draft</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label class="form-label mt-2">Approval Status <span class="required">*</span></label>
-                    <select class="form-select" name="approval_status" id="approval_status">
-                      <option value="">Select Status</option>
-                      <option value="Pending" {% if prop.approval_status == "Pending" %}selected{% endif %}>Pending</option>
-                      <option value="Approved" {% if prop.approval_status == "Approved" %}selected{% endif %}>Approved</option>
-                      <option value="Rejected" {% if prop.approval_status == "Rejected" %}selected{% endif %}>Rejected</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-section">
             <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
             <div class="section-body">
-              <div class="row">
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" id="uploaded_by_name" name="uploaded_by_name" value="{{ prop.uploaded_by_name|default:admin_obj.name }}" readonly>
-                  </div>
+                <div class="row">
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" value="{{ prop.uploaded_by_name }}" disabled></div></div>
+
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" value="{{ prop.uploaded_by_email }}" disabled></div></div>
+
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" value="{{ prop.uploaded_by_contact }}" disabled></div></div>
+
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" value="{{ prop.uploaded_by_role }}" disabled></div></div>
+
                 </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" id="uploaded_by_email" name="uploaded_by_email" value="{{ prop.uploaded_by_email|default:admin_obj.email }}" readonly>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Contact</label>
-                    <input type="text" class="form-control" id="uploaded_by_contact" name="uploaded_by_contact" value="{{ prop.uploaded_by_contact|default:admin_obj.phone }}" readonly>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Role</label>
-                    <input type="text" class="form-control" id="uploaded_by_role" name="uploaded_by_role" value="{{ prop.uploaded_by_role|default:admin_obj.role }}" readonly>
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
+        </div>
+
 
           <!-- STEP BUTTONS -->
           <div class="form-footer">
@@ -2675,27 +2567,16 @@
     fd.append('latitude', $('#latitude').val() || '');
     fd.append('longitude', $('#longitude').val() || '');
 
-    // Listed By 
-    var listedByType = $('input[name="listed_by_type"]:checked').val();
-    fd.append('listed_by_type', listedByType);
-    if (listedByType === 'self') {
-        fd.append('listed_by_id', $('#selfUserId').val());
-        fd.append('listed_by_name', $('#selfUserName').val());
-        fd.append('listed_by_email', $('#selfUserEmail').val());
-        fd.append('listed_by_contact', $('#selfUserPhone').val());
-        fd.append('listed_by_role', $('#selfUserRole').val());
-        fd.append('assigned_to', '');
-    } else {
-        var assignedValue = $('#assigned_to').val();
-        if (assignedValue) {
-            fd.append('listed_by_id', $('#listed_by_id').val());
-            fd.append('listed_by_name', $('#listed_by_name').val());
-            fd.append('listed_by_email', $('#listed_by_email').val());
-            fd.append('listed_by_contact', $('#listed_by_contact').val());
-            fd.append('listed_by_role', $('#listed_by_role').val());
-            fd.append('assigned_to', assignedValue);
-        }
-    }
+    
+    fd.append('listed_by_type', '{{prop.listed_by_type}}');
+     
+    fd.append('listed_by_id', $('#listed_by_id').val());
+    fd.append('listed_by_name', $('#listed_by_name').val());
+    fd.append('listed_by_email', $('#listed_by_email').val());
+    fd.append('listed_by_contact', $('#listed_by_contact').val());
+    fd.append('listed_by_role', $('#listed_by_role').val());
+  
+
 
     // Amenities & Facilities
     var amenities = [];
@@ -2715,8 +2596,8 @@
     fd.append('uploaded_by_email', $('#uploaded_by_email').val());
     fd.append('uploaded_by_contact', $('#uploaded_by_contact').val());
     fd.append('uploaded_by_role', $('#uploaded_by_role').val());
-    fd.append('listing_status', $('#listing_status').val());
-    fd.append('approval_status', $('#approval_status').val());
+    fd.append('listing_status', '{{prop.listing_status}}');
+    fd.append('approval_status', '{{prop.approval_status}}');
 
     // Video options
     const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
@@ -2770,7 +2651,7 @@
                     text: response.msg || response.message || 'Commercial property changes saved.',
                     confirmButtonColor: '#10b981'
                 }).then(() => {
-                    window.location.href = "{% url 'commercial_resale_list' %}";
+                    window.location.href = "{% url 'commercial_resale_rm_list' %}";
                 });
             } else {
                 Swal.fire({ icon: 'error', title: 'Update Failed', text: response.msg || response.message || 'Something went wrong!' });

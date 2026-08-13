@@ -6,7 +6,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         {% for message in messages %}
             {% if message.tags == 'error' %}
-                Swal.fire({
+                swal({
                     icon: "error",
                     title: "Duplicate Property Detected",
                     text: "{{ message|escapejs }}",
@@ -15,7 +15,7 @@
                     allowOutsideClick: false
                 });
             {% elif message.tags == 'warning' %}
-                Swal.fire({
+                swal({
                     icon: "warning",
                     title: "Action Required",
                     text: "{{ message|escapejs }}",
@@ -23,7 +23,7 @@
                     confirmButtonText: 'Review'
                 });
             {% else %}
-                Swal.fire({
+                swal({
                     icon: "success",
                     title: "Success!",
                     text: "{{ message|escapejs }}",
@@ -982,6 +982,65 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- ── PAGINATION CONTROLS ── -->
+        {% if properties.has_other_pages %}
+
+            <nav aria-label="Page navigation" style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="font-size: 13px; color: #64748b; font-weight: 500;">
+                    Showing page <strong>{{ properties.number }}</strong> of <strong>{{ properties.paginator.num_pages }}</strong> 
+                    (Total {{ properties.paginator.count }} records)
+                </div>
+
+                <ul class="pagination" style="display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; align-items: center;">
+                    <!-- First / Previous Page -->
+                    {% if properties.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                                <i class="fas fa-angle-double-left"></i> First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ properties.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                                <i class="fas fa-angle-left"></i> Prev
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Page Numbers -->
+                    {% for num in properties.paginator.page_range %}
+                        {% if properties.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link" style="padding: 8px 14px; border-radius: 6px; border: 1px solid var(--primary); background: var(--primary-gradient); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 2px 5px rgba(102,126,234,0.3);">
+                                    {{ num }}
+                                </span>
+                            </li>
+                        {% elif num > properties.number|add:'-3' and num < properties.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Next / Last Page -->
+                    {% if properties.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ properties.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                                Next <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ properties.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                                Last <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            
+        {% endif %}
     </div>
 </div>
 
@@ -1209,7 +1268,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
@@ -1304,11 +1363,11 @@
         const fromDate = document.getElementById('from_date').value;
         const toDate = document.getElementById('to_date').value;
         if (!fromDate && !toDate) {
-            alert("Please select at least a 'Start Date' or 'End Date' to filter.");
+            swal("Please select at least a 'Start Date' or 'End Date' to filter.");
             return false;
         }
         if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-            alert("Invalid Date Range: 'Start Date' cannot be after 'End Date'.");
+            swal("Invalid Date Range: 'Start Date' cannot be after 'End Date'.");
             return false;
         }
         return true; 
@@ -1388,32 +1447,45 @@
         });
     });
 
-    // Single Property Delete Handler
-    function Delete_Property(prop_id) {
-        Swal.fire({
+    
+
+function Delete_Property(prop_id) {
+        swal({
             title: 'Are you sure?',
-            text: "This action will permanently delete this resale property record!",
+            text: "This action will permanently delete this residential resale property record!",
             icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff0844',
-            cancelButtonColor: '#adb5bd',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
+            buttons: ['Cancel', 'Yes, delete it!'],
+            dangerMode: true
+        }).then((isConfirmed) => {
+            if (isConfirmed) {
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'resale_residential_delete' 0 %}".replace('0', prop_id),
-                    data: { 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+                    url: "{% url 'resale_residential_delete' %}",
+                    data: { 
+                        'prop_id': prop_id, 
+                    },
                     success: function (response) {
                         if (response.status === 'success') {
-                            Swal.fire('Deleted!', response.message, 'success').then(() => {
+                            swal('Deleted!', response.message, 'success').then(() => {
                                 const row = document.getElementById(`row-${prop_id}`);
-                                if(row) row.remove();
-                                else location.reload();
+                                if(row) {
+                                    row.remove();
+                                } else {
+                                    location.reload();
+                                }
                             });
                         } else {
-                            Swal.fire('Error', response.message || 'Deletion failed', 'error');
+                            swal('Error', response.message || 'Deletion failed', 'error');
                         }
+                    },
+                    error: function (xhr) {
+                        let errorMsg = 'Server processing error occurred.';
+                        try {
+                            let jsonRes = JSON.parse(xhr.responseText);
+                            if (jsonRes.message) errorMsg = jsonRes.message;
+                        } catch(e) {}
+                        
+                        swal('Error', errorMsg, 'error');
                     }
                 });
             }
@@ -1435,7 +1507,7 @@
 
         // 1. Verify extension
         if (!file.name.toLowerCase().endsWith('.xlsx')) {
-            Swal.fire('Invalid File', 'Please select a valid Excel (.xlsx) workbook file.', 'error');
+            swal('Invalid File', 'Please select a valid Excel (.xlsx) workbook file.', 'error');
             input.value = ''; // Reset file input
             resetDropzone();
             return;
@@ -1482,7 +1554,7 @@ function resetDropzone() {
 function Import_Resale_Data(_this) {
     var resale_file = $("#resale_file")[0].files;
     if (resale_file.length == 0) {
-        Swal.fire('Warning', 'Please select an Excel file to upload.', 'warning');
+        swal('Warning', 'Please select an Excel file to upload.', 'warning');
         return;
     }
     
@@ -1500,42 +1572,46 @@ function Import_Resale_Data(_this) {
         success: function (response) {
             $(_this).prop("disabled", false).html(`Import Data`);
             
-            // Check if backend reports true success with actual records created/updated, or partial errors
-            const createdCount = response.created || response.imported || 0;
-            const updatedCount = response.updated || 0;
-            const skippedCount = response.skipped || 0;
-
-            if (response.status === 'success' && (createdCount > 0 || updatedCount > 0)) {
-                let statsHtml = `<div style="display:flex; justify-content:center; gap:8px; margin-top:12px; flex-wrap:wrap;">`;
-                if (createdCount > 0) statsHtml += `<span style="background:#10b981; color:white; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:600;">${createdCount} Created</span>`;
-                if (updatedCount > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:600;">${updatedCount} Updated</span>`;
-                if (skippedCount > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:600;">${skippedCount} Skipped</span>`;
-                statsHtml += `</div>`;
-
-                Swal.fire({
+            if (response.status === 'success') {
+                swal({
                     icon: 'success',
                     title: 'Import Process Complete!',
-                    html: `<div style="font-size:14px; color:#374151;">${response.message || ''}</div>` + statsHtml,
-                    confirmButtonColor: '#667eea'
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        }
+                    },
+                    confirmButtonColor: '#10b981',
+                    width: '600px'
                 }).then(() => {
                     window.location.reload();
                 });
-            } else {
-                // If 0 records were imported or status is partial_error/error
-                let errorDetails = '';
-                if (response.errors && response.errors.length > 0) {
-                    errorDetails = `<div style="text-align: left; font-size: 12px; max-height: 140px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 10px; border-radius: 6px; border: 1px solid #FCA5A5; margin-top: 12px;">
-                                    <ul style="margin:0; padding-left:18px;">`;
-                    response.errors.slice(0, 6).forEach(err => { errorDetails += `<li>${err}</li>`; });
-                    errorDetails += `</ul></div>`;
-                }
-
-                Swal.fire({
+            } else if (response.status === 'duplicate') {
+                swal({
                     icon: 'warning',
-                    title: 'No Records Imported',
-                    html: `<p style="font-size:13px; color:#4b5563; margin-bottom:0;">The file was processed, but 0 records were saved due to missing fields or rule violations.</p>` + errorDetails,
+                    title: 'Duplicates Skipped',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        }
+                    },
                     confirmButtonColor: '#f59e0b',
-                    width: '520px'
+                    width: '600px'
+                });
+            } else {
+                swal({
+                    icon: 'error',
+                    title: 'Import Error',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        }
+                    },
+                    confirmButtonColor: '#ef4444',
+                    width: '600px'
                 });
             }
         },
@@ -1547,10 +1623,15 @@ function Import_Resale_Data(_this) {
                 if (jsonRes.message) errorMsg = jsonRes.message;
             } catch(e) {}
 
-            Swal.fire({
+            swal({
                 icon: 'error',
                 title: 'Import Denied',
-                html: `<div style="font-size:13px; color:#dc2626;">${errorMsg}</div>`,
+                content: {
+                    element: "div",
+                    attributes: {
+                        innerHTML: `<div style="font-size:13px; color:#dc2626;">${errorMsg}</div>`
+                    }
+                },
                 confirmButtonColor: '#ef4444'
             });
         }
@@ -1567,7 +1648,7 @@ function Import_Resale_Data(_this) {
     function executeBulkDelete() {
         const type = document.getElementById('deleteType').value;
         if (!type) {
-            Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
+            swal('Warning', 'Please select a delete criteria.', 'warning');
             return;
         }
 
@@ -1577,32 +1658,32 @@ function Import_Resale_Data(_this) {
             payload.from_date = document.getElementById('fromDate').value;
             payload.to_date = document.getElementById('toDate').value;
             if (!payload.from_date || !payload.to_date) {
-                Swal.fire('Warning', 'Please select both From and To dates.', 'warning');
+                swal('Warning', 'Please select both From and To dates.', 'warning');
                 return;
             }
         } else if (type === 'by_uploader') {
             payload.uploader_text = document.getElementById('uploaderText').value;
             if (!payload.uploader_text) {
-                Swal.fire('Warning', 'Please enter the uploader detail.', 'warning');
+                swal('Warning', 'Please enter the uploader detail.', 'warning');
                 return;
             }
         } else if (type === 'by_file') {
             payload.file_name = document.getElementById('selectedFile').value;
             if (!payload.file_name) {
-                Swal.fire('Warning', 'Please select an Excel file from the list.', 'warning');
+                swal('Warning', 'Please select an Excel file from the list.', 'warning');
                 return;
             }
         } else if (type === 'current_page') {
             const rows = document.querySelectorAll('tr[id^="row-"]');
             const ids = Array.from(rows).map(row => row.id.split('-')[1]);
             if (ids.length === 0) {
-                Swal.fire('Warning', 'No data on the current page to delete.', 'warning');
+                swal('Warning', 'No data on the current page to delete.', 'warning');
                 return;
             }
             payload.page_ids = ids;
         }
 
-        Swal.fire({
+        swal({
             title: 'Are you absolutely sure?',
             text: "This action will permanently delete the selected Resale records and their media!",
             icon: 'warning',
@@ -1611,7 +1692,7 @@ function Import_Resale_Data(_this) {
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Yes, delete them!'
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (result.value) {
                 fetch("{% url 'resale_residential_bulk_delete' %}", {
                     method: 'POST',
                     headers: {
@@ -1624,14 +1705,14 @@ function Import_Resale_Data(_this) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        Swal.fire('Deleted!', data.message, 'success').then(() => {
+                        swal('Deleted!', data.message, 'success').then(() => {
                             window.location.reload();
                         });
                     } else {
-                        Swal.fire('Error', data.message, 'error');
+                        swal('Error', data.message, 'error');
                     }
                 })
-                .catch(() => Swal.fire('Error', 'Server error occurred.', 'error'));
+                .catch(() => swal('Error', 'Server error occurred.', 'error'));
             }
         });
     }

@@ -1,14 +1,15 @@
-{% include "admin_user/admin_header.html" %}
+{% include "rm_panel/rm_header.html" %}
 {% load static %}
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
-        --primary: #56ab2f;
-        --primary-light: #f4fdf0;
-        --primary-dark: #3e8e41;
+        --primary: #667eea;
+        --primary-light: #f0f3ff;
+        --primary-dark: #5a67d8;
         --accent: #f97316;
         --dark: #111827;
         --mid: #374151;
@@ -43,13 +44,13 @@
     }
     .prop-topbar a { color: var(--primary); text-decoration: none; }
     .prop-topbar .prop-id-badge {
-        background: var(--primary-light);
+        background: #f0f3ff;
         color: var(--primary);
         font-weight: 700;
         padding: 3px 10px;
         border-radius: 20px;
         font-size: 0.75rem;
-        border: 1px solid #c8e6c9;
+        border: 1px solid #d1dcff;
         font-family: monospace;
     }
     .prop-verified-badge {
@@ -281,9 +282,9 @@
     .spec-full { grid-column: 1 / -1; border-right: none !important; }
 
     .spec-item.highlight-price {
-        background: linear-gradient(135deg, #f4fdf0, #eefbee);
+        background: linear-gradient(135deg, #f0f4ff, #e8eeff);
         border-radius: 8px;
-        border: 1px solid #c8e6c9 !important;
+        border: 1px solid #d1dcff !important;
         padding: 14px;
     }
     .spec-item.highlight-price .spec-label { color: var(--primary); }
@@ -295,20 +296,20 @@
     .facility-pill i { font-size: 0.68rem; }
 
     .status-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; width: fit-content; }
-    .badge-yes { background: #fee2e2; color: #065f46; border: 1px solid #34d399; }
-    .badge-no { background: #ecfdf5; color: #991b1b; border: 1px solid #f87171; }
+    .badge-yes { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-no { background: #ecfdf5; color: #065f46; border: 1px solid #34d399; }
 
     .address-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem; color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary); }
 
     .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
     .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
-    .prop-faq .accordion-button:not(.collapsed) { background: #f4fdf0; color: var(--primary); border-bottom: 1px solid #c8e6c9; }
+    .prop-faq .accordion-button:not(.collapsed) { background: #f0f3ff; color: var(--primary); border-bottom: 1px solid #d1dcff; }
     .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
 
     .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
     .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
-    .sidebar-price-header { background: linear-gradient(135deg, #56ab2f, #a8e063); padding: 20px 20px 16px; color: white; }
-    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.9; font-weight: 600; }
+    .sidebar-price-header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 20px 20px 16px; color: white; }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
     .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
     .sidebar-price-body { padding: 16px 20px; }
     .sidebar-mini-stat { text-align: center; padding: 10px 0; }
@@ -316,16 +317,16 @@
     .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
 
     .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
-    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #3e8e41); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #5a67d8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
     .owner-name { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
     .owner-email { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
     .owner-phone-masked { font-size: 0.82rem; color: var(--mid); font-weight: 500; font-family: monospace; }
     
-    .btn-reveal-phone { font-size: 0.73rem; color: var(--primary); border: 1px solid #c8e6c9; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .btn-reveal-phone { font-size: 0.73rem; color: var(--primary); border: 1px solid #d1dcff; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
     .btn-reveal-phone:hover { background: var(--primary); color: white; border-color: var(--primary); }
     
-    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #56ab2f, #3e8e41); color: white; border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; font-weight: 700; width: 100%; cursor: pointer; text-decoration: none; margin-top: 14px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(86,171,47,0.3); }
-    .btn-call-primary:hover { background: linear-gradient(135deg, #3e8e41, #56ab2f); transform: translateY(-1px); color: white; }
+    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; font-weight: 700; width: 100%; cursor: pointer; text-decoration: none; margin-top: 14px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+    .btn-call-primary:hover { background: linear-gradient(135deg, #5a67d8, #667eea); transform: translateY(-1px); color: white; }
 
     .owner-info-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem; }
     .owner-info-row:last-child { border: none; padding-bottom: 0; }
@@ -365,7 +366,7 @@
         <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <a href="javascript:history.back()"><i class="fas fa-arrow-left me-1"></i> Agricultural Resale Listings</a>
+                    <a href="javascript:history.back()"><i class="fas fa-arrow-left me-1"></i> Commercial Resale Listings</a>
                     <span class="text-muted">/</span>
                     <span>{{ prop.property_title|default:prop.property_no|truncatechars:40 }}</span>
                     <span class="prop-id-badge">ID: {{ prop.id }}</span>
@@ -381,28 +382,28 @@
         </div>
     </div>
 
-    <!-- HERO HEADER -->
+    <!-- HERO HEADER WITH SELLING PRICE -->
     <div class="prop-hero-header">
         <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
                 <div style="flex: 1; min-width: 260px;">
-                    <h1>{{ prop.property_title|default:"Agricultural Resale Land" }}</h1>
+                    <h1>{{ prop.property_title|default:"Commercial Resale Property" }}</h1>
                     <div class="prop-hero-location">
                         <i class="fas fa-location-dot"></i>
-                        {{ prop.village }}, {{ prop.taluka }}, {{ prop.district }}, {{ prop.state|default:"India" }}
+                        {{ prop.locality }}, {{ prop.city }}, {{ prop.state|default:"India" }}
                     </div>
                     <div class="media-action-container">
-                        {% if prop.encumbrance_cert %}
-                            <a href="{{ prop.encumbrance_cert.url }}" target="_blank" class="btn-media-outline btn-blueprint">
-                                <i class="fas fa-file-pdf"></i> 7/12 Extract / Document
+                        {% if prop.floor_plan %}
+                            <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn-media-outline btn-blueprint">
+                                <i class="fas fa-map"></i> Floor Plan
                             </a>
                         {% endif %}
-                        {% if uploaded_video and uploaded_video.video %}
-                            <a href="{{ uploaded_video.video.url }}" target="_blank" class="btn-media-outline btn-video">
+                        {% if prop.property_video %}
+                            <a href="{{ prop.property_video.url }}" target="_blank" class="btn-media-outline btn-video">
                                 <i class="fas fa-circle-play"></i> Property Video
                             </a>
-                        {% elif rm_video and rm_video.video_url %}
-                            <a href="{{ rm_video.video_url }}" target="_blank" class="btn-media-outline btn-video">
+                        {% elif prop.property_video_link %}
+                            <a href="{{ prop.property_video_link }}" target="_blank" class="btn-media-outline btn-video">
                                 <i class="fas fa-external-link-alt"></i> External Video Link
                             </a>
                         {% endif %}
@@ -411,18 +412,20 @@
                 <div class="text-end">
                     <div class="prop-hero-price-tag">₹{{ prop.selling_price|default:"—" }}</div>
                     <div style="font-size:0.78rem; color: var(--muted); margin-top:4px;">
-                        ₹{{ prop.price_per_acre|default:"—" }} / Acre
+                        ₹{{ prop.price_per_sqft|default:"—" }} / sq.ft
                     </div>
                 </div>
             </div>
             
             <!-- QUICK STATS CHIPS -->
             <div class="prop-quick-stats">
-                <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ prop.listing_type|default:"Resale" }} / {{ prop.category|default:"Agricultural" }}</div>
-                <div class="quick-stat-chip"><i class="fas fa-tractor"></i> {{ prop.property_type|title|default:"Farmland" }}</div>
-                <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.land_area }} Acres</div>
-                <div class="quick-stat-chip"><i class="fas fa-tint"></i> Water: {{ prop.water_source|title|default:"—" }}</div>
-                <div class="quick-stat-chip"><i class="fas fa-seedling"></i> Soil: {{ prop.soil_type|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ prop.listing_type|default:"Resale" }} / {{ prop.category|default:"Commercial" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-building"></i> {{ prop.property_type|title|default:"Office Space" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-layer-group"></i> Category: {{ prop.property_category|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.builtup_area }} sq.ft Built-up</div>
+                <div class="quick-stat-chip"><i class="fas fa-compass"></i> Zone: {{ prop.zone_type|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ prop.furnishing_status|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-tools"></i> {{ prop.property_condition|title|default:"—" }}</div>
             </div>
         </div>
     </div>
@@ -444,18 +447,18 @@
                                 <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
                                 <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
                             </div>
-                            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Farm Walkthrough</span>
+                            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Presentation Walkthrough</span>
                         </div>
                     {% else %}
                         <div class="w-100 h-100 position-relative overflow-hidden">
-                            <div style="position:absolute; inset:0; background:linear-gradient(135deg,#56ab2f,#a8e063); filter:blur(12px); transform:scale(1.2);"></div>
+                            <div style="position:absolute; inset:0; background:linear-gradient(135deg,#667eea,#764ba2); filter:blur(12px); transform:scale(1.2);"></div>
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
                                 <div class="text-center text-white">
                                     <div style="width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; margin:auto; border:1px solid rgba(255,255,255,0.15)">
-                                        <i class="fas fa-tractor" style="font-size:60px;"></i>
+                                        <i class="fas fa-building" style="font-size:60px;"></i>
                                     </div>
                                     <h2 style="margin-top:20px; font-weight:700;">EstateFlow</h2>
-                                    <p style="color:rgba(255,255,255,0.8);">No Farm Images Uploaded</p>
+                                    <p style="color:rgba(255,255,255,0.8);">No Property Images Uploaded</p>
                                 </div>
                             </div>
                         </div>
@@ -467,8 +470,8 @@
                     {% if images.count > 1 %}
                         <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
                     {% else %}
-                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#56ab2f,#a8e063);">
-                            <i class="fas fa-tractor mb-1"></i><span style="font-size:10px;">EstateFlow</span>
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                            <i class="fas fa-building mb-1"></i><span style="font-size:10px;">EstateFlow</span>
                         </div>
                     {% endif %}
                 </div>
@@ -486,8 +489,8 @@
                         </div>
                         {% endif %}
                     {% else %}
-                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#56ab2f,#a8e063);">
-                            <i class="fas fa-tractor mb-1"></i><span style="font-size:10px;">EstateFlow</span>
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                            <i class="fas fa-building mb-1"></i><span style="font-size:10px;">EstateFlow</span>
                         </div>
                     {% endif %}
                 </div>
@@ -513,13 +516,15 @@
         <div class="container-fluid px-4">
             <div class="prop-sticky-nav-inner" id="propNavTabs">
                 <button type="button" data-target="sec-listed-by" class="prop-nav-button active"><i class="fas fa-user-tag"></i> Listed By</button>
-                <button type="button" data-target="sec-basic-info" class="prop-nav-button"><i class="fas fa-info-circle"></i> Basic Info</button>
-                <button type="button" data-target="sec-soil-cultivation" class="prop-nav-button"><i class="fas fa-seedling"></i> Soil & Cultivation</button>
-                <button type="button" data-target="sec-water-access" class="prop-nav-button"><i class="fas fa-tint"></i> Water & Access</button>
-                <button type="button" data-target="sec-pricing-legal" class="prop-nav-button"><i class="fas fa-indian-rupee-sign"></i> Pricing & Legal</button>
-                <button type="button" data-target="sec-amenities" class="prop-nav-button"><i class="fas fa-star"></i> Amenities & Desc</button>
+                <button type="button" data-target="sec-basic-info" class="prop-nav-button"><i class="fas fa-info-circle"></i> Basic Information</button>
+                <button type="button" data-target="sec-area-measurements" class="prop-nav-button"><i class="fas fa-ruler-combined"></i> Area Measurements</button>
+                <button type="button" data-target="sec-commercial-specs" class="prop-nav-button"><i class="fas fa-building"></i> Commercial Specs</button>
+                <button type="button" data-target="sec-ownership-legal" class="prop-nav-button"><i class="fas fa-shield-halved"></i> Ownership & Legal</button>
+                <button type="button" data-target="sec-pricing-details" class="prop-nav-button"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</button>
+                <button type="button" data-target="sec-amenities-facilities" class="prop-nav-button"><i class="fas fa-star"></i> Amenities & Nearby</button>
+                <button type="button" data-target="sec-address-details" class="prop-nav-button"><i class="fas fa-location-dot"></i> Address Details</button>
                 <button type="button" data-target="sec-media-portals" class="prop-nav-button"><i class="fas fa-images"></i> Media & Portals</button>
-                <button type="button" data-target="sec-audit-meta" class="prop-nav-button"><i class="fas fa-user-check"></i> Audit Meta</button>
+                <button type="button" data-target="sec-listing-uploaded" class="prop-nav-button"><i class="fas fa-user-check"></i> Uploaded By & Meta</button>
                 <button type="button" data-target="sec-faqs" class="prop-nav-button"><i class="fas fa-comments"></i> Property FAQs</button>
             </div>
         </div>
@@ -539,11 +544,11 @@
                         </div>
                         <div class="spec-grid">
                             <div class="spec-item">
-                                <div class="spec-label">Listed By Type</div>
+                                <div class="spec-label">Listed By Type (Self/Other)</div>
                                 <div class="spec-value">{{ prop.listed_by_type|title|default:"Self" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Assigned To</div>
+                                <div class="spec-label">Assigned To (Team Member)</div>
                                 <div class="spec-value">{{ prop.assigned_to|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
@@ -569,202 +574,162 @@
                         </div>
                     </div>
 
-                    <!-- 2. BASIC LAND INFORMATION -->
+                    <!-- 2. BASIC INFORMATION SECTION -->
                     <div class="prop-section" id="sec-basic-info">
                         <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-info-circle"></i></div> Basic Land Information
+                            <div class="section-icon"><i class="fas fa-info-circle"></i></div> Basic Information
                         </div>
                         <div class="spec-grid">
                             <div class="spec-item spec-full">
-                                <div class="spec-label">Property Title</div>
+                                <div class="spec-label">Property Title (Auto-generated)</div>
                                 <div class="spec-value">{{ prop.property_title|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Agricultural Land Category</div>
+                                <div class="spec-label">Property Type</div>
                                 <div class="spec-value">{{ prop.property_type|title|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Property No</div>
+                                <div class="spec-label">Property Category</div>
+                                <div class="spec-value">{{ prop.property_category|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Shop/Godown No/Unit No</div>
                                 <div class="spec-value">{{ prop.property_no|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Land Area (Acres)</div>
-                                <div class="spec-value">{{ prop.land_area|default:"—" }} Acres</div>
+                                <div class="spec-label">Occupancy Status</div>
+                                <div class="spec-value">{{ prop.occupancy_status|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Village</div>
-                                <div class="spec-value">{{ prop.village|default:"—" }}</div>
+                                <div class="spec-label">Zone Type</div>
+                                <div class="spec-value">{{ prop.zone_type|title|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Taluka</div>
-                                <div class="spec-value">{{ prop.taluka|default:"—" }}</div>
+                                <div class="spec-label">Location Hub</div>
+                                <div class="spec-value">{{ prop.location_hub|title|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">District</div>
-                                <div class="spec-value">{{ prop.district|default:"—" }}</div>
+                                <div class="spec-label">Property Condition</div>
+                                <div class="spec-value">{{ prop.property_condition|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">State</div>
-                                <div class="spec-value">{{ prop.state|default:"—" }}</div>
+                                <div class="spec-label">Age of Property</div>
+                                <div class="spec-value">{{ prop.property_age|default:"0" }} Years</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Locality / Area</div>
-                                <div class="spec-value">{{ prop.locality|default:"—" }}</div>
+                                <div class="spec-label">Furnishing Status</div>
+                                <div class="spec-value">{{ prop.furnishing_status|title|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Pincode</div>
-                                <div class="spec-value">{{ prop.pincode|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item spec-full">
-                                <div class="spec-label">Complete Address</div>
-                                <div class="spec-value">{{ prop.address|default:"—" }}</div>
+                                <div class="spec-label">Facing Direction</div>
+                                <div class="spec-value">{{ prop.facing_direction|default:"—" }}</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 3. SOIL & CULTIVATION -->
-                    <div class="prop-section" id="sec-soil-cultivation">
+                    <!-- 3. AREA MEASUREMENTS SECTION -->
+                    <div class="prop-section" id="sec-area-measurements">
                         <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-seedling"></i></div> Soil & Cultivation
+                            <div class="section-icon"><i class="fas fa-ruler-combined"></i></div> Area Measurements
                         </div>
                         <div class="spec-grid">
                             <div class="spec-item">
-                                <div class="spec-label">Soil Type</div>
-                                <div class="spec-value">{{ prop.soil_type|title|default:"—" }}</div>
+                                <div class="spec-label">Super Built-up Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.super_builtup_area|default:"—" }} sq.ft</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Cultivation Status</div>
-                                <div class="spec-value">{{ prop.cultivation_status|title|default:"—" }}</div>
+                                <div class="spec-label">Built-up Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.builtup_area|default:"—" }} sq.ft</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Fertility Status</div>
-                                <div class="spec-value">{{ prop.fertility_status|title|default:"—" }}</div>
+                                <div class="spec-label">Carpet Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.carpet_area|default:"—" }} sq.ft</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Property Age</div>
-                                <div class="spec-value">{{ prop.property_age|default:"—" }} Years</div>
-                            </div>
-                            <div class="spec-item spec-full">
-                                <div class="spec-label">Previously Grown Crops</div>
-                                <div class="spec-value">{{ prop.previous_crops|default:"—" }}</div>
+                                <div class="spec-label">Plot Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.plot_area|default:"—" }} {% if prop.plot_area %}sq.ft{% endif %}</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 4. WATER & ACCESS -->
-                    <div class="prop-section" id="sec-water-access">
+                    <!-- 4. COMMERCIAL SPECIFICATIONS SECTION -->
+                    <div class="prop-section" id="sec-commercial-specs">
                         <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-tint"></i></div> Water & Access Details
+                            <div class="section-icon"><i class="fas fa-building"></i></div> Commercial Specifications
                         </div>
                         <div class="spec-grid">
                             <div class="spec-item">
-                                <div class="spec-label">Water Source</div>
-                                <div class="spec-value">{{ prop.water_source|title|default:"—" }}</div>
+                                <div class="spec-label">No. of Staircases</div>
+                                <div class="spec-value">{{ prop.no_staircases|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Irrigation Facility</div>
-                                <div class="spec-value">{{ prop.irrigation_facility|title|default:"—" }}</div>
+                                <div class="spec-label">Passenger Lifts</div>
+                                <div class="spec-value">{{ prop.passenger_lifts|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Irrigation Facility Active?</div>
-                                <div class="spec-value">{{ prop.irrigation_facility_active|title|default:"—" }}</div>
+                                <div class="spec-label">Service Lifts</div>
+                                <div class="spec-value">{{ prop.service_lifts|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Number of Borewells</div>
-                                <div class="spec-value">{{ prop.nos_borewells|default:"—" }}</div>
+                                <div class="spec-label">No. of Cabins</div>
+                                <div class="spec-value">{{ prop.num_cabins|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Water Source Infrastructure</div>
-                                <div class="spec-value">{{ prop.water_source_infrastructure|title|default:"—" }}</div>
+                                <div class="spec-label">Meeting Rooms</div>
+                                <div class="spec-value">{{ prop.meeting_rooms|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Road Access</div>
-                                <div class="spec-value">{{ prop.road_access|title|default:"—" }}</div>
+                                <div class="spec-label">Min. Seats</div>
+                                <div class="spec-value">{{ prop.min_seats|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Road Frontage</div>
-                                <div class="spec-value">{{ prop.road_frontage|default:"—" }}</div>
+                                <div class="spec-label">Max. Seats</div>
+                                <div class="spec-value">{{ prop.max_seats|default:"0" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Distance from Nearest Village</div>
-                                <div class="spec-value">{{ prop.dist_nearest_village|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Distance from Main Road</div>
-                                <div class="spec-value">{{ prop.dist_main_road|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Distance from Highway</div>
-                                <div class="spec-value">{{ prop.dist_highway|default:"—" }}</div>
+                                <div class="spec-label">Private Parking</div>
+                                <div class="spec-value">{{ prop.private_parking|default:"0" }} Slots</div>
                             </div>
                             <div class="spec-item spec-full">
-                                <div class="spec-label">Fencing Status</div>
-                                <div class="spec-value">{{ prop.fencing_status|title|default:"—" }}</div>
+                                <div class="spec-label">Public Parking</div>
+                                <div class="spec-value">{{ prop.public_parking|default:"0" }} Slots</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 5. PRICING & LEGAL STATUS -->
-                    <div class="prop-section" id="sec-pricing-legal">
+                    <!-- 5. OWNERSHIP & LEGAL DETAILS SECTION -->
+                    <div class="prop-section" id="sec-ownership-legal">
                         <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div> Pricing & Legal Status
+                            <div class="section-icon"><i class="fas fa-shield-halved"></i></div> Ownership & Legal Details
                         </div>
                         <div class="spec-grid">
-                            <div class="spec-item highlight-price">
-                                <div class="spec-label">Selling Price</div>
-                                <div class="spec-value">₹ {{ prop.selling_price }}</div>
-                            </div>
-                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, #f0fdf4, #eefbee); border-color: #c8e6c9 !important;">
-                                <div class="spec-label" style="color:#2e7d32;">Price Per Acre (Auto)</div>
-                                <div class="spec-value" style="color:#1b5e20;">₹ {{ prop.price_per_acre|default:"—" }} / Acre</div>
-                            </div>
                             <div class="spec-item">
-                                <div class="spec-label">Brokerage</div>
-                                <div class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Fixed Brokerage</div>
-                                <div class="spec-value">{% if prop.manual_brokerage %}₹ {{ prop.manual_brokerage }}{% else %}—{% endif %}</div>
+                                <div class="spec-label">No. of Owners</div>
+                                <div class="spec-value">{{ prop.no_of_owners|default:"1" }} Owner(s)</div>
                             </div>
                             <div class="spec-item">
                                 <div class="spec-label">Ownership Status</div>
-                                <div class="spec-value">{{ prop.ownership_type|title|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Land Conversion Status</div>
-                                <div class="spec-value">{{ prop.land_conversion_status|title|default:"—" }}</div>
+                                <div class="spec-value">{{ prop.ownership_status|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
                                 <div class="spec-label">Ownership Document Type</div>
                                 <div class="spec-value">{{ prop.ownership_document_type|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Title Status</div>
-                                <div class="spec-value">{{ prop.title_status|default:"—" }}</div>
+                                <div class="spec-label">Title Clarity Status</div>
+                                <div class="spec-value">{{ prop.title_clarity_status|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
                                 <div class="spec-label">Encumbrance Status</div>
                                 <div class="spec-value">{{ prop.encumbrance_status|default:"—" }}</div>
                             </div>
                             <div class="spec-item">
-                                <div class="spec-label">Possession Status</div>
-                                <div class="spec-value">{{ prop.possession_status|title|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">7/12 Extract Available?</div>
-                                <div class="spec-value">{% if prop.seven_twelve_available == 'yes' %}Yes{% else %}No{% endif %}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Mutation Entry Updated?</div>
-                                <div class="spec-value">{% if prop.mutation_entry_updated == 'yes' %}Yes{% else %}No{% endif %}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Property Loan Status</div>
+                                <div class="spec-label">Loan on Property?</div>
                                 <div class="spec-value">
-                                    <span class="status-badge {% if prop.property_loan == 'yes' %}badge-no{% else %}badge-yes{% endif %}">
-                                        {{ prop.property_loan|upper }}
+                                    <span class="status-badge {% if prop.property_loan == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.property_loan|default:"no"|upper }}
                                     </span>
-                                    {% if prop.property_loan == 'yes' and prop.loan_amount %}
+                                    {% if prop.property_loan == 'yes' %}
                                         <div class="fw-bold mt-1 text-danger">Loan Amount: ₹ {{ prop.loan_amount }}</div>
                                     {% endif %}
                                 </div>
@@ -772,48 +737,89 @@
                             <div class="spec-item">
                                 <div class="spec-label">Existing Tenants?</div>
                                 <div class="spec-value">
-                                    <span class="status-badge {% if prop.existing_tenants == 'yes' %}badge-no{% else %}badge-yes{% endif %}">
-                                        {{ prop.existing_tenants|upper }}
+                                    <span class="status-badge {% if prop.existing_tenants == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.existing_tenants|default:"no"|upper }}
                                     </span>
-                                    {% if prop.existing_tenants == 'yes' and prop.tenant_details %}
-                                        <div class="text-muted mt-1" style="font-size:0.78rem;">{{ prop.tenant_details }}</div>
-                                    {% endif %}
                                 </div>
                             </div>
+                            {% if prop.existing_tenants == 'yes' %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Tenant Details</div>
+                                <div class="spec-value text-muted">{{ prop.tenant_details }}</div>
+                            </div>
+                            {% endif %}
+
                             <div class="spec-item">
-                                <div class="spec-label">Legal Dispute?</div>
+                                <div class="spec-label">Any Legal Dispute?</div>
                                 <div class="spec-value">
-                                    <span class="status-badge {% if prop.agri_dispute == 'yes' %}badge-no{% else %}badge-yes{% endif %}">
-                                        {{ prop.agri_dispute|upper }}
+                                    <span class="status-badge {% if prop.any_legal_dispute == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.any_legal_dispute|default:"no"|upper }}
                                     </span>
-                                    {% if prop.agri_dispute == 'yes' and prop.dispute_details %}
-                                        <div class="text-danger mt-1" style="font-size:0.78rem;">{{ prop.dispute_details }}</div>
-                                    {% endif %}
                                 </div>
                             </div>
+                            {% if prop.any_legal_dispute == 'yes' %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label text-danger">Dispute Details</div>
+                                <div class="spec-value text-muted">{{ prop.dispute_details }}</div>
+                            </div>
+                            {% endif %}
+
                             <div class="spec-item">
-                                <div class="spec-label">Pending Tax Due?</div>
+                                <div class="spec-label">Government Tax Dues?</div>
                                 <div class="spec-value">
-                                    <span class="status-badge {% if prop.pending_tax_due == 'yes' %}badge-no{% else %}badge-yes{% endif %}">
-                                        {{ prop.pending_tax_due|upper }}
+                                    <span class="status-badge {% if prop.government_tax == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.government_tax|default:"no"|upper }}
                                     </span>
-                                    {% if prop.pending_tax_due == 'yes' and prop.pending_tax_amount %}
+                                    {% if prop.government_tax == 'yes' %}
                                         <div class="fw-bold mt-1 text-danger">Tax Due: ₹ {{ prop.pending_tax_amount }}</div>
                                     {% endif %}
                                 </div>
                             </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Fire Safety NOC Available?</div>
+                                <div class="spec-value">{{ prop.fire_safety_noc|upper|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Sanctioning / Approving Authority</div>
+                                <div class="spec-value">{{ prop.sanctioning_authority|default:"—" }}</div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 6. AMENITIES & DESCRIPTIONS (Summary, Description, User Description) -->
-                    <div class="prop-section" id="sec-amenities">
+                    <!-- 6. PRICING DETAILS SECTION -->
+                    <div class="prop-section" id="sec-pricing-details">
                         <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-star"></i></div> Amenities, Summary & Descriptions
+                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div> Pricing Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item highlight-price">
+                                <div class="spec-label">Selling Price</div>
+                                <div class="spec-value">₹ {{ prop.selling_price }}</div>
+                            </div>
+                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, #fffcf5, #fff8e7); border-color: #f5e6c1 !important;">
+                                <div class="spec-label" style="color:#b8860b;">Price Per Sqft (Auto)</div>
+                                <div class="spec-value" style="color:#8b6508;">₹ {{ prop.price_per_sqft|default:"—" }} / sqft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Brokerage %</div>
+                                <div class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Enter Fixed Brokerage</div>
+                                <div class="spec-value">{% if prop.manual_brokerage %}₹ {{ prop.manual_brokerage }}{% else %}—{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. AMENITIES & NEARBY FACILITIES SECTION -->
+                    <div class="prop-section" id="sec-amenities-facilities">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-star"></i></div> Amenities & Nearby Facilities
                         </div>
                         
                         <div class="sub-section-label">Nearby Facilities</div>
                         <div class="d-flex flex-wrap gap-2 mb-4">
-                            {% for fac in facilities_list %}
+                            {% for fac in prop.nearby_facilities_list %}
                                 <div class="facility-pill"><i class="fas fa-map-marker-alt"></i> {{ fac }}</div>
                             {% empty %}
                                 <div class="text-muted" style="font-size:0.82rem;">No nearby facilities selected.</div>
@@ -822,28 +828,29 @@
 
                         <div class="sub-section-label">Amenities & Features</div>
                         <div class="d-flex flex-wrap gap-2 mb-4">
-                            {% for am in amenities_list %}
+                            {% for am in prop.amenities_list %}
                                 <div class="amenity-pill"><i class="fas fa-check-circle"></i> {{ am }}</div>
                             {% empty %}
                                 <div class="text-muted" style="font-size:0.82rem;">No amenities selected.</div>
                             {% endfor %}
                         </div>
 
+                        <!-- Restored Property Summary & Descriptions -->
                         {% if prop.property_summary %}
-                        <div class="sub-section-label">Property Summary</div>
+                        <div class="sub-section-label">Property Summary (Auto)</div>
                         <div style="font-size: 0.88rem; line-height: 1.7; color: var(--mid);" class="mb-4">
                             {{ prop.property_summary }}
                         </div>
                         {% endif %}
 
                         {% if prop.property_description %}
-                        <div class="sub-section-label">Property Description (System)</div>
+                        <div class="sub-section-label">Property Description (Auto)</div>
                         <div style="font-size: 0.88rem; line-height: 1.8; color: var(--mid);" class="mb-4">
                             {{ prop.property_description|safe }}
                         </div>
                         {% endif %}
 
-                        <div class="sub-section-label">User Custom Description</div>
+                        <div class="sub-section-label">Property Description</div>
                         <div style="font-size: 0.9rem; line-height: 1.8; color: var(--mid);">
                             {% if prop.user_description %}
                                 {{ prop.user_description|linebreaks }}
@@ -853,33 +860,92 @@
                         </div>
                     </div>
 
-                    <!-- 7. MEDIA & PORTALS -->
+                    <!-- 8. ADDRESS DETAILS SECTION -->
+                    <div class="prop-section" id="sec-address-details">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-location-dot"></i></div> Address Details
+                        </div>
+                        <div class="spec-grid mb-3">
+                            <div class="spec-item">
+                                <div class="spec-label">City</div>
+                                <div class="spec-value">{{ prop.city }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Area / Locality</div>
+                                <div class="spec-value">{{ prop.locality }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Building / Project / Society</div>
+                                <div class="spec-value">{{ prop.building_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Pincode</div>
+                                <div class="spec-value">{{ prop.pincode|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Landmark</div>
+                                <div class="spec-value">{{ prop.property_landmark|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">State</div>
+                                <div class="spec-value">{{ prop.state }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Google Maps Link</div>
+                                <div class="spec-value">
+                                    {% if prop.google_maps_link %}
+                                        <a href="{{ prop.google_maps_link }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;">Open Map</a>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Latitude / Longitude</div>
+                                <div class="spec-value">
+                                    {% if prop.latitude and prop.longitude %}
+                                        {{ prop.latitude }}, {{ prop.longitude }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spec-label mb-2">Property Address</div>
+                        <div class="address-box">
+                            <i class="fas fa-map-pin text-primary me-2"></i> {{ prop.address }}
+                        </div>
+                    </div>
+
+                    <!-- 9. MEDIA & PORTALS SECTION -->
                     <div class="prop-section" id="sec-media-portals">
                         <div class="prop-section-title">
                             <div class="section-icon"><i class="fas fa-images"></i></div> Media & Portals
                         </div>
                         <div class="spec-grid">
                             <div class="spec-item">
-                                <div class="spec-label">7/12 Extract / Encumbrance Certificate</div>
+                                <div class="spec-label">Upload Floor Plan (Optional)</div>
                                 <div class="spec-value">
-                                    {% if prop.encumbrance_cert %}
-                                        <a href="{{ prop.encumbrance_cert.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View Document</a>
+                                    {% if prop.floor_plan %}
+                                        <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View Plan</a>
                                     {% else %}—{% endif %}
                                 </div>
                             </div>
+                            
+                            
+                            
                             <div class="spec-item">
                                 <div class="spec-label">Is Property Already Listed Elsewhere?</div>
                                 <div class="spec-value">{{ prop.listed_elsewhere|default:"No" }}</div>
                             </div>
-                            <div class="spec-item spec-full">
+                            <div class="spec-item">
                                 <div class="spec-label">Portal Name</div>
                                 <div class="spec-value">{{ prop.portal_name|default:"—" }}</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 8. AUDIT META -->
-                    <div class="prop-section" id="sec-audit-meta">
+                    <!-- 10. LISTING UPLOADED BY SECTION -->
+                    <div class="prop-section" id="sec-listing-uploaded">
                         <div class="prop-section-title">
                             <div class="section-icon"><i class="fas fa-user-check"></i></div> Listing Uploaded By & System Meta
                         </div>
@@ -901,6 +967,14 @@
                             <div class="spec-item">
                                 <div class="spec-label">Role</div>
                                 <div class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Source File Name</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ prop.upload_file_name|default:"Direct Form Input" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Created At</div>
+                                <div class="spec-value">{{ prop.created_at|date:"d M Y, h:i A" }}</div>
                             </div>
                         </div>
 
@@ -927,7 +1001,7 @@
                         </div>
                     </div>
 
-                    <!-- 9. PROPERTY FAQS SECTION -->
+                    <!-- PROPERTY FAQS SECTION -->
                     <div class="prop-section" id="sec-faqs">
                         <div class="prop-section-title">
                             <div class="section-icon"><i class="fas fa-comments"></i></div> Property Frequently Asked Questions
@@ -965,12 +1039,12 @@
                         <div class="sidebar-price-body">
                             <div class="row g-0">
                                 <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border)">
-                                    <div class="sidebar-mini-stat-label">Price / Acre</div>
-                                    <div class="sidebar-mini-stat-val">₹ {{ prop.price_per_acre|default:"—" }}</div>
+                                    <div class="sidebar-mini-stat-label">Price / Sqft</div>
+                                    <div class="sidebar-mini-stat-val">₹ {{ prop.price_per_sqft|default:"—" }}</div>
                                 </div>
                                 <div class="col-6 sidebar-mini-stat">
-                                    <div class="sidebar-mini-stat-label">Land Area</div>
-                                    <div class="sidebar-mini-stat-val">{{ prop.land_area|default:"—" }} Acres</div>
+                                    <div class="sidebar-mini-stat-label">Property Type</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.property_type|title|default:"Commercial" }}</div>
                                 </div>
                             </div>
                         </div>
@@ -1050,6 +1124,7 @@
 $("#Resale").addClass("active");
 
 document.addEventListener("DOMContentLoaded", function () {
+    // 1. WALKTHROUGH ENGINE FOR UPPER GALLERY
     const slides = document.querySelectorAll('.walkthrough-slide');
     const stripThumbs = document.querySelectorAll('.strip-thumb');
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -1122,6 +1197,7 @@ document.addEventListener("DOMContentLoaded", function () {
         requestAnimationFrame(tickTimer);
     }
 
+    // 2. STICKY NAV SCROLL SPY & BUTTON SCROLLING
     const navButtons = document.querySelectorAll('.prop-nav-button');
     const sections = document.querySelectorAll('.prop-section[id]');
 
@@ -1156,6 +1232,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     updateActiveNav();
 
+    // 3. HORIZONTAL WHEEL SCROLL FOR NAV TABS
     const navTabs = document.getElementById('propNavTabs');
     if (navTabs) {
         navTabs.addEventListener('wheel', function(e) {
@@ -1167,11 +1244,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+// 4. PHONE MASK REVEAL FUNCTION
 function revealPhone(elementId, phone) {
     const el = document.getElementById(elementId);
     if (el && phone) {
         el.textContent = phone;
-        el.style.color = '#56ab2f';
+        el.style.color = '#667eea';
         el.style.fontWeight = '700';
         const btn = el.nextElementSibling;
         if (btn && btn.classList.contains('btn-reveal-phone')) {

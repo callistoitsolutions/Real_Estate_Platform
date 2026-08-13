@@ -8,9 +8,9 @@
 
 <style>
   :root {
-    --primary: #56ab2f;
-    --primary-dark: #3e8e41;
-    --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary: #3b82f6;
+    --primary-dark: #1d4ed8;
+    --primary-grad: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     --success-grad: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
     --info-grad: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     --dark-grad: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
@@ -30,7 +30,7 @@
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f0f4e8 0%, #c8d5b9 100%);
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
     min-height: 100vh;
   }
 
@@ -57,7 +57,7 @@
     border-radius: var(--radius-xl);
     padding: 28px 35px;
     color: #fff;
-    box-shadow: 0 8px 32px rgba(86, 171, 47, .35);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, .35);
     position: relative;
     overflow: hidden;
   }
@@ -96,11 +96,11 @@
   }
   .step-circle.active {
     background: var(--primary-grad); color: #fff; border-color: transparent;
-    transform: scale(1.1); box-shadow: 0 4px 16px rgba(86, 171, 47, .45);
+    transform: scale(1.1); box-shadow: 0 4px 16px rgba(59, 130, 246, .45);
   }
   .step-circle.done { background: var(--success-grad); color: #fff; border-color: transparent; }
   .step-label { font-size: .82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .3s; }
-  .step-label.active { color: #56ab2f; }
+  .step-label.active { color: #3b82f6; }
   .step-label.done { color: var(--success); }
   .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background .4s; }
   .step-line.done { background: var(--success-grad); }
@@ -164,7 +164,7 @@
     background-color: #fff; color: var(--text-dark); font-family: inherit;
   }
   .form-control:focus, .form-select:focus {
-    border-color: #56ab2f; box-shadow: 0 0 0 3px rgba(86, 171, 47, .15); outline: none;
+    border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, .15); outline: none;
   }
   .form-control[readonly] { background: #edf2f7; border-color: #cbd5e0; color: #4a5568; font-weight: 600; cursor: not-allowed; }
 
@@ -196,11 +196,11 @@
     border: 2px solid #e9ecef; border-radius: var(--radius-md); cursor: pointer; font-weight: 600;
     font-size: .85rem; color: var(--text-dark); transition: all .2s;
   }
-  .radio-option:hover { border-color: #56ab2f; background: #f4fdf0; }
-  .radio-option input { accent-color: #56ab2f; width: 16px; height: 16px; }
+  .radio-option:hover { border-color: #3b82f6; background: #eff6ff; }
+  .radio-option input { accent-color: #3b82f6; width: 16px; height: 16px; }
 
   .sub-section-title {
-    font-size: .8rem; font-weight: 700; color: #56ab2f; text-transform: uppercase;
+    font-size: .8rem; font-weight: 700; color: #3b82f6; text-transform: uppercase;
     letter-spacing: .05em; margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e9ecef;
   }
 
@@ -212,8 +212,8 @@
     padding: 12px 28px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;
     font-size: .92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all .3s; border: none;
   }
-  .btn-next, .btn-submit { background: var(--primary-grad); color: #fff; box-shadow: 0 4px 14px rgba(86, 171, 47, .35); }
-  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(86, 171, 47, .5); }
+  .btn-next, .btn-submit { background: var(--primary-grad); color: #fff; box-shadow: 0 4px 14px rgba(59, 130, 246, .35); }
+  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, .5); }
   .btn-prev { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border) !important; }
   .btn-prev:hover { background: #e9ecef; }
 
@@ -251,15 +251,15 @@
     text-align: center; cursor: pointer; background: #fff; transition: all 0.3s;
   }
   .video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
-  .video-option-card.active { border-color: #56ab2f; background: #f4fdf0; box-shadow: 0 8px 16px rgba(86, 171, 47, 0.15); }
+  .video-option-card.active { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15); }
   .video-option-card input[type="radio"] { position: absolute; opacity: 0; }
   .vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
-  .video-option-card.active .vo-icon { color: #56ab2f; }
+  .video-option-card.active .vo-icon { color: #3b82f6; }
   .vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
   .vo-desc { font-size: 0.8rem; color: #64748b; }
   .vo-check {
     position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
-    background: #56ab2f; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0;
+    background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0;
   }
   .video-option-card.active .vo-check { opacity: 1; }
 
@@ -288,17 +288,17 @@
     width: 100%; padding: 12px 16px 12px 45px; border: 2px solid #e2e8f0;
     border-radius: 12px; font-size: 0.92rem; background: #fff; transition: all 0.2s;
   }
-  .modal-search-input:focus { border-color: #56ab2f; box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.15); outline: none; }
+  .modal-search-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); outline: none; }
 
   .modal-grid-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 380px; overflow-y: auto; padding: 4px; }
   .modal-option-card {
     background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px;
     display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease; user-select: none;
   }
-  .modal-option-card:hover { border-color: #56ab2f; background: #f4fdf0; transform: translateY(-1px); }
-  .modal-option-card.checked { border-color: #56ab2f; background: #eefbee; box-shadow: 0 4px 12px rgba(86, 171, 47, 0.12); }
-  .modal-option-card input[type="checkbox"] { accent-color: #56ab2f; width: 18px; height: 18px; cursor: pointer; display: inline-block !important; flex-shrink: 0; }
-  .modal-option-card i { font-size: 1.1rem; color: #56ab2f; width: 24px; text-align: center; }
+  .modal-option-card:hover { border-color: #3b82f6; background: #eff6ff; transform: translateY(-1px); }
+  .modal-option-card.checked { border-color: #3b82f6; background: #eef2ff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12); }
+  .modal-option-card input[type="checkbox"] { accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer; display: inline-block !important; flex-shrink: 0; }
+  .modal-option-card i { font-size: 1.1rem; color: #3b82f6; width: 24px; text-align: center; }
   .modal-option-card label { font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer; margin: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* SEARCHABLE DROPDOWN */
@@ -307,7 +307,7 @@
     border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; background: #fff;
     display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color .3s; min-height: 48px;
   }
-  .search-select.open .search-select-control { border-color: #56ab2f; }
+  .search-select.open .search-select-control { border-color: #3b82f6; }
   .search-select-value { color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 1.2em; display: inline-block; }
   .search-select-value.ss-placeholder { color: #94a3b8; }
   .search-select-arrow { color: #64748b; transition: transform .2s; font-size: .8rem; flex-shrink: 0; margin-left: 8px; }
@@ -318,21 +318,21 @@
   }
   .search-select.open .search-select-panel { display: block; }
   .search-select-input { width: 100%; border: none; border-bottom: 2px solid #e9ecef; padding: 12px 15px; font-size: .9rem; outline: none; }
-  .search-select-input:focus { border-bottom-color: #56ab2f; }
+  .search-select-input:focus { border-bottom-color: #3b82f6; }
   .search-select-options { max-height: 260px; overflow-y: auto; }
   .search-select-group-label { padding: 8px 15px 4px; font-size: .72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; background: #f8f9fa; }
   .search-select-option { padding: 10px 16px; cursor: pointer; color: #2d3748; font-size: .9rem; }
-  .search-select-option:hover, .search-select-option.highlighted { background: #f4fdf0; color: #3e8e41; }
-  .search-select-option.selected { background: #56ab2f; color: #fff; }
+  .search-select-option:hover, .search-select-option.highlighted { background: #eff6ff; color: #1d4ed8; }
+  .search-select-option.selected { background: #3b82f6; color: #fff; }
   .search-select-no-results { padding: 14px 16px; color: #94a3b8; font-size: .88rem; text-align: center; }
 
   /* PREVIEW CARD */
   .preview-card {
-    background: linear-gradient(135deg, #1a2e1a, #2d4a2d); border-radius: var(--radius-lg); padding: 18px; color: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
+    background: linear-gradient(135deg, #1e3a8a, #1e40af); border-radius: var(--radius-lg); padding: 18px; color: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
   }
   .preview-mock { background: #fff; border-radius: var(--radius-md); overflow: hidden; margin-top: 14px; }
   .preview-image {
-    height: 130px; background: linear-gradient(135deg, #d4edda, #a8e063);
+    height: 130px; background: linear-gradient(135deg, #93c5fd, #60a5fa);
     display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative;
   }
   .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; }
@@ -359,11 +359,6 @@
   .checklist-item.done { color: var(--success); }
   .checklist-item.done i { color: var(--success); }
 
-  .inline-status { padding: 12px 16px; border-radius: 10px; font-size: .85rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-  .is-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-  .is-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-  .is-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-
   .form-group, .col-md-12, .section-body, .step-content, .row { overflow: visible !important; }
 
   @media(max-width:1200px) {
@@ -379,8 +374,8 @@
 
     <!-- PAGE HEADER -->
     <div class="page-header">
-      <h1 class="page-title"><i class="fas fa-home" style="margin-right:12px;opacity:.9"></i>Sell Your Residential Plot</h1>
-      <p class="page-subtitle">List your plot for villa or house construction and connect with genuine buyers</p>
+      <h1 class="page-title"><i class="fas fa-home" style="margin-right:12px;opacity:.9"></i>Update Residential Plot #{{prop.id}}</h1>
+      <p class="page-subtitle">Modify your resale residential plot listing details securely</p>
     </div>
 
     <!-- STEPPER -->
@@ -410,9 +405,9 @@
 
     <!-- FORM CONTAINER -->
     <div class="form-container">
-      <form action="{% url 'plot_sale_add' %}" method="POST" enctype="multipart/form-data" id="plotForm">
+      <form action="" method="POST" enctype="multipart/form-data" id="plotForm">
         {% csrf_token %}
-        {% comment %} <input type="hidden" name="plot_type_main" value="residential"> {% endcomment %}
+        <input type="hidden" name="property_id" id="property_id" value="{{ prop.id }}">
 
         <!-- ════ STEP 1 — PLOT DETAILS ════ -->
         <div class="step-content active" id="step1">
@@ -425,94 +420,100 @@
           </div>
 
           <!-- LISTED BY -->
-          <div class="form-section">
-            <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
+          <div class="form-section earth-theme">
+            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <span><i class="fas fa-upload"></i> Listed By</span>
+            </div>
             <div class="section-body">
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="required">*</span></label>
-                <div style="display:flex;gap:24px;margin-bottom:14px;margin-top:8px;">
-                  <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.9rem;">
-                    <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked
-                      onchange="Change_Fields()" style="accent-color:#56ab2f;width:16px;height:16px;">
-                    Listed by Self
-                  </label>
-                  <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.9rem;">
-                    <input type="radio" name="listed_by_type" id="listedByOther" value="other"
-                      onchange="Change_Fields()" style="accent-color:#56ab2f;width:16px;height:16px;">
-                    Listed for Other User
-                  </label>
-                </div>
-              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="text-danger">*</span></label>
+                    <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
+                      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                        <input type="radio" name="listed_by_type" id="listedBySelf" value="self" {% if prop.listed_by_type == 'self' or not prop.listed_by_type %}checked{% endif %} onchange="Change_Fields(true)"> Listed by Self
+                      </label>
+                      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                        <input type="radio" name="listed_by_type" id="listedByOther" value="other" {% if prop.listed_by_type == 'other' %}checked{% endif %} onchange="Change_Fields(true)"> Listed for Other User
+                      </label>
+                    </div>
 
-              <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
-              <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
-              <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
-              <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
-              <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+                    <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
+                    <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
+                    <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
+                    <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
+                    <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
 
-              <div id="listedByOtherWrapper" style="display:none;">
-                <label class="form-label mt-2">Select Team Member <span class="required">*</span></label>
-                <div class="search-select" id="assignedToSearchSelect">
-                  <div class="search-select-control" id="assignedToControl" tabindex="0">
-                    <span class="search-select-value ss-placeholder" id="assignedToValueLabel">-- Select Team Member --</span>
-                    <i class="fas fa-chevron-down search-select-arrow"></i>
-                  </div>
-                  <div class="search-select-panel" id="assignedToPanel">
-                    <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search…">
-                    <div class="search-select-options" id="assignedToOptions">
+                    <div id="listedByOtherWrapper" style="{% if prop.listed_by_type != 'other' %}display:none;{% endif %}">
+                      <div class="search-select" id="assignedToSearchSelect">
+                        <div class="search-select-control" id="assignedToControl" tabindex="0">
+                          <span class="search-select-value ss-placeholder" id="assignedToValueLabel" style="color:black;">
+                            {% if prop.listed_by_id %}
+                              {% for user in user_obj %}
+                                {% if prop.listed_by_id == user.user_id %}
+                                  {{ user.user_id }} - {{ user.user_name }} - {{ user.user_role }} - {{ user.user_phone }}
+                                {% endif %}
+                              {% endfor %}
+                            {% else %}
+                              -- Select Team Member --
+                            {% endif %}
+                          </span>
+                          <i class="fas fa-chevron-down search-select-arrow"></i>
+                        </div>
+                        <div class="search-select-panel" id="assignedToPanel">
+                          <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
+                          <div class="search-select-options" id="assignedToOptions">
+                            {% regroup user_obj by user_role as grouped_users %}
+                            {% for group in grouped_users %}
+                            <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
+                            {% for user in group.list %}
+                            <div class="search-select-option {% if prop.listed_by_id == user.user_id %}selected{% endif %}" data-value="{{ user.id }}-{{user.user_role}}"
+                              data-name="{{ user.user_name }}" data-role="{{ user.user_role }}"
+                              data-phone="{{ user.user_phone }}" data-uid="{{ user.user_id }}"
+                              data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
+                              {{ user.user_id }} - {{user.user_name}} - {{user.user_role}} - {{user.user_phone}}
+                            </div>
+                            {% endfor %}
+                            {% endfor %}
+                            <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <select id="assigned_to" name="assigned_to" data-initial="{{ prop.assigned_to|default:'' }}" style="display:none;">
+                      <option value="">-- Select Team Member --</option>
                       {% regroup user_obj by user_role as grouped_users %}
                       {% for group in grouped_users %}
-                      <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
-                      {% for user in group.list %}
-                      <div class="search-select-option" data-value="{{ user.id }}-{{ user.user_role }}"
-                        data-name="{{ user.user_name }}" data-role="{{ user.user_role }}"
-                        data-phone="{{ user.user_phone }}" data-uid="{{ user.user_id }}"
-                        data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
-                        {{ user.user_id }} — {{ user.user_name }} — {{ user.user_role }} — {{ user.user_phone }}
-                      </div>
+                      <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
+                        {% for user in group.list %}
+                        <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
+                          {{ user.user_name }} - {{ user.user_role }}
+                        </option>
+                        {% endfor %}
+                      </optgroup>
                       {% endfor %}
-                      {% endfor %}
-                      <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
-                    </div>
+                    </select>
+
+                    <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
                   </div>
                 </div>
-                <select id="assigned_to" name="assigned_to" style="display:none;">
-                  <option value="">-- Select --</option>
-                  {% regroup user_obj by user_role as grouped_users %}
-                  {% for group in grouped_users %}
-                  <optgroup label="{{ group.grouper|upper }}">
-                    {% for user in group.list %}
-                    <option value="{{ user.id }}-{{ user.user_role }}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
-                      {{ user.user_name }} — {{ user.user_role }}
-                    </option>
-                    {% endfor %}
-                  </optgroup>
-                  {% endfor %}
-                </select>
-                <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
               </div>
 
-              <div class="row mt-3" id="user_data_div">
-                <div class="col-md-3 mt-2">
-                  <label class="form-label"><i class="fas fa-id-card"></i> ID</label>
-                  <input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <label class="form-label"><i class="fas fa-user"></i> Name</label>
-                  <input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                  <input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
-                  <input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly>
-                </div>
-                <div class="col-md-3 mt-3">
-                  <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
-                  <input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly>
-                </div>
+              <br>
+
+              <div class="row" id="user_data_div">
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_id }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_name|default:'' }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_email|default:'' }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_contact|default:'' }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_role|default:'' }}"></div></div>
+                
               </div>
             </div>
           </div>
@@ -524,14 +525,13 @@
               <div class="mb-3">
                 <label class="form-label">Property Title</label>
                 <input type="text" class="form-control" id="property_title" name="property_title" readonly
-                  placeholder="Auto-generated by system">
+                  placeholder="Auto-generated by system" value="{{ prop.property_title|default_if_none:"" }}">
               </div>
               <div class="row">
-                
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Plot / Survey Number <span class="required">*</span></label>
                   <input type="text" class="form-control" name="property_no" id="property_no"
-                    placeholder="e.g., Plot No. 42, Survey No. 123/B" required>
+                    placeholder="e.g., Plot No. 42, Survey No. 123/B" required value="{{ prop.property_no|default_if_none:"" }}">
                   <span style="font-size:.75rem;color:red;margin-top:4px;display:block;font-weight:bold;"><i
                       class="fas fa-info-circle"></i> Required for verification — not shown publicly</span>
                 </div>
@@ -539,7 +539,7 @@
                   <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
                   <div class="input-with-unit">
                     <input type="number" class="form-control" name="plot_area" id="plot_area" required min="1"
-                      placeholder="e.g., 2400" onkeyup="updatePreview()">
+                      placeholder="e.g., 2400" onkeyup="updatePreview()" value="{{ prop.plot_area|default_if_none:"" }}">
                     <span class="input-unit">sq.ft</span>
                   </div>
                   <p class="hint-text">Total saleable plot area in square feet</p>
@@ -548,13 +548,13 @@
                   <label class="form-label">Plot Sub-Category <span class="required">*</span></label>
                   <select class="form-select form-control" name="property_type" id="property_type" required>
                     <option value="">— Select Plot Sub-Category —</option>
-                    <option value="open_plot">Open Plot (Standalone / Non-Layout)</option>
-                    <option value="gated_community_plot">Gated Community Plot (Named Layout)</option>
-                    <option value="corner_plot">Corner Plot (Double Road Access)</option>
-                    <option value="row_house_plot">Row House Plot</option>
-                    <option value="villa_plot">Villa / Independent Bungalow Plot</option>
-                    <option value="township_plot">Township / Integrated Project Plot</option>
-                    <option value="weekend_home_plot">Weekend Home / Second Home Plot</option>
+                    <option value="open_plot" {% if prop.property_type == "open_plot" %}selected{% endif %}>Open Plot (Standalone / Non-Layout)</option>
+                    <option value="gated_community_plot" {% if prop.property_type == "gated_community_plot" %}selected{% endif %}>Gated Community Plot (Named Layout)</option>
+                    <option value="corner_plot" {% if prop.property_type == "corner_plot" %}selected{% endif %}>Corner Plot (Double Road Access)</option>
+                    <option value="row_house_plot" {% if prop.property_type == "row_house_plot" %}selected{% endif %}>Row House Plot</option>
+                    <option value="villa_plot" {% if prop.property_type == "villa_plot" %}selected{% endif %}>Villa / Independent Bungalow Plot</option>
+                    <option value="township_plot" {% if prop.property_type == "township_plot" %}selected{% endif %}>Township / Integrated Project Plot</option>
+                    <option value="weekend_home_plot" {% if prop.property_type == "weekend_home_plot" %}selected{% endif %}>Weekend Home / Second Home Plot</option>
                   </select>
                 </div>
               </div>
@@ -570,12 +570,12 @@
                   <label class="form-label">Residential Zone / Land Use <span class="required">*</span></label>
                   <select class="form-select form-control" name="land_use" id="land_use" required>
                     <option value="">— Select Zone —</option>
-                    <option value="R1">R1 Zone (Low Density Residential)</option>
-                    <option value="R2">R2 Zone (Medium Density Residential)</option>
-                    <option value="R3">R3 Zone (High Density / Apartment)</option>
-                    <option value="Township">Township / Integrated Township Zone</option>
-                    <option value="Eco_Sensitive">Eco-Sensitive / Green Zone (Restricted Construction)</option>
-                    <option value="Mixed_Res_Com">Mixed Use — Residential + Commercial Permitted</option>
+                    <option value="R1" {% if prop.land_use == "R1" %}selected{% endif %}>R1 Zone (Low Density Residential)</option>
+                    <option value="R2" {% if prop.land_use == "R2" %}selected{% endif %}>R2 Zone (Medium Density Residential)</option>
+                    <option value="R3" {% if prop.land_use == "R3" %}selected{% endif %}>R3 Zone (High Density / Apartment)</option>
+                    <option value="Township" {% if prop.land_use == "Township" %}selected{% endif %}>Township / Integrated Township Zone</option>
+                    <option value="Eco_Sensitive" {% if prop.land_use == "Eco_Sensitive" %}selected{% endif %}>Eco-Sensitive / Green Zone (Restricted Construction)</option>
+                    <option value="Mixed_Res_Com" {% if prop.land_use == "Mixed_Res_Com" %}selected{% endif %}>Mixed Use — Residential + Commercial Permitted</option>
                   </select>
                   <p class="hint-text">As per town planning / development plan</p>
                 </div>
@@ -583,45 +583,45 @@
                   <label class="form-label">NA (Non-Agricultural) Status <span class="required">*</span></label>
                   <select class="form-select form-control" name="na_status" id="na_status" required>
                     <option value="">— Select Status —</option>
-                    <option value="NA Converted">NA Converted (Certificate Available)</option>
-                    <option value="NA Applied">NA Order Applied (Pending Conversion)</option>
-                    <option value="Non-NA">Non-NA Land (Agricultural — Requires Conversion)</option>
-                    <option value="Not Applicable">Not Applicable (Urban Land — NA Not Required)</option>
+                    <option value="NA Converted" {% if prop.na_status == "NA Converted" %}selected{% endif %}>NA Converted (Certificate Available)</option>
+                    <option value="NA Applied" {% if prop.na_status == "NA Applied" %}selected{% endif %}>NA Order Applied (Pending Conversion)</option>
+                    <option value="Non-NA" {% if prop.na_status == "Non-NA" %}selected{% endif %}>Non-NA Land (Agricultural — Requires Conversion)</option>
+                    <option value="Not Applicable" {% if prop.na_status == "Not Applicable" %}selected{% endif %}>Not Applicable (Urban Land — NA Not Required)</option>
                   </select>
                 </div>
                 <div class="col-md-4 mt-2">
                   <label class="form-label">Layout Approval Status</label>
                   <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
                     <option value="">— Select —</option>
-                    <option value="Approved Layout">Approved Layout (Authority Approved)</option>
-                    <option value="Sanctioned Layout">Sanctioned Layout (Municipal Sanction)</option>
-                    <option value="Self_Development">Self Development (Non-Layout / Individual Plot)</option>
-                    <option value="Layout Pending">Layout Approval Pending</option>
-                    <option value="Not Applicable">Not Applicable</option>
+                    <option value="Approved Layout" {% if prop.layout_approval_status == "Approved Layout" %}selected{% endif %}>Approved Layout (Authority Approved)</option>
+                    <option value="Sanctioned Layout" {% if prop.layout_approval_status == "Sanctioned Layout" %}selected{% endif %}>Sanctioned Layout (Municipal Sanction)</option>
+                    <option value="Self_Development" {% if prop.layout_approval_status == "Self_Development" %}selected{% endif %}>Self Development (Non-Layout / Individual Plot)</option>
+                    <option value="Layout Pending" {% if prop.layout_approval_status == "Layout Pending" %}selected{% endif %}>Layout Approval Pending</option>
+                    <option value="Not Applicable" {% if prop.layout_approval_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
                   </select>
                 </div>
                 <div class="col-md-4 mt-3">
                   <label class="form-label">Residential Zone Type</label>
                   <select class="form-select form-control" name="residential_zone_type" id="residential_zone_type">
                     <option value="">— Select Zone —</option>
-                    <option value="R1">R1 Zone (Low Density Residential)</option>
-                    <option value="R2">R2 Zone (Medium Density Residential)</option>
-                    <option value="R3">R3 Zone (High Density / Apartment)</option>
-                    <option value="Township">Township / Integrated Township Zone</option>
-                    <option value="Eco Sensitive">Eco-Sensitive / Green Zone</option>
+                    <option value="R1" {% if prop.residential_zone_type == "R1" %}selected{% endif %}>R1 Zone (Low Density Residential)</option>
+                    <option value="R2" {% if prop.residential_zone_type == "R2" %}selected{% endif %}>R2 Zone (Medium Density Residential)</option>
+                    <option value="R3" {% if prop.residential_zone_type == "R3" %}selected{% endif %}>R3 Zone (High Density / Apartment)</option>
+                    <option value="Township" {% if prop.residential_zone_type == "Township" %}selected{% endif %}>Township / Integrated Township Zone</option>
+                    <option value="Eco Sensitive" {% if prop.residential_zone_type == "Eco Sensitive" %}selected{% endif %}>Eco-Sensitive / Green Zone</option>
                   </select>
                 </div>
                 <div class="col-md-4 mt-3">
                   <label class="form-label">Gated Community / Layout?</label>
                   <select class="form-select form-control" name="gated_community" id="gated_community">
-                    <option value="no">No — Open / Standalone Plot</option>
-                    <option value="yes">Yes — Gated Community / Named Layout</option>
+                    <option value="no" {% if prop.gated_community == "no" %}selected{% endif %}>No — Open / Standalone Plot</option>
+                    <option value="yes" {% if prop.gated_community == "yes" %}selected{% endif %}>Yes — Gated Community / Named Layout</option>
                   </select>
                 </div>
-                <div class="col-md-4 mt-3" id="layout_name_div">
+                <div class="col-md-4 mt-3" id="layout_name_div" style="{% if prop.gated_community != 'yes' %}display:none;{% endif %}">
                   <label class="form-label">Layout / Project Name</label>
                   <input type="text" class="form-control" name="layout_name" id="layout_name"
-                    placeholder="e.g., Green Valley Layout, Shree Nagar">
+                    placeholder="e.g., Green Valley Layout, Shree Nagar" value="{{ prop.layout_name|default_if_none:"" }}">
                 </div>
               </div>
             </div>
@@ -637,7 +637,7 @@
                 <div class="col-md-4">
                   <label class="form-label">Frontage / Width (ft)</label>
                   <div class="input-with-unit">
-                    <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" placeholder="e.g., 40" min="1">
+                    <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" placeholder="e.g., 40" min="1" value="{{ prop.plot_frontage|default_if_none:"" }}">
                     <span class="input-unit">ft</span>
                   </div>
                   <p class="hint-text">Width of the plot facing the road</p>
@@ -645,7 +645,7 @@
                 <div class="col-md-4">
                   <label class="form-label">Depth / Length (ft)</label>
                   <div class="input-with-unit">
-                    <input type="number" class="form-control" name="plot_depth" id="plot_depth" placeholder="e.g., 60" min="1">
+                    <input type="number" class="form-control" name="plot_depth" id="plot_depth" placeholder="e.g., 60" min="1" value="{{ prop.plot_depth|default_if_none:"" }}">
                     <span class="input-unit">ft</span>
                   </div>
                   <p class="hint-text">Depth from front to rear of plot</p>
@@ -654,11 +654,11 @@
                   <label class="form-label">Plot Shape</label>
                   <select class="form-select form-control" name="plot_shape" id="plot_shape">
                     <option value="">— Select Shape —</option>
-                    <option value="Rectangular">Rectangular</option>
-                    <option value="Square">Square</option>
-                    <option value="L-Shaped">L-Shaped</option>
-                    <option value="Triangular">Triangular</option>
-                    <option value="Irregular">Irregular / Odd</option>
+                    <option value="Rectangular" {% if prop.plot_shape == "Rectangular" %}selected{% endif %}>Rectangular</option>
+                    <option value="Square" {% if prop.plot_shape == "Square" %}selected{% endif %}>Square</option>
+                    <option value="L-Shaped" {% if prop.plot_shape == "L-Shaped" %}selected{% endif %}>L-Shaped</option>
+                    <option value="Triangular" {% if prop.plot_shape == "Triangular" %}selected{% endif %}>Triangular</option>
+                    <option value="Irregular" {% if prop.plot_shape == "Irregular" %}selected{% endif %}>Irregular / Odd</option>
                   </select>
                 </div>
               </div>
@@ -669,32 +669,32 @@
                   <label class="form-label">Road Connectivity <span class="required">*</span></label>
                   <select class="form-select form-control" name="road_connectivity" id="road_connectivity" required>
                     <option value="">— Select —</option>
-                    <option value="main_road">Main Road / State Highway</option>
-                    <option value="internal_road">Internal Road (Layout / Society Road)</option>
-                    <option value="corner_double">Corner Plot — Two Road Access</option>
-                    <option value="service_road">Service Lane</option>
-                    <option value="private_road">Private Access Road</option>
-                    <option value="no_road">No Direct Road Access (Land-Locked)</option>
+                    <option value="main_road" {% if prop.road_connectivity == "main_road" %}selected{% endif %}>Main Road / State Highway</option>
+                    <option value="internal_road" {% if prop.road_connectivity == "internal_road" %}selected{% endif %}>Internal Road (Layout / Society Road)</option>
+                    <option value="corner_double" {% if prop.road_connectivity == "corner_double" %}selected{% endif %}>Corner Plot — Two Road Access</option>
+                    <option value="service_road" {% if prop.road_connectivity == "service_road" %}selected{% endif %}>Service Lane</option>
+                    <option value="private_road" {% if prop.road_connectivity == "private_road" %}selected{% endif %}>Private Access Road</option>
+                    <option value="no_road" {% if prop.road_connectivity == "no_road" %}selected{% endif %}>No Direct Road Access (Land-Locked)</option>
                   </select>
                 </div>
                 <div class="col-md-4 mt-2">
                   <label class="form-label">Road / Street Width</label>
                   <select class="form-select form-control" name="road_width" id="road_width">
                     <option value="">— Select —</option>
-                    <option value="less_20">Less than 20 ft (Narrow Lane)</option>
-                    <option value="20">20 ft (Standard Road)</option>
-                    <option value="30">30 ft</option>
-                    <option value="40">40 ft</option>
-                    <option value="60">60 ft (Wide Road)</option>
-                    <option value="100+">100 ft+ (DP / Highway Road)</option>
+                    <option value="less_20" {% if prop.road_width == "less_20" %}selected{% endif %}>Less than 20 ft (Narrow Lane)</option>
+                    <option value="20" {% if prop.road_width == "20" %}selected{% endif %}>20 ft (Standard Road)</option>
+                    <option value="30" {% if prop.road_width == "30" %}selected{% endif %}>30 ft</option>
+                    <option value="40" {% if prop.road_width == "40" %}selected{% endif %}>40 ft</option>
+                    <option value="60" {% if prop.road_width == "60" %}selected{% endif %}>60 ft (Wide Road)</option>
+                    <option value="100+" {% if prop.road_width == "100+" %}selected{% endif %}>100 ft+ (DP / Highway Road)</option>
                   </select>
                   <p class="hint-text">Width of the road abutting the plot</p>
                 </div>
                 <div class="col-md-4 mt-2">
                   <label class="form-label">Corner Plot (Two Road Access)?</label>
                   <select class="form-select form-control" name="corner_plot" id="corner_plot">
-                    <option value="no">No — Single Road Access</option>
-                    <option value="yes">Yes — Corner Plot (Two Roads)</option>
+                    <option value="no" {% if prop.corner_plot == "no" %}selected{% endif %}>No — Single Road Access</option>
+                    <option value="yes" {% if prop.corner_plot == "yes" %}selected{% endif %}>Yes — Corner Plot (Two Roads)</option>
                   </select>
                 </div>
               </div>
@@ -706,14 +706,14 @@
                   <label class="form-label"><i class="fas fa-compass"></i> Plot Facing</label>
                   <select class="form-control form-select" name="plot_facing" id="plot_facing">
                     <option value="">Select Plot Facing</option>
-                    <option value="North">North</option>
-                    <option value="North-East">North-East (NE)</option>
-                    <option value="East">East</option>
-                    <option value="South-East">South-East (SE)</option>
-                    <option value="South">South</option>
-                    <option value="South-West">South-West (SW)</option>
-                    <option value="West">West</option>
-                    <option value="North-West">North-West (NW)</option>
+                    <option value="North" {% if prop.plot_facing == "North" %}selected{% endif %}>North</option>
+                    <option value="North-East" {% if prop.plot_facing == "North-East" %}selected{% endif %}>North-East (NE)</option>
+                    <option value="East" {% if prop.plot_facing == "East" %}selected{% endif %}>East</option>
+                    <option value="South-East" {% if prop.plot_facing == "South-East" %}selected{% endif %}>South-East (SE)</option>
+                    <option value="South" {% if prop.plot_facing == "South" %}selected{% endif %}>South</option>
+                    <option value="South-West" {% if prop.plot_facing == "South-West" %}selected{% endif %}>South-West (SW)</option>
+                    <option value="West" {% if prop.plot_facing == "West" %}selected{% endif %}>West</option>
+                    <option value="North-West" {% if prop.plot_facing == "North-West" %}selected{% endif %}>North-West (NW)</option>
                   </select>
                   <p class="hint-text">Select the direction in which the plot's entrance or main road faces.</p>
                 </div>
@@ -724,21 +724,21 @@
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Boundary Wall / Fencing</label>
                   <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
-                    <option value="none">No Boundary / Open Plot</option>
-                    <option value="partial">Partially Fenced / Walled</option>
-                    <option value="full_compound">Full Compound Wall (All Sides)</option>
-                    <option value="barbed_wire">Barbed Wire Fencing</option>
-                    <option value="live_hedge">Live Hedge / Natural Boundary</option>
+                    <option value="none" {% if prop.plot_fencing == "none" %}selected{% endif %}>No Boundary / Open Plot</option>
+                    <option value="partial" {% if prop.plot_fencing == "partial" %}selected{% endif %}>Partially Fenced / Walled</option>
+                    <option value="full_compound" {% if prop.plot_fencing == "full_compound" %}selected{% endif %}>Full Compound Wall (All Sides)</option>
+                    <option value="barbed_wire" {% if prop.plot_fencing == "barbed_wire" %}selected{% endif %}>Barbed Wire Fencing</option>
+                    <option value="live_hedge" {% if prop.plot_fencing == "live_hedge" %}selected{% endif %}>Live Hedge / Natural Boundary</option>
                   </select>
                 </div>
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Possession / Occupancy Status</label>
                   <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
                     <option value="">— Select —</option>
-                    <option value="Vacant">Vacant (Immediate Possession Available)</option>
-                    <option value="Self Occupied">Self Occupied (Owner in Possession)</option>
-                    <option value="Caretaker Occupied">Caretaker / Watchman Occupied</option>
-                    <option value="Under Construction">Under Construction / Foundation Work Done</option>
+                    <option value="Vacant" {% if prop.current_possession_status == "Vacant" %}selected{% endif %}>Vacant (Immediate Possession Available)</option>
+                    <option value="Self Occupied" {% if prop.current_possession_status == "Self Occupied" %}selected{% endif %}>Self Occupied (Owner in Possession)</option>
+                    <option value="Caretaker Occupied" {% if prop.current_possession_status == "Caretaker Occupied" %}selected{% endif %}>Caretaker / Watchman Occupied</option>
+                    <option value="Under Construction" {% if prop.current_possession_status == "Under Construction" %}selected{% endif %}>Under Construction / Foundation Work Done</option>
                   </select>
                   <p class="hint-text">Indicates when buyer can take physical possession</p>
                 </div>
@@ -770,7 +770,7 @@
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Selling Price <span class="required">*</span></label>
                   <div class="input-with-unit">
-                    <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 3500000" onkeyup="updatePreview()">
+                    <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 3500000" onkeyup="updatePreview()" value="{{ prop.selling_price|default_if_none:"" }}">
                     <span class="input-unit">₹</span>
                   </div>
                 </div>
@@ -778,7 +778,7 @@
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Price per Sq.ft <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span></label>
                   <div class="input-with-unit">
-                    <input type="number" class="form-control" id="plot_price_per_sqft" name="plot_price_per_sqft" placeholder="Auto-filled…" readonly>
+                    <input type="number" class="form-control" id="plot_price_per_sqft" name="plot_price_per_sqft" placeholder="Auto-filled…" readonly value="{{ prop.plot_price_per_sqft|default_if_none:"" }}">
                     <span class="input-unit">₹/sq.ft</span>
                   </div>
                 </div>
@@ -786,17 +786,17 @@
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Is the Price Negotiable?</label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="price_negotiable" value="yes"> Yes, Negotiable</label>
-                    <label class="radio-option"><input type="radio" name="price_negotiable" value="no" checked> Fixed Price</label>
+                    <label class="radio-option"><input type="radio" name="price_negotiable" value="yes" {% if prop.price_negotiable == 'yes' %}checked{% endif %}> Yes, Negotiable</label>
+                    <label class="radio-option"><input type="radio" name="price_negotiable" value="no" {% if prop.price_negotiable == 'no' or not prop.price_negotiable %}checked{% endif %}> Fixed Price</label>
                   </div>
                 </div>
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Additional Charges Applicable?</label>
                   <select class="form-select form-control" name="additional_charges" id="additional_charges">
-                    <option value="none">No Additional Charges (All Inclusive)</option>
-                    <option value="stamp_extra">Stamp Duty &amp; Registration Extra (Buyer to Pay)</option>
-                    <option value="development_charges">Development / Infrastructure Charges Extra</option>
-                    <option value="all_inclusive">All Inclusive — Final Price</option>
+                    <option value="none" {% if prop.additional_charges == "none" %}selected{% endif %}>No Additional Charges (All Inclusive)</option>
+                    <option value="stamp_extra" {% if prop.additional_charges == "stamp_extra" %}selected{% endif %}>Stamp Duty &amp; Registration Extra (Buyer to Pay)</option>
+                    <option value="development_charges" {% if prop.additional_charges == "development_charges" %}selected{% endif %}>Development / Infrastructure Charges Extra</option>
+                    <option value="all_inclusive" {% if prop.additional_charges == "all_inclusive" %}selected{% endif %}>All Inclusive — Final Price</option>
                   </select>
                 </div>
                 <!-- BROKERAGE -->
@@ -804,18 +804,18 @@
                   <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
                   <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
                     <option value="">Select</option>
-                    <option value="No Brokerage">No Brokerage (Direct from Owner)</option>
-                    <option value="1% of amount">1% of Sale Value</option>
-                    <option value="1.5% of amount">1.5% of Sale Value</option>
-                    <option value="2% of amount">2% of Sale Value</option>
-                    <option value="Fixed Amount">Fixed Amount</option>
-                    <option value="Negotiable">Negotiable</option>
+                    <option value="No Brokerage" {% if prop.brokerage_percentage == "No Brokerage" %}selected{% endif %}>No Brokerage (Direct from Owner)</option>
+                    <option value="1% of amount" {% if prop.brokerage_percentage == "1% of amount" %}selected{% endif %}>1% of Sale Value</option>
+                    <option value="1.5% of amount" {% if prop.brokerage_percentage == "1.5% of amount" %}selected{% endif %}>1.5% of Sale Value</option>
+                    <option value="2% of amount" {% if prop.brokerage_percentage == "2% of amount" %}selected{% endif %}>2% of Sale Value</option>
+                    <option value="Fixed Amount" {% if prop.brokerage_percentage == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+                    <option value="Negotiable" {% if prop.brokerage_percentage == "Negotiable" %}selected{% endif %}>Negotiable</option>
                   </select>
                 </div>
-                <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:none;">
+                <div class="col-md-6 mt-3" id="manualBrokerageSection" style="{% if prop.brokerage_percentage != 'Fixed Amount' %}display:none;{% endif %}">
                   <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
                   <div class="input-with-unit">
-                    <input type="number" class="form-control" name="manual_brokerage" placeholder="e.g., 25000">
+                    <input type="number" class="form-control" name="manual_brokerage" placeholder="e.g., 25000" value="{{ prop.manual_brokerage|default_if_none:"" }}">
                     <span class="input-unit">₹</span>
                   </div>
                 </div>
@@ -834,31 +834,31 @@
                   <label class="form-label">Ownership / Tenure Type</label>
                   <select class="form-select form-control" name="ownership_type" id="ownership_type">
                     <option value="">— Select Ownership —</option>
-                    <option value="freehold">Freehold (Full Ownership — Preferred)</option>
-                    <option value="leasehold">Leasehold (Govt / Trust Land)</option>
-                    <option value="co-operative_society">Co-operative Housing Society Plot</option>
-                    <option value="power_of_attorney">Power of Attorney (POA) Holder</option>
-                    <option value="joint_ownership">Joint Ownership (Multiple Owners)</option>
-                    <option value="huf">HUF Property (Hindu Undivided Family)</option>
+                    <option value="freehold" {% if prop.ownership_type == "freehold" %}selected{% endif %}>Freehold (Full Ownership — Preferred)</option>
+                    <option value="leasehold" {% if prop.ownership_type == "leasehold" %}selected{% endif %}>Leasehold (Govt / Trust Land)</option>
+                    <option value="co-operative_society" {% if prop.ownership_type == "co-operative_society" %}selected{% endif %}>Co-operative Housing Society Plot</option>
+                    <option value="power_of_attorney" {% if prop.ownership_type == "power_of_attorney" %}selected{% endif %}>Power of Attorney (POA) Holder</option>
+                    <option value="joint_ownership" {% if prop.ownership_type == "joint_ownership" %}selected{% endif %}>Joint Ownership (Multiple Owners)</option>
+                    <option value="huf" {% if prop.ownership_type == "huf" %}selected{% endif %}>HUF Property (Hindu Undivided Family)</option>
                   </select>
                 </div>
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Primary Title / Ownership Document</label>
                   <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
                     <option value="">— Select Document Type —</option>
-                    <option value="Registered Sale Deed">Registered Sale Deed</option>
-                    <option value="Registered Agreement to Sale">Registered Agreement to Sale (ATS)</option>
-                    <option value="Conveyance Deed">Conveyance Deed / Final Deed</option>
-                    <option value="Gift Deed">Gift Deed</option>
-                    <option value="Irrevocable Power of Attorney (POA)">Irrevocable Power of Attorney (POA)</option>
-                    <option value="Allotment Letter">Allotment Letter (Authority / Society)</option>
-                    <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
-                    <option value="Other">Other (Specify below)</option>
+                    <option value="Registered Sale Deed" {% if prop.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
+                    <option value="Registered Agreement to Sale" {% if prop.ownership_document_type == "Registered Agreement to Sale" %}selected{% endif %}>Registered Agreement to Sale (ATS)</option>
+                    <option value="Conveyance Deed" {% if prop.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed / Final Deed</option>
+                    <option value="Gift Deed" {% if prop.ownership_document_type == "Gift Deed" %}selected{% endif %}>Gift Deed</option>
+                    <option value="Irrevocable Power of Attorney (POA)" {% if prop.ownership_document_type == "Irrevocable Power of Attorney (POA)" %}selected{% endif %}>Irrevocable Power of Attorney (POA)</option>
+                    <option value="Allotment Letter" {% if prop.ownership_document_type == "Allotment Letter" %}selected{% endif %}>Allotment Letter (Authority / Society)</option>
+                    <option value="Inheritance / Partition Deed" {% if prop.ownership_document_type == "Inheritance / Partition Deed" %}selected{% endif %}>Inheritance / Partition Deed</option>
+                    <option value="Other" {% if prop.ownership_document_type == "Other" %}selected{% endif %}>Other (Specify below)</option>
                   </select>
                 </div>
-                <div class="col-md-6 mt-3" id="other_document_type_div" style="display:none;">
+                <div class="col-md-6 mt-3" id="other_document_type_div" style="{% if prop.ownership_document_type != 'Other' %}display:none;{% endif %}">
                   <label class="form-label">Specify Document Type</label>
-                  <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document">
+                  <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document" value="{{ prop.other_document_type|default_if_none:"" }}">
                 </div>
               </div>
 
@@ -868,9 +868,9 @@
                   <label class="form-label">RERA Registration Status</label>
                   <select class="form-select form-control" name="rera_status" id="rera_status">
                     <option value="">— Select —</option>
-                    <option value="Exempt">RERA Exempt (Individual Resale Plot — Most Common)</option>
-                    <option value="Registered">RERA Registered (Number Available)</option>
-                    <option value="Not Applicable">Not Applicable</option>
+                    <option value="Exempt" {% if prop.rera_status == "Exempt" %}selected{% endif %}>RERA Exempt (Individual Resale Plot — Most Common)</option>
+                    <option value="Registered" {% if prop.rera_status == "Registered" %}selected{% endif %}>RERA Registered (Number Available)</option>
+                    <option value="Not Applicable" {% if prop.rera_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
                   </select>
                   <p class="hint-text">Most individual resale residential plots are RERA exempt</p>
                 </div>
@@ -878,21 +878,21 @@
                   <label class="form-label">Title Clarity / Marketability</label>
                   <select class="form-select form-control" name="title_clearance" id="title_clearance">
                     <option value="">— Select —</option>
-                    <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
-                    <option value="Under Verification">Title Under Verification / Search</option>
-                    <option value="Legal Dispute">Title in Legal Dispute</option>
-                    <option value="Encumbrance Exists">Encumbrance / Charge Exists</option>
+                    <option value="Clear & Marketable" {% if prop.title_clearance == "Clear & Marketable" %}selected{% endif %}>Clear &amp; Marketable</option>
+                    <option value="Under Verification" {% if prop.title_clearance == "Under Verification" %}selected{% endif %}>Title Under Verification / Search</option>
+                    <option value="Legal Dispute" {% if prop.title_clearance == "Legal Dispute" %}selected{% endif %}>Title in Legal Dispute</option>
+                    <option value="Encumbrance Exists" {% if prop.title_clearance == "Encumbrance Exists" %}selected{% endif %}>Encumbrance / Charge Exists</option>
                   </select>
                 </div>
                 <div class="col-md-4 mt-2">
                   <label class="form-label">Encumbrance / Charge Status</label>
                   <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
                     <option value="">— Select —</option>
-                    <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
-                    <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
-                    <option value="Under Litigation">Under Court Litigation</option>
-                    <option value="Government Acquisition Notice">Govt Acquisition / Section 4 Notice</option>
-                    <option value="Other Claim Exists">Other Claim / Charge Exists</option>
+                    <option value="Nil" {% if prop.property_encumbrance_status == "Nil" %}selected{% endif %}>No Encumbrance (Clear EC)</option>
+                    <option value="Mortgaged" {% if prop.property_encumbrance_status == "Mortgaged" %}selected{% endif %}>Mortgaged / Hypothecated (Bank / NBFC)</option>
+                    <option value="Under Litigation" {% if prop.property_encumbrance_status == "Under Litigation" %}selected{% endif %}>Under Court Litigation</option>
+                    <option value="Government Acquisition Notice" {% if prop.property_encumbrance_status == "Government Acquisition Notice" %}selected{% endif %}>Govt Acquisition / Section 4 Notice</option>
+                    <option value="Other Claim Exists" {% if prop.property_encumbrance_status == "Other Claim Exists" %}selected{% endif %}>Other Claim / Charge Exists</option>
                   </select>
                 </div>
               </div>
@@ -903,24 +903,24 @@
                   <label class="form-label">Property Tax (Ghar Kar) Status</label>
                   <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
                     <option value="">— Select —</option>
-                    <option value="Fully Paid">Fully Paid (Up to Date)</option>
-                    <option value="Partially Due">Partially Due (Some Arrears Pending)</option>
-                    <option value="Pending">Pending (Multiple Years Unpaid)</option>
-                    <option value="Not Applicable">Not Applicable / Not Assessed Yet</option>
+                    <option value="Fully Paid" {% if prop.property_tax_status == "Fully Paid" %}selected{% endif %}>Fully Paid (Up to Date)</option>
+                    <option value="Partially Due" {% if prop.property_tax_status == "Partially Due" %}selected{% endif %}>Partially Due (Some Arrears Pending)</option>
+                    <option value="Pending" {% if prop.property_tax_status == "Pending" %}selected{% endif %}>Pending (Multiple Years Unpaid)</option>
+                    <option value="Not Applicable" {% if prop.property_tax_status == "Not Applicable" %}selected{% endif %}>Not Applicable / Not Assessed Yet</option>
                   </select>
                 </div>
-                <div id="tax_due_section" style="display:none;" class="col-md-12 mt-0">
+                <div id="tax_due_section" style="{% if prop.property_tax_status != 'Pending' and prop.property_tax_status != 'Partially Due' %}display:none;{% endif %}" class="col-md-12 mt-0">
                   <div class="row">
                     <div class="col-md-6 mt-3">
                       <label class="form-label">Outstanding Tax Amount (₹)</label>
                       <div class="input-with-unit">
-                        <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 15000">
+                        <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 15000" value="{{ prop.outstanding_tax_amount|default_if_none:"" }}">
                         <span class="input-unit">₹</span>
                       </div>
                     </div>
-                    <div class="col-md-6 mt-3" id="pending_since_div" style="display:none;">
+                    <div class="col-md-6 mt-3" id="pending_since_div">
                       <label class="form-label">Tax Pending Since</label>
-                      <input type="date" class="form-control" name="pending_since" id="pending_since">
+                      <input type="date" class="form-control" name="pending_since" id="pending_since" value="{{ prop.pending_since|date:'Y-m-d' }}">
                     </div>
                   </div>
                 </div>
@@ -928,22 +928,22 @@
                   <label class="form-label">Existing Loan / Mortgage on Property</label>
                   <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
                     <option value="">— Select Loan Status —</option>
-                    <option value="No Active Loan">No Active Loan (Loan-Free Property)</option>
-                    <option value="Loan Running">Loan Running (To be closed before sale)</option>
-                    <option value="Loan Closed">Loan Closed (NOC Available)</option>
-                    <option value="Loan Status Not Available">Not Disclosed</option>
+                    <option value="No Active Loan" {% if prop.property_loan_status == "No Active Loan" %}selected{% endif %}>No Active Loan (Loan-Free Property)</option>
+                    <option value="Loan Running" {% if prop.property_loan_status == "Loan Running" %}selected{% endif %}>Loan Running (To be closed before sale)</option>
+                    <option value="Loan Closed" {% if prop.property_loan_status == "Loan Closed" %}selected{% endif %}>Loan Closed (NOC Available)</option>
+                    <option value="Loan Status Not Available" {% if prop.property_loan_status == "Loan Status Not Available" %}selected{% endif %}>Not Disclosed</option>
                   </select>
                 </div>
-                <div id="loan_running_section" style="display:none;" class="col-md-12 mt-0">
+                <div id="loan_running_section" style="{% if prop.property_loan_status != 'Loan Running' %}display:none;{% endif %}" class="col-md-12 mt-0">
                   <div class="row">
                     <div class="col-md-6 mt-3">
                       <label class="form-label">Lender Bank / NBFC Name</label>
-                      <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
+                      <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI" value="{{ prop.financing_bank|default_if_none:"" }}">
                     </div>
                     <div class="col-md-6 mt-3">
                       <label class="form-label">Outstanding Loan Amount (₹)</label>
                       <div class="input-with-unit">
-                        <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 1200000">
+                        <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 1200000" value="{{ prop.outstanding_loan_amount|default_if_none:"" }}">
                         <span class="input-unit">₹</span>
                       </div>
                     </div>
@@ -953,7 +953,7 @@
 
               <div class="form-group mt-3">
                 <label class="form-label">Sanctioning / Approving Authority</label>
-                <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2" placeholder="e.g., Nagpur Municipal Corporation (NMC), MHADA, NIT Nagpur, CIDCO, Gram Panchayat, Town Planning Authority"></textarea>
+                <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2" placeholder="e.g., Nagpur Municipal Corporation (NMC), MHADA, NIT Nagpur, CIDCO, Gram Panchayat, Town Planning Authority">{{ prop.sanctioning_authority|default_if_none:"" }}</textarea>
               </div>
             </div>
           </div>
@@ -990,8 +990,8 @@
                 <p class="text-muted text-center m-0" style="font-size:.85rem;">No amenities selected yet</p>
               </div>
               <div style="display:none;">
-                {% for amenities in ameneties_obj %}
-                <input type="checkbox" name="amenities[]" value="{{ amenities.amenties_name }}" class="amenities-checkbox" data-icon="{{ amenities.amenties_icon }}">
+                {% for am in ameneties_obj %}
+                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox" data-icon="{{am.amenties_icon}}" {% if am.amenties_name in prop_amenities_list %}checked{% endif %}>
                 {% endfor %}
               </div>
             </div>
@@ -1013,8 +1013,8 @@
                 <p class="text-muted text-center m-0" style="font-size:.85rem;">No facilities selected yet</p>
               </div>
               <div style="display:none;">
-                {% for facilities in facilities_obj %}
-                <input type="checkbox" name="nearby_facilities[]" value="{{ facilities.facilities_name }}" class="facilities-checkbox" data-icon="{{ facilities.facilities_icon }}">
+                {% for fa in facilities_obj %}
+                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}" class="facilities-checkbox" data-icon="{{fa.facilities_icon}}" {% if fa.facilities_name in prop_facilities_list %}checked{% endif %}>
                 {% endfor %}
               </div>
             </div>
@@ -1026,7 +1026,7 @@
             <div class="section-body">
               <div class="form-group">
                 <label class="form-label">Property Description</label>
-                <textarea class="form-control" name="user_description" rows="5" id="user_description" placeholder="Describe the plot — highlights, surroundings, connectivity, Vastu, investment potential, development nearby…"></textarea>
+                <textarea class="form-control" name="user_description" rows="5" id="user_description" placeholder="Describe the plot — highlights, surroundings, connectivity, Vastu, investment potential, development nearby…">{{ prop.user_description|default_if_none:"" }}</textarea>
                 <p class="hint-text">A good description significantly increases buyer inquiries.</p>
               </div>
             </div>
@@ -1041,74 +1041,74 @@
                   <label class="form-label">State <span class="required">*</span></label>
                   <select class="form-select form-control" name="state" id="state" required>
                     <option value="">Select State</option>
-                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                    <option value="Assam">Assam</option>
-                    <option value="Bihar">Bihar</option>
-                    <option value="Chhattisgarh">Chhattisgarh</option>
-                    <option value="Goa">Goa</option>
-                    <option value="Gujarat">Gujarat</option>
-                    <option value="Haryana">Haryana</option>
-                    <option value="Himachal Pradesh">Himachal Pradesh</option>
-                    <option value="Jharkhand">Jharkhand</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <option value="Kerala">Kerala</option>
-                    <option value="Madhya Pradesh">Madhya Pradesh</option>
-                    <option value="Maharashtra">Maharashtra</option>
-                    <option value="Manipur">Manipur</option>
-                    <option value="Meghalaya">Meghalaya</option>
-                    <option value="Mizoram">Mizoram</option>
-                    <option value="Nagaland">Nagaland</option>
-                    <option value="Odisha">Odisha</option>
-                    <option value="Punjab">Punjab</option>
-                    <option value="Rajasthan">Rajasthan</option>
-                    <option value="Sikkim">Sikkim</option>
-                    <option value="Tamil Nadu">Tamil Nadu</option>
-                    <option value="Telangana">Telangana</option>
-                    <option value="Tripura">Tripura</option>
-                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                    <option value="Uttarakhand">Uttarakhand</option>
-                    <option value="West Bengal">West Bengal</option>
-                    <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                    <option value="Chandigarh">Chandigarh</option>
-                    <option value="Delhi">Delhi</option>
-                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                    <option value="Ladakh">Ladakh</option>
-                    <option value="Puducherry">Puducherry</option>
+                    <option value="Andhra Pradesh" {% if prop.state == "Andhra Pradesh" %}selected{% endif %}>Andhra Pradesh</option>
+                    <option value="Arunachal Pradesh" {% if prop.state == "Arunachal Pradesh" %}selected{% endif %}>Arunachal Pradesh</option>
+                    <option value="Assam" {% if prop.state == "Assam" %}selected{% endif %}>Assam</option>
+                    <option value="Bihar" {% if prop.state == "Bihar" %}selected{% endif %}>Bihar</option>
+                    <option value="Chhattisgarh" {% if prop.state == "Chhattisgarh" %}selected{% endif %}>Chhattisgarh</option>
+                    <option value="Goa" {% if prop.state == "Goa" %}selected{% endif %}>Goa</option>
+                    <option value="Gujarat" {% if prop.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                    <option value="Haryana" {% if prop.state == "Haryana" %}selected{% endif %}>Haryana</option>
+                    <option value="Himachal Pradesh" {% if prop.state == "Himachal Pradesh" %}selected{% endif %}>Himachal Pradesh</option>
+                    <option value="Jharkhand" {% if prop.state == "Jharkhand" %}selected{% endif %}>Jharkhand</option>
+                    <option value="Karnataka" {% if prop.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                    <option value="Kerala" {% if prop.state == "Kerala" %}selected{% endif %}>Kerala</option>
+                    <option value="Madhya Pradesh" {% if prop.state == "Madhya Pradesh" %}selected{% endif %}>Madhya Pradesh</option>
+                    <option value="Maharashtra" {% if prop.state == "Maharashtra" or not prop.state %}selected{% endif %}>Maharashtra</option>
+                    <option value="Manipur" {% if prop.state == "Manipur" %}selected{% endif %}>Manipur</option>
+                    <option value="Meghalaya" {% if prop.state == "Meghalaya" %}selected{% endif %}>Meghalaya</option>
+                    <option value="Mizoram" {% if prop.state == "Mizoram" %}selected{% endif %}>Mizoram</option>
+                    <option value="Nagaland" {% if prop.state == "Nagaland" %}selected{% endif %}>Nagaland</option>
+                    <option value="Odisha" {% if prop.state == "Odisha" %}selected{% endif %}>Odisha</option>
+                    <option value="Punjab" {% if prop.state == "Punjab" %}selected{% endif %}>Punjab</option>
+                    <option value="Rajasthan" {% if prop.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                    <option value="Sikkim" {% if prop.state == "Sikkim" %}selected{% endif %}>Sikkim</option>
+                    <option value="Tamil Nadu" {% if prop.state == "Tamil Nadu" %}selected{% endif %}>Tamil Nadu</option>
+                    <option value="Telangana" {% if prop.state == "Telangana" %}selected{% endif %}>Telangana</option>
+                    <option value="Tripura" {% if prop.state == "Tripura" %}selected{% endif %}>Tripura</option>
+                    <option value="Uttar Pradesh" {% if prop.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                    <option value="Uttarakhand" {% if prop.state == "Uttarakhand" %}selected{% endif %}>Uttarakhand</option>
+                    <option value="West Bengal" {% if prop.state == "West Bengal" %}selected{% endif %}>West Bengal</option>
+                    <option value="Andaman and Nicobar Islands" {% if prop.state == "Andaman and Nicobar Islands" %}selected{% endif %}>Andaman and Nicobar Islands</option>
+                    <option value="Chandigarh" {% if prop.state == "Chandigarh" %}selected{% endif %}>Chandigarh</option>
+                    <option value="Delhi" {% if prop.state == "Delhi" %}selected{% endif %}>Delhi</option>
+                    <option value="Jammu and Kashmir" {% if prop.state == "Jammu and Kashmir" %}selected{% endif %}>Jammu and Kashmir</option>
+                    <option value="Ladakh" {% if prop.state == "Ladakh" %}selected{% endif %}>Ladakh</option>
+                    <option value="Puducherry" {% if prop.state == "Puducherry" %}selected{% endif %}>Puducherry</option>
                   </select>
                 </div>
                 <div class="col-md-4 mt-2">
                   <label class="form-label">City / District <span class="required">*</span></label>
-                  <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required onkeyup="updatePreview()">
+                  <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required onkeyup="updatePreview()" value="{{ prop.city|default_if_none:"" }}">
                 </div>
                 <div class="col-md-4 mt-2">
                   <label class="form-label">Locality / Neighbourhood <span class="required">*</span></label>
-                  <input type="text" class="form-control" name="locality" id="locality" required placeholder="e.g., Manish Nagar, Wardha Road" onkeyup="updatePreview()">
+                  <input type="text" class="form-control" name="locality" id="locality" required placeholder="e.g., Manish Nagar, Wardha Road" onkeyup="updatePreview()" value="{{ prop.locality|default_if_none:"" }}">
                   <p class="hint-text">Primary location filter used by buyers</p>
                 </div>
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Nearby Landmark / Reference Point</label>
-                  <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="e.g., Near Hingna T-Point, Opp. NIT Gate">
+                  <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="e.g., Near Hingna T-Point, Opp. NIT Gate" value="{{ prop.property_landmark|default_if_none:"" }}">
                 </div>
                 <div class="col-md-6 mt-3">
                   <label class="form-label">PIN Code <span style="color:red;">*</span></label>
-                  <input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440015" maxlength="6" required>
+                  <input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440015" maxlength="6" required value="{{ prop.pincode|default_if_none:"" }}">
                 </div>
                 <div class="col-md-12 mt-3">
                   <label class="form-label">Full Address <span class="required">*</span></label>
-                  <textarea class="form-control" name="address" id="address" rows="3" required placeholder="e.g., Plot No. 42, Layout No. 5, Manish Nagar, Wardha Road, Nagpur – 440015"></textarea>
+                  <textarea class="form-control" name="address" id="address" rows="3" required placeholder="e.g., Plot No. 42, Layout No. 5, Manish Nagar, Wardha Road, Nagpur – 440015">{{ prop.address|default_if_none:"" }}</textarea>
                 </div>
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
-                  <input type="url" class="form-control" name="google_maps_link" id="google_maps_link" placeholder="https://maps.google.com/?q=…">
+                  <input type="url" class="form-control" name="google_maps_link" id="google_maps_link" placeholder="https://maps.google.com/?q=…" value="{{ prop.google_maps_link|default_if_none:"" }}">
                 </div>
                 <div class="col-md-3 mt-3">
                   <label class="form-label">Latitude</label>
-                  <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 21.1458">
+                  <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 21.1458" value="{{ prop.latitude|default_if_none:"" }}">
                 </div>
                 <div class="col-md-3 mt-3">
                   <label class="form-label">Longitude</label>
-                  <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.0882">
+                  <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.0882" value="{{ prop.longitude|default_if_none:"" }}">
                 </div>
               </div>
             </div>
@@ -1139,6 +1139,10 @@
                 <div id="imgMinNotice" style="color:#b45309;font-weight:600;font-size:0.85rem;"><i class="fas fa-exclamation-circle"></i> Add at least 3 images across any categories to publish</div>
               </div>
 
+              <!-- Hidden container for deleted existing images -->
+              <div id="deletedImagesContainer"></div>
+              <input type="hidden" name="existing_images_order" id="existing_images_order" value="">
+
               <!-- Categorization Tabs -->
               <div class="img-cat-tabs" id="imgCatTabs">
                 <div class="img-cat-tab active" data-cat="front_view"><i class="fas fa-image"></i> Front View <span class="cat-count" id="count-front_view">0</span></div>
@@ -1156,73 +1160,137 @@
                 <div class="img-cat-panel active" data-cat-panel="front_view">
                   <input type="file" class="img-cat-input" id="imgInput-front_view" name="property_images_front_view[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="front_view">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Front View Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-front_view"></div>
+                  <div class="img-cat-preview" id="imgPreview-front_view">
+                    {% for img in existing_images %}{% if img.category == 'front_view' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="front_view">
+                        <img src="{{ img.image.url }}" alt="Front View">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'front_view', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="full_plot">
                   <input type="file" class="img-cat-input" id="imgInput-full_plot" name="property_images_full_plot[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="full_plot">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Full Plot View Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-full_plot"></div>
+                  <div class="img-cat-preview" id="imgPreview-full_plot">
+                    {% for img in existing_images %}{% if img.category == 'full_plot' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="full_plot">
+                        <img src="{{ img.image.url }}" alt="Full Plot">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'full_plot', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="road_facing">
                   <input type="file" class="img-cat-input" id="imgInput-road_facing" name="property_images_road_facing[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="road_facing">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Road Facing Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-road_facing"></div>
+                  <div class="img-cat-preview" id="imgPreview-road_facing">
+                    {% for img in existing_images %}{% if img.category == 'road_facing' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="road_facing">
+                        <img src="{{ img.image.url }}" alt="Road Facing">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'road_facing', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="entrance_access">
                   <input type="file" class="img-cat-input" id="imgInput-entrance_access" name="property_images_entrance_access[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="entrance_access">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Entrance / Access Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-entrance_access"></div>
+                  <div class="img-cat-preview" id="imgPreview-entrance_access">
+                    {% for img in existing_images %}{% if img.category == 'entrance_access' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="entrance_access">
+                        <img src="{{ img.image.url }}" alt="Entrance Access">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'entrance_access', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="boundary">
                   <input type="file" class="img-cat-input" id="imgInput-boundary" name="property_images_boundary[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="boundary">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Boundary Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-boundary"></div>
+                  <div class="img-cat-preview" id="imgPreview-boundary">
+                    {% for img in existing_images %}{% if img.category == 'boundary' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="boundary">
+                        <img src="{{ img.image.url }}" alt="Boundary">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'boundary', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="layout_plan">
                   <input type="file" class="img-cat-input" id="imgInput-layout_plan" name="property_images_layout_plan[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="layout_plan">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Layout Plan Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-layout_plan"></div>
+                  <div class="img-cat-preview" id="imgPreview-layout_plan">
+                    {% for img in existing_images %}{% if img.category == 'layout_plan' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="layout_plan">
+                        <img src="{{ img.image.url }}" alt="Layout Plan">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'layout_plan', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="surroundings">
                   <input type="file" class="img-cat-input" id="imgInput-surroundings" name="property_images_surroundings[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="surroundings">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Surroundings Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-surroundings"></div>
+                  <div class="img-cat-preview" id="imgPreview-surroundings">
+                    {% for img in existing_images %}{% if img.category == 'surroundings' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="surroundings">
+                        <img src="{{ img.image.url }}" alt="Surroundings">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'surroundings', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
 
                 <div class="img-cat-panel" data-cat-panel="amenities_infra">
                   <input type="file" class="img-cat-input" id="imgInput-amenities_infra" name="property_images_amenities_infra[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="amenities_infra">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#3b82f6;"></i></div>
                     <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Amenities/Infra Photos Here</div>
                   </div>
-                  <div class="img-cat-preview" id="imgPreview-amenities_infra"></div>
+                  <div class="img-cat-preview" id="imgPreview-amenities_infra">
+                    {% for img in existing_images %}{% if img.category == 'amenities_infra' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="amenities_infra">
+                        <img src="{{ img.image.url }}" alt="Amenities Infra">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'amenities_infra', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
                 </div>
               </div>
               <p class="hint-text mt-2"><i class="fas fa-info-circle"></i> Drag thumbnails within a category to reorder. The first image uploaded under Front View or Full Plot View will serve as the primary cover photo.</p>
@@ -1231,11 +1299,17 @@
                 <div class="col-md-6">
                   <label class="form-label">Encumbrance Certificate (EC)</label>
                   <input type="file" class="form-control" name="encumbrance_cert" id="encumbrance_cert" accept=".pdf,image/*">
+                  {% if prop.encumbrance_cert %}
+                      <div class="mt-2"><a href="{{ prop.encumbrance_cert.url }}" target="_blank" style="font-size:12px;"><i class="fas fa-file-pdf"></i> View Current Certificate</a></div>
+                  {% endif %}
                   <p class="hint-text">Upload EC from Sub-Registrar Office (PDF/Image)</p>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Layout Plan / NA Order Copy</label>
                   <input type="file" class="form-control" name="layout_plan" id="layout_plan" accept=".pdf,image/*">
+                  {% if prop.layout_plan %}
+                      <div class="mt-2"><a href="{{ prop.layout_plan.url }}" target="_blank" style="font-size:12px;"><i class="fas fa-file-image"></i> View Current Layout Plan</a></div>
+                  {% endif %}
                   <p class="hint-text">Approved layout or NA Conversion Certificate</p>
                 </div>
               </div>
@@ -1247,24 +1321,24 @@
             <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
             <div class="section-body">
               <div class="video-options-grid">
-                <label class="video-option-card active" id="card_video_upload">
-                  <input type="radio" name="video_option" id="video_upload" value="upload" checked>
+                <label class="video-option-card {% if not prop.video_option or prop.video_option == 'upload' %}active{% endif %}" id="card_video_upload">
+                  <input type="radio" name="video_option" id="video_upload" value="upload" {% if not prop.video_option or prop.video_option == 'upload' %}checked{% endif %}>
                   <div class="vo-check"><i class="fas fa-check"></i></div>
                   <div class="vo-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                   <div class="vo-title">Upload Video</div>
                   <div class="vo-desc">Upload a pre-recorded walkthrough (Max 20MB)</div>
                 </label>
 
-                <label class="video-option-card" id="card_video_auto">
-                  <input type="radio" name="video_option" id="video_auto" value="auto">
+                <label class="video-option-card {% if prop.video_option == 'auto' %}active{% endif %}" id="card_video_auto">
+                  <input type="radio" name="video_option" id="video_auto" value="auto" {% if prop.video_option == 'auto' %}checked{% endif %}>
                   <div class="vo-check"><i class="fas fa-check"></i></div>
                   <div class="vo-icon"><i class="fas fa-magic"></i></div>
                   <div class="vo-title">Auto-Generate</div>
                   <div class="vo-desc">Create a dynamic slideshow from your uploaded photos</div>
                 </label>
 
-                <label class="video-option-card" id="card_video_rm">
-                  <input type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                <label class="video-option-card {% if prop.video_option == 'rm_assisted' %}active{% endif %}" id="card_video_rm">
+                  <input type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if prop.video_option == 'rm_assisted' %}checked{% endif %}>
                   <div class="vo-check"><i class="fas fa-check"></i></div>
                   <div class="vo-icon"><i class="fas fa-link"></i></div>
                   <div class="vo-title">Link / RM Assisted</div>
@@ -1272,25 +1346,37 @@
                 </label>
               </div>
 
-              <input type="hidden" name="video_source" id="video_source" value="upload">
+              <input type="hidden" name="video_source" id="video_source" value="{{ prop.video_option|default:'upload' }}">
 
               <!-- Direct Video Upload -->
-              <div id="videoUploadWrapper">
+              <div id="videoUploadWrapper" style="{% if prop.video_option and prop.video_option != 'upload' %}display:none;{% endif %}">
                 <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
-                <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border-color: #cbd5e1; padding:25px;">
-                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#56ab2f;"></i></div>
-                  <div class="upload-text">Click to Select Property Video</div>
-                  <div class="upload-subtext">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
+                <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#3b82f6;margin-bottom:8px;"></i></div>
+                  <div class="upload-text" style="font-weight:600;color:#1e293b;">Click to Select Property Video</div>
+                  <div class="upload-subtext" style="font-size:0.8rem;color:#64748b;margin-top:4px;">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
                 </div>
+                {% if uploaded_video and uploaded_video.video %}
+                <div class="mt-3" id="existingVideoContainer">
+                    <label class="form-label d-block fw-bold text-start">Currently Saved Video</label>
+                    <video controls style="width:100%; max-height:320px; border-radius:12px; border: 2px solid #e2e8f0;" src="{{ uploaded_video.video.url }}"></video>
+                </div>
+                {% endif %}
                 <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px; border: 2px solid #e2e8f0;"></video>
               </div>
 
               <!-- Auto Slideshow Preview -->
-              <div id="videoAutoWrapper" style="display:none;">
-                <div class="alert alert-info" style="background:#f4fdf0; border-left:4px solid #56ab2f; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
-                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#56ab2f;"></i> AI Slideshow Generator</div>
-                  <div style="font-size: 0.85rem; color: #4b5563;">We will automatically generate a smooth, professional walkthrough video using the images you've uploaded above (minimum 3 required).</div>
+              <div id="videoAutoWrapper" style="{% if prop.video_option != 'auto' %}display:none;{% endif %}">
+                <div class="alert alert-info" style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
+                  <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#3b82f6;"></i> AI Slideshow Generator</div>
+                  <div style="font-size: 0.85rem; color: #475569;">We will automatically generate a smooth, professional walkthrough video using the images you've uploaded above (minimum 3 required).</div>
                 </div>
+                {% if auto_video and auto_video.video %}
+                <div style="margin-bottom:15px;">
+                    <label class="form-label d-block fw-bold text-start">Currently Saved Slideshow</label>
+                    <video controls style="width:100%; max-height:320px; border-radius:12px;" src="{{ auto_video.video.url }}"></video>
+                </div>
+                {% endif %}
                 <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
                   <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
                   <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:3px solid #1e293b; background:#000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></canvas>
@@ -1301,23 +1387,23 @@
               </div>
 
               <!-- RM Assisted / Link -->
-              <div id="videoRMWrapper" style="display:none;">
+              <div id="videoRMWrapper" style="{% if prop.video_option != 'rm_assisted' %}display:none;{% endif %}">
                 <div class="alert alert-info" style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:15px;">
                   <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fab fa-youtube me-2" style="color:#ef4444;"></i> Public URL / RM Assist</div>
-                  <div style="font-size: 0.85rem; color: #4b5563;">If your video is already on YouTube/Instagram, paste the link below. If your video file is larger than 20MB, contact our RM via WhatsApp to upload it for you.</div>
+                  <div style="font-size: 0.85rem; color: #64748b;">If your video is already on YouTube/Instagram, paste the link below. If your video file is larger than 20MB, contact our RM via WhatsApp to upload it for you.</div>
                 </div>
                 
                 <div class="form-group mb-0">
                   <label class="form-label">Published Video Link</label>
                   <div class="input-group">
                     <span class="input-group-text" style="background: #f8fafc; border-color: #e9ecef;"><i class="fas fa-link text-muted"></i></span>
-                    <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                    <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." value="{{ rm_video.video_url|default_if_none:'' }}" style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
                   </div>
                 </div>
                 <button type="button" class="btn btn-outline-secondary btn-sm mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
                 
-                <div id="rmVideoFrame" style="display:none; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                  <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                <div id="rmVideoFrame" style="display:{% if rm_video.video_url %}block{% else %}none{% endif %}; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                  <iframe id="rmVideoEmbed" src="{{ rm_video.video_url|default_if_none:'' }}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
                 </div>
               </div>
 
@@ -1332,20 +1418,46 @@
                   <div class="form-group">
                     <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
                     <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" {% if prop.listed_elsewhere == "Yes" %}checked{% endif %}>
                       <label class="form-check-label" for="listed_yes">Yes</label>
                     </div>
                     <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" {% if prop.listed_elsewhere == "No" or not prop.listed_elsewhere %}checked{% endif %}>
                       <label class="form-check-label" for="listed_no">No</label>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6" id="portalField" style="display:none;">
+                <div class="col-md-6" id="portalField" style="{% if prop.listed_elsewhere != 'Yes' %}display:none;{% endif %}">
                   <div class="form-group">
                     <label class="form-label">Portal Name</label>
-                    <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                    <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker" value="{{ prop.portal_name|default_if_none:"" }}">
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LISTING STATUS & APPROVAL -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-check-circle"></i> Listing Status &amp; Approval</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <label class="form-label">Listing Status <span class="required">*</span></label>
+                  <select class="form-select form-control" name="listing_status" id="listing_status" required>
+                    <option value="Active" {% if prop.listing_status == "Active" %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if prop.listing_status == "Inactive" %}selected{% endif %}>Inactive</option>
+                    <option value="Sold" {% if prop.listing_status == "Sold" %}selected{% endif %}>Sold</option>
+                    <option value="Draft" {% if prop.listing_status == "Draft" %}selected{% endif %}>Draft</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Approval Status <span class="required">*</span></label>
+                  <select class="form-select form-control" name="approval_status" id="approval_status" required>
+                    <option value="Pending" {% if prop.approval_status == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="Approved" {% if prop.approval_status == "Approved" %}selected{% endif %}>Approved</option>
+                    <option value="Rejected" {% if prop.approval_status == "Rejected" %}selected{% endif %}>Rejected</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -1358,19 +1470,19 @@
               <div class="row">
                 <div class="col-md-3">
                   <label class="form-label"><i class="fas fa-user"></i> Name</label>
-                  <input type="text" class="form-control" name="uploaded_by_name" value="{{ admin_obj.name }}" readonly>
+                  <input type="text" class="form-control" name="uploaded_by_name" value="{{ prop.uploaded_by_name|default:admin_obj.name }}" readonly>
                 </div>
                 <div class="col-md-3">
                   <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                  <input type="email" class="form-control" name="uploaded_by_email" value="{{ admin_obj.email }}" readonly>
+                  <input type="email" class="form-control" name="uploaded_by_email" value="{{ prop.uploaded_by_email|default:admin_obj.email }}" readonly>
                 </div>
                 <div class="col-md-3">
                   <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
-                  <input type="text" class="form-control" name="uploaded_by_contact" value="{{ admin_obj.phone }}" readonly>
+                  <input type="text" class="form-control" name="uploaded_by_contact" value="{{ prop.uploaded_by_contact|default:admin_obj.phone }}" readonly>
                 </div>
                 <div class="col-md-3">
                   <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
-                  <input type="text" class="form-control" name="uploaded_by_role" value="{{ admin_obj.role }}" readonly>
+                  <input type="text" class="form-control" name="uploaded_by_role" value="{{ prop.uploaded_by_role|default:admin_obj.role }}" readonly>
                 </div>
               </div>
             </div>
@@ -1378,7 +1490,7 @@
 
           <div class="step-nav">
             <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-submit" id="submitBtn" onclick="Submit_Residential_Plot(this)"><i class="fas fa-save"></i> Submit Property</button>
+            <button type="button" class="btn-step btn-submit" id="submitBtn" onclick="Update_Residential_Plot(this)"><i class="fas fa-save"></i> Submit Property Updates</button>
           </div>
 
         </div>
@@ -1396,13 +1508,13 @@
           <div class="preview-image">🏡
             <div class="preview-badges">
               <span class="preview-badge">FOR SALE</span>
-              <span class="preview-badge" style="background:#56ab2f;color:white;">RESIDENTIAL</span>
+              <span class="preview-badge" style="background:#3b82f6;color:white;">RESIDENTIAL</span>
             </div>
             <div class="preview-price" id="p_price">₹ 0</div>
           </div>
           <div class="preview-body">
             <div class="preview-title" id="p_title">Your Plot Headline</div>
-            <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#56ab2f"></i> <span id="p_loc">City, Locality</span></div>
+            <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#3b82f6"></i> <span id="p_loc">City, Locality</span></div>
             <div class="preview-specs">
               <span id="p_area">0 sq.ft</span>
               <span id="p_cat">—</span>
@@ -1452,14 +1564,66 @@
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   $("#PlotResale").addClass("active");
 
-  // ADVANCED CATEGORIZED IMAGES SETUP (Global Scope)
+  window.initialFormState = {};
+  function captureInitialFormState() {
+      $('#plotForm').find('input, select, textarea').each(function() {
+          var idOrName = $(this).attr('id') || $(this).attr('name');
+          if (!idOrName) return;
+          if ($(this).is(':checkbox')) {
+              if (!window.initialFormState[idOrName]) window.initialFormState[idOrName] = [];
+              if ($(this).is(':checked')) window.initialFormState[idOrName].push($(this).val());
+          } else if ($(this).is(':radio')) {
+              if ($(this).is(':checked')) window.initialFormState[idOrName] = $(this).val();
+          } else {
+              window.initialFormState[idOrName] = $(this).val() || '';
+          }
+      });
+  }
+
+  function getFormModifications() {
+      var changes = [];
+      var fieldLabels = {
+          'plot_area': 'Plot Area (sq.ft)',
+          'selling_price': 'Selling Price',
+          'property_type': 'Plot Sub-Category',
+          'property_no': 'Property No / Plot No',
+          'city': 'City',
+          'locality': 'Locality/Area',
+          'pincode': 'Pincode',
+          'address': 'Complete Address',
+          'user_description': 'Property Description'
+      };
+
+      $('#plotForm').find('input, select, textarea').each(function() {
+          var idOrName = $(this).attr('id') || $(this).attr('name');
+          if (!idOrName) return;
+          if (['csrfmiddlewaretoken', 'property_id', 'id', 'existing_images_order', 'video_source'].includes(idOrName)) return;
+
+          var initialVal = window.initialFormState[idOrName] || '';
+          var currentVal = $(this).val() || '';
+
+          if ($(this).is(':radio')) {
+              if ($(this).is(':checked') && initialVal !== currentVal) {
+                  var label = fieldLabels[idOrName] || idOrName.replace(/_/g, ' ').toUpperCase();
+                  changes.push({ field: label, oldVal: initialVal ? initialVal : 'Blank', newVal: currentVal, isNew: !initialVal });
+              }
+              return;
+          }
+
+          if (typeof initialVal === 'string' && initialVal.trim() !== currentVal.trim()) {
+              var label = fieldLabels[idOrName] || idOrName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              changes.push({ field: label, oldVal: initialVal.trim() ? initialVal.trim() : 'Blank', newVal: currentVal.trim() ? currentVal.trim() : 'Cleared', isNew: !initialVal.trim() });
+          }
+      });
+      return changes;
+  }
+
   const PLOT_IMG_CATEGORIES = ['front_view', 'full_plot', 'road_facing', 'entrance_access', 'boundary', 'layout_plan', 'surroundings', 'amenities_infra'];
   const PLOT_IMG_LIMITS = { front_view: 4, full_plot: 5, road_facing: 3, entrance_access: 3, boundary: 3, layout_plan: 3, surroundings: 4, amenities_infra: 3 };
   const PLOT_TOTAL_LIMIT = 25;
@@ -1468,123 +1632,11 @@
   window.catFiles = {};
   PLOT_IMG_CATEGORIES.forEach(function (c) { window.catFiles[c] = []; });
 
-  // Global Video Slideshow Variables
   var slideshowInterval = null;
 
-  function getUploadedImages(callback) {
-      var loadedImages = [];
-      var allFiles = [];
-
-      if (window.catFiles) {
-          Object.keys(window.catFiles).forEach(function (cat) {
-              if (Array.isArray(window.catFiles[cat])) {
-                  window.catFiles[cat].forEach(function (file) {
-                      if (file) allFiles.push(file);
-                  });
-              }
-          });
-      }
-
-      if (allFiles.length === 0) { 
-          callback([]); 
-          return; 
-      }
-
-      var processed = 0;
-      allFiles.forEach(function (file) {
-          var reader = new FileReader();
-          reader.onload = function (e) {
-              var img = new Image();
-              img.crossOrigin = "Anonymous";
-              img.onload = function () { 
-                  loadedImages.push(img); 
-                  processed++; 
-                  if (processed === allFiles.length) callback(loadedImages); 
-              };
-              img.onerror = function () { 
-                  processed++; 
-                  if (processed === allFiles.length) callback(loadedImages); 
-              };
-              img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-      });
-  }
-
-  function startAutoSlideshowPreview() {
-      stopAutoSlideshowPreview();
-      var container = document.getElementById('autoSlideshowPreviewContainer');
-      var warning = document.getElementById('autoSlideshowWarning');
-
-      getUploadedImages(function (images) {
-          if (images.length < 3) {
-              if (container) container.style.display = 'none';
-              if (warning) warning.style.display = 'block';
-              return;
-          }
-          if (warning) warning.style.display = 'none';
-          if (container) container.style.display = 'block';
-          runCanvasAnimation(images);
-      });
-  }
-
-  function runCanvasAnimation(images) {
-      var canvas = document.getElementById('slideshowCanvas');
-      var ctx = canvas ? canvas.getContext('2d') : null;
-      if (!ctx || !canvas || images.length === 0) return;
-
-      var durationPerSlide = 3500;
-      var fadeDuration = 800;
-      var startTime = null;
-
-      function animate(timestamp) {
-          if (!startTime) startTime = timestamp;
-          var elapsed = timestamp - startTime;
-          var progress = (elapsed % durationPerSlide) / durationPerSlide;
-          var index = Math.floor(elapsed / durationPerSlide) % images.length;
-          var nextIndex = (index + 1) % images.length;
-
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          var slideTime = elapsed % durationPerSlide;
-          var isFading = slideTime > (durationPerSlide - fadeDuration);
-          var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
-
-          drawCinematicFrame(ctx, canvas, images[index], progress, 1.0);
-          if (isFading) drawCinematicFrame(ctx, canvas, images[nextIndex], 0, fadeOpacity);
-
-          slideshowInterval = requestAnimationFrame(animate);
-      }
-
-      function drawCinematicFrame(ctx, canvas, img, progress, opacity) {
-          ctx.save();
-          ctx.globalAlpha = opacity;
-          ctx.fillStyle = "#0f172a";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          var scale = 1.0 + (progress * 0.08);
-          var hRatio = canvas.width / img.width;
-          var vRatio = canvas.height / img.height;
-          var ratio  = Math.max(hRatio, vRatio) * scale;
-          var baseShiftX = (canvas.width - img.width * ratio) / 2;
-          var centerShiftY = (canvas.height - img.height * ratio) / 2;
-          var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
-          var centerShiftX = baseShiftX + panOffsetX;
-          ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
-          ctx.restore();
-      }
-
-      stopAutoSlideshowPreview();
-      slideshowInterval = requestAnimationFrame(animate);
-  }
-
-  function stopAutoSlideshowPreview() {
-      if (slideshowInterval) { 
-          cancelAnimationFrame(slideshowInterval); 
-          slideshowInterval = null; 
-      }
-  }
-
   document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(captureInitialFormState, 600);
+
     const uploadRadio = document.getElementById('video_upload');
     const autoRadio = document.getElementById('video_auto');
     const rmRadio = document.getElementById('video_rm');
@@ -1607,12 +1659,6 @@
       if (uploadRadio && uploadRadio.checked) document.getElementById('card_video_upload')?.classList.add('active');
       if (autoRadio && autoRadio.checked) document.getElementById('card_video_auto')?.classList.add('active');
       if (rmRadio && rmRadio.checked) document.getElementById('card_video_rm')?.classList.add('active');
-
-      if (autoRadio && autoRadio.checked) {
-        startAutoSlideshowPreview();
-      } else {
-        stopAutoSlideshowPreview();
-      }
     }
 
     document.querySelectorAll('.video-option-card').forEach(card => {
@@ -1630,283 +1676,253 @@
     if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
 
     toggleVideoOption();
+
+    var videoInput = document.getElementById('videoInput');
+    var videoArea = document.getElementById('videoUploadArea');
+    var videoPreview = document.getElementById('videoPreview');
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function (e) {
+            e.preventDefault();
+            videoInput.click();
+        });
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var propCity     = document.getElementById('city')?.value.trim() || '';
+            var propLocality = document.getElementById('locality')?.value.trim() || '';
+            var locationInfo = (propLocality || propCity) ? ' (' + [propLocality, propCity].filter(Boolean).join(', ') + ')' : '';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+
+            var companyWhatsAppNumber = "917057205423";
+            var rawMessage = "Hello Team,\n\n" +
+                             "I am trying to upload a video for my residential plot listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + locationInfo + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share via WhatsApp',
+                    cancelButtonText: 'Okay'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        var rmRadio = document.getElementById('video_rm');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                    }
+                });
+                return;
+            }
+
+            var existingVid = document.getElementById('existingVideoContainer');
+            if (existingVid) existingVid.style.display = 'none';
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+        linkInputEl.addEventListener('paste', function () { setTimeout(renderVideoPreview, 100); });
+    }
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', renderVideoPreview);
+    }
   });
+
+  function renderVideoPreview() {
+      var linkInput = document.getElementById('property_video_link');
+      var frame = document.getElementById('rmVideoFrame');
+      if (!linkInput || !frame) return;
+      var url = linkInput.value.trim();
+      if (!url) { frame.style.display = 'none'; frame.innerHTML = ''; return; }
+      
+      frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+      var embedIframe = document.getElementById('rmVideoEmbed');
+
+      var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      if (ytMatch) { embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1'; frame.style.display = 'block'; return; }
+
+      var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+      if (instaMatch) { embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/'; frame.style.display = 'block'; return; }
+
+      embedIframe.src = url;
+      frame.style.display = 'block';
+  }
+
+  window.totalImageCount = function () {
+      var newTotal = PLOT_IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
+      var existingTotal = document.querySelectorAll('.existing-img-item').length;
+      return newTotal + existingTotal;
+  };
+
+  function syncCategoryInput(cat) {
+      var dt = new DataTransfer();
+      window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
+      var inputEl = document.getElementById('imgInput-' + cat);
+      if (inputEl) inputEl.files = dt.files;
+  }
+
+  function renderCategory(cat) {
+      var preview = document.getElementById('imgPreview-' + cat);
+      if (!preview) return;
+
+      // Remove only temporary new items to re-render them correctly
+      preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
+
+      window.catFiles[cat].forEach(function (file) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+              var div = document.createElement('div');
+              div.className = 'img-cat-preview-item new-file-item';
+              div.dataset.fileName = file.name;
+              div.dataset.cat = cat;
+
+              div.innerHTML =
+                  '<img src="' + e.target.result + '">' +
+                  '<span style="position:absolute;top:6px;left:6px;background:rgba(59,130,246,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">New</span>' +
+                  '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)"><i class="fas fa-times"></i></button>';
+
+              preview.appendChild(div);
+              updateCategoryCount(cat);
+          };
+          reader.readAsDataURL(file);
+      });
+
+      updateCategoryCount(cat);
+  }
+
+  function updateCategoryCount(cat) {
+      var countEl = document.getElementById('count-' + cat);
+      var existingInCat = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+      var newInCat = window.catFiles[cat] ? window.catFiles[cat].length : 0;
+      if (countEl) {
+          countEl.innerText = existingInCat + newInCat;
+      }
+  }
+
+  function renderAllCategories() {
+      PLOT_IMG_CATEGORIES.forEach(renderCategory);
+      PLOT_IMG_CATEGORIES.forEach(updateCategoryCount);
+      
+      var total = window.totalImageCount();
+      var totalCountEl = document.getElementById('imgTotalCount');
+      if (totalCountEl) totalCountEl.innerText = total;
+
+      var notice = document.getElementById('imgMinNotice');
+      if (notice) {
+          if (total >= PLOT_MIN_REQUIRED) {
+              notice.style.color = '#10b981';
+              notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images added.';
+          } else {
+              notice.style.color = '#b45309';
+              notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + PLOT_MIN_REQUIRED + ' images to publish';
+          }
+      }
+
+      if (typeof updatePreview === 'function') updatePreview();
+  }
+
+  window.removeExistingCatImage = function(imageId, cat, evt) {
+      if (evt) evt.stopPropagation();
+      const el = document.getElementById('existing-img-' + imageId);
+      const container = document.getElementById('deletedImagesContainer');
+      if (el) {
+          el.remove();
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'deleted_images[]';
+          hiddenInput.value = imageId;
+          container.appendChild(hiddenInput);
+      }
+      renderAllCategories();
+  };
+
+  function handleCatFiles(cat, files) {
+      var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+      var limit = PLOT_IMG_LIMITS[cat] || 5;
+      var existingInCat = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+
+      if (existingInCat + window.catFiles[cat].length + incoming.length > limit) {
+          Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+          incoming = incoming.slice(0, Math.max(0, limit - (existingInCat + window.catFiles[cat].length)));
+      }
+      if (window.totalImageCount() + incoming.length > PLOT_TOTAL_LIMIT) {
+          Swal.fire('Total Limit Reached', 'Maximum ' + PLOT_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
+          incoming = incoming.slice(0, Math.max(0, PLOT_TOTAL_LIMIT - window.totalImageCount()));
+      }
+
+      window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+      syncCategoryInput(cat);
+      renderAllCategories();
+  }
+
+  window.removeCatImage = function (cat, fileName, evt) {
+      if (evt) evt.stopPropagation();
+      window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
+      syncCategoryInput(cat);
+      renderAllCategories();
+  };
 
   document.addEventListener('DOMContentLoaded', function () {
-    var yesRadio = document.getElementById('listed_yes');
-    var noRadio = document.getElementById('listed_no');
-    var portalField = document.getElementById('portalField');
+    const sections = ['amenities', 'facilities'];
+    sections.forEach(section => { updateDisplay(section); });
 
-    function togglePortalField() {
-      if (portalField) {
-        portalField.style.display = yesRadio.checked ? 'block' : 'none';
-      }
-    }
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (activePanel) activePanel.classList.add('active');
+        });
+    });
 
-    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
-    if (noRadio) noRadio.addEventListener('change', togglePortalField);
-    togglePortalField();
+    PLOT_IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (zone && input) {
+            zone.addEventListener('click', function (e) { e.preventDefault(); input.click(); });
+            input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+        }
+    });
+
+    renderAllCategories();
+    updatePreview();
   });
-
-  function updateBrokerageLabel(role) {
-    var labelElement = document.getElementById('brokerageLabel');
-    if (!labelElement) return;
-
-    var normalizedRole = (role || "").trim().toLowerCase();
-    var labelText = "";
-
-    switch (normalizedRole) {
-      case 'admin':
-        labelText = "EstateFlow Service Fee";
-        break;
-      case 'relationship manager':
-        labelText = "Buyer Service Fee";
-        break;
-      case 'landlord':
-        labelText = "Buyer Service Fee";
-        break;
-      case 'agent':
-        labelText = "Brokerage";
-        break;
-      case 'agency/builder':
-      case 'builder':
-        labelText = "Brokerage/Service Fee";
-        break;
-      default:
-        labelText = "Brokerage";
-        break;
-    }
-    labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
-  }
-
-  function Change_Fields() {
-    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
-    if (!checkedInput) return;
-    var selectedValue = checkedInput.value;
-
-    var admin_id = document.getElementById('selfUserId')?.value || "";
-    var admin_name = document.getElementById('selfUserName')?.value || "";
-    var admin_email = document.getElementById('selfUserEmail')?.value || "";
-    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
-    var admin_role = document.getElementById('selfUserRole')?.value || "";
-
-    var targetId = document.getElementById('listed_by_id');
-    var targetName = document.getElementById('listed_by_name');
-    var targetEmail = document.getElementById('listed_by_email');
-    var targetContact = document.getElementById('listed_by_contact');
-    var targetRole = document.getElementById('listed_by_role');
-
-    if (selectedValue === "self") {
-      var otherWrapper = document.getElementById('listedByOtherWrapper');
-      if (otherWrapper) otherWrapper.style.display = "none";
-
-      var hiddenSelect = document.getElementById('assigned_to');
-      if (hiddenSelect) {
-        hiddenSelect.value = "";
-        hiddenSelect.required = false;
-      }
-
-      var valueLabel = document.getElementById('assignedToValueLabel');
-      if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
-
-      if (targetId) targetId.value = admin_id;
-      if (targetName) targetName.value = admin_name;
-      if (targetEmail) targetEmail.value = admin_email;
-      if (targetContact) targetContact.value = admin_phone;
-      if (targetRole) targetRole.value = admin_role;
-
-      updateBrokerageLabel(admin_role);
-    } else {
-      if (targetId) targetId.value = "";
-      if (targetName) targetName.value = "";
-      if (targetEmail) targetEmail.value = "";
-      if (targetContact) targetContact.value = "";
-      if (targetRole) targetRole.value = "";
-
-      var otherWrapper = document.getElementById('listedByOtherWrapper');
-      if (otherWrapper) otherWrapper.style.display = "block";
-
-      var hiddenSelect = document.getElementById('assigned_to');
-      if (hiddenSelect) {
-        hiddenSelect.required = true;
-      }
-    }
-  }
-
-  (function () {
-    var wrapper = document.getElementById('assignedToSearchSelect');
-    var control = document.getElementById('assignedToControl');
-    var panel = document.getElementById('assignedToPanel');
-    var input = document.getElementById('searchTeamMember');
-    var optionsEl = document.getElementById('assignedToOptions');
-    var noResults = document.getElementById('assignedToNoResults');
-    var valueLabel = document.getElementById('assignedToValueLabel');
-    var hiddenSelect = document.getElementById('assigned_to');
-    var hiddenRole = document.getElementById('assigned_to_role');
-
-    if (!wrapper || !hiddenSelect) return;
-
-    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
-    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
-    var highlightedIndex = -1;
-
-    function openPanel() {
-      wrapper.classList.add('open');
-      input.value = '';
-      filterOptions('');
-      setTimeout(function () { input.focus(); }, 0);
-    }
-
-    function closePanel() {
-      wrapper.classList.remove('open');
-      highlightedIndex = -1;
-    }
-
-    function togglePanel() {
-      if (wrapper.classList.contains('open')) {
-        closePanel();
-      } else {
-        openPanel();
-      }
-    }
-
-    function selectOption(opt) {
-      var value = opt.getAttribute('data-value');
-      var name = opt.getAttribute('data-name');
-      var role = opt.getAttribute('data-role');
-      var uid = opt.getAttribute('data-uid');
-      var phone = opt.getAttribute('data-phone');
-
-      hiddenSelect.value = value;
-      if (hiddenRole) hiddenRole.value = role;
-      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
-      valueLabel.classList.remove('ss-placeholder');
-
-      options.forEach(function (o) { o.classList.remove('selected'); });
-      opt.classList.add('selected');
-
-      wrapper.classList.remove('validation-error');
-      closePanel();
-
-      var evt = new Event('change', { bubbles: true });
-      hiddenSelect.dispatchEvent(evt);
-    }
-
-    function filterOptions(query) {
-      query = query.trim().toLowerCase();
-      var anyVisible = false;
-      var groupHasVisible = {};
-
-      options.forEach(function (opt) {
-        var haystack = opt.getAttribute('data-search') || '';
-        var match = haystack.indexOf(query) !== -1;
-        opt.style.display = match ? '' : 'none';
-        if (match) {
-          anyVisible = true;
-          var prev = opt.previousElementSibling;
-          while (prev && !prev.classList.contains('search-select-group-label')) {
-            prev = prev.previousElementSibling;
-          }
-          if (prev) groupHasVisible[prev.textContent] = true;
-        }
-      });
-
-      groupLabels.forEach(function (label) {
-        label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
-      });
-
-      noResults.style.display = anyVisible ? 'none' : 'block';
-      highlightedIndex = -1;
-      options.forEach(function (o) { o.classList.remove('highlighted'); });
-    }
-
-    function visibleOptions() {
-      return options.filter(function (o) { return o.style.display !== 'none'; });
-    }
-
-    function moveHighlight(step) {
-      var visible = visibleOptions();
-      if (!visible.length) return;
-      visible.forEach(function (o) { o.classList.remove('highlighted'); });
-      highlightedIndex += step;
-      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
-      if (highlightedIndex >= visible.length) highlightedIndex = 0;
-      var el = visible[highlightedIndex];
-      el.classList.add('highlighted');
-      el.scrollIntoView({ block: 'nearest' });
-    }
-
-    control.addEventListener('click', togglePanel);
-    control.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        togglePanel();
-      }
-    });
-
-    input.addEventListener('input', function () {
-      filterOptions(input.value);
-    });
-
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
-      else if (e.key === 'Enter') {
-        e.preventDefault();
-        var visible = visibleOptions();
-        if (highlightedIndex >= 0 && visible[highlightedIndex]) {
-          selectOption(visible[highlightedIndex]);
-        } else if (visible.length === 1) {
-          selectOption(visible[0]);
-        }
-      } else if (e.key === 'Escape') {
-        closePanel();
-      }
-    });
-
-    options.forEach(function (opt) {
-      opt.addEventListener('click', function () { selectOption(opt); });
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!wrapper.contains(e.target)) closePanel();
-    });
-
-    hiddenSelect.addEventListener('change', function () {
-      if (typeof get_user_data === 'function') {
-        get_user_data(this);
-      }
-    });
-
-    if (typeof Change_Fields === 'function') {
-      Change_Fields();
-    }
-  })();
-
-  function get_user_data() {
-    var assigned_to = $("#assigned_to").val();
-    if (!assigned_to) {
-      $('#listed_by_id, #listed_by_name, #listed_by_email, #listed_by_contact, #listed_by_role').val('');
-      return;
-    }
-    $.ajax({
-      method: "POST",
-      url: "{% url 'get_user_data' %}",
-      data: { 'assigned_to': assigned_to },
-      dataType: "json",
-      success: function (response) {
-        $('#listed_by_id').val(response.user_id || '');
-        $('#listed_by_name').val(response.name || '');
-        $('#listed_by_email').val(response.email || '');
-        $('#listed_by_contact').val(response.contact || '');
-        $('#listed_by_role').val(response.role || '');
-        updateBrokerageLabel(response.role);
-      },
-      error: function (xhr, status, error) { console.error('Failed to fetch user data:', error); }
-    });
-  }
-
-  let currentSection = null;
 
   window.openModal = function (section) {
     currentSection = section;
@@ -2096,7 +2112,7 @@
       Swal.fire({
         icon: 'warning', title: 'Required Fields Missing',
         html: `<p>Please fill the following fields:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
-        confirmButtonColor: '#56ab2f'
+        confirmButtonColor: '#3b82f6'
       });
       return false;
     }
@@ -2155,7 +2171,6 @@
     if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ 0';
     if (pLoc) pLoc.textContent = [city, loc].filter(Boolean).join(', ') || 'City, Locality';
 
-    // Corrected Price Per Sq.ft Calculation
     const psf = document.getElementById('plot_price_per_sqft');
     if (psf) {
       if (price && area && parseFloat(area) > 0) {
@@ -2165,8 +2180,7 @@
       }
     }
 
-    // Checklist Verification Update for Residential Plot
-    setCheck('cl-listedby', true); // Defaults to self or valid selection
+    setCheck('cl-listedby', true);
     setCheck('cl-area', !!area && parseFloat(area) > 0);
     setCheck('cl-price', !!price && parseFloat(price) > 0);
     setCheck('cl-amenities', amenitiesChecked);
@@ -2175,299 +2189,41 @@
     setCheck('cl-images', window.totalImageCount() >= PLOT_MIN_REQUIRED);
   }
 
-  function setupToggle(name, sectionId) {
-    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-      r.addEventListener('change', function () {
-        const sec = document.getElementById(sectionId);
-        if (sec) sec.style.display = this.value === 'yes' ? 'block' : 'none';
-      });
-    });
-  }
+  // ── SUBMISSION FOR UPDATES ──
+  function Update_Residential_Plot(_this) {
+    var modifications = getFormModifications();
+    var modificationsHtml = '';
 
-  window.totalImageCount = function () {
-      return PLOT_IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
-  };
-
-  function findCoverCategory() {
-      for (var i = 0; i < PLOT_IMG_CATEGORIES.length; i++) {
-          if (window.catFiles[PLOT_IMG_CATEGORIES[i]].length > 0) return PLOT_IMG_CATEGORIES[i];
-      }
-      return null;
-  }
-
-  function syncCategoryInput(cat) {
-      var dt = new DataTransfer();
-      window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
-      var inputEl = document.getElementById('imgInput-' + cat);
-      if (inputEl) inputEl.files = dt.files;
-  }
-
-  function renderCategory(cat) {
-      var preview = document.getElementById('imgPreview-' + cat);
-      if (!preview) return;
-
-      preview.innerHTML = '';
-      var coverCat = findCoverCategory();
-
-      window.catFiles[cat].forEach(function (file, idx) {
-          var reader = new FileReader();
-          reader.onload = function (e) {
-              var div = document.createElement('div');
-              div.className = 'img-cat-preview-item';
-              div.draggable = true;
-              div.dataset.fileName = file.name;
-              div.dataset.cat = cat;
-
-              var isCover = (cat === coverCat && idx === 0);
-              div.innerHTML =
-                  '<img src="' + e.target.result + '">' +
-                  '<span style="position:absolute;top:6px;left:6px;background:rgba(86,171,47,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Image ' + (idx + 1) + '</span>' +
-                  (isCover ? '<span style="position:absolute;bottom:6px;left:6px;background:#f59e0b;color:white;font-size:0.6rem;font-weight:bold;padding:2px 6px;border-radius:4px;z-index:5;"><i class="fas fa-star"></i> Cover</span>' : '') +
-                  '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)"><i class="fas fa-times"></i></button>';
-
-              div.addEventListener('dragstart', handleCatDragStart);
-              div.addEventListener('dragover', handleCatDragOver);
-              div.addEventListener('drop', handleCatDrop);
-              div.addEventListener('dragend', function () { div.classList.remove('dragging'); });
-              preview.appendChild(div);
-          };
-          reader.readAsDataURL(file);
-      });
-
-      var countEl = document.getElementById('count-' + cat);
-      if (countEl) countEl.innerText = window.catFiles[cat].length;
-      var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
-      if (tab) tab.classList.toggle('has-images', window.catFiles[cat].length > 0);
-  }
-
-  function renderAllCategories() {
-      PLOT_IMG_CATEGORIES.forEach(renderCategory);
-      var total = window.totalImageCount();
-      var totalCountEl = document.getElementById('imgTotalCount');
-      if (totalCountEl) totalCountEl.innerText = total;
-
-      var notice = document.getElementById('imgMinNotice');
-      if (notice) {
-          if (total >= PLOT_MIN_REQUIRED) {
-              notice.className = 'min-ok';
-              notice.innerHTML = '<i class="fas fa-check-circle text-success"></i> Great! ' + total + ' images added.';
-          } else {
-              notice.className = 'min-warning';
-              notice.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> Add at least ' + PLOT_MIN_REQUIRED + ' images to publish';
-          }
-      }
-
-      // Refresh canvas preview if Auto-Generate is active
-      if (document.getElementById('video_auto')?.checked) {
-          startAutoSlideshowPreview();
-      }
-
-      if (typeof updatePreview === 'function') updatePreview();
-  }
-
-  function handleCatFiles(cat, files) {
-      var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
-      var limit = PLOT_IMG_LIMITS[cat] || 5;
-
-      if (window.catFiles[cat].length + incoming.length > limit) {
-          Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
-          incoming = incoming.slice(0, Math.max(0, limit - window.catFiles[cat].length));
-      }
-      if (window.totalImageCount() + incoming.length > PLOT_TOTAL_LIMIT) {
-          Swal.fire('Total Limit Reached', 'Maximum ' + PLOT_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
-          incoming = incoming.slice(0, Math.max(0, PLOT_TOTAL_LIMIT - window.totalImageCount()));
-      }
-
-      window.catFiles[cat] = window.catFiles[cat].concat(incoming);
-      syncCategoryInput(cat);
-      renderAllCategories();
-  }
-
-  window.removeCatImage = function (cat, fileName, evt) {
-      if (evt) evt.stopPropagation();
-      window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
-      syncCategoryInput(cat);
-      renderAllCategories();
-  };
-
-  var draggedCatFileName = null, draggedCatName = null;
-  function handleCatDragStart(e) { draggedCatFileName = this.dataset.fileName; draggedCatName = this.dataset.cat; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
-  function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-  function handleCatDrop(e) {
-      e.preventDefault();
-      var targetCat = this.dataset.cat;
-      var targetFileName = this.dataset.fileName;
-      if (targetCat !== draggedCatName || targetFileName === draggedCatFileName) return;
-
-      var arr = window.catFiles[targetCat];
-      var fromIdx = arr.findIndex(function (f) { return f.name === draggedCatFileName; });
-      var toIdx = arr.findIndex(function (f) { return f.name === targetFileName; });
-      if (fromIdx === -1 || toIdx === -1) return;
-
-      var moved = arr.splice(fromIdx, 1)[0];
-      arr.splice(toIdx, 0, moved);
-      syncCategoryInput(targetCat);
-      renderAllCategories();
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    setupToggle('property_loan', 'loan_amt_section');
-    setupToggle('existing_tenants', 'tenant_section');
-    setupToggle('agri_dispute', 'dispute_section');
-    setupToggle('pending_tax_due', 'tax_section');
-
-    const brokeragePercentage = document.getElementById('brokeragePercentage');
-    if (brokeragePercentage) {
-      brokeragePercentage.addEventListener('change', function () {
-        document.getElementById('manualBrokerageSection').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
-      });
-    }
-
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-      el.addEventListener('input', updatePreview);
-      el.addEventListener('change', updatePreview);
-    });
-
-    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            var cat = this.dataset.cat;
-            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
-            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
-
-            this.classList.add('active');
-            var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
-            if (activePanel) activePanel.classList.add('active');
-        });
-    });
-
-    PLOT_IMG_CATEGORIES.forEach(function (cat) {
-        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
-        var input = document.getElementById('imgInput-' + cat);
-        if (zone && input) {
-            zone.addEventListener('click', function (e) {
-                e.preventDefault();
-                input.click();
-            });
-            input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
-            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
-            zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
-            zone.addEventListener('drop', function (e) {
-                e.preventDefault();
-                zone.classList.remove('dragover');
-                handleCatFiles(cat, e.dataTransfer.files);
-            });
-        }
-    });
-
-    renderAllCategories();
-
-    var videoInput = document.getElementById('videoInput');
-    var videoArea = document.getElementById('videoUploadArea');
-    var videoPreview = document.getElementById('videoPreview');
-
-    if (videoArea && videoInput) videoArea.addEventListener('click', function () { videoInput.click(); });
-    if (videoInput) {
-        videoInput.addEventListener('change', function (e) {
-            var file = e.target.files[0];
-            if (!file) return;
-
-            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
-            var propCity     = document.getElementById('city')?.value.trim() || '';
-            var propLocality = document.getElementById('locality')?.value.trim() || '';
-            var locationInfo = (propLocality || propCity) ? ' (' + [propLocality, propCity].filter(Boolean).join(', ') + ')' : '';
-            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
-
-            var companyWhatsAppNumber = "917057205423";
-            var rawMessage = "Hello Team,\n\n" +
-                             "I am trying to upload a video for my property listing, but the file size exceeds the 20MB limit.\n\n" +
-                             "📌 *Property Details:*\n" +
-                             "• *Title:* " + propTitle + locationInfo + "\n" +
-                             "• *Listed By:* " + listedByName + "\n" +
-                             "• *Video File Name:* " + file.name + "\n" +
-                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
-                             "Please assist me in publishing this video for my listing.";
-
-            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
-
-            if (file.size > 20 * 1024 * 1024) {
-                videoInput.value = '';
-
-                if (videoPreview) {
-                    videoPreview.pause();
-                    videoPreview.removeAttribute('src');
-                    videoPreview.load();
-                    videoPreview.style.display = 'none';
-                }
-
-                Swal.fire({
-                    title: 'Video File Too Large',
-                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Share via WhatsApp',
-                    cancelButtonText: 'Okay',
-                    confirmButtonColor: '#10b981'
-                }).then(function (result) {
-                    if (result.isConfirmed) {
-                        window.open(whatsappUrl, '_blank');
-                        var rmRadio = document.getElementById('video_rm');
-                        if (rmRadio) rmRadio.checked = true;
-                        var linkField = document.getElementById('property_video_link');
-                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                });
-                return;
-            }
-
-            if (videoPreview) {
-                videoPreview.src = URL.createObjectURL(file);
-                videoPreview.style.display = 'block';
-                videoPreview.load();
-                videoPreview.play();
+    if (modifications.length > 0) {
+        modificationsHtml = `
+            <div style="text-align: left; max-height: 220px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 12px;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px;">
+                    <i class="fas fa-edit" style="color: #3b82f6;"></i> Modified / Added Fields (${modifications.length}):
+                </p>
+                <ul style="padding-left: 18px; margin: 0; font-size: 0.82rem; color: #475569;">
+        `;
+        modifications.forEach(function(item) {
+            if (item.isNew) {
+                modificationsHtml += `<li style="margin-bottom: 6px;"><strong>${item.field}:</strong> Added <span style="color: #10b981; font-weight: 700;">"${item.newVal}"</span></li>`;
+            } else {
+                modificationsHtml += `<li style="margin-bottom: 6px;"><strong>${item.field}:</strong> Modified from <span style="color: #e74c3c; text-decoration: line-through;">"${item.oldVal}"</span> to <span style="color: #10b981; font-weight: 700;">"${item.newVal}"</span></li>`;
             }
         });
+        modificationsHtml += `</ul></div>`;
+    } else {
+        modificationsHtml = `<p style="font-size: 0.85rem; color: #64748b; margin-top: 10px;">No field values were modified.</p>`;
     }
 
-    var linkInputEl = document.getElementById('property_video_link');
-    if (linkInputEl) {
-        linkInputEl.addEventListener('input', renderVideoPreview);
-    }
-    var previewBtn = document.getElementById('previewRMLinkBtn');
-    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
-
-    updatePreview();
-  });
-
-  function renderVideoPreview() {
-      var linkInput = document.getElementById('property_video_link');
-      var frame = document.getElementById('rmVideoFrame');
-      if (!linkInput || !frame) return;
-      var url = linkInput.value.trim();
-      if (!url) { frame.style.display = 'none'; return; }
-      
-      frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowtransparency="true" allowfullscreen></iframe>';
-      var embedIframe = document.getElementById('rmVideoEmbed');
-
-      var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-      if (ytMatch) { embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1'; frame.style.display = 'block'; return; }
-
-      var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
-      if (instaMatch) { embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/'; frame.style.display = 'block'; return; }
-
-      embedIframe.src = url;
-      frame.style.display = 'block';
-  }
-
-  // ── RESIDENTIAL PLOT FORM SUBMISSION VIA SWAL WITH PERCENTAGE PROGRESS ──
-  function Submit_Residential_Plot(_this) {
     Swal.fire({
-        title: 'Confirm Submission',
-        text: 'Are you sure you want to submit this residential plot property?',
+        title: 'Confirm Update',
+        html: `<p style="font-size:0.95rem; color:#475569;">Are you sure you want to submit updates for this residential plot property?</p>${modificationsHtml}`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#56ab2f',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, Submit!'
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Update!',
+        cancelButtonText: 'Review Form',
+        reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
             processPlotSubmission(_this);
@@ -2485,25 +2241,19 @@
 
     if (window.totalImageCount && window.totalImageCount() < 3) {
         goToStep(4);
-        $('.img-total-summary').addClass('input-error');
-        var imgSummaryEl = document.querySelector('.img-total-summary');
-        if (imgSummaryEl) imgSummaryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         Swal.fire({
             title: 'Missing Images',
-            text: 'Please upload at least 3 property images.',
+            text: 'Please have at least 3 property images uploaded or saved.',
             icon: 'error',
-            confirmButtonColor: '#56ab2f'
+            confirmButtonColor: '#3b82f6'
         });
         return;
-    } else {
-        $('.img-total-summary').removeClass('input-error');
     }
 
     function updateProgress(value, statusText) {
         var progressText = document.getElementById('swalProgressText');
         var progressBar = document.getElementById('swalProgressBar');
         var progressStatus = document.getElementById('swalProgressStatus');
-
         if (progressText) progressText.textContent = value + '%';
         if (progressBar) progressBar.style.width = value + '%';
         if (progressStatus && statusText) progressStatus.textContent = statusText;
@@ -2513,27 +2263,25 @@
     progressContainer.innerHTML = `
         <div style="padding: 10px 0;">
             <div style="margin-bottom: 12px;">
-                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #56ab2f;">0%</span>
+                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #3b82f6;">0%</span>
             </div>
             <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
             </div>
             <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
                 <i class="fas fa-spinner fa-spin me-1"></i> 
-                <span id="swalProgressStatus">Preparing data...</span>
+                <span id="swalProgressStatus">Updating property record...</span>
             </div>
         </div>
     `;
 
     Swal.fire({
-        title: 'Submitting Property...',
+        title: 'Updating Property...',
         html: progressContainer,
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+        didOpen: () => { Swal.showLoading(); }
     });
 
     var formEl = document.getElementById('plotForm');
@@ -2632,8 +2380,8 @@
     fd.append('uploaded_by_email', $('[name="uploaded_by_email"]').val());
     fd.append('uploaded_by_contact', $('[name="uploaded_by_contact"]').val());
     fd.append('uploaded_by_role', $('[name="uploaded_by_role"]').val());
-    fd.append('listing_status', 'Draft');
-    fd.append('approval_status', 'Pending');
+    fd.append('listing_status', $('#listing_status').val());
+    fd.append('approval_status', $('#approval_status').val());
 
     const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
     fd.append('video_option', selectedVideoOption);

@@ -223,6 +223,38 @@ urlpatterns = [
 
      path('residential_plot_resale',views.residential_plot_resale,name="residential_plot_resale"),
 
+     ######## urls for ajax for add/edit resale residential plot property ################
+    
+     path('Resale_Residential_Plot_Ajax',  views.Resale_Residential_Plot_Ajax,    name='Resale_Residential_Plot_Ajax'),
+
+     ######### urls for download sample excel for residential resale plot #############
+
+     path('admin/download-sample-resiplot/', views.download_resiplot_sample_excel, name='download_resiplot_sample_excel'),
+
+     ############# urls for export excel for residential resale plot ###############
+
+     path('export/residential-plot/excel/', views.export_residential_plot_excel, name='export_residential_plot_excel'),
+
+     ############ urls for import excel for residential resale plot ################
+
+     path('import_resiplot_resale_excel', views.import_resiplot_resale_excel, name='import_resiplot_resale_excel'),
+
+     ########## urls for update plot residential form ####################
+
+     path('residential_plot_resale_update/<str:id>',views.residential_plot_resale_update,name="residential_plot_resale_update"),
+
+     ############### urls for view plot residential form ####################
+
+     path('residential_plot_resale_view/<str:id>',views.residential_plot_resale_view,name="residential_plot_resale_view"),
+
+     ############### urls for delete plot residential record ####################
+
+     path('residential_plot_resale_delete',views.residential_plot_resale_delete,name="residential_plot_resale_delete"),
+
+     ########## urls for bulk delete plot residential record ####################
+
+     path('residential_plot_resale_delete_bulk', views.residential_plot_resale_delete_bulk, name='residential_plot_resale_delete_bulk'),
+
      ############ urls for plot commercial list ########################
 
      path('commercial_plot_resale_list',views.commercial_plot_resale_list,name="commercial_plot_resale_list"),
@@ -231,9 +263,41 @@ urlpatterns = [
 
      path('commercial_plot_resale',views.commercial_plot_resale,name="commercial_plot_resale"),
 
+     ######## urls for ajax for add/edit resale commercial plot property ################
+         
+     path('Resale_Commercial_Plot_Ajax',  views.Resale_Commercial_Plot_Ajax,name='Resale_Commercial_Plot_Ajax'),
+
      ############## urls for plot industrial list ##########################
 
      path('industrial_plot_resale_list',views.industrial_plot_resale_list,name="industrial_plot_resale_list"),
+
+    ######### urls for download sample excel for commercial resale plot #############
+
+     path('admin/download-sample-commplot/', views.download_commplot_sample_excel, name='download_commplot_sample_excel'),
+
+    ############# urls for export excel for commercial resale plot ###############
+    
+     path('export/commercial-plot/excel/', views.export_commercial_plot_excel, name='export_commercial_plot_excel'),
+
+    ############ urls for import excel for commercial resale plot ################
+
+     path('import_commplot_resale_excel', views.import_commplot_resale_excel, name='import_commplot_resale_excel'),
+
+     ########## urls for update plot commercial form ####################
+     
+     path('commercial_plot_resale_update/<str:id>',views.commercial_plot_resale_update,name="commercial_plot_resale_update"),
+
+    ########## urls for view plot commercial form ####################
+     
+     path('commercial_plot_resale_view/<str:id>',views.commercial_plot_resale_view,name="commercial_plot_resale_view"),
+
+    ############### urls for delete plot commercial record ####################
+     
+     path('commercial_plot_resale_delete',views.commercial_plot_resale_delete,name="commercial_plot_resale_delete"),
+
+    ########## urls for bulk delete plot commercial record ####################
+     
+     path('commercial_plot_resale_delete_bulk', views.commercial_plot_resale_delete_bulk, name='commercial_plot_resale_delete_bulk'),
 
      ############## urls for plot industrial form #######################
 
@@ -645,7 +709,7 @@ urlpatterns = [
     
   #  path('resale_residential_list',            views.resale_residential_list,   name='resale_residential_list'),
     path('resale_residential_view/<str:pk>/',   views.resale_residential_view,   name='resale_residential_view'),
-    path('resale_residential_delete/<str:pk>/', views.resale_residential_delete, name='resale_residential_delete'),
+    path('resale_residential_delete/', views.resale_residential_delete, name='resale_residential_delete'),
     path(
     'resale-residential/edit/<str:id>/',
     views.resale_residential_edit,
@@ -666,6 +730,12 @@ urlpatterns = [
     ####################End Urls Section For Resindential Resale Property #######################################
     
     #################### START Urls Section For Commercial Resale Property #######################################
+
+    ######## urls for ajax for add/edit resale commercial ################
+
+    path('commercial-residential/bulk-delete/', views.resale_commercial_bulk_delete, name='resale_commercial_bulk_delete'),
+    
+    path('Resale_Commercial_Ajax',  views.Resale_Commercial_Ajax,    name='Resale_Commercial_Ajax'),
     
  
     path('commercial/export/excel/', views.export_commercial_resale_excel, name='export_commercial_resale_excel'),
@@ -674,7 +744,9 @@ urlpatterns = [
      path('add_commercial_property', views.add_commercial_property, name='add_commercial_property'),
 
      path('commercial-resale/import/', views.import_commercial_data, name='import_commercial_data'),
+
      path('commercial-resale/download-sample/', views.download_commercial_sample_excel, name='download_commercial_sample_excel'),
+     
      path('commercial/import/test/', views.import_test_view,            name='import_test_view'),       
      path('commercial_toggle',                 views.toggle_commercial_property,         name='toggle_commercial_property'),
      path('commercial_delete',                 views.delete_commercial_property,         name='delete_commercial_property'),
@@ -753,13 +825,21 @@ urlpatterns = [
     # URL for Editing Industrial Resale
     path('industrial-resale/edit/<str:id>/', views.industrial_resale_edit, name='industrial_resale_edit'),
 
+
+    ######## urls for ajax for add/edit resale industrial property ################
+    
+    path('Resale_Industrial_Ajax',  views.Resale_Industrial_Ajax,    name='Resale_Industrial_Ajax'),
+
+    ############# urls for export industrial excel ######################
+    
+    path('industrial/export/excel/', views.export_industrial_resale_excel, name='export_industrial_resale_excel'),
     
     path('industrial-resale/view/<str:id>/', views.industrial_resale_view, name='industrial_resale_view'),
 
     path('industrial-resale/restore/<str:id>/', views.industrial_resale_restore, name='industrial_resale_restore'),
     path('industrial-resale/hard-delete/<str:id>/', views.industrial_resale_hard_delete, name='industrial_resale_hard_delete'),
 
-    path('industrial-resale/delete/<str:id>/', views.industrial_resale_delete, name='industrial_resale_delete'),
+    path('industrial-resale/delete/', views.industrial_resale_delete, name='industrial_resale_delete'),
 
     path('industrial-resale/bulk-delete/', views.industrial_bulk_delete, name='industrial_bulk_delete'),
   
@@ -777,9 +857,13 @@ urlpatterns = [
   
     path('admin/edit-agricultural/<str:pk>/', views.edit_agricultural_property, name='edit_agricultural_property'),
 
+    ######## urls for ajax for add/edit resale agricultural property ################
+        
+    path('Resale_Agricultural_Ajax', views.Resale_Agricultural_Ajax,    name='Resale_Agricultural_Ajax'),
+
    
     path('agricultural-resale/bulk-delete/', views.agricultural_bulk_delete, name='agricultural_bulk_delete'),
-    path('delete-agricultural/<str:pk>/', views.delete_agricultural_property, name='delete_agricultural_property'),
+    path('delete-agricultural', views.delete_agricultural_property, name='delete_agricultural_property'),
 
     path('admin/view-agricultural/<str:pk>/', views.view_agricultural_property, name='view_agricultural_property'),
     

@@ -1203,6 +1203,183 @@
         border-color: #94a3b8;
         color: #0f172a;
     }
+
+    /* ── Selected Items Tags Display ── */
+  .selected-items-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      min-height: 42px;
+      padding: 10px;
+      background: #ffffff;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      align-items: center;
+  }
+
+  .item-tag {
+      background: #f0f4ff;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.05);
+      animation: fadeIn 0.2s ease;
+  }
+
+  .item-tag i {
+      color: #667eea;
+      font-size: 0.9rem;
+  }
+
+  .item-tag .remove-btn {
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      transition: color 0.2s ease;
+  }
+
+  .item-tag .remove-btn:hover {
+      color: #ef4444;
+  }
+
+  /* ── Modal Enhancements ── */
+  .modal-content {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+  }
+
+  .modal-header {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 18px 24px;
+      border-bottom: none;
+  }
+
+  .modal-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+
+  .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+  }
+
+  .modal-header .btn-close:hover {
+      opacity: 1;
+  }
+
+  .modal-body {
+      padding: 24px;
+      background: #f8fafc;
+      max-height: 60vh;
+      overflow-y: auto;
+  }
+
+  .modal-footer {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+  }
+
+  /* Modal Checkbox Grid Cards */
+  .modal-item-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      height: 100%;
+  }
+
+  .modal-item-card:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+  }
+
+  .modal-item-card input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #667eea;
+      cursor: pointer;
+  }
+
+  .modal-item-card label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+  }
+
+  .modal-item-card label i {
+      color: #667eea;
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+  }
+
+  /* ── Fix Modal Scrolling ── */
+  .modal-dialog {
+      max-height: 85vh;
+      margin: 1.75rem auto;
+  }
+
+  .modal-content {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+  }
+
+  .modal-header {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 18px 24px;
+      border-bottom: none;
+      flex-shrink: 0;
+  }
+
+  .modal-body {
+      padding: 24px;
+      background: #f8fafc;
+      overflow-y: auto !important; /* Forces vertical scroll */
+      max-height: calc(85vh - 130px); /* Adjusts dynamically so header/footer remain visible */
+      flex-grow: 1;
+  }
+
+  .modal-footer {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+  }
+  
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -1886,7 +2063,7 @@
 
                             <div style="display:none;">
                                 {% for fa in facilities_obj %}
-                                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}" class="facilities-checkbox" data-icon="{{fa.facilities_icon}}" {% if fa.facilities_name in prop.nearby_facilities_list %}checked{% endif %}>
+                                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}" class="facilities-checkbox" data-icon="{{fa.facilities_icon}}" {% if fa.facilities_name in prop_facilities_list %}checked{% endif %}>
                                 {% endfor %}
                             </div>
                         </div>
@@ -1912,7 +2089,7 @@
 
                             <div style="display:none;">
                                 {% for am in ameneties_obj %}
-                                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox" data-icon="{{am.amenties_icon}}" {% if am.amenties_name in prop.amenities_list %}checked{% endif %}>
+                                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox" data-icon="{{am.amenties_icon}}" {% if am.amenties_name in prop_amenities_list %}checked{% endif %}>
                                 {% endfor %}
                             </div>
                         </div>
@@ -2749,15 +2926,15 @@
             const container = $('#modalItemsList').empty();
             $(`.${section}-checkbox`).each(function () {
                 container.append(`
-        <div class="col-md-4 col-sm-6 mb-2">
-          <div class="form-check">
-            <input class="form-check-input modal-item-checkbox" type="checkbox" 
-                   value="${this.value}" data-icon="${$(this).data('icon')}"
-                   ${this.checked ? 'checked' : ''}>
-            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
-          </div>
-        </div>
-      `);
+                    <div class="col-md-4 col-sm-6 mb-3">
+                        <div class="modal-item-card">
+                            <input class="form-check-input modal-item-checkbox m-0" type="checkbox" 
+                                   value="${this.value}" data-icon="${$(this).data('icon')}"
+                                   ${this.checked ? 'checked' : ''}>
+                            <label><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+                        </div>
+                    </div>
+                `);
             });
 
             updateModalCount();
@@ -3377,6 +3554,57 @@
         updatePreview();
     });
 
+document.addEventListener("DOMContentLoaded", function () {
+        // ── 1. INITIALIZE BROKERAGE FIXED AMOUNT FIELD ON LOAD ──
+        const brokeragePercentage = document.getElementById("brokerage_percentage");
+        const manualBrokerage = document.getElementById("manualBrokerage");
+
+        if (brokeragePercentage && manualBrokerage) {
+            // Check initial value when opening the edit form
+            if (brokeragePercentage.value === "Fixed Amount") {
+                manualBrokerage.style.display = "block";
+            } else {
+                manualBrokerage.style.display = "none";
+            }
+
+            brokeragePercentage.addEventListener("change", function () {
+                manualBrokerage.style.display = (this.value === "Fixed Amount") ? "block" : "none";
+            });
+        }
+
+        // ── 2. INITIALIZE CONDITIONAL YES/NO SECTIONS ON LOAD ──
+        const conditionalMaps = [
+            { radioName: 'property_loan', sectionId: 'res_loan_amount_section' },
+            { radioName: 'existing_tenants', sectionId: 'res_tenant_details_section' },
+            { radioName: 'any_legal_dispute', sectionId: 'res_dispute_details_section' },
+            { radioName: 'government_tax', sectionId: 'res_tax_amount_section' }
+        ];
+
+        conditionalMaps.forEach(map => {
+            const radios = document.querySelectorAll(`input[name="${map.radioName}"]`);
+            const targetSection = document.getElementById(map.sectionId);
+
+            if (targetSection) {
+                // Check initial state on form load
+                const checkedRadio = document.querySelector(`input[name="${map.radioName}"]:checked`);
+                if (checkedRadio && checkedRadio.value === 'yes') {
+                    targetSection.style.display = 'block';
+                } else {
+                    targetSection.style.display = 'none';
+                }
+
+                // Listen for changes
+                radios.forEach(radio => {
+                    radio.addEventListener('change', function () {
+                        targetSection.style.display = (this.value === 'yes') ? 'block' : 'none';
+                    });
+                });
+            }
+        });
+
+        // ... rest of your existing DOMContentLoaded code (drag & drop, inputs, etc.) ...
+    });
+
 document.addEventListener('DOMContentLoaded', function () {
     var uploadRadio      = document.getElementById('video_upload');
     var autoRadio        = document.getElementById('video_auto');
@@ -3825,18 +4053,7 @@ function processPropertySubmission(_this) {
             field.removeClass('is-invalid');
         }
     }
-
-    var existingImagesCount = document.querySelectorAll('.existing-img-item').length;
-    var newImagesCount = window.totalImageCount ? window.totalImageCount() : 0;
-    var grandTotalImages = existingImagesCount + newImagesCount;
-
-    if (grandTotalImages < 3) {
-        isValid = false;
-        errorMessage += 'Property Images (at least 3 required), ';
-        $('.img-total-summary').addClass('border-danger');
-    } else {
-        $('.img-total-summary').removeClass('border-danger');
-    }
+    
 
     if (!isValid) {
         Swal.fire({

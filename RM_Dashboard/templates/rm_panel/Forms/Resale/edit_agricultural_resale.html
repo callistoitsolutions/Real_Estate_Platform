@@ -1,4 +1,4 @@
-{% include "admin_user/admin_header.html" %}
+{% include "rm_panel/rm_header.html" %}
 {% load static %}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -8,7 +8,7 @@
   :root {
     --primary: #667eea;
     --primary-dark: #5a67d8;
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); /* Pink to Violet */
     --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
     --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
     --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -406,73 +406,6 @@
                 <div class="col-md-12">
                   <div class="form-group">
                     <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="text-danger">*</span></label>
-                    <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
-                      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-                        <input type="radio" name="listed_by_type" id="listedBySelf" value="self" {% if prop.listed_by_type == 'self' or not prop.listed_by_type %}checked{% endif %} onchange="Change_Fields(true)"> Listed by Self
-                      </label>
-                      <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-                        <input type="radio" name="listed_by_type" id="listedByOther" value="other" {% if prop.listed_by_type == 'other' %}checked{% endif %} onchange="Change_Fields(true)"> Listed for Other User
-                      </label>
-                    </div>
-
-                    <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
-                    <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
-                    <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
-                    <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
-                    <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
-
-                    <div id="listedByOtherWrapper" style="{% if prop.listed_by_type != 'other' %}display:none;{% endif %}">
-                      <div class="search-select" id="assignedToSearchSelect">
-                        <div class="search-select-control" id="assignedToControl" tabindex="0">
-                          <span class="search-select-value ss-placeholder" id="assignedToValueLabel" style="color:black;">
-                            {% if prop.listed_by_id %}
-                              {% for user in user_obj %}
-                                {% if prop.listed_by_id == user.user_id %}
-                                  {{ user.user_id }} - {{ user.user_name }} - {{ user.user_role }} - {{ user.user_phone }}
-                                {% endif %}
-                              {% endfor %}
-                            {% else %}
-                              -- Select Team Member --
-                            {% endif %}
-                          </span>
-                          <i class="fas fa-chevron-down search-select-arrow"></i>
-                        </div>
-                        <div class="search-select-panel" id="assignedToPanel">
-                          <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
-                          <div class="search-select-options" id="assignedToOptions">
-                            {% regroup user_obj by user_role as grouped_users %}
-                            {% for group in grouped_users %}
-                            <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
-                            {% for user in group.list %}
-                            <div class="search-select-option {% if prop.listed_by_id == user.user_id %}selected{% endif %}" data-value="{{ user.id }}-{{user.user_role}}"
-                              data-name="{{ user.user_name }}" data-role="{{ user.user_role }}"
-                              data-phone="{{ user.user_phone }}" data-uid="{{ user.user_id }}"
-                              data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
-                              {{ user.user_id }} - {{user.user_name}} - {{user.user_role}} - {{user.user_phone}}
-                            </div>
-                            {% endfor %}
-                            {% endfor %}
-                            <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <select id="assigned_to" name="assigned_to" data-initial="{{ prop.assigned_to|default:'' }}" style="display:none;">
-                      <option value="">-- Select Team Member --</option>
-                      {% regroup user_obj by user_role as grouped_users %}
-                      {% for group in grouped_users %}
-                      <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
-                        {% for user in group.list %}
-                        <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
-                          {{ user.user_name }} - {{ user.user_role }}
-                        </option>
-                        {% endfor %}
-                      </optgroup>
-                      {% endfor %}
-                    </select>
-
-                    <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
                   </div>
                 </div>
               </div>
@@ -930,16 +863,16 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">7/12 Extract Available?</label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="seven_twelve_available" value="yes" {% if prop.seven_twelve_available == 'yes' or not prop.seven_twelve_available %}checked{% endif %}> Yes</label>
-                    <label class="radio-option"><input type="radio" name="seven_twelve_available" value="no" {% if prop.seven_twelve_available == 'no' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="seven_twelve_available" value="yes" {% if prop.seven_twelve_available == "True" %}checked{% endif %}> Yes</label>
+                    <label class="radio-option"><input type="radio" name="seven_twelve_available" value="no" {% if prop.seven_twelve_available == "False" %}checked{% endif %}> No</label>
                   </div>
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Mutation Entry Updated?</label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="mutation_entry_updated" value="yes" {% if prop.mutation_entry_updated == 'yes' or not prop.mutation_entry_updated %}checked{% endif %}> Yes</label>
-                    <label class="radio-option"><input type="radio" name="mutation_entry_updated" value="no" {% if prop.mutation_entry_updated == 'no' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="mutation_entry_updated" value="yes" {% if prop.mutation_entry_updated == 'True' %}checked{% endif %}> Yes</label>
+                    <label class="radio-option"><input type="radio" name="mutation_entry_updated" value="no" {% if prop.mutation_entry_updated == 'False' %}checked{% endif %}> No</label>
                   </div>
                 </div>
 
@@ -947,10 +880,10 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Property Loan Status <span class="required">*</span></label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="property_loan" value="no" {% if prop.property_loan == 'no' or not prop.property_loan %}checked{% endif %}> No</label>
-                    <label class="radio-option"><input type="radio" name="property_loan" value="yes" {% if prop.property_loan == 'yes' %}checked{% endif %}> Yes</label>
+                    <label class="radio-option"><input type="radio" name="property_loan" value="no" {% if prop.property_loan == 'False' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="property_loan" value="yes" {% if prop.property_loan == 'True' %}checked{% endif %}> Yes</label>
                   </div>
-                  <div class="conditional-section mt-2" id="loan_amt_section" style="{% if prop.property_loan != 'yes' %}display:none;{% endif %}">
+                  <div class="conditional-section mt-2" id="loan_amt_section" style="{% if prop.property_loan != 'True' %}display:none;{% endif %}">
                     <input type="number" class="form-control" name="loan_amount" placeholder="Loan Amount (₹)" value="{{ prop.loan_amount|default_if_none:"" }}">
                   </div>
                 </div>
@@ -959,10 +892,10 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Existing Tenants? <span class="required">*</span></label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="existing_tenants" value="no" {% if prop.existing_tenants == 'no' or not prop.existing_tenants %}checked{% endif %}> No</label>
-                    <label class="radio-option"><input type="radio" name="existing_tenants" value="yes" {% if prop.existing_tenants == 'yes' %}checked{% endif %}> Yes</label>
+                    <label class="radio-option"><input type="radio" name="existing_tenants" value="no" {% if prop.existing_tenants == 'False'  %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="existing_tenants" value="yes" {% if prop.existing_tenants == 'True' %}checked{% endif %}> Yes</label>
                   </div>
-                  <div class="conditional-section mt-2" id="tenant_section" style="{% if prop.existing_tenants != 'yes' %}display:none;{% endif %}">
+                  <div class="conditional-section mt-2" id="tenant_section" style="{% if prop.existing_tenants != 'True' %}display:none;{% endif %}">
                     <textarea class="form-control" name="tenant_details" placeholder="Tenant details…">{{ prop.tenant_details|default_if_none:"" }}</textarea>
                   </div>
                 </div>
@@ -971,10 +904,10 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Legal Dispute? <span class="required">*</span></label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="agri_dispute" value="no" {% if prop.agri_dispute == 'no' or not prop.agri_dispute %}checked{% endif %}> No</label>
-                    <label class="radio-option"><input type="radio" name="agri_dispute" value="yes" {% if prop.agri_dispute == 'yes' %}checked{% endif %}> Yes</label>
+                    <label class="radio-option"><input type="radio" name="agri_dispute" value="no" {% if prop.agri_dispute == 'False' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="agri_dispute" value="yes" {% if prop.agri_dispute == 'True' %}checked{% endif %}> Yes</label>
                   </div>
-                  <div class="conditional-section mt-2" id="dispute_section" style="{% if prop.agri_dispute != 'yes' %}display:none;{% endif %}">
+                  <div class="conditional-section mt-2" id="dispute_section" style="{% if prop.agri_dispute != 'True' %}display:none;{% endif %}">
                     <textarea class="form-control" name="dispute_details" placeholder="Dispute details…">{{ prop.dispute_details|default_if_none:"" }}</textarea>
                   </div>
                 </div>
@@ -983,10 +916,10 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Pending Tax Due? <span class="required">*</span></label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="pending_tax_due" value="no" {% if prop.pending_tax_due == 'no' or not prop.pending_tax_due %}checked{% endif %}> No</label>
-                    <label class="radio-option"><input type="radio" name="pending_tax_due" value="yes" {% if prop.pending_tax_due == 'yes' %}checked{% endif %}> Yes</label>
+                    <label class="radio-option"><input type="radio" name="pending_tax_due" value="no" {% if prop.pending_tax_due == 'False' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="pending_tax_due" value="yes" {% if prop.pending_tax_due == 'True' %}checked{% endif %}> Yes</label>
                   </div>
-                  <div class="conditional-section mt-2" id="tax_section" style="{% if prop.pending_tax_due != 'yes' %}display:none;{% endif %}">
+                  <div class="conditional-section mt-2" id="tax_section" style="{% if prop.pending_tax_due != 'True' %}display:none;{% endif %}">
                     <input type="number" class="form-control" name="pending_tax_amount" placeholder="Pending Tax Amount (₹)" value="{{ prop.pending_tax_amount|default_if_none:"" }}">
                   </div>
                 </div>
@@ -1461,37 +1394,7 @@
             </div>
           </div>
 
-          <div class="form-section">
-            <div class="section-header"><i class="fas fa-upload"></i> Listing Status and Approval</div>
-            <div class="section-body">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label class="form-label mt-2">Listing Status <span class="required">*</span></label>
-                    <select class="form-select" name="listing_status" id="listing_status">
-                      <option value="">Select Status</option>
-                      <option value="Active" {% if prop.listing_status == "Active" %}selected{% endif %}>Active</option>
-                      <option value="Inactive" {% if prop.listing_status == "Inactive" %}selected{% endif %}>Inactive</option>
-                      <option value="Sold" {% if prop.listing_status == "Sold" %}selected{% endif %}>Sold</option>
-                      <option value="Draft" {% if prop.listing_status == "Draft" %}selected{% endif %}>Draft</option>
-                    </select>
-                  </div>
-                </div>
 
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label class="form-label mt-2">Approval Status <span class="required">*</span></label>
-                    <select class="form-select" name="approval_status" id="approval_status">
-                      <option value="">Select Status</option>
-                      <option value="Pending" {% if prop.approval_status == "Pending" %}selected{% endif %}>Pending</option>
-                      <option value="Approved" {% if prop.approval_status == "Approved" %}selected{% endif %}>Approved</option>
-                      <option value="Rejected" {% if prop.approval_status == "Rejected" %}selected{% endif %}>Rejected</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- UPLOADED BY -->
           <div class="form-section earth-theme">
@@ -2815,28 +2718,16 @@
     fd.append('dispute_details', $('textarea[name="dispute_details"]').val());
     fd.append('pending_tax_due', $('input[name="pending_tax_due"]:checked').val() || 'no');
     fd.append('pending_tax_amount', $('input[name="pending_tax_amount"]').val());
+    
+    fd.append('listed_by_type', '{{user_obj.listed_by_id}}');
+    
+    fd.append('listed_by_id', $('#listed_by_id').val());
+    fd.append('listed_by_name', $('#listed_by_name').val());
+    fd.append('listed_by_email', $('#listed_by_email').val());
+    fd.append('listed_by_contact', $('#listed_by_contact').val());
+    fd.append('listed_by_role', $('#listed_by_role').val());
 
-    // Listed By 
-    var listedByType = $('input[name="listed_by_type"]:checked').val();
-    fd.append('listed_by_type', listedByType);
-    if (listedByType === 'self') {
-        fd.append('listed_by_id', $('#selfUserId').val());
-        fd.append('listed_by_name', $('#selfUserName').val());
-        fd.append('listed_by_email', $('#selfUserEmail').val());
-        fd.append('listed_by_contact', $('#selfUserPhone').val());
-        fd.append('listed_by_role', $('#selfUserRole').val());
-        fd.append('assigned_to', '');
-    } else {
-        var assignedValue = $('#assigned_to').val();
-        if (assignedValue) {
-            fd.append('listed_by_id', $('#listed_by_id').val());
-            fd.append('listed_by_name', $('#listed_by_name').val());
-            fd.append('listed_by_email', $('#listed_by_email').val());
-            fd.append('listed_by_contact', $('#listed_by_contact').val());
-            fd.append('listed_by_role', $('#listed_by_role').val());
-            fd.append('assigned_to', assignedValue);
-        }
-    }
+
 
     // Amenities & Facilities
     var amenities = [];
@@ -2856,8 +2747,8 @@
     fd.append('uploaded_by_email', $('input[name="uploaded_by_email"]').val());
     fd.append('uploaded_by_contact', $('input[name="uploaded_by_contact"]').val());
     fd.append('uploaded_by_role', $('input[name="uploaded_by_role"]').val());
-    fd.append('listing_status', $('#listing_status').val());
-    fd.append('approval_status', $('#approval_status').val());
+    fd.append('listing_status', '{{user_obj.listing_status}}');
+    fd.append('approval_status', '{{user_obj.approval_status}}');
 
     // Video options
     const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
@@ -2915,7 +2806,7 @@
                     text: response.msg || response.message || 'Agricultural property changes saved.',
                     confirmButtonColor: '#56ab2f'
                 }).then(() => {
-                    window.location.href = "{% url 'agricultural_resale_list' %}";
+                    window.location.href = "{% url 'agriculture_resale_rm_list' %}";
                 });
             } else {
                 Swal.fire({ icon: 'error', title: 'Update Failed', text: response.msg || response.message || 'Something went wrong!' });

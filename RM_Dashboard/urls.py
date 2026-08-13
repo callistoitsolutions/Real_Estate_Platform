@@ -84,6 +84,10 @@ urlpatterns = [
 
     path('residential_resale_rm_update/<str:id>',views.residential_resale_rm_update,name="residential_resale_rm_update"),
 
+    ############ urls for view resale property form residential #######################
+
+    path('residential_resale_rm_view/<str:id>',views.residential_resale_rm_view,name="residential_resale_rm_view"),
+
     ######### urls for resale commercial property list #########################
 
     path('commercial_resale_rm_list',views.commercial_resale_rm_list,name="commercial_resale_rm_list"),
@@ -91,6 +95,14 @@ urlpatterns = [
     ######## urls for resale property from commercial ######################
 
     path('commercial_resale_rm',views.commercial_resale_rm,name="commercial_resale_rm"),
+
+    ############# urls for update resale property form commercial ####################
+    
+    path('commercial_resale_rm_update/<str:id>',views.commercial_resale_rm_update,name="commercial_resale_rm_update"),
+
+    ############# urls for view resale property form commercial ####################
+    
+    path('commercial_resale_rm_view/<str:id>',views.commercial_resale_rm_view,name="commercial_resale_rm_view"),
 
     ######### urls for resale plot property list #######################
 
@@ -107,6 +119,14 @@ urlpatterns = [
     ############## urls for residential plot list form ########################
 
     path('plot_resale_res_rm',views.plot_resale_res_rm,name="plot_resale_res_rm"),
+
+    ######## urls for update residential plot list form #################
+
+    path('plot_resale_res_rm_update/<str:id>',views.plot_resale_res_rm_update,name="plot_resale_res_rm_update"),
+
+    ######## urls for view residential plot list form #################
+
+    path('plot_resale_res_rm_view/<str:id>',views.plot_resale_res_rm_view,name="plot_resale_res_rm_view"),
 
     ########### urls for commercial plot list for rm #######################
 
@@ -132,6 +152,14 @@ urlpatterns = [
 
     path('industry_resale_rm',views.industry_resale_rm,name="industry_resale_rm"),
 
+    ############# urls for update resale property form industrial ####################
+    
+    path('industrial_resale_rm_update/<str:id>',views.industrial_resale_rm_update,name="industrial_resale_rm_update"),
+
+    ######## urls for view resale property form industrial ######################
+        
+    path('industrial_resale_rm_view/<str:id>',views.industrial_resale_rm_view,name="industrial_resale_rm_view"),
+
     ########### urls for agricultural plot list for rm #######################
 
     path('plot_resale_agri_rm_list',views.plot_resale_agri_rm_list,name="plot_resale_agri_rm_list"),
@@ -147,6 +175,10 @@ urlpatterns = [
     ######### urls for agricutural resale property form ######################
 
     path('agriculture_resale_rm',views.agriculture_resale_rm,name="agriculture_resale_rm"),
+
+    ######### urls for update aricultural resale property form #####################
+
+    path('agriculture_resale_rm_update/<str:id>',views.agriculture_resale_rm_update,name="agriculture_resale_rm_update"),
       
     path('affilate_page',views.affilate_page,name="affilate_page"),
     

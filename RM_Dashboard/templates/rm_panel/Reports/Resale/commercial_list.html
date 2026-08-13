@@ -1,712 +1,1170 @@
 {% include "rm_panel/rm_header.html" %}
 {% load static %}
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                swal({
+                    title: "Duplicate Property Detected",
+                    text: "{{ message|escapejs }}",
+                    icon: "error",
+                    button: "Understood",
+                    closeOnClickOutside: false
+                });
+            {% elif message.tags == 'warning' %}
+                swal({
+                    title: "Action Required",
+                    text: "{{ message|escapejs }}",
+                    icon: "warning",
+                    button: "Review"
+                });
+            {% else %}
+                swal({
+                    title: "Success!",
+                    text: "{{ message|escapejs }}",
+                    icon: "success",
+                    timer: 2500,
+                    buttons: false
+                });
+            {% endif %}
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
 <style>
-    .dashboard-analytics-grid {
+    /* ── Root Variables ── */
+    :root {
+        --primary: #667eea;
+        --primary-dark: #5a67d8;
+        --secondary: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --dark: #1e293b;
+        --card-bg: #ffffff;
+        --border: #e2e8f0;
+        --text-muted: #94a3b8;
+        --text-body: #334155;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+        --radius: 12px;
+        --primary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --info-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        --dark-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+
+    * { box-sizing: border-box; }
+
+    /* Modal Background Overlay */
+    .property-image-modal {
+        display: none;
+        position: fixed;
+        z-index: 999999 !important;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    /* Modal Content Box */
+    .property-image-modal .modal-content {
+        background-color: #fefefe;
+        margin: 5vh auto;
+        padding: 20px;
+        border-radius: 12px;
+        width: 80%;
+        max-width: 900px;
+        max-height: 80vh; 
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        scroll-behavior: smooth;
+    }
+
+    .property-image-modal .close-modal {
+        color: #888;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+        z-index: 10;
+    }
+
+    .property-image-modal .close-modal:hover,
+    .property-image-modal .close-modal:focus {
+        color: #111;
+        text-decoration: none;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+        background: var(--primary-gradient);
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        color: white;
+    }
+    .page-header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .page-title { margin: 0; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .page-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-primary-custom {
+        padding: 9px 20px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5);
+        color: white; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 7px; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-primary-custom:hover { background: rgba(255,255,255,0.35); color: white; }
+    .btn-primary-custom.solid { background: white; color: var(--primary); border-color: white; }
+    .btn-primary-custom.solid:hover { background: #f0f0ff; color: var(--primary); }
+
+    .row-divider { display: flex; align-items: center; text-align: center; margin: 30px 0 15px; color: #6b7280; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .row-divider::before, .row-divider::after { content: ''; flex: 1; border-bottom: 2px solid #e5e7eb; }
+    .row-divider:not(:empty)::before { margin-right: 15px; }
+    .row-divider:not(:empty)::after { margin-left: 15px; }
+
+    /* ── KPI Cards ── */
+    .kpi-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px; }
+    .kpi-card { flex: 1; min-width: 170px; background: #fff; border-radius: 12px; padding: 18px; position: relative; border: 1px solid #f3f4f6; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    
+    .kpi-card.b-red { border-bottom: 4px solid #ef4444; }
+    .kpi-card.b-blue { border-bottom: 4px solid #3b82f6; }
+    .kpi-card.b-orange { border-bottom: 4px solid #f97316; }
+    .kpi-card.b-green { border-bottom: 4px solid #10b981; }
+    .kpi-card.b-pink { border-bottom: 4px solid #ec4899; }
+    .kpi-card.b-purple { border-bottom: 4px solid #8b5cf6; }
+    .kpi-card.b-cyan { border-bottom: 4px solid #06b6d4; }
+
+    .badge-tag { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; }
+    .tag-existing { background: #f3f4f6; color: #6b7280; }
+    .tag-new { background: #10b981; color: #fff; }
+
+    .kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 15px; }
+    .ic-red { background: #fee2e2; color: #ef4444; }
+    .ic-blue { background: #eff6ff; color: #3b82f6; }
+    .ic-orange { background: #ffedd5; color: #f97316; }
+    .ic-green { background: #d1fae5; color: #10b981; }
+    .ic-pink { background: #fce7f3; color: #ec4899; }
+    .ic-purple { background: #ede9fe; color: #8b5cf6; }
+    .ic-cyan { background: #cffafe; color: #06b6d4; }
+
+    .kpi-val { font-size: 28px; font-weight: 800; color: #111827; line-height: 1; margin-bottom: 6px; }
+    .kpi-label { font-size: 13px; font-weight: 700; color: #6b7280; margin-bottom: 6px; }
+    .kpi-desc { font-size: 11px; color: #9ca3af; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .c-up { color: #10b981; font-weight: 600; }
+    .c-down { color: #ef4444; font-weight: 600; }
+
+    /* ── Advanced Search Bar ── */
+    .advanced-search-bar { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 24px; margin-top: 30px; }
+    .search-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 150px; }
+    .search-group.wide { flex: 2; min-width: 250px; }
+    .search-group label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; color: #374151; background: #f9fafb; outline: none; transition: border-color 0.2s; }
+    .filter-input:focus { border-color: #4F46E5; background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    
+    .search-actions { display: flex; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
+    .btn-reset { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .results-badge { background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; width: 100%; margin-top: 5px; border: 1px solid #bfdbfe; }
+
+    /* ── Analytics Charts ── */
+    .analytics-section {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 20px;
         margin-bottom: 24px;
     }
-    
-    .chart-layout-matrix {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
-        margin-bottom: 24px;
-    }
-    
-    .chart-card-wrapper {
-        background: #ffffff;
-        border-radius: var(--radius-xl);
+    .chart-container {
+        background: var(--card-bg);
+        border-radius: var(--radius);
         padding: 20px;
-        box-shadow: var(--shadow-soft);
-        border: 2px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
     }
-    
-    .chart-card-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 10px;
-    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .chart-title { font-size: 14px; font-weight: 700; color: var(--dark); margin: 0; display: flex; align-items: center; gap: 8px; }
+    .chart-title i { color: var(--primary); }
+    .chart-wrapper { position: relative; height: 220px; }
 
-    .clean-filter-box {
-        background: #ffffff;
-        border-radius: var(--radius-xl);
+    /* ── Properties Section ── */
+    .properties-section {
+        background: var(--card-bg);
+        border-radius: var(--radius);
         padding: 24px;
-        box-shadow: var(--shadow-card);
-        border: 2px solid var(--border);
-    }
-
-    .quick-insights-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
         margin-bottom: 24px;
     }
 
-    .insight-pill-card {
-        background: #ffffff;
-        border: 2px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 16px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        transition: transform 0.2s, border-color 0.2s;
+    /* ── Table ── */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .properties-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        white-space: nowrap;
+    }
+    .properties-table th, 
+    .properties-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+        font-size: 0.85rem;
+    }
+    .properties-table thead tr {
+        background: linear-gradient(135deg, #667eea10, #764ba210);
+        border-bottom: 2px solid var(--border);
+    }
+    .properties-table th {
+        font-size: 11px; font-weight: 700; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;
     }
 
-    .insight-pill-card:hover {
-        transform: translateY(-2px);
-        border-color: var(--primary);
+    /* ── Action Buttons Styling ── */
+    .action-buttons { display: flex; gap: 8px; align-items: center; justify-content: center; }
+    .btn-action {
+        width: 35px; height: 35px; border-radius: 8px; border: none;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.3s ease; color: white; font-size: 0.9rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
+    .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
+    .btn-view { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .btn-edit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .btn-delete { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
 
-    .insight-icon-zone {
-        width: 46px;
-        height: 46px;
-        border-radius: var(--radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        flex-shrink: 0;
+    /* ── Active Filter Tags ── */
+    .active-tag {
+        background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 600; 
+        padding: 4px 12px; border-radius: 20px; display: inline-flex; 
+        align-items: center; gap: 6px; border: 1px solid #bfdbfe;
     }
+    .active-tag i { cursor: pointer; color: #3b82f6; transition: 0.2s; }
+    .active-tag i:hover { color: #1e3a8a; }
 
-    @media(max-width: 992px) {
-        .chart-layout-matrix { grid-template-columns: 1fr; }
-        .quick-insights-row { grid-template-columns: repeat(2, 1fr); }
+    /* ── Dropzone Modal ── */
+    .dropzone {
+        border: 2px dashed #c7d2fe; border-radius: 10px; padding: 30px 20px;
+        text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafe;
     }
-    @media(max-width: 576px) {
-        .quick-insights-row { grid-template-columns: 1fr; }
-    }
-
-    
+    .dropzone:hover { border-color: var(--primary); background: #eef2ff; }
 </style>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
 <div class="main-content">
 
     <div class="page-header">
         <div class="page-header-content">
             <h1 class="page-title">
-                <i class="fas fa-tachometer-alt"></i> Sell Commercial Property Listings
+                <i class="fas fa-building"></i> Resale Commercial Property Listings
             </h1>
             <div class="page-actions">
-                <a href="{% url 'commercial_resale_rm' %}">
-                    <button class="btn-primary-custom">
-                        <i class="fas fa-plus-circle"></i> Add Resale (Commercial) Property
-                    </button>
+                <a href="{% url 'commercial_resale_rm' %}" class="btn-primary-custom solid">
+                    <i class="fas fa-plus-circle"></i> Add Commercial Residential Property Listing
                 </a>
-                {% comment %} <button class="btn-primary-custom"
-                        style="background: transparent; border: 2px solid white; color: white;"
-                        data-bs-toggle="modal" data-bs-target="#importExcelModal">
-                    <i class="fas fa-file-excel"></i> Import Excel
+                {% comment %} <button class="btn-primary-custom" data-toggle="modal" data-target="#exampleModalCenter">
+                    <i class="fas fa-file-excel"></i> Upload/Export Resale Data Via Excel
                 </button> {% endcomment %}
-
-                <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
-    <i class="fas fa-trash-alt"></i> Bulk Delete
-</button>
+                <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444;">
+                    <i class="fas fa-trash-alt"></i> Bulk Delete
+                </button>
             </div>
         </div>
     </div>
 
-
-
-<div class="dashboard-summary-section-title">
-    <i class="fas fa-chart-pie text-primary"></i> Core Resale Portfolio & Availability Volume
-</div>
-<div class="stats-grid">
-    <div class="stat-card primary" onclick="applyQuickFilter('status_filter', '')" style="cursor:pointer;">
-        <div class="stat-icon primary"><i class="fas fa-building"></i></div>
-        <div class="stat-value">{{ total_properties }}</div>
-        <div class="stat-label">Total Listings Managed</div>
-        <span class="stat-change positive"><i class="fas fa-database"></i> Live Database Records</span>
-    </div>
-    
-    <div class="stat-card success" onclick="applyQuickFilter('status_filter', 'active')" style="cursor:pointer;">
-        <div class="stat-icon success"><i class="fas fa-broadcast-tower"></i></div>
-        <div class="stat-value">{{ active_properties }}</div>
-        <div class="stat-label">Active Portal Listings</div>
-        <span class="stat-change positive"><i class="fas fa-wifi"></i> Broadcast Active</span>
-    </div>
-    
-    <div class="stat-card warning" onclick="applyQuickFilter('status_filter', 'inactive')" style="cursor:pointer;">
-        <div class="stat-icon warning"><i class="fas fa-eye-slash"></i></div>
-        <div class="stat-value">{{ inactive_properties }}</div>
-        <div class="stat-label">Paused / Draft Profiles</div>
-        <span class="stat-change"><i class="fas fa-lock"></i> Hidden From Portal</span>
-    </div>
-</div>
-
-<div class="dashboard-summary-section-title">
-    <i class="fas fa-wallet text-success"></i> Financial Capital Summary & Yield Valuations
-</div>
-<div class="stats-grid">
-    <div class="stat-card success" style="background: var(--success-gradient); color: white;">
-        <div class="stat-icon success" style="background: rgba(255,255,255,0.2); color:white;"><i class="fas fa-calculator"></i></div>
-        <div class="stat-value">{% if avg_price %}₹{{ avg_price|floatformat:0 }}{% else %}N/A{% endif %}</div>
-        <div class="stat-label" style="color: rgba(255,255,255,0.85)">Average Asking Value</div>
-        <span class="stat-change text-white" style="font-weight:600;"><i class="fas fa-chart-line"></i> Avg: ₹{{ avg_price_per_sqft|floatformat:0 }}/sqft</span>
-    </div>
-
-    <div class="stat-card info" style="background: var(--info-gradient); color: white;">
-        <div class="stat-icon info" style="background: rgba(255,255,255,0.2); color:white;"><i class="fas fa-coins"></i></div>
-        <div class="stat-value">₹{{ total_portfolio_value|default:"0" }}</div>
-        <div class="stat-label" style="color: rgba(255,255,255,0.85)">Total Capital Under Management</div>
-        <span class="stat-change text-white" style="font-weight:600;"><i class="fas fa-vault"></i> Cumulative Asset Worth</span>
-    </div>
-
-    <div class="stat-card primary" style="background: var(--primary-gradient); color: white;">
-        <div class="stat-icon primary" style="background: rgba(255,255,255,0.2); color:white;"><i class="fas fa-handshake"></i></div>
-        <div class="stat-value">{{ brokered_deals_count }}</div>
-        <div class="stat-label" style="color: rgba(255,255,255,0.85)">Commissionable Listings</div>
-        <span class="stat-change text-white" style="font-weight:600;"><i class="fas fa-percent"></i> {{ brokerage_with_fees_count }} Active Monetized Contracts</span>
-    </div>
-</div>
-
-<div class="dashboard-summary-section-title">
-    <i class="fas fa-layer-group text-info"></i> Commercial Category Real-Estate Product Mix
-</div>
-<div class="stats-grid">
-    <div class="stat-card info" onclick="applyQuickFilter('property_type', 'office')" style="cursor:pointer;">
-        <div class="stat-icon info"><i class="fas fa-briefcase"></i></div>
-        <div class="stat-value">{{ office_count }}</div>
-        <div class="stat-label">Corporate Office Suites</div>
-        <span class="stat-change positive"><i class="fas fa-network-wired"></i> Tech & Business Centers</span>
-    </div>
-
-    <div class="stat-card danger" onclick="applyQuickFilter('property_type', 'shop')" style="cursor:pointer;">
-        <div class="stat-icon danger"><i class="fas fa-store"></i></div>
-        <div class="stat-value">{{ shop_count }}</div>
-        <div class="stat-label">Retail Shops & Showrooms</div>
-        <span class="stat-change positive"><i class="fas fa-shopping-bag"></i> High Footfall Markets</span>
-    </div>
-
-    <div class="stat-card warning" onclick="applyQuickFilter('property_type', 'warehouse')" style="cursor:pointer;">
-        <div class="stat-icon warning"><i class="fas fa-warehouse"></i></div>
-        <div class="stat-value">{{ warehouse_count }}</div>
-        <div class="stat-label">Logistics Warehouses</div>
-        <span class="stat-change positive"><i class="fas fa-truck-loading"></i> Distribution Infrastructure</span>
-    </div>
-
-    <div class="stat-card primary" onclick="applyQuickFilter('property_type', 'industrial')" style="cursor:pointer;">
-        <div class="stat-icon primary" style="background: var(--dark-gradient); color: white;"><i class="fas fa-industry"></i></div>
-        <div class="stat-value">{{ industrial_count }}</div>
-        <div class="stat-label">Manufacturing Plants</div>
-        <span class="stat-change positive" style="color: var(--text-dark);"><i class="fas fa-tools"></i> Industrial Complexes</span>
-    </div>
-
-    <div class="stat-card success" onclick="applyQuickFilter('property_type', 'land')" style="cursor:pointer;">
-        <div class="stat-icon success" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;"><i class="fas fa-map"></i></div>
-        <div class="stat-value">{{ land_count }}</div>
-        <div class="stat-label">Commercial Land Yields</div>
-        <span class="stat-change positive"><i class="fas fa-globe"></i> Zoned Plots</span>
-    </div>
-</div>
-
-
-
-
-<div class="chart-layout-matrix">
-    <div class="chart-card-wrapper">
-        <div class="chart-card-title">
-            <i class="fas fa-chart-pie" style="color: var(--primary)"></i> Real-Estate Type Asset Profile Ratio
+    <!-- INVENTORY OVERVIEW -->
+    <div class="row-divider"><span>INVENTORY & OWNERSHIP OVERVIEW</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-red">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-red"><i class="fas fa-building"></i></div>
+            <div class="kpi-val">{{ total_count|default:"0" }}</div>
+            <div class="kpi-label">Total Commercial Resale Properties</div>
+            <div class="kpi-desc"><i class="fas fa-database"></i> All registered records</div>
         </div>
-        <div style="height: 260px; position: relative;">
-            <canvas id="propertyPieChart"></canvas>
+        <div class="kpi-card b-teal">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-teal"><i class="fas fa-handshake"></i></div>
+            <div class="kpi-val">{{ total_negotiable|default:"0" }}</div>
+            <div class="kpi-label">Negotiable Listings</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> {{ negotiable_pct|default:"0" }}% flexible rate</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-couch"></i></div>
+            <div class="kpi-val">{{ total_furnished|default:"0" }}</div>
+            <div class="kpi-label">Fully Furnished</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> {{ furnished_pct|default:"0" }}% ready homes</div>
+        </div>
+        <div class="kpi-card b-amber">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-amber"><i class="fas fa-certificate"></i></div>
+            <div class="kpi-val">{{ total_freehold|default:"0" }}</div>
+            <div class="kpi-label">Self Owned / Freehold</div>
+            <div class="kpi-desc"><i class="fas fa-shield-alt"></i> {{ freehold_pct|default:"0" }}% clear titles</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-images"></i></div>
+            <div class="kpi-val">{{ total_with_images|default:"0" }}</div>
+            <div class="kpi-label">Properties With Photos</div>
+            <div class="kpi-desc"><i class="fas fa-camera"></i> {{ images_pct|default:"0" }}% visual ratio</div>
         </div>
     </div>
 
-    <div class="chart-card-wrapper">
-        <div class="chart-card-title">
-            <i class="fas fa-chart-bar" style="color: #10b981"></i> Monthly Listings Ingestion Timeline (Current Year)
+    <!-- PRICING & VALUE SUMMARY -->
+    <div class="row-divider"><span>PRICING & VALUATION SUMMARY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-orange"><i class="fas fa-rupee-sign"></i></div>
+            <div class="kpi-val">{% if avg_price %}₹{{ avg_price|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Avg Selling Price</div>
+            <div class="kpi-desc"><i class="fas fa-calculator"></i> Market average</div>
         </div>
-        <div style="height: 260px; position: relative;">
-            <canvas id="rentalIncomeChart"></canvas>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-arrow-up"></i></div>
+            <div class="kpi-val">{% if max_price %}₹{{ max_price|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Highest Selling Price</div>
+            <div class="kpi-desc c-up"><i class="fas fa-crown" style="color:#f59e0b;"></i> Premium listing</div>
         </div>
-    </div>
-
-    <div class="chart-card-wrapper">
-        <div class="chart-card-title">
-            <i class="fas fa-toggle-on" style="color: #f59e0b"></i> Portal Broadcast Status (Active vs Hidden)
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-arrow-down"></i></div>
+            <div class="kpi-val">{% if min_price %}₹{{ min_price|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Lowest Selling Price</div>
+            <div class="kpi-desc"><i class="fas fa-tag"></i> Budget listing</div>
         </div>
-        <div style="height: 260px; position: relative;">
-            <canvas id="occupancyDoughnutChart"></canvas>
+        <div class="kpi-card b-cyan">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-cyan"><i class="fas fa-chart-line"></i></div>
+            <div class="kpi-val">{% if avg_price_sqft %}₹{{ avg_price_sqft|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Avg Price / Sqft</div>
+            <div class="kpi-desc"><i class="fas fa-ruler-combined"></i> Rate per sqft</div>
         </div>
-    </div>
-
-    <div class="chart-card-wrapper">
-        <div class="chart-card-title">
-            <i class="fas fa-th-large" style="color: #6366f1"></i> Jurisdictional Zone Footprint Layout
-        </div>
-        <div style="height: 260px; position: relative;">
-            <canvas id="rentRangeChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<div class="quick-insights-row">
-    <div class="insight-pill-card" onclick="applyQuickFilter('property_type', 'warehouse')" style="cursor:pointer;">
-        <div class="insight-icon-zone" style="background: #fff7ed; color: #f59e0b;"><i class="fas fa-warehouse"></i></div>
-        <div>
-            <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-dark); line-height: 1.2;">{{ warehouse_count }}</div>
-            <div style="font-size: 0.8rem; color: var(--muted); font-weight: 500;">Logistics Warehouses</div>
-        </div>
-    </div>
-
-    <div class="insight-pill-card" onclick="applyQuickFilter('property_type', 'industrial')" style="cursor:pointer;">
-        <div class="insight-icon-zone" style="background: #f5f3ff; color: #8b5cf6;"><i class="fas fa-industry"></i></div>
-        <div>
-            <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-dark); line-height: 1.2;">{{ industrial_count }}</div>
-            <div style="font-size: 0.8rem; color: var(--muted); font-weight: 500;">Industrial Sites</div>
+        <div class="kpi-card b-blue">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-blue"><i class="fas fa-university"></i></div>
+            <div class="kpi-val">{{ total_with_loan|default:"0" }}</div>
+            <div class="kpi-label">Active Property Loans</div>
+            <div class="kpi-desc"><i class="fas fa-landmark"></i> Bank mortgaged</div>
         </div>
     </div>
 
-    <div class="insight-pill-card" onclick="applyQuickFilter('property_type', 'land')" style="cursor:pointer;">
-        <div class="insight-icon-zone" style="background: #fdf2f8; color: #ec4899;"><i class="fas fa-map"></i></div>
-        <div>
-            <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-dark); line-height: 1.2;">{{ land_count }}</div>
-            <div style="font-size: 0.8rem; color: var(--muted); font-weight: 500;">Commercial Land Yards</div>
+    <!-- LEGAL & STATUS SUMMARY -->
+    <div class="row-divider"><span>LEGAL, TAX & TENANT STATUS</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-green">
+            <div class="kpi-icon ic-green"><i class="fas fa-balance-scale"></i></div>
+            <div class="kpi-val">{{ no_dispute_count|default:"0" }}</div>
+            <div class="kpi-label">No Legal Dispute</div>
+            <div class="kpi-desc c-up"><i class="fas fa-check-circle"></i> Clear titles</div>
+        </div>
+        <div class="kpi-card b-red">
+            <div class="kpi-icon ic-red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="kpi-val">{{ dispute_count|default:"0" }}</div>
+            <div class="kpi-label">Legal Disputes</div>
+            <div class="kpi-desc c-down"><i class="fas fa-exclamation-circle"></i> Requires review</div>
+        </div>
+        <div class="kpi-card b-amber">
+            <div class="kpi-icon ic-amber"><i class="fas fa-receipt"></i></div>
+            <div class="kpi-val">{{ tax_pending_count|default:"0" }}</div>
+            <div class="kpi-label">Pending Tax Dues</div>
+            <div class="kpi-desc"><i class="fas fa-clock"></i> Outstanding dues</div>
+        </div>
+        <div class="kpi-card b-cyan">
+            <div class="kpi-icon ic-cyan"><i class="fas fa-user-friends"></i></div>
+            <div class="kpi-val">{{ tenant_occupied|default:"0" }}</div>
+            <div class="kpi-label">Existing Tenants</div>
+            <div class="kpi-desc"><i class="fas fa-key"></i> Tenant occupied</div>
+        </div>
+        <div class="kpi-card b-pink">
+            <div class="kpi-icon ic-pink"><i class="fas fa-star"></i></div>
+            <div class="kpi-val">{{ premium_count|default:"0" }}</div>
+            <div class="kpi-label">Premium (&gt; ₹1 Cr)</div>
+            <div class="kpi-desc"><i class="fas fa-award"></i> High value segment</div>
         </div>
     </div>
 
-    <div class="insight-pill-card" style="background: #f8fafc;">
-        <div class="insight-icon-zone" style="background: #f0fdfa; color: #14b8a6;"><i class="fas fa-percent"></i></div>
-        <div>
-            <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-dark); line-height: 1.2;">
-                {% if total_properties > 0 %}
-                    {% widthratio active_properties total_properties 100 %}%
-                {% else %}0%{% endif %}
+    <!-- LISTING QUALITY & MEDIA -->
+    <div class="row-divider"><span>LISTING QUALITY & MEDIA ATTACHMENTS</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-cyan">
+            <div class="kpi-icon ic-cyan"><i class="fas fa-video"></i></div>
+            <div class="kpi-val">{{ with_video_count|default:"0" }}</div>
+            <div class="kpi-label">With Video Tour</div>
+            <div class="kpi-desc"><i class="fas fa-play-circle"></i> Walkthrough available</div>
+        </div>
+        <div class="kpi-card b-pink">
+            <div class="kpi-icon ic-pink"><i class="fas fa-drafting-compass"></i></div>
+            <div class="kpi-val">{{ with_floor_plan|default:"0" }}</div>
+            <div class="kpi-label">With Floor Plan</div>
+            <div class="kpi-desc"><i class="fas fa-map"></i> Layout attached</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <div class="kpi-icon ic-purple"><i class="fas fa-user-check"></i></div>
+            <div class="kpi-val">{{ with_owner_count|default:"0" }}</div>
+            <div class="kpi-label">Owner Details Present</div>
+            <div class="kpi-desc"><i class="fas fa-id-card"></i> Direct contact available</div>
+        </div>
+        <div class="kpi-card b-orange">
+            <div class="kpi-icon ic-orange"><i class="fas fa-tags"></i></div>
+            <div class="kpi-val">{{ budget_count|default:"0" }}</div>
+            <div class="kpi-label">Budget (&lt; ₹30 Lakhs)</div>
+            <div class="kpi-desc"><i class="fas fa-wallet"></i> Affordable segment</div>
+        </div>
+    </div>
+
+    <!-- ANALYTICS CHARTS SECTION -->
+    <div class="analytics-section">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Type Breakdown</h3>
             </div>
-            <div style="font-size: 0.8rem; color: var(--muted); font-weight: 500;">Live Conversion Ratio</div>
+            <div class="chart-wrapper">
+                <canvas id="propertyTypeChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-chart-bar"></i> BHK Distribution</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="bhkChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-couch"></i> Furnishing Status</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="furnishingChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-map-marked-alt"></i> Zone Distribution</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="zoneChart"></canvas>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="clean-filter-box mb-4">
-    <div class="form-header" style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9;">
-        <div class="form-title" style="font-size: 1.1rem; color: var(--text-dark); font-weight: 700;">
-            <i class="fas fa-filter" style="background: var(--primary-gradient); color: white; border-radius: var(--radius-sm); width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.95rem;"></i> 
-            Property Data  Search Filters
-        </div>
-      
-    </div>
+    <!-- ADVANCED FILTERS & PROPERTIES SECTION -->
+    <div class="properties-section">
 
-    <form method="GET" action="" id="filterEngineFormPipeline">
-        <input type="hidden" name="status_filter" id="hiddenStatusFilterField" value="{{ status_filter|default:'' }}">
-
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label font-weight-bold"><i class="fas fa-search text-muted"></i> Global Text Search</label>
-                <input type="text" name="search_query" class="form-control auto-submittable" value="{{ search_query|default:'' }}" placeholder="Search by title, location, owner...">
+        <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
+            <div class="search-group wide">
+                <label><i class="fas fa-search"></i> SEARCH RESALE PROPERTIES</label>
+                <input type="text" name="search" id="searchInput" value="{{ search_query|default:'' }}" class="filter-input" placeholder="Type ID, title, city, locality, owner name...">
             </div>
-
-            <div class="col-md-2">
-                <label class="form-label font-weight-bold">Property Type</label>
-                <select name="property_type" id="filter_property_type" class="form-select form-control auto-submittable">
-                    <option value="">All Categories</option>
-                    <option value="office" {% if property_type == 'office' %}selected{% endif %}>Office Space</option>
-                    <option value="shop" {% if property_type == 'shop' %}selected{% endif %}>Shop/Showroom</option>
-                    <option value="warehouse" {% if property_type == 'warehouse' %}selected{% endif %}>Warehouse/Godown</option>
-                    <option value="industrial" {% if property_type == 'industrial' %}selected{% endif %}>Industrial Facility</option>
-                    <option value="land" {% if property_type == 'land' %}selected{% endif %}>Commercial Land</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label font-weight-bold">Zone Type</label>
-                <select name="zone_type" class="form-select form-control auto-submittable">
-                    <option value="">All Zones</option>
-                    <option value="industrial" {% if zone_type == 'industrial' %}selected{% endif %}>Industrial</option>
-                    <option value="commercial" {% if zone_type == 'commercial' %}selected{% endif %}>Commercial</option>
-                    <option value="residential" {% if zone_type == 'residential' %}selected{% endif %}>Residential</option>
-                    <option value="sez" {% if zone_type == 'sez' %}selected{% endif %}>SEZ</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label font-weight-bold">City Base</label>
-                <select name="city" class="form-select form-control auto-submittable">
-                    <option value="">All Cities</option>
-                    {% for city in distinct_cities %}
-                        {% if city %}
-                        <option value="{{ city }}" {% if city_selected == city %}selected{% endif %}>{{ city|title }}</option>
-                        {% endif %}
+            
+            <div class="search-group">
+                <label>PROPERTY TYPE</label>
+                <select name="prop_type" class="filter-input" onchange="this.form.submit()">
+                    <option value="">All Types</option>
+                    {% for pt in unique_prop_types %}
+                        <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt|capfirst }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <label class="form-label font-weight-bold">Condition</label>
-                <select name="property_condition" class="form-select form-control auto-submittable">
-                    <option value="">All Conditions</option>
-                    <option value="new" {% if property_condition == 'new' %}selected{% endif %}>Brand New</option>
-                    <option value="excellent" {% if property_condition == 'excellent' %}selected{% endif %}>Excellent</option>
-                    <option value="good" {% if property_condition == 'good' %}selected{% endif %}>Good</option>
-                    <option value="renovation" {% if property_condition == 'renovation' %}selected{% endif %}>Needs Renovation</option>
+            <div class="search-group">
+                <label>BHK TYPE</label>
+                <select name="bhk" class="filter-input" onchange="this.form.submit()">
+                    <option value="">All BHK</option>
+                    {% for bv in unique_bhk_values %}
+                        <option value="{{ bv }}" {% if bhk_query == bv %}selected{% endif %}>{{ bv|upper }}</option>
+                    {% endfor %}
                 </select>
             </div>
-        </div>
 
-        <div class="row g-3 mt-1">
-            <div class="col-md-3">
-                <label class="form-label font-weight-bold">Ownership Estate</label>
-                <select name="ownership_type" class="form-select form-control auto-submittable">
+            <div class="search-group">
+                <label>FURNISHING</label>
+                <select name="furnish" class="filter-input" onchange="this.form.submit()">
+                    <option value="">All Furnishing</option>
+                    <option value="unfurnished" {% if furnish_query == "unfurnished" %}selected{% endif %}>Unfurnished</option>
+                    <option value="semi" {% if furnish_query == "semi" %}selected{% endif %}>Semi Furnished</option>
+                    <option value="fully" {% if furnish_query == "fully" %}selected{% endif %}>Fully Furnished</option>
+                </select>
+            </div>
+
+            <div class="search-group">
+                <label>ZONE</label>
+                <select name="zone" class="filter-input" onchange="this.form.submit()">
+                    <option value="">All Zones</option>
+                    {% for z in unique_zones %}
+                        <option value="{{ z }}" {% if zone_query == z %}selected{% endif %}>{{ z|capfirst }} Zone</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="search-group">
+                <label>OWNERSHIP TYPE</label>
+                <select name="ownership" class="filter-input" onchange="this.form.submit()">
                     <option value="">All Ownerships</option>
-                    <option value="freehold" {% if ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
-                    <option value="leasehold" {% if ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
-                    <option value="cooperative" {% if ownership_type == 'cooperative' %}selected{% endif %}>Co-operative Society</option>
+                    <option value="Self Owned" {% if ownership_query == "Self Owned" %}selected{% endif %}>Self Owned</option>
+                    <option value="Joint Ownership" {% if ownership_query == "Joint Ownership" %}selected{% endif %}>Joint Ownership</option>
+                    <option value="Inherited" {% if ownership_query == "Inherited" %}selected{% endif %}>Inherited</option>
+                    <option value="Company Owned" {% if ownership_query == "Company Owned" %}selected{% endif %}>Company Owned</option>
                 </select>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label font-weight-bold"><i class="fas fa-calendar-alt text-muted"></i> Date Added (From)</label>
-                <input type="date" name="start_date" id="search_start_date" class="form-control" value="{{ start_date|default:'' }}">
+            <div class="search-group">
+                <label>NEGOTIABLE</label>
+                <select name="negotiable" class="filter-input" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    <option value="yes" {% if negotiable_query == "yes" %}selected{% endif %}>Yes - Negotiable</option>
+                    <option value="no" {% if negotiable_query == "no" %}selected{% endif %}>No - Fixed</option>
+                </select>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label font-weight-bold"><i class="fas fa-calendar-alt text-muted"></i> Date Added (To)</label>
-                <input type="date" name="end_date" id="search_end_date" class="form-control" value="{{ end_date|default:'' }}">
+            <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
+                <a href="{% url 'residential_resale_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset</a>
             </div>
 
-            <div class="col-md-3 d-write-pane d-flex align-items-end gap-2">
-    <button type="submit" class="btn-step btn-next flex-grow-1 justify-content-center" style="padding: 10px; font-weight: 600; font-size: 0.9rem; white-space: nowrap;">
-        <i class="fas fa-search"></i> Filter Properties
-    </button>
-    
-    <button type="button" class="btn-prev text-danger" onclick="clearFilterPipeline()" style="padding: 10px; font-weight: 600; font-size: 0.9rem; background: #fee2e2; border: 2px solid #fecaca !important; border-radius: var(--radius-md); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; transition: all 0.3s ease; white-space: nowrap;">
-        <i class="fas fa-undo-alt"></i> Reset
-    </button>
-</div>
-        </div>
-    </form>
-</div>
-
-
-    <div class="properties-section">
-        <div class="section-header">
-            <h3 class="section-title"><i class="fas fa-list"></i> Commercial Property Listings</h3>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-4 p-3" style="background: #ffffff; border-radius: var(--radius-md); border: 2px solid var(--border); box-shadow: var(--shadow-soft);">
-    <div>
-        
-    </div>
-    {% comment %} <div class="d-flex gap-2">
-        <button type="button" onclick="triggerDataExport('excel')" class="btn btn-sm" style="background: #e2eafc; color: #3f37c9; border: 1px solid #b5c99a; font-weight: 600; padding: 8px 18px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease;">
-            <i class="fas fa-file-excel text-success" style="font-size: 1.05rem;"></i> Export Data Excel
-        </button>
-
-        <button type="button" onclick="triggerDataExport('csv')" class="btn btn-sm" style="background: #f8f9fa; color: #475569; border: 1px solid #cbd5e1; font-weight: 600; padding: 8px 18px; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease;">
-            <i class="fas fa-file-csv text-warning" style="font-size: 1.05rem;"></i> Export Data CSV
-        </button>
-    </div> {% endcomment %}
-</div>
-
-<script>
-function triggerDataExport(exportFormat) {
-    // Collect active search string states from the main dashboard filter form
-    let searchForm = document.getElementById('filterEngineFormPipeline');
-    let queryParameters = searchForm ? new URLSearchParams(new FormData(searchForm)).toString() : "";
-    
-    let targetEndpoint = exportFormat === 'excel' 
-        ? "{% url 'export_commercial_resale_excel' %}" 
-        : "{% url 'export_commercial_resale_csv' %}";
-        
-    // Dispatches file generation stream effortlessly
-    window.location.href = targetEndpoint + "?" + queryParameters;
-}
-</script>
-<div class="table-responsive" style="overflow-x:auto;">
-   <table id="commercialTable"
-       class="properties-table table table-bordered table-hover"
-       style="width:100%; font-size:12px; white-space:nowrap;">
-    <thead style="background: #f8f9fa;">
-        <tr>
-            <th>Sr.No</th>
-            <th>Images</th>
-            
-            <th>Property Id</th>
-            <th>Property Title</th>
-            <th>Property Type</th>
-            <th>Zone Type</th>
-            <th>Location Hub</th>
-            <th>Property Condition</th>
-            <th>Ownership Type</th>
-            <th>Age Of the property</th>
-            
-            <th>No.Of Staircases</th>
-            <th>Passenger Lifts</th>
-            <th>Service Lifts</th>
-            <th>No.Of Cabins</th>
-            <th>Meeting Rooms</th>
-            <th>Min Seats</th>
-            <th>Max Seats</th>
-            <th>PrivateParking</th>
-            <th>Public Parking</th>
-            <th>Built-up Area(sqft)</th>
-            <th>Carpet Area (sqft)</th>
-            <th>Plot Area (sqft)</th>
-            
-            <th>No.Of Owners</th>
-            <th>Loan on Property?</th>
-            <th>Loan Amount</th>
-            <th>Existing Tenants?</th>
-            <th>Tenant Details</th>
-            <th>Any Legal Dispute</th>
-            <th>Dispute Details</th>
-            <th>Government Tax Dues?</th>
-            <th>Pending Tax Amount</th>
-            <th>Fire Safety NOC Available</th>
-            <th>Brokerage</th>
-            <th>Brokerage %</th>
-             <th>Manual Brokerage</th>
-            <th>Expected Price</th>
-            <th>Price Per Sqft</th>
-            <th>Property Description</th>
-            <th>Sanctioning Authority</th>
-            
-            <th>Nearby Facilities</th>
-            <th>Amenities</th>
-            <th>City</th>
-            <th>Area/Locality</th>
-            <th>Building Name</th>
-            <th>Property Address</th>
-            
-            <th>Owner Name</th>
-            <th>Owner Contact</th>
-            <th>Owner Email</th>
-               <th>Owner Role</th>
-            <th>Res. Status</th>
-            
-            <th>Uploader Name</th>
-            <th>Uploader Email</th>
-            <th>Uploader Contact</th>
-            <th>Uploader Role</th>
-            <th>Resident Status</th>
-              <th>Data Uploaded Via</th>
-            <th>Created At</th>
-            <th>Updated At</th>
-            <th style="position: sticky; right: 0; background: white; z-index: 1;">Actions</th>
-        </tr>
-    </thead>
-    
-  <tbody>
-    {% for prop in commercial_list %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-
-        <td>
-            {% if prop.images.first %}
-                <div style="position:relative; display:inline-block; cursor:pointer;" 
-                     onclick="openGallery(this)" 
-                     data-title="{{ prop.property_title }}"
-                     data-images="{% for img in prop.images.all %}{{ img.image.url }}{% if not forloop.last %}|{% endif %}{% endfor %}">
-                    
-                    <img src="{{ prop.images.first.image.url }}" alt="Property" 
-                         style="width:60px; height:45px; object-fit:cover; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                    
-                    <span style="position:absolute; top:-5px; right:-5px; background:#e85d04; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
-                        {{ prop.images.count }}
-                    </span>
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                <div class="results-badge" style="width: fit-content;">
+                    <i class="fas fa-filter"></i> Showing <strong style="margin: 0 4px; font-size: 15px; color: #1d4ed8;">{{ filtered_count }}</strong> of {{ total_count }} properties
                 </div>
-            {% else %}
-                <div style="width:60px; height:45px; border-radius:6px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:#9ca3af;">
-                    <i class="fas fa-image"></i>
+
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    {% if search_query %}
+                        <span class="active-tag">Search: "{{ search_query }}" <i class="fas fa-times" onclick="clearFilterText()"></i></span>
+                    {% endif %}
+                    {% if prop_type_query %}
+                        <span class="active-tag">Type: {{ prop_type_query|capfirst }} <i class="fas fa-times" onclick="clearFilterSelect('prop_type')"></i></span>
+                    {% endif %}
+                    {% if bhk_query %}
+                        <span class="active-tag">BHK: {{ bhk_query|upper }} <i class="fas fa-times" onclick="clearFilterSelect('bhk')"></i></span>
+                    {% endif %}
+                    {% if furnish_query %}
+                        <span class="active-tag">Furnishing: {{ furnish_query|capfirst }} <i class="fas fa-times" onclick="clearFilterSelect('furnish')"></i></span>
+                    {% endif %}
+                    {% if zone_query %}
+                        <span class="active-tag">Zone: {{ zone_query|capfirst }} Zone <i class="fas fa-times" onclick="clearFilterSelect('zone')"></i></span>
+                    {% endif %}
+                    {% if ownership_query %}
+                        <span class="active-tag">Ownership: {{ ownership_query }} <i class="fas fa-times" onclick="clearFilterSelect('ownership')"></i></span>
+                    {% endif %}
+                    {% if negotiable_query %}
+                        <span class="active-tag">Negotiable: {{ negotiable_query|capfirst }} <i class="fas fa-times" onclick="clearFilterSelect('negotiable')"></i></span>
+                    {% endif %}
+                    {% if from_date %}
+                        <span class="active-tag">From: {{ from_date }} <i class="fas fa-times" onclick="clearOneDate('from_date')"></i></span>
+                    {% endif %}
+                    {% if to_date %}
+                        <span class="active-tag">To: {{ to_date }} <i class="fas fa-times" onclick="clearOneDate('to_date')"></i></span>
+                    {% endif %}
                 </div>
-            {% endif %}
-        </td>
+            </div>
+        </form>
 
-        <td style="font-weight: 600; color: #4facfe;">{{ prop.id|default:"—" }}</td>
+        <!-- DATE RANGE FILTER FORM -->
+        <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <form id="dateSearchForm" method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                {% for key, value in request.GET.items %}
+                    {% if key != 'from_date' and key != 'to_date' %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
 
-        <td style="font-weight: 600; color: #2c3e50;">{{ prop.property_title|default:"—" }}</td>
+                <div>
+                    <label for="from_date" style="font-weight: bold; font-size: 12px; color: #64748b;">START DATE</label><br>
+                    <input type="date" id="from_date" name="from_date" value="{{ from_date }}" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
 
-        <td><span class="badge bg-secondary">{{ prop.property_type|upper }}</span></td>
+                <div>
+                    <label for="to_date" style="font-weight: bold; font-size: 12px; color: #64748b;">END DATE</label><br>
+                    <input type="date" id="to_date" name="to_date" value="{{ to_date }}" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
 
-        <td>{{ prop.zone_type|title }}</td>
+                <div>
+                    <button type="submit" onclick="return validateDateSearch()" style="padding: 9px 15px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight:600;">
+                        <i class="fas fa-search"></i> Search Dates
+                    </button>
+                    <a href="{% url 'residential_resale_list' %}" style="padding: 9px 15px; background: #cbd5e0; color: #2d3748; text-decoration: none; border-radius: 6px; margin-left: 8px; font-weight:600;">
+                        Clear
+                    </a>
+                </div>
+            </form>
+        </div>
 
-        <td>{{ prop.location_hub|title|default:"—" }}</td>
+        <!-- EXPORT ACTIONS BAR -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <small style="color:#888; font-size:13px;">
+                <i class="fas fa-database"></i> Total: <strong>{{ total_count }}</strong> records
+            </small>
+            <div style="display:flex; gap:8px;">
+                <a href="{% url 'export_commercial_resale_excel' %}" class="btn btn-outline-success btn-sm" style="font-weight:600;">
+                    <i class="fas fa-file-excel text-primary"></i> Export to Excel
+                </a>
+            </div>
+        </div>
 
-        <td>{{ prop.property_condition|title }}</td>
+        <!-- MAIN PROPERTIES DATA TABLE -->
+        <div class="table-responsive">
+            <table class="properties-table" id="resaleTable">
+                <thead>
+                    <tr>
+                        <th>Sr.No</th>
+                        <th>Listing Status</th>
+                        <th>Approval Status</th>
+                        <th>Images</th>
+                        
+                        <!-- VIDEO COLUMNS -->
+                        <th>Manual Upload Video</th>
+                        <th>Auto Video</th>
+                        <th>RM Link Video</th>
+                        <th>Property Id</th>
+                        
+                        <!-- Category Fields -->
+                        <th>Listing Type</th>
+                        <th>Category</th>
 
-        <td>{{ prop.ownership_type|title }}</td>
+                        <!-- Listed By Section -->
+                        <th>Listed By Type</th>
+                        <th>Assigned To</th>
+                        <th>Listed By ID</th>
+                        <th>Listed By Name</th>
+                        <th>Listed By Email</th>
+                        <th>Listed By Contact</th>
+                        <th>Listed By Role</th>
 
-        <td>{{ prop.age_of_property }} Yrs</td>
+                        <!-- Basic Information Section -->
+                        <th>Property Title</th>
+                        <th>Property Type</th>
+                        <th>Property Category</th>
+                        <th>Shop/Godown No/Unit No</th>
+                        <th>Occupancy Status</th>
+                        <th>Zone Type</th>
+                        <th>Location Hub</th>
+                        <th>Property Condition</th>
+                        <th>Age of Property</th>
+                        <th>Furnishing Status</th>
+                        <th>Facing Direction</th>
 
-        <td class="text-center">{{ prop.num_staircases|default:"0" }}</td>
+                        <!-- Area Measurements Section -->
+                        <th>Super Built-up Area (sq.ft)</th>
+                        <th>Built-up Area (sq.ft)</th>
+                        <th>Carpet Area (sq.ft)</th>
+                        <th>Plot Area (sq.ft)</th>
 
-        <td class="text-center">{{ prop.passenger_lifts|default:"0" }}</td>
+                        <!-- Commercial Specifications Section -->
+                        <th>No. of Staircases</th>
+                        <th>Passenger Lifts</th>
+                        <th>Service Lifts</th>
+                        <th>No. of Cabins</th>
+                        <th>Meeting Rooms</th>
+                        <th>Min. Seats</th>
+                        <th>Max. Seats</th>
+                        <th>Private Parking</th>
+                        <th>Public Parking</th>
+                        
 
-        <td class="text-center">{{ prop.service_lifts|default:"0" }}</td>
+                        <!-- Ownership & Legal Details Section -->
+                        <th>No. of Owners</th>
+                        <th>Ownership Status</th>
+                        <th>Ownership Document Type</th>
+                        <th>Title Clarity Status</th>
+                        <th>Encumbrance Status</th>
+                        <th>Loan on Property?</th>
+                        <th>Loan Amount (₹)</th>
+                        <th>Existing Tenants?</th>
+                        <th>Tenant Details</th>
+                        <th>Any Legal Dispute?</th>
+                        <th>Dispute Details</th>
+                        <th>Government Tax Dues?</th>
+                        <th>Pending Tax Amount (₹)</th>
+                        <th>Fire Safety NOC Available?</th>
+                        <th>Sanctioning / Approving Authority</th>
 
-        <td class="text-center">{{ prop.num_cabins|default:"0" }}</td>
+                        <!-- Pricing Details Section -->
+                        <th>Selling Price</th>
+                        <th>Price Per Sqft (Auto)</th>
+                        <th>Brokerage %</th>
+                        <th>Enter Fixed Brokerage</th>
 
-        <td class="text-center">{{ prop.meeting_rooms|default:"0" }}</td>
+                        <!-- Amenities & Nearby Facilities -->
+                        <th>Nearby Facilities</th>
+                        <th>Amenities & Features</th>
+                        <th>Property Summary</th>
+                        <th>Property Description</th>
+                        <th>Property Description (User)</th>
 
-        <td class="text-center">{{ prop.min_seats|default:"—" }}</td>
+                        <!-- Address Details Section -->
+                        <th>City</th>
+                        <th>Area / Locality</th>
+                        <th>Building / Project / Society</th>
+                        <th>Property Address</th>
+                        <th>Pincode</th>
+                        <th>Property Landmark</th>
+                        <th>State</th>
+                        <th>Google Maps Link</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
 
-        <td class="text-center">{{ prop.max_seats|default:"—" }}</td>
+                        <!-- Property Images Docs and Videos Sections -->
+                        <th>Upload Floor Plan (Optional)</th>
+                        
+                        <th>Is Property Already Listed Elsewhere?</th>
+                        <th>Portal Name</th>
 
-        <td class="text-center">{{ prop.private_parking|default:"0" }}</td>
+                        <!-- Listing Uploaded By Section -->
+                        <th>Uploaded By Name</th>
+                        <th>Uploaded By Email</th>
+                        <th>Uploaded By Contact</th>
+                        <th>Uploaded By Role</th>
+                        <th>Upload File Name</th>
 
-        <td class="text-center">{{ prop.public_parking|default:"0" }}</td>
+                        <!-- Timestamp and other details section -->
+                        
+                        <th>Property Unique Key</th>
+                        <th>Duplicate Count</th>
+                        <th>Duplicate Group ID</th>
+                        <th>Is Deleted</th>
+                        <th>Is Duplicate</th>
+                        <th>Deleted At</th>
+                        <th>Deleted By</th>
+                        <th>Created At</th>
+                        
 
-        <td class="text-end style-metric" style="font-weight:600;">{{ prop.builtup_area|floatformat:2 }}</td>
+                        <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
+                    </tr>
+                </thead>
 
-        <td class="text-end">{{ prop.carpet_area|floatformat:2|default:"—" }}</td>
+                <tbody>
+                    {% for prop in properties %}
+                    <tr id="row-{{ prop.pk }}">
+                        <td style="font-weight:700;color:#1e293b;">{{ forloop.counter }}</td>
 
-        <td class="text-end">{{ prop.plot_area|floatformat:2|default:"—" }}</td>
+                        <td>
+                            {% if prop.listing_status == 'Active' %}<span class="badge bg-warning">Active</span>
+                            {% elif prop.listing_status == 'Draft' %}<span class="badge bg-secondary">Draft</span>
+                            {% elif prop.listing_status == 'Sold' %}<span class="badge bg-success">Sold</span>
+                            {% else %}<span class="badge bg-info">{{ prop.listing_status|default:"—" }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if prop.approval_status == 'Approved' %}<span class="badge bg-success">Approved</span>
+                            {% elif prop.approval_status == 'Pending' %}<span class="badge bg-warning text-dark">Pending</span>
+                            {% else %}<span class="badge bg-danger">{{ prop.approval_status|default:"—" }}</span>{% endif %}
+                        </td>
 
-        <td class="text-center">{{ prop.num_owners|default:"1" }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="openModal('modal-images-{{ prop.id }}')">
+                                {% if prop.thumbnail %}
+                                    <div style="position:relative;width:50px;height:50px;min-width:50px;">
+                                        <img src="{{ prop.thumbnail.image.url }}" alt="Property Image" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+                                        {% if prop.image_count > 1 %}
+                                        <div style="position:absolute;bottom:-4px;right:-4px;background:#000;color:#fff;padding:2px 6px;border-radius:10px;font-size:11px;font-weight:600;">
+                                            +{{ prop.image_count|add:"-1" }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div style="width:50px;height:50px;border-radius:8px;background:linear-gradient(135deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+                                        <i class="fas fa-building" style="font-size:18px;color:#2563eb;"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- Manual Upload Video Column -->
+                        <td>
+                            {% for vid in prop.video.all %}
+                                {% if vid.source == 'uploaded' and vid.video %}
+                                    <button onclick="openModal('modal-video-upload-{{ prop.id }}')" class="btn btn-sm btn-outline-success" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-video"></i> Watch</button>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
 
-        <td class="text-center">
-            {% if prop.loan_on_property == 'yes' or prop.loan_on_property == 'Yes' %}
-                <span class="text-danger" style="font-weight:600;">Yes</span>
-            {% else %}
-                No
-            {% endif %}
-        </td>
+                        <!-- Auto Video Column -->
+                        <td>
+                            {% for vid in prop.video.all %}
+                                {% if vid.source == 'auto' and vid.video %}
+                                    <button onclick="openModal('modal-video-auto-{{ prop.id }}')" class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-magic"></i> Watch</button>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
 
-        <td class="text-end">{% if prop.loan_amount %}&#8377;{{ prop.loan_amount|floatformat:0 }}{% else %}—{% endif %}</td>
+                        <!-- RM Link Video Column -->
+                        <td>
+                            {% for vid in prop.video.all %}
+                                {% if vid.source == 'rm_assisted' and vid.video_url %}
+                                    <button onclick="openModal('modal-video-rm-{{ prop.id }}')" class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-play-circle"></i> Play</button>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
 
-        <td class="text-center">{{ prop.existing_tenants|title }}</td>
+                        <td style="font-weight:bold;">{{ prop.id|default:"—" }}</td>
+                        
+                        <!-- Category Fields -->
+                        <td>{{ prop.listing_type|default:"—" }}</td>
+                        <td>{{ prop.category|default:"—" }}</td>
 
-        <td style="max-width:120px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.tenant_details }}">{{ prop.tenant_details|default:"—" }}</td>
+                        <!-- Listed By Section -->
+                        <td>{{ prop.listed_by_type|default:"—" }}</td>
+                        <td>{{ prop.assigned_to|default:"—" }}</td>
+                        <td>{{ prop.listed_by_id|default:"—" }}</td>
+                        <td>{{ prop.listed_by_name|default:"—" }}</td>
+                        <td>{{ prop.listed_by_email|default:"—" }}</td>
+                        <td>{{ prop.listed_by_contact|default:"—" }}</td>
+                        <td>{{ prop.listed_by_role|default:"—" }}</td>
 
-        <td class="text-center">
-            {% if prop.any_legal_dispute == 'yes' or prop.any_legal_dispute == 'Yes' %}
-                <span class="badge bg-warning text-dark">Disputed</span>
-            {% else %}
-                Clear
-            {% endif %}
-        </td>
+                        <!-- Basic Information Section -->
+                        <td style="font-weight:600;color:#0f172a;">{{ prop.property_title|default:"—" }}</td>
+                        <td>{{ prop.property_type|default:"—" }}</td>
+                        <td>{{ prop.property_category|default:"—" }}</td>
+                        <td>{{ prop.property_no|default:"—" }}</td>
+                        <td>{{ prop.occupancy_status|default:"—" }}</td>
+                        <td>{{ prop.zone_type|default:"—" }}</td>
+                        <td>{{ prop.location_hub|default:"—" }}</td>
+                        <td>{{ prop.property_condition|default:"—" }}</td>
+                        <td>{{ prop.property_age|default:"—" }}</td>
+                        <td>{{ prop.furnishing_status|default:"—" }}</td>
+                        <td>{{ prop.facing_direction|default:"—" }}</td>
 
-        <td style="max-width:120px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.dispute_details }}">{{ prop.dispute_details|default:"—" }}</td>
+                        <!-- Area Measurements Section -->
+                        <td>{{ prop.super_builtup_area|default:"—" }}</td>
+                        <td>{{ prop.builtup_area|default:"—" }}</td>
+                        <td>{{ prop.carpet_area|default:"—" }}</td>
+                        <td>{{ prop.plot_area|default:"—" }}</td>
 
-        <td class="text-center">{{ prop.government_tax_dues|title }}</td>
+                        <!-- Commercial Specifications Section -->
+                        <td>{{ prop.no_staircases|default:"0" }}</td>
+                        <td>{{ prop.passenger_lifts|default:"0" }}</td>
+                        <td>{{ prop.service_lifts|default:"0" }}</td>
+                        <td>{{ prop.num_cabins|default:"0" }}</td>
+                        <td>{{ prop.meeting_rooms|default:"0" }}</td>
+                        <td>{{ prop.min_seats|default:"0" }}</td>
+                        <td>{{ prop.max_seats|default:"0" }}</td>
+                        <td>{{ prop.private_parking|default:"0" }}</td>
+                        <td>{{ prop.public_parking|default:"0" }}</td>
+                        
 
-        <td class="text-end">{% if prop.pending_tax_amount %}&#8377;{{ prop.pending_tax_amount|floatformat:0 }}{% else %}—{% endif %}</td>
+                        <!-- Ownership and Legal Details Section -->
+                        <td>{{ prop.no_of_owners|default:"—" }}</td>
+                        <td>{{ prop.ownership_status|default:"—" }}</td>
+                        <td>{{ prop.ownership_document_type|default:"—" }}</td>
+                        <td>{{ prop.title_clarity_status|default:"—" }}</td>
+                        <td>{{ prop.encumbrance_status|default:"—" }}</td>
+                        <td>{% if prop.property_loan == 'yes' %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+                        <td>{% if prop.loan_amount %}₹{{ prop.loan_amount }}{% else %}—{% endif %}</td>
+                        <td>{% if prop.existing_tenants == 'yes' %}Yes{% else %}No{% endif %}</td>
+                        <td>
+                            <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.tenant_details }}">{{ prop.tenant_details|default:"—" }}</div>
+                        </td>
+                        <td>{% if prop.any_legal_dispute == 'yes' %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+                        <td>
+                            <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.dispute_details }}">{{ prop.dispute_details|default:"—" }}</div>
+                        </td>
+                        <td>{% if prop.government_tax == 'yes' %}<span class="badge bg-warning text-dark">Pending</span>{% else %}<span class="badge bg-success">Paid</span>{% endif %}</td>
+                        <td>{% if prop.pending_tax_amount %}₹{{ prop.pending_tax_amount }}{% else %}—{% endif %}</td>
+                        <td>{{ prop.fire_safety_noc|capfirst|default:"—" }}</td>
+                        <td>
+                            <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.sanctioning_authority }}">{{ prop.sanctioning_authority|default:"—" }}</div>
+                        </td>
 
-        <td class="text-center">{{ prop.fire_safety_noc_available|title|default:"—" }}</td>
+                        <!-- Pricing Details Section -->
+                        <td style="font-weight:700;color:#16a34a;">₹{{ prop.selling_price|floatformat:0|default:"0" }}</td>
+                        <td>{% if prop.price_per_sqft %}₹{{ prop.price_per_sqft }}{% else %}—{% endif %}</td>
+                        <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                        <td>{% if prop.manual_brokerage %}₹{{ prop.manual_brokerage }}{% else %}—{% endif %}</td>
 
-        <td class="text-center">
-            {% if prop.brokerage == 'yes' or prop.brokerage == 'Yes' %}
-                <span class="badge bg-success">Yes</span>
-            {% else %}
-                <span class="badge bg-danger">No</span>
-            {% endif %}
-        </td>
+                        <!-- Amenities and Nearby Facilities Section -->
+                        <td>
+                            {% if prop.nearby_facilities_list %}
+                                {% for f in prop.nearby_facilities_list %}
+                                    <span class="badge bg-primary" style="margin: 1px;">{{ f }}</span>
+                                {% endfor %}
+                            {% elif prop.nearby_facilities %}
+                                <span class="badge bg-primary">{{ prop.nearby_facilities }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if prop.amenities_list %}
+                                {% for a in prop.amenities_list %}
+                                    <span class="badge bg-success" style="margin: 1px;">{{ a }}</span>
+                                {% endfor %}
+                            {% elif prop.amenities %}
+                                <span class="badge bg-success">{{ prop.amenities }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.property_summary|striptags }}">{{ prop.property_summary|striptags|default:"—" }}</div>
+                        </td>
+                        <td>
+                            <div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.property_description|striptags }}">{{ prop.property_description|striptags|default:"—" }}</div>
+                        </td>
+                        <td>
+                            <div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.user_description|striptags }}">{{ prop.user_description|striptags|default:"—" }}</div>
+                        </td>
 
-        <td>{{ prop.brokerage_percentage}}</td>
-        <td>{{prop.manual_brokerage|default:"—" }}</td>
+                        <!-- Address Details Section -->
+                        <td>{{ prop.city|default:"—" }}</td>
+                        <td>{{ prop.locality|default:"—" }}</td>
+                        <td>{{ prop.building_name|default:"—" }}</td>
+                        <td>
+                            <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.address }}">{{ prop.address|default:"—" }}</div>
+                        </td>
+                        <td>{{ prop.pincode|default:"—" }}</td>
+                        <td>{{ prop.property_landmark|default:"—" }}</td>
+                        <td>{{ prop.state|default:"—" }}</td>
+                        <td>
+                            {% if prop.google_maps_link %}
+                                <a href="{{ prop.google_maps_link }}" target="_blank" class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-map-marker-alt"></i> Map</a>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ prop.latitude|default:"—" }}</td>
+                        <td>{{ prop.longitude|default:"—" }}</td>
 
-        <td style="font-weight:bold; color:#10b981;">&#8377;{{ prop.expected_price|floatformat:0 }}</td>
+                        <!-- Property Images Docs and Videos Sections -->
+                        <td>
+                            {% if prop.floor_plan %}
+                            <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn btn-sm btn-outline-secondary" style="padding: 2px 8px; font-size: 11px;">View Plan</a>
+                            {% else %}—{% endif %}
+                        </td>
+                        
+                       
+                        <td>{% if prop.listed_elsewhere == 'Yes' %}<span class="badge bg-info">Yes</span>{% else %}No{% endif %}</td>
+                        <td>{{ prop.portal_name|default:"—" }}</td>
 
-        <td style="color:#0284c7; font-weight:600;">&#8377;{{ prop.price_per_sqft|floatformat:2|default:"—" }}</td>
+                        <!-- Listing Uploaded By Section -->
+                        <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                        <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                        <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                        <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                        <td>{{ prop.upload_file_name|default:"—" }}</td>
 
-        <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.property_description }}">{{ prop.property_description|safe|striptags }}</td>
+                        <!-- Timestamp and other details section -->
+                        
+                        <td>{{ prop.property_unique_key|default:"—" }}</td>
+                        <td>{{ prop.duplicate_count|default:"0" }}</td>
+                        <td>{{ prop.duplicate_group_id|default:"—" }}</td>
+                        <td>{% if prop.is_deleted %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+                        <td>{% if prop.is_duplicate %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+                        <td>{{ prop.deleted_at|date:"d M Y H:i"|default:"—" }}</td>
+                        <td>{{ prop.deleted_by|default:"—" }}</td>
+                        <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
 
-        <td style="max-width:120px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.sanctioning_authority }}">{{ prop.sanctioning_authority }}</td>
-
-        <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.nearby_facilities }}">{{ prop.nearby_facilities|default:"—" }}</td>
-
-        <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.amenities }}">{{ prop.amenities|default:"—" }}</td>
-
-        <td>{{ prop.city }}</td>
-
-        <td>{{ prop.area_locality }}</td>
-
-        <td>{{ prop.building_name|default:"—" }}</td>
-
-        <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis;" title="{{ prop.property_address }}">{{ prop.property_address }}</td>
-
-        <td>{{ prop.owner_name }}</td>
-
-        <td>{{ prop.owner_contact }}</td>
-
-        <td>{{ prop.owner_email }}</td>
-
-        <td><span class="badge bg-info text-dark">{{ prop.uploaded_by_role|default:"Owner" }}</span></td>
-
-        <td><span class="text-uppercase" style="font-size:11px; font-weight:600;">{{ prop.residential_status }}</span></td>
-
-        <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-
-        <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-
-        <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-
-        <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-
-        <td><span class="text-uppercase" style="font-size:11px;">{{ prop.residential_status|default:"—" }}</span></td>
-
-     
-    <td>
-    {% if prop.upload_file_name %}
-        <span class="text-success"
-              title="{{ prop.upload_file_name }}">
-            <i class="fas fa-file-excel"></i>
-            {{ prop.upload_file_name }}
-        </span>
-    
-    {% else %}
-        <span class="text-primary">
-            <i class="fas fa-keyboard"></i>
-            Web Listing Ui Form
-        </span>
-    {% endif %}
-</td>
-        <td>{{ prop.created_at|date:"d M Y, h:i A" }}</td>
-
-        <td>{{ prop.updated_at|date:"d M Y, h:i A" }}</td>
-
-       <td style="position: sticky; right: 0; background: white; z-index: 1; box-shadow: -2px 0 5px rgba(0,0,0,0.05);">
-    <div style="display:flex; gap:6px; justify-content:center;">
-        <a href="{% url 'commercial_resale_view' prop.id %}" class="btn-action btn-view" style="width:30px; height:30px; border-radius:6px; border:none; background:#f0f4ff; color:#667eea; display:flex; align-items:center; justify-content:center; text-decoration:none;" title="View">
-            <i class="fas fa-eye"></i>
-        </a>
-        <a href="{% url 'commercial_resale_edit' prop.id %}" class="btn-action btn-edit" style="width:30px; height:30px; border-radius:6px; border:none; background:#e6fffa; color:#10b981; display:flex; align-items:center; justify-content:center; text-decoration:none;" title="Edit">
-            <i class="fas fa-edit"></i>
-        </a>
-        
-        <button class="btn-action btn-toggle" style="width:30px; height:30px; border-radius:6px; border:none; background:#fff7ed; color:#f97316;" title="Toggle Status" onclick="Toggle_Property('{{ prop.id }}', this)">
-            <i class="fas fa-power-off"></i>
-        </button>
-        
-        <button class="btn-action btn-delete" style="width:30px; height:30px; border-radius:6px; border:none; background:#fff5f5; color:#ef4444;" title="Delete" onclick="Delete_Property('{{ prop.id }}')">
-            <i class="fas fa-trash"></i>
-        </button>
+                        <!-- Actions -->
+                        <td style="position:sticky;right:0;background:white;z-index:1;">
+                            <div class="action-buttons">
+                                <a href="{% url "commercial_resale_rm_view" prop.id %}" class="btn-action btn-view" title="View Property">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url "commercial_resale_rm_update" prop.id %}" class="btn-action btn-edit" title="Edit Property">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn-action btn-delete" title="Delete Property" onclick="Delete_Property('{{ prop.id }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="85">
+                            <div class="empty-state" style="text-align:center; padding: 40px;">
+                                <i class="fas fa-building" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 10px;"></i>
+                                <p style="color: #64748b; font-size: 1.1rem;">No resale commercial properties found matching your criteria.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</td>
-    </tr>
+</div>
+
+<!-- ============================================== -->
+<!-- PROPERTY MEDIA MODALS (SEPARATED)              -->
+<!-- ============================================== -->
+{% for prop in properties %} 
+
+    <!-- 1. IMAGES MODAL -->
+    <div id="modal-images-{{ prop.id }}" class="property-image-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('modal-images-{{ prop.id }}')">&times;</span>
+            <h3 style="margin-top: 0; margin-bottom: 15px; text-align: center; font-size:20px; font-weight:800; color:#1e293b;">
+                Property Images — {{ prop.property_title }}
+            </h3>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                {% if prop.images.all %}
+                    {% for img in prop.images.all %}
+                        <div style="text-align:center;">
+                            <img src="{{ img.image.url }}" style="width: 220px; height: 160px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                            {% if img.category %}
+                                <div style="font-size:11px; margin-top:6px; font-weight:800; color:#475569; text-transform:uppercase;">
+                                    {{ img.category }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; width: 100%; color:#94a3b8; font-style: italic;">No images available for this property.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. VIDEO MODALS -->
+    {% for vid in prop.video.all %}
+        
+        <!-- Manual Upload Video Modal -->
+        {% if vid.source == 'uploaded' and vid.video %}
+        <div id="modal-video-upload-{{ prop.id }}" class="property-image-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close-modal" onclick="closeModal('modal-video-upload-{{ prop.id }}')">&times;</span>
+                <h3 style="margin-top: 0; margin-bottom: 15px; text-align: center; font-size:18px; font-weight:700; color:#1e293b;">
+                    <i class="fas fa-upload text-success"></i> Manual Upload Video
+                </h3>
+                <div style="text-align:center; width: 100%;">
+                    <video controls style="width: 100%; border-radius: 10px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); background: #000;">
+                        <source src="{{ vid.video.url }}" type="video/mp4">
+                        Your browser does not support HTML video.
+                    </video>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Auto-Generated Video Modal -->
+        {% elif vid.source == 'auto' and vid.video %}
+        <div id="modal-video-auto-{{ prop.id }}" class="property-image-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close-modal" onclick="closeModal('modal-video-auto-{{ prop.id }}')">&times;</span>
+                <h3 style="margin-top: 0; margin-bottom: 15px; text-align: center; font-size:18px; font-weight:700; color:#1e293b;">
+                    <i class="fas fa-magic text-primary"></i> Auto-Generated Slideshow
+                </h3>
+                <div style="text-align:center; width: 100%;">
+                    <video controls style="width: 100%; border-radius: 10px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); background: #000;">
+                        <source src="{{ vid.video.url }}" type="video/mp4">
+                        Your browser does not support HTML video.
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <!-- RM Link Video Modal -->
+        {% elif vid.source == 'rm_assisted' and vid.video_url %}
+        <div id="modal-video-rm-{{ prop.id }}" class="property-image-modal">
+            <div class="modal-content" style="max-width: 700px;">
+                <span class="close-modal" onclick="closeModal('modal-video-rm-{{ prop.id }}')">&times;</span>
+                <h3 style="margin-top: 0; margin-bottom: 15px; text-align: center; font-size:18px; font-weight:700; color:#1e293b;">
+                    <i class="fas fa-link text-info"></i> RM Assisted Video Link
+                </h3>
+                <div style="text-align:center; width: 100%;">
+                    <div class="list-rm-video-preview" data-url="{{ vid.video_url }}" style="width:100%; aspect-ratio:16/9; background:#f8fafc; border-radius:10px; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: 0 6px 12px rgba(0,0,0,0.1);">
+                        <div style="padding: 20px;">
+                            <i class="fas fa-external-link-alt" style="font-size: 2.5rem; color: #3b82f6; margin-bottom: 12px;"></i>
+                            <p style="margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #1e293b;">External Video Link</p>
+                            <a href="{{ vid.video_url }}" target="_blank" class="btn btn-primary btn-sm" style="text-transform: none; font-weight:600;">Open Video Link</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     {% endfor %}
-</tbody>
-</table>
-</div>
+{% endfor %}
+
+<!-- EXCEL IMPORT MODAL -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-excel" style="margin-right:8px;"></i> Upload & Import Resale Data Via Excel
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1; font-size:22px; background:none; border:none; line-height:1;">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Sample Download Banner -->
+                <div style="background:#EEF2FF; border:1px solid #C7D2FE; border-radius:8px; padding:12px 16px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                    <div>
+                        <p style="margin:0; font-size:13px; font-weight:600; color:#4338CA;">
+                            <i class="fas fa-info-circle"></i> Download sample layout template
+                        </p>
+                        <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">
+                            Ensure column headers match before importing data.
+                        </p>
+                    </div>
+                    <a href="{% url 'download_commercial_sample_excel' %}" style="padding:7px 16px; background:#4F46E5; color:white; border-radius:6px; text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
+                        <i class="fas fa-download"></i> Sample Excel
+                    </a>
+                </div>
+
+                <!-- Dropzone Box -->
+                <div class="form-group">
+                    <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">
+                       Upload Excel Workbook <span style="color:red;">*</span>
+                    </label>
+                    
+                    <div class="dropzone" id="dropzoneBox" onclick="document.getElementById('resale_file').click()" style="border: 2px dashed #667eea; border-radius: 12px; padding: 25px 20px; text-align: center; cursor: pointer; background: #f8fafc; transition: all 0.3s ease;">
+                        <div id="dropzoneDefaultState">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem; color:#667eea; display:block; margin-bottom:10px;"></i>
+                            <p style="margin:0; font-size:14px; font-weight:600; color:#374151;">Click to browse or drag & drop</p>
+                            <p style="margin:4px 0 0; font-size:12px; color:#9CA3AF;">Supported format: <strong>.xlsx</strong></p>
+                        </div>
+                        
+                        <div id="dropzoneFileSelectedState" style="display: none;">
+                            <i class="fas fa-file-excel" style="font-size:2.5rem; color:#10b981; display:block; margin-bottom:10px;"></i>
+                            <p id="selectedFileNameText" style="margin:0; font-size:14px; font-weight:700; color:#065f46; word-break: break-all;"></p>
+                            <p id="selectedFileSizeText" style="margin:4px 0 0; font-size:12px; color:#047857;"></p>
+                            <span style="display:inline-block; margin-top:10px; font-size:12px; color:#4f46e5; text-decoration:underline; font-weight:600;">Click to change file</span>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="resale_file" name="resale_file" accept=".xlsx" style="display:none;" onchange="checkSelectedFileSize(this)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:6px; font-size:13px;">Close</button>
+                <button type="button" class="btn btn-primary" style="padding:8px 24px; background:var(--primary-gradient); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600;" onclick="Import_Resale_Data(this)">
+                    <i class="fas fa-upload"></i> Import Data
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true" style="z-index: 10000;">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
-            <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
-                <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
-                    <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete
+<!-- ADVANCED BULK DELETE MODAL -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--danger-gradient);">
+                <h5 class="modal-title">
+                    <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete (Resale)
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1;">&times;</button>
             </div>
-            <div class="modal-body" style="padding:24px;">
+            <div class="modal-body">
                 <form id="bulkDeleteForm">
-                    <div class="form-group mb-3">
+                    <div class="form-group">
                         <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
-                        <select class="form-select mt-1" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
+                        <select class="form-control" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
                             <option value="">-- Select Option --</option>
                             <option value="current_page">Delete Current Page Data</option>
                             <option value="date_range">Delete by Date Range</option>
@@ -721,37 +1179,35 @@ function triggerDataExport(exportFormat) {
                     <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
                         <div style="flex: 1;">
                             <label style="font-size:12px;">From Date</label>
-                            <input type="date" id="fromDate" class="form-control mt-1">
+                            <input type="date" id="fromDate" name="from_date" class="form-control">
                         </div>
                         <div style="flex: 1;">
                             <label style="font-size:12px;">To Date</label>
-                            <input type="date" id="toDate" class="form-control mt-1">
+                            <input type="date" id="toDate" name="to_date" class="form-control">
                         </div>
                     </div>
 
                     <div id="uploaderInput" style="display:none; margin-top: 10px;">
                         <label style="font-size:12px;">Uploaded By (Name/Email/Role)</label>
-                        <input type="text" id="uploaderText" class="form-control mt-1" placeholder="e.g. Admin or admin@example.com">
+                        <input type="text" id="uploaderText" name="uploader_text" class="form-control" placeholder="e.g. Admin or admin@example.com">
                     </div>
 
                     <div id="fileInput" style="display:none; margin-top: 10px;">
                         <label style="font-size:12px;">Select Uploaded Excel File</label>
-                      <select id="selectedFile" class="form-select mt-1" style="font-size:13px;">
-    <option value="">-- Select File --</option>
-    
-    {% for file in uploaded_files %}
-        <option value="{{ file }}">{{ file }}</option>
-    {% empty %}
-        <option value="" disabled>No files found</option>
-    {% endfor %}
-    
-</select>
+                        <select id="selectedFile" name="selected_file" class="form-control" style="font-size:13px;">
+                            <option value="">-- Select File --</option>
+                            {% for file in uploaded_files %}
+                                <option value="{{ file }}">{{ file }}</option>
+                            {% empty %}
+                                <option value="" disabled>No files recorded in database</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="executeBulkDelete()">
                     <i class="fas fa-exclamation-triangle"></i> Confirm Delete
                 </button>
             </div>
@@ -759,663 +1215,461 @@ function triggerDataExport(exportFormat) {
     </div>
 </div>
 
-
-
-<div class="modal fade" id="importExcelModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-file-excel" style="color:#16a34a;"></i>
-                    Import Commercial Properties
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">
-                        Upload Excel File (.xlsx) <span style="color:red;">*</span>
-                    </label>
-                    <input type="file" class="form-control" id="commercial_excel_file" name="commercial_excel_file" accept=".xlsx" onchange="checkSelectedFileSize(this)">
-                </div>
-                <div class="mt-3">
-                    <a href="{% url 'download_commercial_sample_excel' %}" style="font-size:12px; color:#667eea; text-decoration:none;">
-                        <i class="fas fa-download"></i> Download Sample Template
-                    </a>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="importUploadBtn" style="background-color:#667eea; border:none;" onclick="Import_Commercial_Data(this)">
-                    <i class="fas fa-upload"></i> Upload
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
-$(document).ready(function () {
-    $('#commercialTable').DataTable({
-        "scrollX": true,
-        "scrollY": "500px",
-        "scrollCollapse": true,
-        "paging": true,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": false,
-
-        // ✅ ADD BUTTONS HERE
-        "dom": 'Bfrtip',
-
-        "buttons": [
-            {
-                extend: 'copy',
-                text: 'Copy'
-            },
-            {
-                extend: 'csv',
-                text: 'CSV'
-            },
-            {
-                extend: 'excel',
-                text: 'Excel'
-            },
-            {
-                extend: 'pdf',
-                text: 'PDF',
-                orientation: 'landscape',   // better for wide tables
-                pageSize: 'A2'              // important for many columns
-            },
-            {
-                extend: 'print',
-                text: 'Print'
-            }
-        ],
-
-        "language": {
-            "search": "🔍 Search:",
-            "searchPlaceholder": "Type to search..."
-        }
-    });
-});
-</script>
-
-
-<!-- Include SweetAlert2 if you haven't already -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-
-$("#Resale").addClass("active");
-
-function Delete_Property(propertyId) {
-    // 1. Show SweetAlert confirmation dialog
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this! All associated images will also be deleted.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444', // Matches your button's red color
-        cancelButtonColor: '#94a3b8',
-        confirmButtonText: '<i class="fas fa-trash"></i> Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            
-            // 2. Show loading state
-            Swal.fire({ 
-                title: 'Deleting...', 
-                allowOutsideClick: false, 
-                didOpen: () => { Swal.showLoading(); } 
-            });
-
-            // 3. Get CSRF Token
-            // This looks for a hidden input field named csrfmiddlewaretoken
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
-
-            // 4. Determine the URL
-            // Make sure this matches your urls.py path exactly!
-            const deleteUrl = `/Admin_App/commercial/delete/${propertyId}/`;
-
-            // 5. Send the AJAX request to Django
-            fetch(deleteUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    // Success alert
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted!',
-                        text: 'Property has been removed.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
-                    // Smoothly remove the row from the table
-                    // Note: Ensure your <tr> tags have an id like id="row-{{ prop.id }}"
-                    const row = document.getElementById(`row-${propertyId}`);
-                    if (row) {
-                        row.style.transition = "opacity 0.4s ease, transform 0.4s ease";
-                        row.style.opacity = "0";
-                        row.style.transform = "translateX(-20px)";
-                        setTimeout(() => row.remove(), 400);
-                    } else {
-                        // Fallback: reload page if row ID is missing
-                        setTimeout(() => window.location.reload(), 1500); 
-                    }
-                } else {
-                    Swal.fire('Error!', data.message || 'Could not delete property.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error("Delete error:", error);
-                Swal.fire('Error!', `Connection failed: ${error.message}`, 'error');
-            });
-        }
-    });
-}
-</script>
-
-
-
-<script>
-function openGallery(element) {
-    const rawData = element.getAttribute('data-images');
-    const propertyTitle = element.getAttribute('data-title') || 'Property Gallery';
-    
-    if (!rawData) {
-        Swal.fire('No Images', 'No images are available for this property.', 'info');
-        return;
-    }
-
-    const images = rawData.split('|');
-    
-    // Create HTML for a simple image slider
-    let htmlContent = `
-        <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner" style="border-radius: 12px; overflow: hidden;">
-    `;
-    
-    images.forEach((imgUrl, index) => {
-        let activeClass = index === 0 ? 'active' : '';
-        htmlContent += `
-            <div class="carousel-item ${activeClass}">
-                <img src="${imgUrl}" class="d-block w-100" style="max-height: 60vh; object-fit: contain; background: #000;" alt="Property Image ${index + 1}">
-                <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.6); border-radius: 8px; padding: 5px; bottom: 10px;">
-                    <span style="color: white; font-size: 14px;">Image ${index + 1} of ${images.length}</span>
-                </div>
-            </div>
-        `;
-    });
-    
-    htmlContent += `
-            </div>
-            ${images.length > 1 ? `
-            <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.5); border-radius: 50%; padding: 20px;"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.5); border-radius: 50%; padding: 20px;"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-            ` : ''}
-        </div>
-    `;
-
-    // Trigger SweetAlert Modal with the Gallery
-    Swal.fire({
-        title: `<h5 style="color:#2c3e50; font-weight:700;"><i class="fas fa-images"></i> ${propertyTitle}</h5>`,
-        html: htmlContent,
-        width: '800px',
-        showCloseButton: true,
-        showConfirmButton: false,
-        padding: '1em',
-        background: '#f8f9fa'
-    });
-}
-</script>
-<script>
+    // Activate Navigation Sidebar Link
     $("#Resale").addClass("active");
 
-    // ── DataTable ──────────────────
-    $(document).ready(function () {
-        $('#commercialTable').DataTable({
-            responsive: true,
-            pageLength: 10,
-            lengthMenu: [[5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, 'All']],
-            order: [[0, 'asc']],
-            dom: '<"row mb-3"<"col-sm-6"l><"col-sm-6 text-end"B>>' +
-                 '<"row"<"col-sm-12"tr>>' +
-                 '<"row mt-2"<"col-sm-5"i><"col-sm-7"p>>',
-           
-            language: {
-                searchPlaceholder: 'Search properties...',
-                lengthMenu:  'Show _MENU_ entries',
-                info:        'Showing _START_ to _END_ of _TOTAL_ properties',
-                infoEmpty:   'No properties found',
-                emptyTable:  'No commercial properties added yet',
-                paginate: { previous: '&laquo; Prev', next: 'Next &raquo;' }
+    // Chart Data Parsing
+    const propTypeDataObj = {{ property_type_counts|safe|default:"{}" }};
+    const bhkDataObj      = {{ bhk_counts|safe|default:"{}" }};
+    const zoneDataObj     = {{ zone_counts|safe|default:"{}" }};
+
+    const COLORS = ['#667eea','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1'];
+
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.size = 11;
+
+    // 1. Property Type Pie
+    if (Object.keys(propTypeDataObj).length) {
+        new Chart(document.getElementById('propertyTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(propTypeDataObj).map(k => k.toUpperCase()),
+                datasets: [{ data: Object.values(propTypeDataObj), backgroundColor: COLORS }]
             },
-            columnDefs: [
-                { orderable: false, targets: [1, 47] }
-            ]
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '55%' }
         });
-    });
+    }
 
-    // ── Charts Data from Django ────────────────────────────────────────────
-    const pieCtx = document.getElementById('propertyPieChart').getContext('2d');
-    new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: {{ chart_type_labels|safe }},
-            datasets: [{
-                data: {{ chart_type_data|safe }},
-                backgroundColor: [
-                    'rgba(102,126,234,0.8)', 'rgba(245,87,108,0.8)',
-                    'rgba(79,172,254,0.8)',  'rgba(67,233,123,0.8)',
-                    'rgba(251,191,36,0.8)'
-                ],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font: { size: 11 } } } }
-        }
-    });
+    // 2. BHK Distribution Bar
+    if (Object.keys(bhkDataObj).length) {
+        new Chart(document.getElementById('bhkChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(bhkDataObj).map(k => k.toUpperCase()),
+                datasets: [{ label: 'Units', data: Object.values(bhkDataObj), backgroundColor: '#667eea', borderRadius: 6 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
 
-    const barCtx = document.getElementById('rentalIncomeChart').getContext('2d');
-    new Chart(barCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-            datasets: [{
-                label: 'Properties Added',
-                data: {{ chart_monthly_data|safe }},
-                backgroundColor: 'rgba(102,126,234,0.7)',
-                borderColor: 'rgba(102,126,234,1)',
-                borderWidth: 2, borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { stepSize: 1 } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-
-    const doughnutCtx = document.getElementById('occupancyDoughnutChart').getContext('2d');
-    new Chart(doughnutCtx, {
+    // 3. Furnishing Status Doughnut
+    new Chart(document.getElementById('furnishingChart'), {
         type: 'doughnut',
         data: {
-            labels: ['Active', 'Inactive'],
-            datasets: [{
-                data: [{{ active_properties }}, {{ inactive_properties }}],
-                backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(239,68,68,0.8)'],
-                borderWidth: 2
+            labels: ['Fully Furnished', 'Semi Furnished', 'Unfurnished'],
+            datasets: [{ 
+                data: [
+                    {{ fully_furnished|default:0 }}, 
+                    {{ semi_furnished|default:0 }}, 
+                    {{ unfurnished|default:0 }}
+                ], 
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] 
             }]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font: { size: 11 } } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { position: 'bottom' } }, 
+            cutout: '55%' 
         }
     });
 
-    const rentCtx = document.getElementById('rentRangeChart').getContext('2d');
-    new Chart(rentCtx, {
-        type: 'bar',
-        data: {
-            labels: {{ chart_zone_labels|safe }},
-            datasets: [{
-                label: 'Properties',
-                data: {{ chart_zone_data|safe }},
-                backgroundColor: [
-                    'rgba(102,126,234,0.7)','rgba(79,172,254,0.7)',
-                    'rgba(67,233,123,0.7)', 'rgba(250,112,154,0.7)'
-                ],
-                borderWidth: 2, borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { stepSize: 1 } },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-
-    // ── Action Buttons ────────────────────────────────────
-    function View_Property(prop_id) {
-        window.location.href = '/commercial-property/view/' + prop_id + '/';
-    }
-
-    function Edit_Property(prop_id) {
-        window.location.href = '/commercial-property/edit/' + prop_id + '/';
-    }
-
-    function Toggle_Property(prop_id, btn) {
-        Swal.fire({
-            title: 'Toggle Status?',
-            text: 'Change the active/inactive status of this property?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#667eea',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Toggle!',
-            cancelButtonText: 'Cancel',
-            allowOutsideClick: false,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: 'POST',
-                    url: '{% url "toggle_commercial_property" %}', // Make sure this URL exists in your urls.py!
-                    data: {
-                        'prop_id': prop_id,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    },
-                    success: function (response) {
-                        if (response.status == '1') {
-                            Swal.fire({
-                                icon: 'success', title: response.msg,
-                                confirmButtonColor: '#667eea', allowOutsideClick: false,
-                            }).then(() => { location.reload(); });
-                        } else {
-                            Swal.fire({ icon: 'error', title: response.msg, confirmButtonColor: '#dc3545' });
-                        }
-                    },
-                    error: function (xhr) {
-                        Swal.fire({ icon: 'error', title: 'Error ' + xhr.status, text: 'Could not connect. Try again.', confirmButtonColor: '#dc3545' });
-                    }
-                });
-            }
-        });
-    }
-
-    function Delete_Property(prop_id) {
-        Swal.fire({
-            title: 'Delete Property?',
-            text: 'This action cannot be undone!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Delete!',
-            cancelButtonText: 'Cancel',
-            allowOutsideClick: false,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: 'POST',
-                    url: '{% url "delete_commercial_property" %}', // Make sure this URL exists in your urls.py!
-                    data: {
-                        'prop_id': prop_id,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    },
-                    success: function (response) {
-                        if (response.status == '1') {
-                            Swal.fire({
-                                icon: 'success', title: response.msg,
-                                confirmButtonColor: '#667eea', allowOutsideClick: false,
-                            }).then(() => { location.reload(); });
-                        } else {
-                            Swal.fire({ icon: 'error', title: response.msg, confirmButtonColor: '#dc3545' });
-                        }
-                    },
-                    error: function (xhr) {
-                        Swal.fire({ icon: 'error', title: 'Error ' + xhr.status, text: 'Could not connect. Try again.', confirmButtonColor: '#dc3545' });
-                    }
-                });
-            }
-        });
-    }
-
-    // ── Excel Import logic ──────────────────────────────────────
-    function checkSelectedFileSize(_this) {
-        if (!_this.files || _this.files.length === 0) return;
-        var ext = _this.files[0].name.split('.').pop().toLowerCase();
-        if (ext !== 'xlsx') {
-            Swal.fire({ icon: 'warning', title: 'Wrong File Type', text: 'Please upload only .xlsx files.' });
-            _this.value = '';
-        }
-    }
-
-    function Import_Commercial_Data(_this) {
-        var fileInput = document.getElementById('commercial_excel_file');
-        if (!fileInput || fileInput.files.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'No File Selected', text: 'Please select an Excel file first.' });
-            return;
-        }
-
-        var fd = new FormData();
-        fd.append('commercial_excel_file', fileInput.files[0]);
-
-        var originalText = _this.innerHTML;
-        $(_this).prop('disabled', true);
-        _this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Uploading...';
-
-        Swal.fire({
-            title: 'Importing...',
-            text: 'Please wait while we import your properties.',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        $.ajax({
-            method: 'POST',
-            url: "{% url 'import_commercial_data' %}",
-            processData: false,
-            contentType: false,
-            data: fd,
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            success: function (response) {
-                $(_this).prop('disabled', false);
-                _this.innerHTML = originalText;
-
-                if (response.status == '1') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Import Successful!',
-                        text: response.msg,
-                        confirmButtonColor: '#667eea',
-                        allowOutsideClick: false,
-                    }).then(() => {
-                        var modal = bootstrap.Modal.getInstance(document.getElementById('importExcelModal'));
-                        if (modal) modal.hide();
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Import Failed',
-                        text: response.msg,
-                        confirmButtonColor: '#dc3545',
-                        allowOutsideClick: false,
-                    });
-                }
+    // 4. Zone Distribution Bar (Matches your form values: commercial, industrial, mixed_use, etc.)
+    if (Object.keys(zoneDataObj).length) {
+        new Chart(document.getElementById('zoneChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(zoneDataObj).map(k => k ? k.replace(/_/g, ' ').toUpperCase() : 'UNKNOWN'),
+                datasets: [{ 
+                    label: 'Listings', 
+                    data: Object.values(zoneDataObj), 
+                    backgroundColor: '#10b981', 
+                    borderRadius: 6 
+                }]
             },
-            error: function (xhr) {
-                $(_this).prop('disabled', false);
-                _this.innerHTML = originalText;
-                var errMsg = 'HTTP ' + xhr.status + ' — ' + (xhr.statusText || 'Unknown error.');
-                if (xhr.status === 403) errMsg = 'CSRF error (403). Refresh the page and try again.';
-                else if (xhr.status === 404) errMsg = 'URL not found (404). Check urls.py has import_commercial_data.';
-                else if (xhr.status === 500) errMsg = 'Server error (500). Check Django terminal logs.';
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } } 
+            }
+        });
+    }
 
-                Swal.fire({
-                    icon: 'error', title: 'Upload Error', text: errMsg, confirmButtonColor: '#dc3545',
+    // Debounced Live Search
+    let typingTimer;
+    const searchInput = document.getElementById('searchInput');
+    const form = document.getElementById('liveSearchForm');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => { form.submit(); }, 500);
+        });
+        searchInput.addEventListener('keydown', function () { clearTimeout(typingTimer); });
+    }
+
+    function clearFilterSelect(selectName) {
+        const select = form.querySelector(`select[name="${selectName}"]`);
+        if(select) { select.selectedIndex = 0; form.submit(); }
+    }
+
+    function clearFilterText() {
+        if(searchInput) { searchInput.value = ''; form.submit(); }
+    }
+
+    function clearOneDate(name) {
+        const el = document.getElementById(name === 'from_date' ? 'from_date' : 'to_date');
+        if(el) { el.value = ''; }
+        form.submit();
+    }
+
+    function validateDateSearch() {
+        const fromDate = document.getElementById('from_date').value;
+        const toDate = document.getElementById('to_date').value;
+        if (!fromDate && !toDate) {
+            alert("Please select at least a 'Start Date' or 'End Date' to filter.");
+            return false;
+        }
+        if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+            alert("Invalid Date Range: 'Start Date' cannot be after 'End Date'.");
+            return false;
+        }
+        return true; 
+    }
+
+    // Modal Handlers
+    function openModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden"; 
+        }
+    }
+
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto"; 
+            
+            var videos = modal.querySelectorAll('video');
+            videos.forEach(function(vid) {
+                vid.pause();
+            });
+
+            var iframes = modal.querySelectorAll('iframe');
+            iframes.forEach(function(iframe) {
+                var src = iframe.src;
+                iframe.src = src; 
+            });
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('property-image-modal')) {
+            event.target.style.display = "none";
+            document.body.style.overflow = "auto";
+            
+            var videos = event.target.querySelectorAll('video');
+            videos.forEach(function(vid) { vid.pause(); });
+
+            var iframes = event.target.querySelectorAll('iframe');
+            iframes.forEach(function(iframe) {
+                var src = iframe.src;
+                iframe.src = src;
+            });
+        }
+    }
+
+    // Convert RM Assisted Links to playable iframes inside List Modals
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.list-rm-video-preview').forEach(function(container) {
+            var url = container.getAttribute('data-url');
+            if (!url) return;
+            
+            if (url.includes('wa.me') || url.includes('whatsapp.com')) return; 
+
+            var iframeSrc = url;
+            var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+            
+            if (ytMatch) {
+                iframeSrc = 'https://www.youtube.com/embed/' + ytMatch[1];
+            } else {
+                var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+                if (instaMatch) {
+                    iframeSrc = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/';
+                } else if (url.includes('facebook.com') || url.includes('fb.watch')) {
+                    iframeSrc = 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=false';
+                }
+            }
+            
+            if(ytMatch || url.match(/instagram\.com/) || url.includes('facebook.com') || url.includes('fb.watch')){
+                container.innerHTML = '<iframe src="' + iframeSrc + '" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>';
+            }
+        });
+    });
+
+    // Single Property Delete Handler
+    function Delete_Property(prop_id) {
+        swal({
+            title: 'Are you sure?',
+            text: "This action will permanently delete this commercial resale property record!",
+            icon: 'warning',
+            buttons: ['Cancel', 'Yes, delete it!'],
+            dangerMode: true
+        }).then((isConfirmed) => {
+            if (isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_commercial_property' %}",
+                    data: { 
+                        'prop_id': prop_id, 
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            swal('Deleted!', response.message, 'success').then(() => {
+                                const row = document.getElementById(`row-${prop_id}`);
+                                if(row) {
+                                    row.remove();
+                                } else {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            swal('Error', response.message || 'Deletion failed', 'error');
+                        }
+                    },
+                    error: function (xhr) {
+                        let errorMsg = 'Server processing error occurred.';
+                        try {
+                            let jsonRes = JSON.parse(xhr.responseText);
+                            if (jsonRes.message) errorMsg = jsonRes.message;
+                        } catch(e) {}
+                        
+                        swal('Error', errorMsg, 'error');
+                    }
                 });
             }
         });
     }
 
+    // File Upload Verification
+    function checkSelectedFileSize(input) {
+        const defaultState = document.getElementById('dropzoneDefaultState');
+        const selectedState = document.getElementById('dropzoneFileSelectedState');
+        const fileNameText = document.getElementById('selectedFileNameText');
+        const fileSizeText = document.getElementById('selectedFileSizeText');
+        const dropzoneBox = document.getElementById('dropzoneBox');
 
-    function toggleDeleteInputs() {
-    const type = document.getElementById('deleteType').value;
-    document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
-    document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
-    document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
-}
+        if (input.files && input.files.length > 0) {
+            const file = input.files[0];
 
-function executeBulkDelete() {
-    const type = document.getElementById('deleteType').value;
-    if (!type) {
-        Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
+            if (!file.name.toLowerCase().endsWith('.xlsx')) {
+                swal('Invalid File', 'Please select a valid Excel (.xlsx) workbook file.', 'error');
+                input.value = ''; 
+                resetDropzone();
+                return;
+            }
+
+            let sizeFormatted = '';
+            if (file.size < 1024 * 1024) {
+                sizeFormatted = (file.size / 1024).toFixed(1) + ' KB';
+            } else {
+                sizeFormatted = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            fileNameText.textContent = file.name;
+            fileSizeText.textContent = `Size: ${sizeFormatted}`;
+            
+            defaultState.style.display = 'none';
+            selectedState.style.display = 'block';
+            dropzoneBox.style.background = '#ecfdf5';
+            dropzoneBox.style.borderColor = '#10b981';
+
+        } else {
+            resetDropzone();
+        }
+    }
+
+    function resetDropzone() {
+        const defaultState = document.getElementById('dropzoneDefaultState');
+        const selectedState = document.getElementById('dropzoneFileSelectedState');
+        const dropzoneBox = document.getElementById('dropzoneBox');
+
+        if (defaultState && selectedState && dropzoneBox) {
+            defaultState.style.display = 'block';
+            selectedState.style.display = 'none';
+            dropzoneBox.style.background = '#f8fafc';
+            dropzoneBox.style.borderColor = '#667eea';
+        }
+    }
+
+  
+
+    function Import_Resale_Data(_this) {
+    var resale_file = $("#resale_file")[0].files;
+    if (resale_file.length == 0) {
+        swal('Warning', 'Please select an Excel file to upload.', 'warning');
         return;
     }
+    
+    var fd = new FormData();
+    fd.append('excel_file', resale_file[0]);
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Importing...`);
 
-    let payload = { delete_type: type };
-
-    if (type === 'date_range') {
-        payload.from_date = document.getElementById('fromDate').value;
-        payload.to_date = document.getElementById('toDate').value;
-        if (!payload.from_date || !payload.to_date) {
-            Swal.fire('Warning', 'Please select both From and To dates.', 'warning');
-            return;
-        }
-    } else if (type === 'by_uploader') {
-        payload.uploader_text = document.getElementById('uploaderText').value;
-        if (!payload.uploader_text) {
-            Swal.fire('Warning', 'Please enter the uploader detail.', 'warning');
-            return;
-        }
-    } else if (type === 'by_file') {
-        payload.file_name = document.getElementById('selectedFile').value;
-        if (!payload.file_name) {
-            Swal.fire('Warning', 'Please select an Excel file from the list.', 'warning');
-            return;
-        }
-    } else if (type === 'current_page') {
-        // Fetch visible rows from the DataTable
-        const table = $('#commercialTable').DataTable();
-        const currentRows = table.rows({ page: 'current' }).nodes();
-        const ids = Array.from(currentRows).map(row => row.id.split('-')[1]);
-        
-        if (ids.length === 0) {
-            Swal.fire('Warning', 'No data on the current page to delete.', 'warning');
-            return;
-        }
-        payload.page_ids = ids;
-    }
-
-    Swal.fire({
-        title: 'Are you absolutely sure?',
-        text: "This action will move the selected properties to the Recycle Bin!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, delete them!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-
-            fetch("{% url 'commercial_resale_bulk_delete' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire('Deleted!', data.message, 'success').then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            })
-            .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
-        }
-    });
-}
-</script>
-
-<script>
-
-document.addEventListener("DOMContentLoaded", function() {
-    const filterForm = document.getElementById("filterEngineFormPipeline");
-
-    // 1. Instant Auto-Submit Handling for Dropdowns
-    document.querySelectorAll(".auto-submittable").forEach(elem => {
-        if (elem.tagName === "SELECT") {
-            elem.addEventListener("change", () => { filterForm.submit(); });
-        }
-    });
-
-    // 2. Strict Chronological Date Compliance Validation 
-    filterForm.addEventListener("submit", function(e) {
-        const startDate = document.getElementById("search_start_date").value;
-        const endDate = document.getElementById("search_end_date").value;
-
-        if (startDate && endDate) {
-            if (new Date(startDate) > new Date(endDate)) {
-                e.preventDefault(); // Stop form submission
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Timeline Range',
-                    text: 'The search range start parameters cannot be chronologically set past the target end date window.',
-                    confirmButtonColor: '#667eea'
+    $.ajax({
+        method: "POST",
+        url: "{% url 'import_commercial_data' %}",
+        processData: false,
+        contentType: false,
+        data: fd,
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        success: function (response) {
+            $(_this).prop("disabled", false).html(`Import Data`);
+            
+            if (response.status === 'success') {
+                swal({
+                    title: 'Import Process Complete!',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        },
+                    },
+                    icon: 'success'
+                }).then(() => {
+                    window.location.reload();
                 });
-                return false;
+            } else if (response.status === 'duplicate') {
+                swal({
+                    title: 'Duplicates Skipped',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        },
+                    },
+                    icon: 'warning'
+                });
+            } else {
+                swal({
+                    title: 'Import Error',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        },
+                    },
+                    icon: 'error'
+                });
             }
+        },
+        error: function (xhr) {
+            $(_this).prop("disabled", false).html(`Import Data`);
+            let errorMsg = 'Server processing error occurred.';
+            try {
+                let jsonRes = JSON.parse(xhr.responseText);
+                if (jsonRes.message) errorMsg = jsonRes.message;
+            } catch(e) {}
+
+            swal({
+                title: 'Import Denied',
+                content: {
+                    element: "div",
+                    attributes: {
+                        innerHTML: `<div style="font-size:13px; color:#dc2626;">${errorMsg}</div>`
+                    },
+                },
+                icon: 'error'
+            });
         }
     });
-});
+}
 
-// Quick card-clicks state inversion submit handler
-function applyQuickFilter(fieldName, filterValue) {
-    if (fieldName === 'status_filter') {
-        document.getElementById('hiddenStatusFilterField').value = filterValue;
-    } else if (fieldName === 'property_type') {
-        document.getElementById('filter_property_type').value = filterValue;
+    // Bulk Delete Logic
+    function toggleDeleteInputs() {
+        const type = document.getElementById('deleteType').value;
+        document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+        document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+        document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
     }
-    document.getElementById("filterEngineFormPipeline").submit();
-}
 
-// Clear active states and reload base querysets
-function clearFilterPipeline() {
-    window.location.href = window.location.pathname;
-}
-    </script>
+    function executeBulkDelete() {
+        const type = document.getElementById('deleteType').value;
+        if (!type) {
+            swal('Warning', 'Please select a delete criteria.', 'warning');
+            return;
+        }
+
+        let payload = { delete_type: type };
+
+        if (type === 'date_range') {
+            payload.from_date = document.getElementById('fromDate').value;
+            payload.to_date = document.getElementById('toDate').value;
+            if (!payload.from_date || !payload.to_date) {
+                swal('Warning', 'Please select both From and To dates.', 'warning');
+                return;
+            }
+        } else if (type === 'by_uploader') {
+            payload.uploader_text = document.getElementById('uploaderText').value;
+            if (!payload.uploader_text) {
+                swal('Warning', 'Please enter the uploader detail.', 'warning');
+                return;
+            }
+        } else if (type === 'by_file') {
+            payload.file_name = document.getElementById('selectedFile').value;
+            if (!payload.file_name) {
+                swal('Warning', 'Please select an Excel file from the list.', 'warning');
+                return;
+            }
+        } else if (type === 'current_page') {
+            const rows = document.querySelectorAll('tr[id^="row-"]');
+            const ids = Array.from(rows).map(row => row.id.split('-')[1]);
+            if (ids.length === 0) {
+                swal('Warning', 'No data on the current page to delete.', 'warning');
+                return;
+            }
+            payload.page_ids = ids;
+        }
+
+        swal({
+            title: 'Are you absolutely sure?',
+            text: "This action will permanently delete the selected Resale records and their media!",
+            icon: 'warning',
+            buttons: ['Cancel', 'Yes, delete them!'],
+            dangerMode: true
+        }).then((isConfirmed) => {
+            if (isConfirmed) {
+                fetch("{% url 'resale_commercial_bulk_delete' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        swal('Deleted!', data.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        swal('Error', data.message, 'error');
+                    }
+                })
+                .catch(() => swal('Error', 'Server error occurred.', 'error'));
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
