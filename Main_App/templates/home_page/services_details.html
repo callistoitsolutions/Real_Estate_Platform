@@ -1,635 +1,223 @@
-{% include 'home_page/header.html' %}
-
 {% block meta_tags %}
-
-<title>
-    {{ seo.meta_title|default:service.title }}
-</title>
-
-<meta name="description"
-      content="{{ seo.meta_description|default:'' }}">
-
-<meta name="keywords"
-      content="{{ seo.primary_keyword }}, {{ seo.secondary_keywords }}">
-
-<meta property="og:title"
-      content="{{ seo.meta_title|default:service.title }}">
-
-<meta property="og:description"
-      content="{{ seo.meta_description }}">
-
-<meta property="og:type"
-      content="website">
-
-<meta property="og:url"
-      content="{{ request.build_absolute_uri }}">
-
+<title>{{ seo.meta_title|default:service.title }}</title>
+<meta name="description" content="{{ seo.meta_description|default:'' }}">
+<meta name="keywords" content="{{ seo.primary_keyword }}, {{ seo.secondary_keywords }}">
+<meta property="og:title" content="{{ seo.meta_title|default:service.title }}">
+<meta property="og:description" content="{{ seo.meta_description }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
 {% if service.featured_image %}
-<meta property="og:image"
-      content="{{ request.scheme }}://{{ request.get_host }}{{ service.featured_image.url }}">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ service.featured_image.url }}">
 {% endif %}
-
 <meta name="twitter:card" content="summary_large_image">
-
-<meta name="twitter:title"
-      content="{{ seo.meta_title|default:service.title }}">
-
-<meta name="twitter:description"
-      content="{{ seo.meta_description }}">
-
+<meta name="twitter:title" content="{{ seo.meta_title|default:service.title }}">
+<meta name="twitter:description" content="{{ seo.meta_description }}">
 {% if seo.schema_json %}
 <script type="application/ld+json">
 {{ seo.schema_json|safe }}
 </script>
 {% endif %}
-
 {% if seo.noindex %}
 <meta name="robots" content="noindex,nofollow">
 {% else %}
 <meta name="robots" content="index,follow">
 {% endif %}
-
 <link rel="canonical" href="{{ request.build_absolute_uri }}">
-
 {% endblock %}
-
 
 {% block extra_css %}
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-
 :root {
-  --bg-main:#f8fafc;
-  --bg-card:#ffffff;
-  --primary:#006ce4;
-  --primary-dark:#0050a8;
-  --accent:#f59e0b;
-  --text-dark:#1e293b;
-  --text-body:#475569;
-  --text-muted:#64748b;
-  --border:#e2e8f0;
-  --shadow-1:0 4px 12px rgba(0,0,0,.06);
-  --shadow-2:0 12px 30px rgba(0,0,0,.1);
-  --radius:12px;
+    --primary: #006ce4;
+    --primary-dark: #0050a8;
+    --accent: #f59e0b;
+    --text-dark: #1e293b;
+    --text-body: #475569;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f8fafc;
+    --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-2: 0 12px 30px rgba(0,0,0,0.1);
+    --radius: 12px;
 }
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: "Poppins", sans-serif; background: var(--bg); color: var(--text-body); }
+a { color: inherit; }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+.top-util-bar { background: #0f172a; color: rgba(255,255,255,.75); font-size: .78rem; padding: 8px 24px; }
+.top-util-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.top-util-inner i { margin-right: 6px; color: rgba(255,255,255,.5); }
+.top-util-inner a { color: inherit; text-decoration: none; }
+@media(max-width:768px) { .top-util-bar { display: none; } }
 
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg-main);
-  color:var(--text-body);
-  line-height:1.6;
-}
+.breadcrumb-bar { background: #fff; border-bottom: 1px solid var(--border); }
+.breadcrumb-bar .bb-inner { max-width: 1300px; margin: 0 auto; padding: 12px 20px; font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+.breadcrumb-bar a { color: var(--text-muted); text-decoration: none; }
+.breadcrumb-bar a:hover { color: var(--primary); }
+.breadcrumb-bar .bb-current { color: var(--text-dark); }
 
-/* HERO */
+.inner-hero { background: linear-gradient(135deg, #0f172a, #1e293b); padding: 46px 20px 38px; text-align: center; }
+.inner-hero .badge-chip { background: rgba(255,255,255,.15); color: #fff; padding: 7px 16px; border-radius: 30px; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; display: inline-block; margin-bottom: 14px; }
+.inner-hero h1 { font-size: 2rem; font-weight: 900; color: #fff; margin-bottom: 10px; max-width: 800px; margin-left: auto; margin-right: auto; }
+.inner-hero p { font-size: 1rem; color: rgba(255,255,255,.85); max-width: 640px; margin: 0 auto; font-weight: 500; }
+@media(max-width:768px) { .inner-hero h1 { font-size: 1.5rem; } }
 
-.page-hero{
-  background:linear-gradient(135deg,#002347 0%,#004282 50%,#0059b3 100%);
-  padding:70px 20px 55px;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
+.service-hero-image { width: 100%; height: 340px; border-radius: var(--radius) var(--radius) 0 0; overflow: hidden; background: linear-gradient(135deg,#eff6ff,#dbeafe); display: flex; align-items: center; justify-content: center; margin: -1px -1px 0; }
+.service-hero-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.service-hero-image .shi-icon { width: 100px; height: 100px; border-radius: 24px; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 40px rgba(0,108,228,.18); }
+.service-hero-image .shi-icon i { font-size: 2.8rem; color: var(--primary); }
+@media(max-width:768px) { .service-hero-image { height: 220px; } }
 
-.page-hero h1{
-  font-size:2.3rem;
-  font-weight:900;
-  color:#fff;
-  margin-bottom:20px;
-}
+.content-wrap { max-width: 1300px; margin: 0 auto; padding: 40px 20px 60px; }
+.content-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; align-items: start; }
+@media(max-width:992px) { .content-grid { grid-template-columns: 1fr; } }
 
-.meta-row{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  flex-wrap:wrap;
-}
+.main-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-1); overflow: hidden; }
+.main-card-body { padding: 36px; }
+.main-card .rich-text h2 { font-size: 1.35rem; font-weight: 800; color: var(--text-dark); margin: 28px 0 14px; border-left: 4px solid var(--primary); padding-left: 14px; }
+.main-card .rich-text h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-dark); margin: 22px 0 12px; }
+.main-card .rich-text p { font-size: .95rem; line-height: 1.8; margin-bottom: 18px; color: var(--text-body); }
+.main-card .rich-text ul, .main-card .rich-text ol { padding-left: 22px; margin-bottom: 18px; }
+.main-card .rich-text li { margin-bottom: 8px; }
+.main-card .rich-text img { max-width: 100%; border-radius: 10px; margin: 16px 0; }
 
-.meta-chip{
-  background:rgba(255,255,255,.12);
-  color:#fff;
-  padding:10px 18px;
-  border-radius:30px;
-  font-size:.85rem;
-  font-weight:600;
-}
+.seo-note-block { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border); }
 
-/* CONTENT */
+.sidebar-wrapper { position: sticky; top: 20px; display: flex; flex-direction: column; gap: 20px; }
+.sb-box { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-1); overflow: hidden; }
+.sb-head { background: var(--text-dark); color: #fff; padding: 14px 20px; font-weight: 700; font-size: .9rem; }
+.sb-body { padding: 20px; }
+.info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--text-muted); }
+.info-val { color: var(--text-dark); font-weight: 700; }
+.info-val.verified { color: #16a34a; }
 
-.content-wrap{
-  max-width:1280px;
-  margin:auto;
-  padding:50px 20px;
-}
+.cta-box { background: linear-gradient(135deg,#4338ca,#4f46e5); border-radius: var(--radius); padding: 26px; text-align: center; color: #fff; }
+.cta-box h5 { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+.cta-box p { font-size: .85rem; color: rgba(255,255,255,.8); margin-bottom: 18px; }
+.btn-cta { display: block; background: var(--accent); color: #1e293b; text-align: center; padding: 12px; border-radius: 8px; font-weight: 700; font-size: .88rem; text-decoration: none; margin-bottom: 10px; }
+.btn-cta:hover { background: #d97706; color: #1e293b; }
+.btn-cta-ghost { display: block; border: 1.5px solid rgba(255,255,255,.3); color: #fff; text-align: center; padding: 12px; border-radius: 8px; font-weight: 600; font-size: .85rem; text-decoration: none; }
+.btn-cta-ghost:hover { background: rgba(255,255,255,.1); }
 
-.content-grid{
-  display:grid;
-  grid-template-columns:1fr 380px;
-  gap:35px;
-}
+.explore-services-btn { width: 100%; margin-top: 6px; border: 1px solid var(--primary); color: var(--primary); background: none; font-size: .85rem; font-weight: 700; border-radius: 8px; padding: 10px; text-align: center; text-decoration: none; display: block; transition: .2s; }
+.explore-services-btn:hover { background: var(--primary); color: #fff; }
 
-@media(max-width:1100px){
-  .content-grid{
-    grid-template-columns:1fr;
-  }
-}
-
-.main-card{
-  background:#fff;
-  border-radius:var(--radius);
-  overflow:hidden;
-  border:1px solid var(--border);
-  box-shadow:var(--shadow-1);
-}
-
-/* IMAGE */
-
-.service-hero-image{
-  height:320px;
-  background:#f1f5f9;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-.service-hero-image img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.shi-icon{
-  width:120px;
-  height:120px;
-  border-radius:30px;
-  background:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 20px 60px rgba(0,108,228,.2);
-}
-
-.shi-icon i{
-  font-size:3.5rem;
-  color:var(--primary);
-}
-
-/* HEADER */
-
-.service-header{
-  padding:40px 40px 0;
-}
-
-.sh-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  background:rgba(0,108,228,.08);
-  color:var(--primary);
-  font-size:.78rem;
-  font-weight:700;
-  padding:6px 14px;
-  border-radius:20px;
-  margin-bottom:16px;
-}
-
-.sh-info h2{
-  font-size:1.7rem;
-  font-weight:900;
-  color:var(--text-dark);
-  margin-bottom:12px;
-}
-
-.sh-info p{
-  color:var(--text-muted);
-  font-size:.95rem;
-}
-
-/* BODY */
-
-.main-body{
-  padding:35px 40px 40px;
-}
-
-/* CONTENT */
-
-.service-content{
-  color:var(--text-body);
-  font-size:.98rem;
-  line-height:1.9;
-}
-
-.service-content h1,
-.service-content h2,
-.service-content h3,
-.service-content h4{
-  color:var(--text-dark);
-  font-weight:800;
-  margin:32px 0 16px;
-}
-
-.service-content h2{
-  border-left:5px solid var(--primary);
-  padding-left:15px;
-}
-
-.service-content p{
-  margin-bottom:20px;
-}
-
-.service-content ul,
-.service-content ol{
-  padding-left:24px;
-  margin-bottom:20px;
-}
-
-.service-content li{
-  margin-bottom:10px;
-}
-
-/* SEO SECTION */
-
-.seo-section{
-  background:linear-gradient(135deg,#f0f7ff,#e0f2fe);
-  border:1px solid #bfdbfe;
-  border-radius:12px;
-  padding:24px;
-  margin-top:40px;
-}
-
-.seo-section h6{
-  color:var(--primary);
-  font-weight:800;
-  margin-bottom:15px;
-  font-size:.85rem;
-}
-
-.kw-tags{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.kw-tag{
-  background:#fff;
-  border:1px solid #bfdbfe;
-  color:var(--primary-dark);
-  padding:7px 14px;
-  border-radius:30px;
-  font-size:.8rem;
-  font-weight:600;
-}
-
-/* SIDEBAR */
-
-.sidebar{
-  display:flex;
-  flex-direction:column;
-  gap:24px;
-}
-
-.sb-box{
-  background:#fff;
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  overflow:hidden;
-  box-shadow:var(--shadow-1);
-}
-
-.sb-head{
-  background:linear-gradient(135deg,#002347,#004282);
-  color:#fff;
-  padding:16px 22px;
-  font-weight:800;
-}
-
-.sb-body{
-  padding:24px;
-}
-
-/* CTA */
-
-.cta-box{
-  background:linear-gradient(135deg,#002347,#004282);
-  padding:28px;
-  border-radius:var(--radius);
-  text-align:center;
-}
-
-.cta-box h5{
-  color:#fff;
-  font-size:1.2rem;
-  font-weight:900;
-  margin-bottom:12px;
-}
-
-.cta-box p{
-  color:rgba(255,255,255,.8);
-  margin-bottom:20px;
-}
-
-.btn-cta{
-  display:block;
-  background:#f9b449;
-  color:#002347;
-  padding:14px 20px;
-  border-radius:10px;
-  text-decoration:none;
-  font-weight:800;
-  margin-bottom:12px;
-}
-
-.btn-cta-ghost{
-  display:block;
-  border:2px solid rgba(255,255,255,.2);
-  color:#fff;
-  padding:12px 20px;
-  border-radius:10px;
-  text-decoration:none;
-}
-
-/* FOOTER */
-
-footer{
-  background:#1e293b;
-  color:rgba(255,255,255,.7);
-  padding:60px 20px 30px;
-  margin-top:40px;
-}
-
-.footer-inner{
-  max-width:1280px;
-  margin:auto;
-}
-
-.footer-bottom{
-  border-top:1px solid rgba(255,255,255,.1);
-  margin-top:30px;
-  padding-top:25px;
-  text-align:center;
-}
-
+footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
+.footer-inner { max-width: 1300px; margin: 0 auto; padding: 40px 20px; }
+.footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+@media(max-width:640px) { .footer-grid { grid-template-columns: 1fr; } }
+.fl-brand { font-size: 1.3rem; font-weight: 900; color: #fff; margin-bottom: 12px; }
+.fl-desc { font-size: .85rem; line-height: 1.7; }
+.fl-title { font-size: .85rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 5px 0; transition: .2s; }
+.fl-link:hover { color: #fff; padding-left: 4px; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 20px; text-align: center; font-size: .8rem; max-width: 1300px; margin: 0 auto; }
 </style>
-
 {% endblock %}
 
-
 {% block content %}
-
-<!-- HERO -->
-
-<section class="page-hero">
-
-    <h1>
-        {{ seo.meta_title|default:service.title }}
-    </h1>
-
-    <div class="meta-row">
-
-        <div class="meta-chip">
-            Professional Content
-        </div>
-
-        <div class="meta-chip">
-            SEO Optimized
-        </div>
-
-        <div class="meta-chip">
-            Verified By PropCRM
-        </div>
-
+<div class="top-util-bar">
+    <div class="top-util-inner">
+        <div><span><i class="bi bi-geo-alt"></i>Serving Nagpur &amp; 50+ Cities</span></div>
+        <div><span><i class="bi bi-telephone"></i>+91 90000 00000</span></div>
     </div>
+</div>
 
+{% include 'home_page/header.html' %}
+
+<div class="breadcrumb-bar">
+    <div class="bb-inner">
+        <a href="/">Home</a> <i class="bi bi-chevron-right" style="font-size:.65rem;"></i>
+        <a href="{% url 'services' %}">Services</a> <i class="bi bi-chevron-right" style="font-size:.65rem;"></i>
+        <span class="bb-current">{{ service.title }}</span>
+    </div>
+</div>
+
+<section class="inner-hero">
+    {% if service.category %}<span class="badge-chip">{{ service.category|title }}</span>{% endif %}
+    <h1>{{ service.title|default:seo.meta_title }}</h1>
+    {% if seo.meta_description %}<p>{{ seo.meta_description }}</p>{% endif %}
 </section>
 
-
 <div class="content-wrap">
-
     <div class="content-grid">
 
-        <!-- MAIN -->
+        <main class="main-card">
+            <div class="service-hero-image">
+                {% if service.featured_image %}
+                    <img src="{{ service.featured_image.url }}" alt="{{ service.title }}">
+                {% else %}
+                    <div class="shi-icon"><i class="{{ service.icon|default:'bi bi-house' }}"></i></div>
+                {% endif %}
+            </div>
+            <div class="main-card-body">
+            <div class="rich-text">
+                {% if service.content %}
+                    {{ service.content|safe }}
+                {% else %}
+                    <p>Comprehensive details about this service will be displayed here.</p>
+                {% endif %}
 
-        <div>
+                {% if seo.intro_html %}
+                <div class="seo-note-block">
+                    {{ seo.intro_html|safe }}
+                </div>
+                {% endif %}
+            </div>
+            </div>
+        </main>
 
-            <div class="main-card">
-
-                <!-- IMAGE -->
-
-                <div class="service-hero-image">
-
-                    {% if service.featured_image %}
-
-                        <img src="{{ service.featured_image.url }}">
-
-                    {% else %}
-
-                        <div class="shi-icon">
-
-                            <i class="{{ service.icon|default:'bi bi-house' }}"></i>
-
+        <aside>
+            <div class="sidebar-wrapper">
+                <div class="sb-box">
+                    <div class="sb-head">Service Overview</div>
+                    <div class="sb-body">
+                        <div class="info-row">
+                            <span class="info-label">Category</span>
+                            <span class="info-val">{{ service.category|default:'Enterprise Service'|title }}</span>
                         </div>
-
-                    {% endif %}
-
-                </div>
-
-                <!-- HEADER -->
-
-                <div class="service-header">
-
-                    <div class="sh-badge">
-
-                        <i class="bi bi-award-fill"></i>
-
-                        {% if seo.pagetype == "service" %}
-
-                            Premium Service
-
-                        {% elif seo.pagetype == "blog" %}
-
-                            Real Estate Blog
-
-                        {% elif seo.pagetype == "subscription" %}
-
-                            Subscription Plan
-
-                        {% elif seo.pagetype == "property" %}
-
-                            Verified Property
-
-                        {% else %}
-
-                            Featured Content
-
-                        {% endif %}
-
-                    </div>
-
-                    <div class="sh-info">
-
-                        <h2>
-                            {{ seo.meta_title|default:service.title }}
-                        </h2>
-
-                        <p>
-                            {{ seo.meta_description }}
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <!-- BODY -->
-
-                <div class="main-body">
-
-                    {% if service.content %}
-
-                    <div class="service-content">
-
-                        {{ service.content|safe }}
-
-                    </div>
-
-                    {% endif %}
-
-
-                    {% if seo.intro_html %}
-
-                    <div style="margin-top:40px;">
-
-                        {{ seo.intro_html|safe }}
-
-                    </div>
-
-                    {% endif %}
-
-
-                    {% if seo.primary_keyword or seo.secondary_keywords %}
-
-                    <div class="seo-section">
-
-                        <h6>
-
-                            <i class="bi bi-tags-fill"></i>
-
-                            Related Keywords
-
-                        </h6>
-
-                        <div class="kw-tags">
-
-                            {% if seo.primary_keyword %}
-
-                            <span class="kw-tag">
-
-                                {{ seo.primary_keyword }}
-
-                            </span>
-
-                            {% endif %}
-
-                            {% if seo.secondary_keywords %}
-
-                            <span class="kw-tag">
-
-                                {{ seo.secondary_keywords }}
-
-                            </span>
-
-                            {% endif %}
-
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span class="info-val verified"><i class="bi bi-shield-fill-check"></i> Verified</span>
                         </div>
-
                     </div>
-
-                    {% endif %}
-
                 </div>
 
-            </div>
-
-        </div>
-
-
-        <!-- SIDEBAR -->
-
-        <aside class="sidebar">
-
-            <div class="sb-box">
-
-                <div class="sb-head">
-
-                    Content Information
-
+                <div class="cta-box">
+                    <h5>Need This Service?</h5>
+                    <p>Talk to a PropCRM expert and get a callback within 24 hours.</p>
+                    <a href="{% url 'Contact_Us' %}" class="btn-cta">{{ service.cta_text|default:'Request a Callback' }}</a>
+                    <a href="{% url 'services' %}" class="btn-cta-ghost">Explore All Services</a>
                 </div>
-
-                <div class="sb-body">
-
-                    <p>
-
-                        Professionally optimized dynamic SEO page for PropCRM platform.
-
-                    </p>
-
-                </div>
-
             </div>
-
-
-            <div class="cta-box">
-
-                <h5>
-
-                    Ready To Get Started?
-
-                </h5>
-
-                <p>
-
-                    Contact our expert team for real estate solutions.
-
-                </p>
-
-                <a href="/contact/" class="btn-cta">
-
-                    Contact Us
-
-                </a>
-
-                <a href="/listingpage/" class="btn-cta-ghost">
-
-                    Browse Listings
-
-                </a>
-
-            </div>
-
         </aside>
 
     </div>
-
 </div>
 
-
 <footer>
-
     <div class="footer-inner">
-
-        <div class="footer-bottom">
-
-            © 2026 PropCRM · All Rights Reserved
-
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Empowering the real estate industry with verified listings and end-to-end property services in Nagpur.</div>
+            </div>
+            <div>
+                <div class="fl-title">Quick Links</div>
+                <a href="{% url 'services' %}" class="fl-link">All Services</a>
+                <a href="/contact/" class="fl-link">Support</a>
+            </div>
+            <div>
+                <div class="fl-title">Contact</div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
+            </div>
         </div>
-
     </div>
-
+    <div class="footer-bottom">© 2026 PropCRM Platform. All Rights Reserved.</div>
 </footer>
-
 {% endblock %}

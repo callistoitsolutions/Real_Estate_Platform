@@ -18,11 +18,14 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib.sitemaps.views import sitemap
+from Main_App.sitemaps import sitemaps
 # finance.api import router as finance_router
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('Main_App.urls')),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
        
     path('Admin_App/',include('Admin_App.urls')),
     path('Tenant_Panel/', include(('Tenant_App.urls', 'Tenant_App'), namespace='Tenant_App')),

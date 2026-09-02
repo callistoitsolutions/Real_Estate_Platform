@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{% if listing_type == 'sale' %}Flats & Houses for Sale{% else %}Flats & Houses for Rent{% endif %} in {{ current_city|default:"Nagpur" }} — PropCRM</title>
+<title>{% if listing_type == 'sale' %}Properties for Sale{% else %}Properties for Rent{% endif %} in {{ city|default:"Nagpur" }} — PropCRM</title>
 
+<!-- Existing Libraries -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        corePlugins: { preflight: false },
+        theme: {
+            extend: {
+                fontFamily: { sans: ['Inter', 'Poppins', 'sans-serif'] },
+                colors: { brand: { dark: '#1e293b', blue: '#6C3CF4', yellow: '#f59e0b', footer: '#0f172a', text: '#334155', lightbg: '#f8fafc' } }
+            }
+        }
+    }
+</script>
+
 <style>
+/* ── CORE VARIABLES & RESETS ── */
 :root {
   --primary: #6C3CF4;
   --primary-dark: #5429d6;
@@ -21,36 +38,12 @@
   --muted: #9098a9;
   --border: #e4e7ed;
   --bg: #f5f6fa;
-  --white: #ffffff;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-md: 0 6px 20px rgba(0,0,0,0.10);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
-  --green: #0dbd8b;
-  --green-bg: #e8faf5;
-  --orange: #f97316;
-  --blue: #3b82f6;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--body-text);}
 a{text-decoration:none;color:inherit;}
 
-/* ── TOP SEARCH BAR ── */
-.top-bar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300;box-shadow:var(--shadow-sm);}
-.top-bar-inner{max-width:1340px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-
-.type-toggle{display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;}
-.type-toggle button{padding:8px 20px;font-size:0.82rem;font-weight:700;border:none;background:white;cursor:pointer;color:var(--muted);font-family:'Poppins',sans-serif;transition:.15s;}
-.type-toggle button.active{background:var(--primary);color:white;}
-
-.loc-wrap{position:relative;flex:1;min-width:260px;}
-.loc-bar{display:flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;background:white;cursor:text;flex-wrap:wrap;min-height:42px;}
-.loc-bar:focus-within{border-color:var(--primary);}
-.loc-chip{background:var(--primary-light);color:var(--primary-dark);border-radius:20px;padding:3px 10px;font-size:0.8rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
-.loc-chip .x{cursor:pointer;font-size:1rem;line-height:1;opacity:.7;}
-.loc-chip .x:hover{opacity:1;}
-.loc-bar input{border:none;outline:none;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:500;color:var(--sec);flex:1;min-width:120px;background:transparent;}
-.loc-bar input::placeholder{color:var(--muted);font-weight:400;}
-
+/* ── AUTOCOMPLETE DROPDOWN ── */
 .autocomplete-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:9999;overflow:hidden;}
 .autocomplete-drop.open{display:block;}
 .ac-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:0.88rem;color:var(--sec);font-weight:500;transition:background .1s;}
@@ -63,20 +56,119 @@ a{text-decoration:none;color:inherit;}
 .ac-empty{padding:12px 14px;font-size:0.85rem;color:var(--muted);text-align:center;}
 
 /* ── FILTER STRIP ── */
-.filter-strip{background:white;border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:290;}
-.filter-strip-inner{max-width:1340px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;height:52px;}
+.filter-strip{background:white;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:290;}
+.filter-strip-inner{max-width:1340px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;height:56px;}
 .filter-strip-inner::-webkit-scrollbar{display:none;}
-
-.fpill{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);background:white;color:var(--sec);cursor:pointer;white-space:nowrap;transition:.15s;font-family:'Poppins',sans-serif;flex-shrink:0;position:relative;}
+.fpill{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);background:white;color:var(--sec);cursor:pointer;white-space:nowrap;transition:.15s;font-family:'Poppins',sans-serif;flex-shrink:0;}
 .fpill:hover{border-color:var(--primary);color:var(--primary);}
 .fpill.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
 .fpill .chevron{font-size:0.7rem;}
 .fpill .dot{width:7px;height:7px;background:var(--primary);border-radius:50%;flex-shrink:0;}
 .fs-divider{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 4px;}
 
+
+
+ .btn-nav-outline, 
+ .btn-nav-pr { 
+    padding: 8px 18px; 
+    border-radius: 8px; 
+    font-weight: 700; 
+    font-size: 0.85rem; 
+    cursor: pointer; 
+    text-decoration: none; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px; 
+    transition: .2s; 
+    white-space: nowrap; 
+}
+ .btn-nav-outline { 
+    border: 1.5px solid #006ce4; 
+    color: #006ce4; 
+    background: transparent; 
+}
+ .btn-nav-outline:hover { 
+    background: #006ce4; 
+    color: white; 
+}
+ .btn-nav-pr { 
+    background: #f97316; 
+    color: white; 
+    border: none; 
+}
+ .btn-nav-pr:hover { 
+    background: #ea580c; 
+    color: white; 
+    transform: translateY(-1px); 
+}
+
+
+
+/* ── SHORTS RAIL ── */
+.shorts-section{max-width:1340px;margin:0 auto;padding:4px 4px 18px;}
+.shorts-head h2{font-size:1rem;font-weight:800;color:var(--sec);display:flex;align-items:center;gap:8px;}
+.shorts-head h2 i{color:var(--primary);}
+.shorts-head p{font-size:0.75rem;color:var(--muted);margin-top:2px;margin-bottom:10px;}
+.shorts-track{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding-bottom:4px;}
+.shorts-track::-webkit-scrollbar{display:none;}
+.short-card{position:relative;flex:0 0 128px;width:128px;height:210px;border-radius:14px;overflow:hidden;cursor:pointer;background:#111;box-shadow:0 3px 10px rgba(0,0,0,.15);border:2px solid transparent;transition:transform .15s;}
+.short-card:hover{transform:translateY(-3px);border-color:var(--primary);}
+.short-card .sc-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;}
+.short-card .sc-img.active{opacity:1;}
+.short-card .sc-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.75) 100%);}
+.short-card .sc-avatar{position:absolute;top:8px;left:8px;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;border:2px solid #fff;z-index:2;}
+.short-card .sc-play{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--sec);z-index:2;}
+.short-card .sc-info{position:absolute;left:8px;right:8px;bottom:8px;color:#fff;z-index:2;}
+.short-card .sc-info .sc-price{font-size:.78rem;font-weight:800;line-height:1.1;}
+.short-card .sc-info .sc-sub{font-size:.62rem;font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.short-card .sc-badge{position:absolute;top:8px;left:38px;background:rgba(0,0,0,.5);color:#fff;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:2;text-transform:uppercase;letter-spacing:.3px;}
+
+/* ── SHORTS FULL-SCREEN PLAYER ── */
+.shorts-overlay{display:none;position:fixed;inset:0;background:#000;z-index:99999;align-items:center;justify-content:center;}
+.shorts-overlay.open{display:flex;}
+.shorts-stage{position:relative;width:100%;max-width:420px;height:100%;max-height:100vh;background:#000;overflow:hidden;}
+@media(min-width:640px){.shorts-stage{max-height:92vh;border-radius:16px;margin-top:4vh;box-shadow:0 20px 60px rgba(0,0,0,.5);}}
+.shorts-progress-row{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:4px;z-index:40;}
+.shorts-progress-row .sp-bar{flex:1;height:3px;background:rgba(255,255,255,.35);border-radius:3px;overflow:hidden;}
+.shorts-progress-row .sp-bar .sp-fill{height:100%;width:0%;background:#fff;transition:width linear;}
+.shorts-topbar{position:absolute;top:22px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;z-index:40;color:#fff;}
+.shorts-topbar .st-owner{display:flex;align-items:center;gap:8px;}
+.shorts-topbar .st-avatar{width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;border:2px solid #fff;}
+.shorts-topbar .st-name{font-size:.78rem;font-weight:700;}
+.shorts-topbar .st-name small{display:block;font-size:.62rem;font-weight:500;opacity:.75;}
+.shorts-topbar .st-actions{display:flex;gap:10px;align-items:center;}
+.shorts-topbar .st-btn{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;font-size:.85rem;}
+.shorts-media{position:absolute;inset:0;}
+.shorts-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity .35s ease;}
+.shorts-media img.active{opacity:1;animation:sc-kenburns 4.2s ease-in-out forwards;}
+@keyframes sc-kenburns{from{transform:scale(1.12) translate(0,0);}to{transform:scale(1.0) translate(0,-1%);}}
+.shorts-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
+.shorts-tapzone{position:absolute;top:0;bottom:0;width:34%;z-index:30;}
+.shorts-tapzone.left{left:0;}
+.shorts-tapzone.right{right:0;}
+.shorts-nav-arrow{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;z-index:35;cursor:pointer;backdrop-filter:blur(4px);}
+.shorts-nav-arrow.prev{left:-50px;}
+.shorts-nav-arrow.next{right:-50px;}
+@media(max-width:640px){.shorts-nav-arrow{display:none;}}
+.shorts-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:14px 18px 18px;z-index:45;transform:translateY(calc(100% - 96px));transition:transform .3s ease;max-height:78%;overflow-y:auto;}
+.shorts-sheet.expanded{transform:translateY(0);}
+.shorts-sheet .ss-handle{width:40px;height:4px;background:#e2e5eb;border-radius:4px;margin:0 auto 10px;cursor:pointer;}
+.shorts-sheet .ss-price-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.shorts-sheet .ss-price{font-size:1.15rem;font-weight:800;color:var(--sec);}
+.shorts-sheet .ss-title{font-size:.85rem;font-weight:700;color:var(--sec);margin-top:2px;}
+.shorts-sheet .ss-loc{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:2px;}
+.shorts-sheet .ss-stats{display:flex;gap:18px;margin:12px 0;padding:12px 0;border-top:1px solid #f0f1f4;border-bottom:1px solid #f0f1f4;}
+.shorts-sheet .ss-stat b{display:block;font-size:.85rem;color:var(--sec);}
+.shorts-sheet .ss-stat span{font-size:.65rem;color:var(--muted);text-transform:uppercase;}
+.shorts-sheet .ss-amenities{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+.shorts-sheet .ss-amenities span{background:#f5f0fe;color:var(--primary);font-size:.68rem;font-weight:600;padding:4px 10px;border-radius:20px;}
+.shorts-sheet .ss-actions{display:flex;gap:10px;margin-top:14px;}
+.shorts-sheet .ss-actions button{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:.82rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.shorts-sheet .ss-know{background:#f1f2f6;color:var(--sec);}
+.shorts-sheet .ss-call{background:var(--primary);color:#fff;}
+
 /* ── PILL DROPDOWN PANEL ── */
 .pill-panel{display:none;position:fixed;top:0;left:0;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.14);padding:16px;z-index:99999;min-width:240px;font-size:0.88rem;color:var(--sec);}
-.pill-panel.right{left:auto;right:0;}
 .pill-panel.open{display:block;}
 .pp-title{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
 .pp-options{display:flex;flex-wrap:wrap;gap:8px;}
@@ -87,202 +179,164 @@ a{text-decoration:none;color:inherit;}
 /* Budget slider panel */
 .budget-panel{min-width:300px;}
 .budget-hist{display:flex;align-items:flex-end;gap:2px;height:50px;margin-bottom:8px;padding:0 4px;}
-.hist-bar{flex:1;background:var(--primary-light);border-radius:2px 2px 0 0;transition:.2s;}
+.hist-bar{flex:1;background:var(--primary-light);border-radius:2px 2px 0 0;}
 .hist-bar.in-range{background:var(--primary);}
 .range-track{position:relative;height:4px;background:#e4e7ed;border-radius:4px;margin:0 4px;}
 .range-fill{position:absolute;height:100%;background:var(--primary);border-radius:4px;}
 .range-inputs{position:relative;margin-top:-10px;}
 .range-inputs input[type=range]{position:absolute;width:100%;-webkit-appearance:none;appearance:none;height:4px;background:transparent;pointer-events:none;outline:none;}
 .range-inputs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:white;border:2.5px solid var(--primary);cursor:pointer;pointer-events:all;box-shadow:0 2px 6px rgba(108,60,244,.3);}
-.range-inputs input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:white;border:2.5px solid var(--primary);cursor:pointer;pointer-events:all;}
 .budget-vals{display:flex;gap:8px;margin-top:18px;align-items:center;}
 .bval-box{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:0.8rem;font-weight:600;color:var(--sec);text-align:center;}
-.bval-sep{font-size:0.8rem;color:var(--muted);}
-.pp-apply{margin-top:14px;width:100%;padding:9px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;}
-.pp-apply:hover{background:var(--primary-dark);}
+.pp-apply{margin-top:14px;width:100%;padding:9px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;}
 
 /* ── MORE FILTERS DRAWER ── */
 .mf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;backdrop-filter:blur(2px);}
 .mf-overlay.open{display:block;}
-.mf-drawer{position:fixed;top:0;right:-500px;width:460px;max-width:96vw;height:100vh;background:white;z-index:1001;display:flex;flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);}
+.mf-drawer{position:fixed;top:0;right:-500px;width:460px;max-width:96vw;height:100vh;background:white;z-index:1001;display:flex;flex-direction:column;transition:right .3s ease;}
 .mf-drawer.open{right:0;}
-.mf-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mf-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);}
 .mf-head h3{font-size:1rem;font-weight:700;color:var(--sec);}
-.mf-close{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;color:var(--muted);}
-.mf-close:hover{border-color:#ef4444;color:#ef4444;}
-
+.mf-close{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .mf-layout{display:flex;flex:1;overflow:hidden;}
-.mf-sidebar{width:170px;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;background:#fafbfc;}
-.mf-sidebar-item{padding:12px 16px;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:.15s;}
-.mf-sidebar-item:hover{background:#f0ecfe;color:var(--primary);}
+.mf-sidebar{width:170px;border-right:1px solid var(--border);overflow-y:auto;background:#fafbfc;}
+.mf-sidebar-item{padding:12px 16px;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;border-left:3px solid transparent;}
 .mf-sidebar-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary);}
 .mf-content{flex:1;overflow-y:auto;padding:20px;}
 .mf-section{display:none;}
 .mf-section.active{display:block;}
-.mf-section-title{font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
-.mf-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
-.mf-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;color:var(--sec);}
-.mf-btn:hover{border-color:var(--primary);color:var(--primary);}
+.mf-section-title{font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;}
+.mf-options{display:flex;flex-wrap:wrap;gap:8px;}
+.mf-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;}
 .mf-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary);font-weight:600;}
-.mf-divider{height:1px;background:var(--border);margin:16px 0;}
+.mf-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);}
+.mf-clear-btn{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:white;font-weight:700;}
+.mf-apply-btn{flex:2;padding:10px;border-radius:8px;background:var(--primary);color:white;font-weight:700;}
 
-.mf-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;}
-.mf-clear-btn{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:white;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--sec);}
-.mf-apply-btn{flex:2;padding:10px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;}
-.mf-apply-btn:hover{background:var(--primary-dark);}
-
-/* ── PAGE BODY ── */
-.page-wrap{max-width:1340px;margin:0 auto;padding:20px 20px 50px;}
-
-.applied-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
-.af-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:white;border:1px solid var(--border);font-size:0.78rem;font-weight:600;color:var(--sec);cursor:pointer;}
-.af-chip i{font-size:0.7rem;color:var(--muted);}
-.af-chip:hover{border-color:#ef4444;color:#ef4444;}
-.af-clear{font-size:0.78rem;font-weight:700;color:var(--primary);cursor:pointer;padding:5px 0;}
-
-.results-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
-.rh-count{font-size:0.82rem;color:var(--muted);font-weight:500;margin-bottom:3px;}
-.rh-title{font-size:1.28rem;font-weight:700;color:var(--sec);line-height:1.25;}
-.rh-sub{font-size:0.78rem;color:var(--muted);margin-top:3px;font-weight:400;}
-.sort-sel{background:white;border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:600;color:var(--sec);cursor:pointer;font-family:'Poppins',sans-serif;}
-
-/* ── PROPERTY CARDS ── */
-.listings-col{display:flex;flex-direction:column;gap:16px;}
-.pcard{background:white;border-radius:14px;border:1px solid var(--border);display:flex;overflow:hidden;transition:box-shadow .2s,border-color .2s,transform .15s;cursor:pointer;color:inherit;text-decoration:none;}
-.pcard:hover{box-shadow:var(--shadow-md);border-color:#c4b3f9;transform:translateY(-1px);}
-
-/* image side */
-.pc-img-wrap{width:290px;min-width:290px;position:relative;overflow:hidden;background:#f1f5f9;}
-.pc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
-.pcard:hover .pc-img-wrap img{transform:scale(1.03);}
-.pc-placeholder{width:100%;height:100%;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#ede8fe 0%,#ddd6fe 100%);}
-.pc-placeholder i{font-size:2.8rem;color:var(--primary);opacity:.6;}
-.pc-placeholder span{font-size:0.75rem;font-weight:600;color:var(--primary);opacity:.7;text-transform:uppercase;letter-spacing:1px;}
-
-/* image counter badge */
-.img-counter{position:absolute;bottom:52px;right:10px;background:rgba(17,20,45,.6);color:white;font-size:0.7rem;font-weight:600;padding:3px 8px;border-radius:12px;backdrop-filter:blur(4px);}
-
-.img-badges{position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;}
-.ibadge{font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;}
-.ib-new{background:#3b82f6;color:white;}
-.ib-feat{background:#f59e0b;color:white;}
-.ib-verif{background:#0dbd8b;color:white;}
-
-.owner-av{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:white;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:var(--primary);border:2px solid white;}
-
-.img-price{position:absolute;bottom:0;left:0;right:0;background:rgba(17,20,45,.75);backdrop-filter:blur(4px);padding:8px 12px;color:white;display:flex;justify-content:space-between;align-items:center;}
-.img-price .amt{font-size:1.05rem;font-weight:800;}
-.img-price .per{font-size:0.7rem;opacity:.7;font-weight:400;}
-.btn-save{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:white;font-size:0.95rem;backdrop-filter:blur(4px);}
-.btn-save:hover{background:rgba(239,68,68,.8);}
-.btn-save.saved{background:rgba(239,68,68,.9);}
-
-/* body side */
-.pc-body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0;}
-.pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-.pc-owner-row{font-size:0.75rem;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:5px;}
-.pc-owner-row strong{color:var(--sec);}
-.pc-new-badge{font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;background:#dbeafe;color:#1e40af;}
-
-.pc-title{font-size:0.98rem;font-weight:700;color:var(--sec);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pc-addr{font-size:0.82rem;color:var(--muted);display:flex;align-items:center;gap:5px;}
-
-/* specs row */
-.pc-specs{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.spec-col{flex:1;padding:8px 12px;display:flex;flex-direction:column;gap:1px;}
-.spec-col+.spec-col{border-left:1px solid var(--border);}
-.spec-val{font-size:0.88rem;font-weight:700;color:var(--sec);}
-.spec-lbl{font-size:0.68rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
-
-/* short description */
-.pc-desc{font-size:0.8rem;color:var(--body-text);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-
-/* amenities/highlights */
-.pc-highlights{display:flex;gap:6px;flex-wrap:wrap;}
-.hl-tag{font-size:0.72rem;font-weight:500;padding:3px 9px;border-radius:4px;background:#f8f9fb;border:1px solid var(--border);color:var(--body-text);display:flex;align-items:center;gap:4px;}
-.hl-tag.verified{background:var(--green-bg);border-color:#a7f3d0;color:#065f46;}
-.hl-tag.ptype{background:#eff6ff;border-color:#bfdbfe;color:#1e40af;}
-
-/* footer row */
-.pc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);margin-top:auto;gap:10px;flex-wrap:wrap;}
-.pc-updated{font-size:0.75rem;color:var(--muted);}
-.pc-updated strong{color:var(--body-text);font-weight:600;}
-.pc-btns{display:flex;gap:8px;align-items:center;}
-.btn-contact{padding:9px 20px;border-radius:8px;border:none;background:var(--primary);color:white;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
-.btn-contact:hover{background:var(--primary-dark);}
-.btn-whatsapp{padding:9px 14px;border-radius:8px;border:1.5px solid #25D366;color:#25D366;background:white;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;display:flex;align-items:center;gap:6px;}
-.btn-whatsapp:hover{background:#f0fdf4;}
-
-/* ── EMPTY STATE ── */
-.empty-state{text-align:center;padding:80px 20px;background:white;border-radius:12px;border:1px solid var(--border);}
-.empty-state i{font-size:3rem;color:var(--muted);display:block;margin-bottom:14px;}
-.empty-state h3{font-size:1.1rem;font-weight:700;color:var(--sec);margin-bottom:6px;}
-.empty-state p{font-size:0.88rem;color:var(--muted);}
-.btn-reset{margin-top:18px;padding:10px 24px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;font-size:0.88rem;cursor:pointer;font-family:'Poppins',sans-serif;}
-
-/* ── PAGINATION ── */
-.pagination-row{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:28px;flex-wrap:wrap;}
-.pg-btn{min-width:38px;height:38px;padding:0 10px;border-radius:8px;border:1.5px solid var(--border);background:white;font-size:0.85rem;font-weight:600;color:var(--sec);cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:.15s;font-family:'Poppins',sans-serif;}
-.pg-btn:hover{border-color:var(--primary);color:var(--primary);}
-.pg-btn.current{background:var(--primary);border-color:var(--primary);color:white;}
-.pg-btn.disabled{opacity:.4;pointer-events:none;}
-.pg-info{font-size:0.78rem;color:var(--muted);text-align:center;margin-top:8px;}
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .pc-img-wrap{width:240px;min-width:240px;}
-}
-@media(max-width:768px){
-  .pc-img-wrap{width:100%;min-width:100%;height:200px;}
-  .pcard{flex-direction:column;}
-  .mf-drawer{width:100%;}
-  .mf-sidebar{width:140px;}
-}
-@media(max-width:480px){
-  .pc-specs{flex-wrap:wrap;}
-  .spec-col{min-width:45%;}
-}
+/* ── FOOTER STYLES ── */
+footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; font-family: "Poppins", sans-serif; }
+.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
+.footer-newsletter-inner { max-width: 1340px; margin: 0 auto; padding: 24px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.footer-newsletter-inner h3 { color: #fff; font-size: 1.05rem; font-weight: 800; }
+.footer-newsletter-inner p { font-size: .82rem; color: rgba(255,255,255,.55); }
+.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: .9rem; text-decoration: none; transition: .2s; }
+.footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+.footer-inner { max-width: 1340px; margin: 0 auto; padding: 40px 20px; }
+.footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+@media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
+@media(max-width:580px) { .footer-grid { grid-template-columns: 1fr; } }
+.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; }
+.fl-desc { font-size: .85rem; line-height: 1.7; margin-bottom: 14px; }
+.fl-title { font-size: .85rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: .2s; }
+.fl-link:hover { color: white; padding-left: 4px; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1340px; margin: 0 auto; }
 </style>
 </head>
-<body>
 
-{% include 'home_page/header.html' %}
+<body class="flex flex-col min-h-screen">
 
-<div class="top-bar">
-  <div class="top-bar-inner">
-    <div class="type-toggle">
-      <button id="toggleRent" onclick="switchType('rent')" class="{% if listing_type == 'rent' %}active{% endif %}">Rent</button>
-      <button id="toggleSale" onclick="switchType('sale')" class="{% if listing_type == 'sale' %}active{% endif %}">Resale</button>
+<!-- ── UNIFIED HOUSING.COM STYLE TOP NAV ── -->
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-[400] flex items-center px-4 md:px-6 h-16 w-full justify-between shadow-sm">
+    <div class="flex items-center h-full gap-2 md:gap-4">
+        <a href="/" class="text-xl md:text-2xl font-bold text-brand-dark flex items-center gap-2 tracking-tight shrink-0">
+            <i class="fa-solid fa-house-chimney text-brand-blue"></i> PropCRM
+        </a>
+        <button onclick="toggleSearchOverlay()" class="bg-brand-dark text-white h-10 px-3 md:px-5 font-semibold text-xs md:text-sm flex items-center gap-2 hover:bg-gray-800 transition rounded-md cursor-pointer">
+            {% if listing_type == 'rent' %}Rent{% else %}Buy/Resale{% endif %} in {{ city|default:"Nagpur"|title }} <i class="bi bi-chevron-down text-[10px]"></i>
+        </button>
     </div>
 
-    <div class="loc-wrap">
-      <div class="loc-bar" id="locBar" onclick="document.getElementById('locInput').focus()">
-        {% for area in areas_list %}
-          <span class="loc-chip">
-            {{ area|title }}
-            <span class="x" onclick="event.stopPropagation();removeAreaChip('{{ area }}')">×</span>
-          </span>
-        {% endfor %}
-        <input type="text" id="locInput"
-               placeholder="{% if not areas_list %}Search locality, area, landmark…{% endif %}"
-               autocomplete="off"
-               oninput="fetchAC(this.value)"
-               onkeydown="handleACKey(event)">
-      </div>
-      <div class="autocomplete-drop" id="acDrop"></div>
+    <!-- Clickable Search Bar -->
+    <div class="hidden lg:flex flex-1 max-w-2xl mx-6 cursor-pointer group" onclick="toggleSearchOverlay()">
+        <div class="flex items-center w-full border border-gray-300 rounded-md overflow-hidden bg-white h-10 group-hover:border-brand-blue transition relative">
+            <div class="flex items-center gap-2 px-3 text-sm text-gray-500 bg-gray-50 h-full border-r border-gray-200">
+                <i class="bi bi-search"></i>
+            </div>
+            <div class="flex items-center gap-2 px-3 flex-1 overflow-hidden">
+                {% if areas_list %}
+                    <span class="text-gray-800 text-sm font-medium truncate">{{ areas_list|join:", "|title }}</span>
+                {% else %}
+                    <span class="text-gray-400 text-sm font-medium">Search Locality, Project or Builder...</span>
+                {% endif %}
+            </div>
+            <div class="bg-brand-blue text-white px-6 h-full flex items-center justify-center font-semibold text-xs">Search</div>
+        </div>
     </div>
 
-    <button onclick="applyLocSearch()"
-            style="padding:9px 20px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;">
-      <i class="bi bi-search"></i> Search
+    <!-- Right Actions -->
+   <div class="flex items-center gap-2 md:gap-3 shrink-0">
+    <a href="{% url 'post_property' %}" class="hidden md:inline-flex btn-nav-outline">
+        <i class="bi bi-plus-lg"></i> Post Property FREE
+    </a>
+    <a href="{% url 'post_property' %}" class="md:hidden w-9 h-9 rounded-full bg-brand-blue text-white flex items-center justify-center text-lg">
+        <i class="bi bi-plus-lg"></i>
+    </a>
+    <button onclick="toggleSearchOverlay()" class="md:hidden w-9 h-9 rounded-full bg-gray-100 text-brand-dark flex items-center justify-center border border-gray-300">
+        <i class="bi bi-search"></i>
     </button>
-  </div>
+    <button class="w-8 h-8 rounded-full bg-gray-100 text-brand-dark flex items-center justify-center border border-gray-300 hover:bg-gray-200">
+        <i class="bi bi-person-fill"></i>
+    </button>
+</div>
+</nav>
+
+<!-- ── EXPANDED SEARCH OVERLAY ── -->
+<div id="expandedSearchOverlay" class="fixed inset-0 bg-black/60 z-[500] hidden flex-col">
+    <div class="w-full bg-brand-blue pt-8 pb-12 px-4 relative flex flex-col items-center shadow-lg animate-fade-in-down">
+        <button onclick="toggleSearchOverlay()" class="absolute top-4 right-6 bg-white text-brand-blue w-8 h-8 flex items-center justify-center rounded-sm shadow-md hover:bg-gray-100 transition">
+            <i class="bi bi-x text-2xl"></i>
+        </button>
+
+        
+
+            <div class="w-full flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 md:gap-3 text-white mb-6 sm:mb-8 text-sm font-medium sm:justify-center mt-4 px-1">
+        <span class="font-bold tracking-wide text-base mb-1 sm:mb-0 sm:mr-2 self-start sm:self-auto">I'm Looking to</span>
+
+        <div class="flex flex-wrap gap-2 justify-center w-full sm:w-auto">
+            <button class="px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if listing_type == 'sale' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchType('sale')">Buy/Resale</button>
+            <button class="px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if listing_type == 'rent' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchType('rent')">Rent</button>
+
+            <span class="mx-1 text-white/50 hidden md:inline self-center">|</span>
+
+            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'residential' or category == 'all' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('residential')">Residential</button>
+            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'commercial' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('commercial')">Commercial</button>
+            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'pg' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('pg')">PG/Co-Living</button>
+            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'plot' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('plot')">Plots</button>
+            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition hidden md:block {% if category == 'industrial' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('industrial')">Industrial</button>
+            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition hidden md:block {% if category == 'agricultural' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('agricultural')">Agricultural</button>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row w-full max-w-4xl bg-white rounded-2xl sm:rounded-full sm:h-14 p-1 shadow-2xl relative">
+        <div class="flex items-center px-4 sm:px-6 py-3 sm:py-0 border-b sm:border-b-0 sm:border-r border-gray-200 cursor-pointer text-gray-800 font-bold sm:min-w-[140px] justify-between hover:bg-gray-50 rounded-t-xl sm:rounded-t-none sm:rounded-l-full transition shrink-0">
+            {{ city|default:"Nagpur"|title }} <i class="bi bi-chevron-down text-sm text-gray-500 ml-2"></i>
+        </div>
+
+        <div class="flex-1 flex items-center px-4 py-2 sm:py-0 relative min-w-0">
+            <div class="flex items-center gap-2 mr-2 flex-wrap">
+                 {% for area in areas_list %}
+                    <span class="bg-gray-100 text-gray-800 border border-gray-200 text-xs px-3 py-1.5 rounded-full flex items-center gap-1 font-semibold whitespace-nowrap shadow-sm">{{ area|title }} <i class="bi bi-x-lg cursor-pointer hover:text-red-500" onclick="removeAreaChip('{{ area }}')"></i></span>
+                {% endfor %}
+            </div>
+            <input type="text" id="locInput" class="w-full h-full outline-none text-gray-800 text-sm bg-transparent font-medium min-w-0" placeholder="Search Locality, Builder or Project..." autocomplete="off" oninput="fetchAC(this.value)" onkeydown="handleACKey(event)">
+        </div>
+
+        <button onclick="applyLocSearch(); toggleSearchOverlay();" class="bg-brand-blue text-white h-11 sm:h-full px-6 sm:px-8 m-1 sm:m-0 rounded-xl sm:rounded-full font-bold hover:bg-brand-dark transition shadow-md shrink-0">Search</button>
+
+        <div class="autocomplete-drop w-full !top-[calc(100%+8px)] !rounded-xl !shadow-2xl !border-0" id="acDrop"></div>
+    </div>
+
+
+
+    </div>
+    <div class="flex-1 bg-transparent cursor-pointer" onclick="toggleSearchOverlay()"></div>
 </div>
 
+<!-- ── FILTER STRIP ── -->
 <div class="filter-strip">
   <div class="filter-strip-inner">
-
-    <div class="fpill {% if current_bhk %}active{% endif %}" id="pill-bhk" onclick="togglePanel('panel-bhk',this)">
+       <div class="fpill {% if current_bhk %}active{% endif %}" id="pill-bhk" data-valid-for="residential" onclick="togglePanel('panel-bhk',this)">
       {% if current_bhk %}<span class="dot"></span> {{ current_bhk }}{% else %}BHK Type{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel" id="panel-bhk" onclick="event.stopPropagation()">
@@ -301,26 +355,12 @@ a{text-decoration:none;color:inherit;}
     </div>
 
     <div class="fpill {% if budget_min or budget_max %}active{% endif %}" id="pill-budget" onclick="togglePanel('panel-budget',this)">
-      {% if budget_min or budget_max %}
-        <span class="dot"></span>
-        ₹{% if budget_min %}{{ budget_min|floatformat:0 }}{% else %}0{% endif %} – {% if budget_max %}{{ budget_max|floatformat:0 }}{% else %}Any{% endif %}
-      {% else %}
-        ₹ Budget
-      {% endif %}
+      {% if budget_min or budget_max %}<span class="dot"></span> ₹{% if budget_min %}{{ budget_min|floatformat:0 }}{% else %}0{% endif %} – {% if budget_max %}{{ budget_max|floatformat:0 }}{% else %}Any{% endif %}{% else %}₹ Budget{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel budget-panel" id="panel-budget" onclick="event.stopPropagation()">
         <div class="pp-title">Budget Range</div>
         <div class="budget-hist" id="budgetHist">
-          <div class="hist-bar in-range" style="height:25%"></div>
-          <div class="hist-bar in-range" style="height:40%"></div>
-          <div class="hist-bar in-range" style="height:60%"></div>
-          <div class="hist-bar in-range" style="height:100%"></div>
-          <div class="hist-bar in-range" style="height:80%"></div>
-          <div class="hist-bar in-range" style="height:65%"></div>
-          <div class="hist-bar in-range" style="height:50%"></div>
-          <div class="hist-bar in-range" style="height:35%"></div>
-          <div class="hist-bar in-range" style="height:20%"></div>
-          <div class="hist-bar in-range" style="height:15%"></div>
+          <div class="hist-bar in-range" style="height:25%"></div><div class="hist-bar in-range" style="height:40%"></div><div class="hist-bar in-range" style="height:60%"></div><div class="hist-bar in-range" style="height:100%"></div><div class="hist-bar in-range" style="height:80%"></div><div class="hist-bar in-range" style="height:65%"></div><div class="hist-bar in-range" style="height:50%"></div><div class="hist-bar in-range" style="height:35%"></div><div class="hist-bar in-range" style="height:20%"></div><div class="hist-bar in-range" style="height:15%"></div>
         </div>
         <div class="range-track" id="rangeTrack">
           <div class="range-fill" id="rangeFill"></div>
@@ -329,38 +369,29 @@ a{text-decoration:none;color:inherit;}
             <input type="range" id="rangeMax" min="0" max="200000" step="5000" value="{{ budget_max|default:200000 }}" oninput="updateRange()">
           </div>
         </div>
-        <div class="budget-vals">
-          <div class="bval-box" id="bValMin">₹{{ budget_min|default:"0" }}</div>
-          <span class="bval-sep">—</span>
-          <div class="bval-box" id="bValMax">₹{{ budget_max|default:"Any" }}</div>
-        </div>
+        <div class="budget-vals"><div class="bval-box" id="bValMin">₹{{ budget_min|default:"0" }}</div><span class="bval-sep">—</span><div class="bval-box" id="bValMax">₹{{ budget_max|default:"Any" }}</div></div>
         <button class="pp-apply" onclick="applyBudget()">Apply</button>
       </div>
     </div>
 
-    <div class="fpill {% if filter_owner or filter_agent or filter_builder %}active{% endif %}" id="pill-listed" onclick="togglePanel('panel-listed',this)">
-      {% if filter_owner %}
-          <span class="dot"></span> Owner
-      {% elif filter_agent %}
-          <span class="dot"></span> Agent
-      {% elif filter_builder %}
-          <span class="dot"></span> Builder
-      {% else %}
-          Listed By
-      {% endif %}
+      <div class="fpill {% if filter_listed_by %}active{% endif %}" id="pill-listed" onclick="togglePanel('panel-listed',this)">
+      {% if filter_listed_by %}<span class="dot"></span> {{ filter_listed_by_label|default:filter_listed_by }}{% else %}Listed By{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel" id="panel-listed" onclick="event.stopPropagation()">
         <div class="pp-title">Listed By</div>
         <div class="pp-options">
-          <button class="pp-btn {% if filter_owner %}sel{% endif %}" onclick="selectListedBy('owner')">Owner</button>
-          <button class="pp-btn {% if filter_agent %}sel{% endif %}" onclick="selectListedBy('agent')">Agent</button>
-          <button class="pp-btn {% if filter_builder %}sel{% endif %}" onclick="selectListedBy('builder')">Builder</button>
-          <button class="pp-btn {% if not filter_owner and not filter_agent and not filter_builder %}sel{% endif %}" onclick="selectListedBy('')">Any</button>
+          <button class="pp-btn {% if filter_listed_by == 'landlord' %}sel{% endif %}" onclick="selectListedBy('landlord')">Landlord</button>
+          <button class="pp-btn {% if filter_listed_by == 'rm' %}sel{% endif %}" onclick="selectListedBy('rm')">Relationship Manager</button>
+          <button class="pp-btn {% if filter_listed_by == 'agent' %}sel{% endif %}" onclick="selectListedBy('agent')">Agent</button>
+          <button class="pp-btn {% if filter_listed_by == 'admin' %}sel{% endif %}" onclick="selectListedBy('admin')">Admin</button>
+          <button class="pp-btn {% if filter_listed_by == 'agency_builder' %}sel{% endif %}" onclick="selectListedBy('agency_builder')">Agency/Builder</button>
+          <button class="pp-btn {% if not filter_listed_by %}sel{% endif %}" onclick="selectListedBy('')">Any</button>
         </div>
       </div>
     </div>
 
-    <div class="fpill {% if current_furnishing %}active{% endif %}" id="pill-furn" onclick="togglePanel('panel-furn',this)">
+
+       <div class="fpill {% if current_furnishing %}active{% endif %}" id="pill-furn" data-valid-for="residential,pg" onclick="togglePanel('panel-furn',this)">
       {% if current_furnishing %}<span class="dot"></span> {{ current_furnishing|title }}{% else %}Furnishing{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel" id="panel-furn" onclick="event.stopPropagation()">
@@ -374,420 +405,683 @@ a{text-decoration:none;color:inherit;}
       </div>
     </div>
 
-    <div class="fpill {% if current_prop_type %}active{% endif %}" id="pill-ptype" onclick="togglePanel('panel-ptype',this)">
+ <!-- PROPERTY TYPE for ALL (Dynamically swapped via JS) -->
+    <div class="fpill {% if current_prop_type %}active{% endif %}" id="pill-ptype" data-valid-for="all" onclick="togglePanel('panel-ptype',this)">
       {% if current_prop_type %}<span class="dot"></span> {{ current_prop_type }}{% else %}Property Type{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel" id="panel-ptype" onclick="event.stopPropagation()">
         <div class="pp-title">Property Type</div>
-        <div class="pp-options">
-          <button class="pp-btn {% if current_prop_type == 'Apartment' %}sel{% endif %}" onclick="selectPropType(this,'Apartment')">Apartment</button>
-          <button class="pp-btn {% if current_prop_type == 'Independent House' %}sel{% endif %}" onclick="selectPropType(this,'Independent House')">Independent House</button>
-          <button class="pp-btn {% if current_prop_type == 'Independent Floor' %}sel{% endif %}" onclick="selectPropType(this,'Independent Floor')">Independent Floor</button>
-          <button class="pp-btn {% if current_prop_type == 'Studio' %}sel{% endif %}" onclick="selectPropType(this,'Studio')">Studio</button>
-          <button class="pp-btn {% if current_prop_type == 'Duplex' %}sel{% endif %}" onclick="selectPropType(this,'Duplex')">Duplex</button>
-          <button class="pp-btn {% if current_prop_type == 'Penthouse' %}sel{% endif %}" onclick="selectPropType(this,'Penthouse')">Penthouse</button>
-          <button class="pp-btn {% if current_prop_type == 'Villa' %}sel{% endif %}" onclick="selectPropType(this,'Villa')">Villa</button>
-          <button class="pp-btn" onclick="selectPropType(this,'')">Any</button>
+        
+                <div class="pp-options" id="dynamicPropTypes">
+          {% for pt in available_prop_types %}
+            <button class="pp-btn {% if current_prop_type == pt %}sel{% endif %}" onclick="selectPropType(this,'{{ pt|escapejs }}')">{{ pt }}</button>
+          {% empty %}
+            <span style="font-size:.8rem;color:var(--muted);padding:6px 4px;">No property types listed yet</span>
+          {% endfor %}
+          <button class="pp-btn {% if not current_prop_type %}sel{% endif %}" onclick="selectPropType(this,'')">Any</button>
         </div>
       </div>
     </div>
+
+       <div id="categoryPillsContainer" style="display:contents"></div>
 
     <div class="fs-divider"></div>
 
     <div class="fpill {% if filter_verified %}active{% endif %}" onclick="toggleFilter('verified',this)">
       {% if filter_verified %}<span class="dot"></span>{% endif %}
-      <i class="bi bi-patch-check-fill" style="font-size:0.8rem;color:{% if filter_verified %}var(--primary){% else %}var(--muted){% endif %};"></i>
-      Verified
+      <i class="bi bi-patch-check-fill" style="font-size:0.8rem;color:{% if filter_verified %}var(--primary){% else %}var(--muted){% endif %};"></i> Verified
     </div>
 
-    <div class="fpill {% if filter_pet %}active{% endif %}" onclick="toggleFilter('pet',this)">
-      {% if filter_pet %}<span class="dot"></span>{% endif %}
-      🐾 Pet Friendly
+    <div class="fpill hidden {% if filter_pet %}active{% endif %}" onclick="toggleFilter('pet',this)">
+      {% if filter_pet %}<span class="dot"></span>{% endif %} 🐾 Pet Friendly
     </div>
 
     <div class="fpill" onclick="openMoreFilters()" style="{% if active_more_count > 0 %}background:var(--primary-light);border-color:var(--primary);color:var(--primary);{% endif %}">
       {% if active_more_count > 0 %}<span class="dot"></span>{% endif %}
-      <i class="bi bi-sliders" style="font-size:0.85rem;"></i>
-      More Filters{% if active_more_count > 0 %} ({{ active_more_count }}){% endif %}
+      <i class="bi bi-sliders" style="font-size:0.85rem;"></i> More Filters{% if active_more_count > 0 %} ({{ active_more_count }}){% endif %}
     </div>
 
     {% if active_filter_count > 0 %}
-    <div class="fpill" onclick="resetAllFilters()" style="color:#ef4444;border-color:#fecaca;">
-      <i class="bi bi-x-circle" style="font-size:0.85rem;"></i> Reset
-    </div>
+    <div class="fpill" onclick="resetAllFilters()" style="color:#ef4444;border-color:#fecaca;"><i class="bi bi-x-circle" style="font-size:0.85rem;"></i> Reset</div>
     {% endif %}
-
   </div>
 </div>
 
+
+
+<!-- ── SHORTS FULL-SCREEN PLAYER ── -->
+<div class="shorts-overlay" id="shortsOverlay">
+  <div class="shorts-stage" id="shortsStage">
+    <div class="shorts-progress-row" id="shortsProgressRow"></div>
+    <div class="shorts-topbar">
+      <div class="st-owner">
+        <div class="st-avatar" id="shortsAvatar">P</div>
+        <div class="st-name" id="shortsOwnerName">Owner<small id="shortsOwnerRole">Listed by</small></div>
+      </div>
+      <div class="st-actions">
+        <div class="st-btn" id="shortsMuteBtn" onclick="toggleShortsMute()"><i class="bi bi-volume-mute-fill"></i></div>
+        <div class="st-btn" id="shortsPauseBtn" onclick="toggleShortsPause()"><i class="bi bi-pause-fill"></i></div>
+        <div class="st-btn" onclick="closeShorts()"><i class="bi bi-x-lg"></i></div>
+      </div>
+    </div>
+    <div class="shorts-media" id="shortsMedia"></div>
+    <div class="shorts-tapzone left" onclick="shortsPrevFrame()"></div>
+    <div class="shorts-tapzone right" onclick="shortsNextFrame()"></div>
+    <div class="shorts-nav-arrow prev" onclick="shortsPrevProperty()"><i class="fa-solid fa-chevron-left"></i></div>
+    <div class="shorts-nav-arrow next" onclick="shortsNextProperty()"><i class="fa-solid fa-chevron-right"></i></div>
+
+    <div class="shorts-sheet" id="shortsSheet">
+      <div class="ss-handle" onclick="toggleShortsSheet()"></div>
+      <div class="ss-price-row">
+        <div>
+          <div class="ss-price" id="ssPrice">₹—</div>
+          <div class="ss-title" id="ssTitle">Property Title</div>
+          <div class="ss-loc"><i class="fa-solid fa-location-dot text-brand-blue"></i><span id="ssLoc">Location</span></div>
+        </div>
+      </div>
+      <div class="ss-stats" id="ssStats"></div>
+      <div class="ss-amenities" id="ssAmenities"></div>
+      <div class="ss-actions">
+        <button class="ss-know" onclick="shortsKnowMore()"><i class="bi bi-info-circle"></i> Know More</button>
+        <button class="ss-call" onclick="shortsContact()"><i class="fa-solid fa-phone"></i> Contact</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MORE FILTERS DRAWER (Unchanged Structure) ── -->
 <div class="mf-overlay" id="mfOverlay" onclick="closeMoreFilters()"></div>
 <div class="mf-drawer" id="mfDrawer">
   <div class="mf-head">
     <h3><i class="bi bi-sliders" style="margin-right:8px;"></i>More Filters</h3>
     <button class="mf-close" onclick="closeMoreFilters()"><i class="bi bi-x-lg"></i></button>
   </div>
-  <div class="mf-layout">
-    <div class="mf-sidebar">
-      <div class="mf-sidebar-item active" onclick="switchMFSection('sec-verified',this)">Verified</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-lease',this)">Lease Type</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-bathrooms',this)">Bathrooms</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-area',this)">Built-up Area</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-age',this)">Age of Property</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-amenities',this)">Amenities</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-parking',this)">Parking</div>
-      <div class="mf-sidebar-item" onclick="switchMFSection('sec-added',this)">Added</div>
-    </div>
-    <div class="mf-content">
-      <div class="mf-section active" id="sec-verified">
-        <div class="mf-section-title">Verified</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_verified %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_verified')">Show only verified properties</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-lease">
-        <div class="mf-section-title">Lease Type</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_lease == 'Family' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_lease','Family')">Family</button>
-          <button class="mf-btn {% if filter_lease == 'Company' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_lease','Company')">Company</button>
-          <button class="mf-btn {% if filter_lease == 'Bachelor' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_lease','Bachelor')">Bachelor</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-bathrooms">
-        <div class="mf-section-title">Bathrooms</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_bathrooms == '1' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','1')">1+</button>
-          <button class="mf-btn {% if filter_bathrooms == '2' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','2')">2+</button>
-          <button class="mf-btn {% if filter_bathrooms == '3' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','3')">3+</button>
-          <button class="mf-btn {% if filter_bathrooms == '4' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','4')">4+</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-area">
-        <div class="mf-section-title">Built-up Area (sq.ft)</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_area_range == '0-500' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','0-500')">Under 500</button>
-          <button class="mf-btn {% if filter_area_range == '500-1000' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','500-1000')">500 – 1000</button>
-          <button class="mf-btn {% if filter_area_range == '1000-1500' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','1000-1500')">1000 – 1500</button>
-          <button class="mf-btn {% if filter_area_range == '1500-2000' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','1500-2000')">1500 – 2000</button>
-          <button class="mf-btn {% if filter_area_range == '2000+' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','2000+')">2000+</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-age">
-        <div class="mf-section-title">Age of Property</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_age == '0-1' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','0-1')">Under 1 Year</button>
-          <button class="mf-btn {% if filter_age == '1-5' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','1-5')">1 – 5 Years</button>
-          <button class="mf-btn {% if filter_age == '5-10' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','5-10')">5 – 10 Years</button>
-          <button class="mf-btn {% if filter_age == '10-20' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','10-20')">10 – 20 Years</button>
-          <button class="mf-btn {% if filter_age == '20+' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','20+')">20+ Years</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-amenities">
-        <div class="mf-section-title">Amenities</div>
-        <div class="mf-options" id="amenitiesBtns">
-          <button class="mf-btn" data-amenity="Lift" onclick="toggleAmenity(this,'Lift')">Lift</button>
-          <button class="mf-btn" data-amenity="Power Backup" onclick="toggleAmenity(this,'Power Backup')">Power Backup</button>
-          <button class="mf-btn" data-amenity="Security" onclick="toggleAmenity(this,'Security')">Security</button>
-          <button class="mf-btn" data-amenity="CCTV" onclick="toggleAmenity(this,'CCTV')">CCTV</button>
-          <button class="mf-btn" data-amenity="Gym" onclick="toggleAmenity(this,'Gym')">Gym</button>
-          <button class="mf-btn" data-amenity="Swimming Pool" onclick="toggleAmenity(this,'Swimming Pool')">Swimming Pool</button>
-          <button class="mf-btn" data-amenity="Club House" onclick="toggleAmenity(this,'Club House')">Club House</button>
-          <button class="mf-btn" data-amenity="Park" onclick="toggleAmenity(this,'Park')">Park</button>
-          <button class="mf-btn" data-amenity="Intercom" onclick="toggleAmenity(this,'Intercom')">Intercom</button>
-          <button class="mf-btn" data-amenity="Gated Society" onclick="toggleAmenity(this,'Gated Society')">Gated Society</button>
-          <button class="mf-btn" data-amenity="Vastu Compliant" onclick="toggleAmenity(this,'Vastu Compliant')">Vastu Compliant</button>
-          <button class="mf-btn" data-amenity="Water Supply 24x7" onclick="toggleAmenity(this,'Water Supply 24x7')">Water Supply 24x7</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-parking">
-        <div class="mf-section-title">Parking</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_parking == 'Covered' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_parking','Covered')">Covered</button>
-          <button class="mf-btn {% if filter_parking == 'Open' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_parking','Open')">Open</button>
-          <button class="mf-btn {% if filter_parking == 'Both' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_parking','Both')">Both</button>
-        </div>
-      </div>
-      <div class="mf-section" id="sec-added">
-        <div class="mf-section-title">Added On</div>
-        <div class="mf-options">
-          <button class="mf-btn {% if filter_added == '1' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_added','1')">Last 1 Day</button>
-          <button class="mf-btn {% if filter_added == '7' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_added','7')">Last 7 Days</button>
-          <button class="mf-btn {% if filter_added == '30' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_added','30')">Last 30 Days</button>
-        </div>
-      </div>
-    </div>
+ 
+    <div class="mf-layout">
+    <div class="mf-sidebar" id="mfSidebar"></div>
+    <div class="mf-content" id="mfContent"></div>
   </div>
+
+
   <div class="mf-foot">
     <button class="mf-clear-btn" onclick="clearMoreFilters()">Clear All</button>
     <button class="mf-apply-btn" onclick="applyMoreFilters()">Apply Filters</button>
   </div>
 </div>
 
-<div class="page-wrap">
+<!-- ── MAIN CONTENT AREA ── -->
+<main class="max-w-[1340px] mx-auto w-full px-4 md:px-5 py-6 flex flex-col lg:flex-row gap-6 font-sans">
+        
+    <!-- Left Column: Listings -->
+    <div class="flex-1 w-full lg:w-2/3">
+        
+        <!-- Breadcrumbs & Header Info -->
+        <div class="mb-4">
+            <div class="text-xs text-gray-500 font-medium flex gap-2 mb-2 items-center">
+                <a href="/" class="hover:text-brand-blue">Home</a>
+                <span>›</span>
+                <span class="capitalize">{{ listing_type }}</span>
+                <span>›</span>
+                
+                                <span class="capitalize">{% if current_prop_type %}{{ current_prop_type }}{% else %}{{ category|default:"All" }}{% endif %}</span>
+                <span>›</span>
+                <span class="font-bold text-gray-800">{{ city|default:""|title }}</span>
+                {% for area in areas_list %}
+                    <span>›</span>
+                    <span class="font-bold text-gray-800">{{ area|title }}</span>
+                {% endfor %}
+            </div>
 
-  <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">
-    <a href="/" style="color:var(--body-text);">Home</a>
-    <span style="margin:0 5px;">›</span>
-    {{ listing_type|title }}
-    <span style="margin:0 5px;">›{{ category }}</span>
-    <span style="color:var(--sec);font-weight:600;">{{ city|default:""|title }}</span>
-    {% for area in areas_list %}
-      <span style="margin:0 5px;">›</span>
-      <span style="color:var(--sec);font-weight:600;">{{ area|title }}</span>
-    {% endfor %}
+            {% if active_filter_count > 0 %}
+            <div class="flex flex-wrap gap-2 mb-4 items-center">
+                {% for area in areas_list %}
+                <span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeAreaChip('{{ area }}')">{{ area|title }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>
+                {% endfor %}
+                {% if current_bhk %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('bhk')">{{ current_bhk }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if budget_min %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('budget_min')">Min ₹{{ budget_min }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if budget_max %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('budget_max')">Max ₹{{ budget_max }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if current_furnishing %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('furnishing')">{{ current_furnishing|title }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if current_prop_type %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('prop_type')">{{ current_prop_type }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if filter_verified %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('verified')">Verified <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if filter_pet %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('pet')">Pet Friendly <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                {% if filter_lease %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('lease')">{{ filter_lease }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
+                <span class="af-clear text-[11px] font-bold text-brand-blue ml-1 cursor-pointer hover:underline" onclick="resetAllFilters()">Clear All</span>
+            </div>
+            {% endif %}
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                <div>
+                    <div class="text-xs text-gray-500 font-medium mb-1">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of <strong class="text-gray-800">{{ total|default:"0" }}</strong> properties</div>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
+                        {% if listing_type == 'rent' %}Properties for Rent{% else %}Properties for Sale{% endif %}
+                        {% for area in areas_list %}{% if forloop.first %} in {% else %}, {% endif %}{{ area|title }}{% endfor %}{% if not areas_list %} in {{ city|title }}{% endif %}
+                    </h1>
+                </div>
+                <div class="flex items-center gap-2 text-sm shrink-0">
+                    <span class="text-gray-500 whitespace-nowrap font-medium hidden sm:block">Sort by:</span>
+                    <select class="border border-gray-300 rounded px-3 py-1.5 outline-none font-medium text-brand-dark bg-white shadow-sm focus:border-brand-blue transition" onchange="applySorting(this.value)">
+                        <option value="relevant"   {% if current_sort == 'relevant'   %}selected{% endif %}>Relevance</option>
+                        <option value="newest"     {% if current_sort == 'newest'     %}selected{% endif %}>Newest First</option>
+                        <option value="price-asc"  {% if current_sort == 'price-asc'  %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+   
+
+        <!-- ── PROPERTY SHORTS RAIL ── -->
+{% if properties %}
+<div class="shorts-section">
+  <div class="shorts-head">
+    <h2><i class="bi bi-play-circle-fill"></i> {{ city|default:"Nagpur"|title }} Shorts</h2>
+    <p>Quick video peeks of the best properties in this list</p>
   </div>
-
-  {% if active_filter_count > 0 %}
-  <div class="applied-row">
-    {% for area in areas_list %}
-    <span class="af-chip" onclick="removeAreaChip('{{ area }}')">
-      {{ area|title }} <i class="fas fa-times"></i>
-    </span>
-    {% endfor %}
-    {% if current_bhk %}
-    <span class="af-chip" onclick="removeFilterParam('bhk')">
-      {{ current_bhk }} <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if budget_min %}
-    <span class="af-chip" onclick="removeFilterParam('budget_min')">
-      Min ₹{{ budget_min }} <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if budget_max %}
-    <span class="af-chip" onclick="removeFilterParam('budget_max')">
-      Max ₹{{ budget_max }} <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if current_furnishing %}
-    <span class="af-chip" onclick="removeFilterParam('furnishing')">
-      {{ current_furnishing|title }} <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if current_prop_type %}
-    <span class="af-chip" onclick="removeFilterParam('prop_type')">
-      {{ current_prop_type }} <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if filter_verified %}
-    <span class="af-chip" onclick="removeFilterParam('verified')">
-      Verified <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if filter_pet %}
-    <span class="af-chip" onclick="removeFilterParam('pet')">
-      Pet Friendly <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    {% if filter_lease %}
-    <span class="af-chip" onclick="removeFilterParam('lease')">
-      {{ filter_lease }} <i class="fas fa-times"></i>
-    </span>
-    {% endif %}
-    <span class="af-clear" onclick="resetAllFilters()">Clear All</span>
-  </div>
-  {% endif %}
-
-  <div class="results-hdr">
-    <div>
-      <div class="rh-count">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of <strong>{{ total|default:"0" }}</strong> properties</div>
-      <div class="rh-title">
-        {% if listing_type == 'rent' %}Properties for Rent{% else %}Properties for Sale{% endif %}
-        {% for area in areas_list %}{% if forloop.first %} in {% else %}, {% endif %}{{ area|title }}{% endfor %}{% if not areas_list %} in {{ city|title }}{% endif %}
-      </div>
-      <div class="rh-sub">Last Updated: Today &nbsp;·&nbsp; Verified &amp; Owner listings</div>
-    </div>
-    <select class="sort-sel" onchange="applySorting(this.value)">
-      <option value="relevant"   {% if current_sort == 'relevant'   %}selected{% endif %}>Sort by: Relevance</option>
-      <option value="newest"     {% if current_sort == 'newest'     %}selected{% endif %}>Sort by: Newest</option>
-      <option value="price-asc"  {% if current_sort == 'price-asc'  %}selected{% endif %}>Price: Low → High</option>
-      <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High → Low</option>
-    </select>
-  </div>
-
-  <div class="listings-col" id="listingsCol">
-    {% for p in properties %}
-    <a href="/listing/{{ listing_type }}/{{ category|lower|slugify }}/{{ p.id }}/" class="pcard">
-
-      <div class="pc-img-wrap">
-        {% if p.image_url %}
-          <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy">
-          <div class="img-counter"><i class="bi bi-images"></i> {{ p.image_count|default:"1" }}</div>
-        {% else %}
-          <div class="pc-placeholder">
-            <i class="bi {% if p.property_type == 'commercial' %}bi-building{% elif p.property_type == 'pg' %}bi-people-fill{% else %}bi-house-door-fill{% endif %}"></i>
-            <span>{{ p.property_type|default:"Residential" }}</span>
-          </div>
-        {% endif %}
-
-        <div class="img-badges">
-          {% if p.is_new %}<span class="ibadge ib-new">New</span>{% endif %}
-          {% if p.is_verified %}<span class="ibadge ib-verif">✓ Verified</span>{% endif %}
-          {% if p.is_featured %}<span class="ibadge ib-feat">Featured</span>{% endif %}
-        </div>
-
-        <div class="owner-av">{{ p.owner_initials|default:"O" }}</div>
-
-        <div class="img-price">
-          <div>
-            <div class="amt">{{ p.price_display|default:"Price on Request" }}</div>
-            {% if listing_type == 'rent' %}<div class="per">per month</div>{% endif %}
-          </div>
-          <button class="btn-save" onclick="event.preventDefault();toggleSave('{{ p.id }}',this)" title="Save">
-            <i class="bi bi-heart"></i>
-          </button>
-        </div>
-      </div>
-
-      <div class="pc-body">
-        <div class="pc-top">
-          <div class="pc-owner-row">
-            <i class="bi bi-person-circle" style="font-size:0.9rem;"></i>
-            <strong>{{ p.uploaded_by_name|default:"Unknown User" }}</strong>
-            <span>·</span>
-            <span>{{ p.uploaded_by_role|default:"Owner" }}</span>
-          </div>
-          {% if p.is_new %}
-          <span class="pc-new-badge">New</span>
-          {% endif %}
-        </div>
-
-        <div>
-          <div class="pc-title">{{ p.title }}</div>
-          <div class="pc-addr">
-            <i class="bi bi-geo-alt-fill" style="color:var(--primary);font-size:0.8rem;"></i>
-            {{ p.location }}
-          </div>
-        </div>
-
-        <div class="pc-specs">
-          {% if p.area %}
-          <div class="spec-col">
-            <div class="spec-val">{{ p.area }}</div>
-            <div class="spec-lbl">Built-up Area</div>
-          </div>
-          {% endif %}
-          {% if p.beds %}
-          <div class="spec-col">
-            <div class="spec-val">{{ p.beds }}</div>
-            <div class="spec-lbl">Configuration</div>
-          </div>
-          {% elif p.total_beds %}
-          <div class="spec-col">
-            <div class="spec-val">{{ p.total_beds }} Beds</div>
-            <div class="spec-lbl">Beds</div>
-          </div>
-          {% endif %}
-          {% if p.furnishing %}
-          <div class="spec-col">
-            <div class="spec-val">{{ p.furnishing|title }}</div>
-            <div class="spec-lbl">Furnishing</div>
-          </div>
-          {% endif %}
-          {% if p.floor %}
-          <div class="spec-col">
-            <div class="spec-val">{{ p.floor }}</div>
-            <div class="spec-lbl">Floor</div>
-          </div>
-          {% endif %}
-        </div>
-
-        {% if p.description %}
-        <div class="pc-desc">{{ p.description }}</div>
-        {% endif %}
-
-        <div class="pc-highlights">
-          {% if p.property_type %}
-          <span class="hl-tag ptype">
-            <i class="bi bi-building" style="font-size:0.75rem;"></i>
-            {{ p.property_type|title }}
-          </span>
-          {% endif %}
-          {% if p.is_verified %}
-          <span class="hl-tag verified">
-            <i class="bi bi-patch-check-fill" style="font-size:0.75rem;"></i> Verified
-          </span>
-          {% endif %}
-          {% if p.pet_friendly %}
-          <span class="hl-tag">🐾 Pet Friendly</span>
-          {% endif %}
-          {% if p.pg_for %}
-          <span class="hl-tag">👤 For {{ p.pg_for|title }}</span>
-          {% endif %}
-          {% for amenity in p.amenities|slice:":4" %}
-          <span class="hl-tag">
-            <i class="bi bi-check-circle" style="font-size:0.7rem;color:var(--green);"></i>
-            {{ amenity }}
-          </span>
-          {% endfor %}
-          {% if p.amenities|length > 4 %}
-          <span class="hl-tag" style="background:#f0ecfe;border-color:#c4b3f9;color:var(--primary);">
-            +{{ p.amenities|length|add:"-4" }} more
-          </span>
-          {% endif %}
-        </div>
-
-        <div class="pc-footer">
-          <div class="pc-updated">
-            <strong>Updated</strong> recently
-            {% if p.facing %} · Facing {{ p.facing }}{% endif %}
-          </div>
-          <div class="pc-btns">
-            <button class="btn-whatsapp" onclick="event.preventDefault();whatsappListing('{{ p.phone|escapejs }}','{{ p.title|escapejs }}')">
-              <i class="fab fa-whatsapp"></i>
-            </button>
-            <button class="btn-contact" onclick="event.preventDefault();callListing('{{ p.phone|escapejs }}','{{ p.uploaded_by_name|escapejs }}')">
-              <i class="bi bi-telephone-fill"></i> Contact
-            </button>
-          </div>
-        </div>
-      </div>
-    </a>
-    {% empty %}
-    <div class="empty-state">
-      <i class="bi bi-search"></i>
-      <h3>No properties found</h3>
-      <p>Try adjusting your filters or searching in a different area</p>
-      <button class="btn-reset" onclick="resetAllFilters()">Clear Filters</button>
-    </div>
-    {% endfor %}
-  </div>
-
-  {% if page_obj.paginator.num_pages > 1 %}
-  <div class="pagination-row">
-    {% if page_obj.has_previous %}
-    <a class="pg-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
-      <i class="bi bi-chevron-left"></i>
-    </a>
-    {% else %}
-    <span class="pg-btn disabled"><i class="bi bi-chevron-left"></i></span>
-    {% endif %}
-
-    {% for num in page_obj.paginator.page_range %}
-      {% if page_obj.number == num %}
-        <span class="pg-btn current">{{ num }}</span>
-      {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-        <a class="pg-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
-      {% endif %}
-    {% endfor %}
-
-    {% if page_obj.has_next %}
-    <a class="pg-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
-      <i class="bi bi-chevron-right"></i>
-    </a>
-    {% else %}
-    <span class="pg-btn disabled"><i class="bi bi-chevron-right"></i></span>
-    {% endif %}
-  </div>
-  <div class="pg-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ total }} total results</div>
-  {% endif %}
-
+  <div class="shorts-track" id="shortsTrack"></div>
 </div>
+{% endif %}
+        <div>
+            {% for p in properties %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6 flex flex-col md:flex-row hover:shadow-md transition">
+                
+                <!-- Image Slider -->
+                <div class="relative w-full md:w-[280px] h-48 md:h-auto bg-gray-100 shrink-0 overflow-hidden group">
+                    <div id="track-{{ p.id }}" data-current="0" class="flex w-full h-full transition-transform duration-300 ease-in-out">
+                        {% if p.images_list %}
+                            {% for img in p.images_list %}
+                                <img src="{{ img }}" alt="{{ p.title }}" loading="lazy" class="w-full h-full object-cover shrink-0 min-w-full">
+                            {% endfor %}
+                        {% elif p.image_url %}
+                            <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy" class="w-full h-full object-cover shrink-0 min-w-full">
+                        {% else %}
+                            <div class="w-full h-full min-w-full min-h-[200px] flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-indigo-50 to-purple-100 shrink-0">
+                                <i class="bi {% if p.property_type == 'commercial' %}bi-building{% elif p.property_type == 'pg' %}bi-people-fill{% else %}bi-house-door-fill{% endif %} text-4xl text-brand-blue opacity-50"></i>
+                                <span class="text-[10px] font-bold text-brand-blue opacity-60 uppercase tracking-widest">{{ p.property_type|default:"Property" }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Agent/Owner Label -->
+                   <!-- Listed By Name Label -->
+<div class="absolute top-2 left-0 bg-brand-dark text-white text-[11px] font-medium px-3 py-1 rounded-r-full flex items-center gap-2 shadow-sm z-10">
+    <i class="fa-solid {% if p.listed_by_role == 'agent' %}fa-user-tie{% else %}fa-user{% endif %} text-[10px]"></i> 
+    {{ p.listed_by_name|default:p.uploaded_by_name|default:"Owner" }}
+</div>
+
+                    <!-- Badges -->
+                    <div class="absolute top-10 left-2 flex gap-1 flex-wrap z-10">
+                        {% if p.is_new %}<span class="bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">New</span>{% endif %}
+                        {% if p.is_verified %}<span class="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">✓ Verified</span>{% endif %}
+                        {% if p.is_featured %}<span class="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">Featured</span>{% endif %}
+                    </div>
+
+                    <!-- Navigation Arrows -->
+                    {% if p.image_count > 1 %}
+                    <button onclick="event.preventDefault(); event.stopPropagation(); slideImage('{{ p.id }}', -1)" class="absolute top-1/2 -translate-y-1/2 left-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-brand-dark transition shadow-md hover:bg-white z-20">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <button onclick="event.preventDefault(); event.stopPropagation(); slideImage('{{ p.id }}', 1)" class="absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-brand-dark transition shadow-md hover:bg-white z-20">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                    {% endif %}
+
+                    <!-- Counter -->
+                    <div class="absolute bottom-2 right-2 text-white text-[10px] font-medium bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm flex items-center gap-1 z-10">
+                        {% if p.image_count > 1 %}
+                            <span id="counter-{{ p.id }}">1</span>/{{ p.image_count }}
+                        {% else %}
+                            <i class="bi bi-images"></i> 1
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Card Details -->
+                <div class="p-4 md:p-5 flex-1 flex flex-col justify-between min-w-0">
+                    <div>
+                       <a href="{% url 'property_detail' listing_type=p.listing_type|lower category=p.url_category|slugify slug=p.title|slugify pk=p.id %}">
+    <h2 class="text-lg font-bold text-gray-900 mb-1 hover:text-brand-blue cursor-pointer transition truncate">
+        {{ p.title }}
+    </h2>
+</a>
+                        <p class="text-xs text-gray-500 mb-3 font-medium flex items-center gap-1 truncate"><i class="fa-solid fa-location-dot text-brand-blue"></i> {{ p.location }}</p>
+                        
+                        <!-- Grid Stats & Price Breakup -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3 border-b border-gray-100 pb-3 relative">
+                            
+                            <!-- PRICE BREAKDOWN COLUMN -->
+                            <div>
+                                <div class="text-[1.1rem] font-bold text-gray-900 leading-tight">{{ p.price_display|default:"Price on Request" }}</div>
+                                
+                                <a href="javascript:void(0);" onclick="togglePriceBreakup(event, 'pb-{{ p.id }}')" class="text-[10px] text-brand-blue font-medium hover:underline block mt-0.5">see price breakup</a>
+                                {% if p.listing_type == 'rent' %}<div class="text-[9px] text-gray-500 mt-1 uppercase tracking-wide">per month</div>{% endif %}
+
+                                <!-- HOUSING.COM STYLE POPOVER -->
+                              
+<div id="pb-{{ p.id }}" class="price-breakup-popover hidden fixed bg-white border border-gray-200 shadow-2xl rounded-xl w-[92vw] max-w-[480px] z-[9999] p-5 text-gray-800 cursor-default" onclick="event.stopPropagation();">
+
+                                    <button onclick="togglePriceBreakup(event, 'pb-{{ p.id }}')" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800"><i class="bi bi-x-lg text-sm"></i></button>
+                                    
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <!-- Column 1: Monthly -->
+                                        <div class="border-r border-gray-200 border-dashed pr-3">
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4 flex items-center gap-1.5"><i class="bi bi-calendar2-week"></i> Monthly</div>
+                                            <div class="mb-4">
+                                                <div class="text-[10px] text-gray-500 mb-0.5">Rental</div>
+                                                <div class="font-bold text-sm text-gray-900">{{ p.price_display|default:"-" }}</div>
+                                            </div>
+                                            <div class="mb-4">
+                                                <div class="text-[10px] text-gray-500 mb-0.5">Maintenance</div>
+                                                <div class="font-bold text-xs text-gray-900">{{ p.maintenance_display|default:"Included in rent" }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-[10px] text-gray-500 mb-0.5">Parking</div>
+                                                <div class="font-bold text-xs text-gray-900">Included in rent</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Column 2: One Time -->
+                                        <div class="border-r border-gray-200 border-dashed px-1">
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4 flex items-center gap-1.5"><i class="bi bi-cash-coin"></i> One Time</div>
+                                            <div class="mb-4">
+                                                <div class="text-[10px] text-gray-500 mb-0.5">{{ "Brokerage" }}</div>
+                                                <div class="font-bold text-sm text-gray-900">{{ p.brokerage_display|default:"-" }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-[10px] text-gray-500 mb-0.5">Advance Rent</div>
+                                                <div class="font-bold text-sm text-gray-900">{{ p.advance_rent_display|default:"-" }}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Column 3: Refundable -->
+                                        <div class="pl-1">
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4 flex items-center gap-1.5"><i class="bi bi-arrow-return-left"></i> Refundable</div>
+                                            <div class="mb-4">
+                                                <div class="text-[10px] text-gray-500 mb-0.5">Security Deposit</div>
+                                                <div class="font-bold text-sm text-gray-900">{{ p.security_deposit_display|default:"-" }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-[10px] text-gray-500 mb-0.5">Lock in period</div>
+                                                <div class="font-bold text-xs text-gray-900">Standard</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+                                        <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Total Move-in Cost</span>
+                                        <span class="text-lg font-bold text-brand-blue">{{ p.total_movein_display|default:"-" }}</span>
+                                    </div>
+                                </div>
+                                <!-- END POPOVER -->
+
+
+                            </div>
+
+                            {% if p.area %}
+                            <div>
+                                <div class="text-sm font-semibold text-gray-800 leading-tight">{{ p.area }}</div>
+                                <div class="text-[9px] text-gray-500 mt-0.5 uppercase tracking-wide">Area</div>
+                            </div>
+                            {% endif %}
+                            {% if p.beds %}
+                            <div>
+                                <div class="text-sm font-semibold text-gray-800 leading-tight">{{ p.beds }}</div>
+                                <div class="text-[9px] text-gray-500 mt-0.5 uppercase tracking-wide">Config</div>
+                            </div>
+                            {% endif %}
+                            {% if p.furnishing %}
+                            <div>
+                                <div class="text-sm font-semibold text-gray-800 leading-tight">{{ p.furnishing|title }}</div>
+                                <div class="text-[9px] text-gray-500 mt-0.5 uppercase tracking-wide">Furnishing</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if p.description %}
+                        <div class="text-xs text-gray-600 mb-3 line-clamp-2">{{ p.description|striptags }}</div>
+                        {% endif %}
+
+                        <!-- Highlights & Amenities (Fixed Array Rendering) -->
+                        <div class="text-xs text-gray-600 mb-2 flex flex-wrap gap-1.5 items-center">
+                            <span class="font-semibold text-gray-800 mr-1">Highlights:</span> 
+                            {% if p.property_type %}<span class="bg-blue-50 border border-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-medium"><i class="bi bi-building"></i> {{ p.property_type|title }}</span>{% endif %}
+                            {% if p.pet_friendly %}<span class="bg-gray-50 border border-gray-200 px-2 py-1 rounded text-[10px] font-medium">🐾 Pet Friendly</span>{% endif %}
+                            
+                                                       {% if p.amenities %}
+                                <span class="amenities-holder" data-amenities="{{ p.amenities|escapejs }}"></span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="flex items-end justify-between mt-3 pt-3 border-t border-gray-50">
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wide leading-tight">
+                            Updated<br><span class="font-bold text-gray-700 mt-0.5 inline-block normal-case text-xs">Recently</span>
+                        </div>
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <button onclick="event.preventDefault();toggleSave('{{ p.id }}',this)" class="w-9 h-9 border border-gray-300 rounded flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition shadow-sm bg-white">
+                                <i class="fa-regular fa-heart text-base"></i>
+                            </button>
+                            <button onclick="event.preventDefault();whatsappListing('{{ p.phone|escapejs }}','{{ p.title|escapejs }}')" class="w-9 h-9 border border-green-500 bg-green-50 text-green-600 rounded flex items-center justify-center hover:bg-green-500 hover:text-white transition shadow-sm">
+                                <i class="fa-brands fa-whatsapp text-lg"></i>
+                            </button>
+                            <button onclick="event.preventDefault();callListing('{{ p.phone|escapejs }}','{{ p.uploaded_by_name|escapejs }}')" class="bg-brand-blue hover:bg-brand-dark text-white font-semibold rounded px-4 md:px-6 py-2 transition shadow-sm flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-phone"></i> Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-200">
+                <i class="bi bi-search text-5xl text-gray-300 block mb-4"></i>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">No properties found</h3>
+                <p class="text-sm text-gray-500 mb-6">Try adjusting your filters or searching in a different area</p>
+                <button onclick="resetAllFilters()" class="bg-brand-blue text-white px-6 py-2 rounded font-semibold shadow-sm hover:bg-brand-dark transition">Clear Filters</button>
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+        <!-- Pagination -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="flex justify-center items-center gap-2 mt-8">
+            {% if page_obj.has_previous %}
+            <a class="w-10 h-10 border border-gray-300 rounded bg-white flex items-center justify-center text-gray-600 hover:border-brand-blue hover:text-brand-blue transition font-medium" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a>
+            {% else %}
+            <span class="w-10 h-10 border border-gray-200 rounded bg-gray-50 flex items-center justify-center text-gray-400 font-medium cursor-not-allowed"><i class="bi bi-chevron-left"></i></span>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="w-10 h-10 border border-brand-blue rounded bg-brand-blue flex items-center justify-center text-white font-bold shadow-sm">{{ num }}</span>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                <a class="w-10 h-10 border border-gray-300 rounded bg-white flex items-center justify-center text-gray-600 hover:border-brand-blue hover:text-brand-blue transition font-medium" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a class="w-10 h-10 border border-gray-300 rounded bg-white flex items-center justify-center text-gray-600 hover:border-brand-blue hover:text-brand-blue transition font-medium" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a>
+            {% else %}
+            <span class="w-10 h-10 border border-gray-200 rounded bg-gray-50 flex items-center justify-center text-gray-400 font-medium cursor-not-allowed"><i class="bi bi-chevron-right"></i></span>
+            {% endif %}
+        </div>
+        <div class="text-xs text-gray-500 text-center mt-3">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+        {% endif %}
+
+    </div>
+
+    <!-- Right Column: Sidebar -->
+    <div class="hidden lg:block w-1/3 max-w-[340px] shrink-0 space-y-5">
+        
+        <!-- Platform Lead Promo Banner -->
+        <div class="bg-gradient-to-br from-brand-dark to-indigo-900 rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-hidden text-white">
+            <div class="relative z-10 w-4/5">
+                <h3 class="text-lg font-bold leading-snug mb-2">
+                    Need Expert Assistance?
+                </h3>
+                <p class="text-xs text-indigo-200 mb-4">Let our Property Advisors handle the search, negotiation, and paperwork for you.</p>
+                <button class="bg-brand-yellow text-brand-dark font-bold text-sm px-4 py-2 rounded shadow-sm hover:bg-yellow-500 transition">Talk to Advisor</button>
+            </div>
+            <div class="absolute right-[-20px] bottom-[-20px] w-32 h-32 opacity-20 pointer-events-none">
+                <i class="fa-solid fa-headset text-9xl text-white"></i>
+            </div>
+        </div>
+
+        <!-- Property Services Promo Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <h3 class="text-base font-bold text-gray-900">Platform Services</h3>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-indigo-50 transition cursor-pointer">
+                    <div class="w-10 h-10 bg-indigo-100 text-brand-blue rounded flex items-center justify-center shrink-0">
+                        <i class="fa-regular fa-file-lines text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800">Rental Agreement</h4>
+                        <p class="text-[10px] text-gray-500 mt-0.5">Draft and register online seamlessly.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-indigo-50 transition cursor-pointer">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-truck-fast text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800">Packers & Movers</h4>
+                        <p class="text-[10px] text-gray-500 mt-0.5">Verified shifting services at best prices.</p>
+                    </div>
+                </div>
+            </div>
+
+           <a href="{% url 'services' %}" class="w-full mt-5 border border-brand-blue text-brand-blue text-sm font-semibold rounded py-2 hover:bg-indigo-50 transition text-center inline-block">
+    Explore All Services
+</a>
+        </div>
+    </div>
+</main>
+
+<!-- ── RESTORED FULL FOOTER FROM HOME PAGE ── -->
+<footer>
+    <div class="footer-newsletter">
+        <div class="footer-newsletter-inner">
+            <div>
+                <h3>Stay Updated!</h3>
+                <p>Subscribe to get the latest property updates.</p>
+            </div>
+            <div class="footer-social d-flex gap-2">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-whatsapp"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
+            </div>
+            <div>
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+                <a href="#" class="fl-link">Short-term Stays</a>
+                <a href="#" class="fl-link">Rent Agreement</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+                <a href="#" class="fl-link">New Projects</a>
+                <a href="#" class="fl-link">Plots &amp; Land</a>
+                <a href="#" class="fl-link">Home Loans</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+                <a href="#" class="fl-link">Agent Registration</a>
+                <a href="#plansSection" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Contact Support</a>
+            </div>
+            <div>
+                <div class="fl-title">Company</div>
+                <a href="{% url 'blog' %}" class="fl-link">Blog</a>
+                <a href="{% url 'services' %}" class="fl-link">Services</a>
+                <a href="#" class="fl-link">About Us</a>
+                <a href="#" class="fl-link">Contact Us</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+        <span>Privacy Policy · Terms · Sitemap</span>
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
 // ════════════════════════════════════════
-// SECURE FILTER STATE (DEFAULTS APPLIED)
+// SEARCH OVERLAY TOGGLE
+// ════════════════════════════════════════
+function toggleSearchOverlay() {
+    const overlay = document.getElementById('expandedSearchOverlay');
+    if (overlay.classList.contains('hidden')) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden'; // Stop background scrolling
+        // Slight delay to ensure it renders before focusing
+        setTimeout(() => document.getElementById('locInput').focus(), 100);
+    } else {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+}
+
+// ════════════════════════════════════════
+// DYNAMIC PROPERTY TYPES (BASED ON CATEGORY)
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+// DYNAMIC UI RENDERING (Pill visibility only —
+// Property Type options now come from Django, see Change 2A)
+// ════════════════════════════════════════
+function renderDynamicUI() {
+    const FS_category = '{{ category|default:"residential"|escapejs }}'.toLowerCase();
+
+    document.querySelectorAll('.fpill[data-valid-for]').forEach(pill => {
+        const validFor = pill.getAttribute('data-valid-for').split(',');
+        if (validFor.includes('all') || validFor.includes(FS_category) || FS_category === 'all') {
+            pill.style.display = 'inline-flex';
+        } else {
+            pill.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", renderDynamicUI);
+
+// ════════════════════════════════════════
+// CATEGORY-SPECIFIC TOP FILTER PILLS
+// ════════════════════════════════════════
+const CATEGORY_PILLS_CONFIG = {
+  pg: [
+    { id: 'gender', label: 'Gender', key: 'pg_for', options: ['Boys','Girls','Co-Living'] },
+    { id: 'roomtype', label: 'Room Type', key: 'room_type', options: ['Single','Double','Triple','Quad'] },
+    { id: 'food', label: 'Food Available', key: 'meals', options: [['1','Available'],['0','Not Available']] },
+  ],
+  commercial: [
+    { id: 'seats', label: 'Seating Capacity', key: 'seats', options: [['0-10','Up to 10'],['10-25','10–25'],['25-50','25–50'],['50+','50+']] },
+  ],
+  plot: [
+    { id: 'facing', label: 'Facing', key: 'road_facing', options: ['North','South','East','West'] },
+    { id: 'corner', label: 'Corner Plot', key: 'corner_plot', options: [['1','Corner Plot Only']] },
+  ],
+  industrial: [
+    { id: 'power', label: 'Power Supply', key: 'power_supply', options: [['1','Available']] },
+    { id: 'crane', label: 'Crane / Machinery', key: 'crane', options: [['1','Available']] },
+  ],
+  agricultural: [
+    { id: 'soil', label: 'Soil Type', key: 'soil_type', options: ['Black Soil','Red Soil','Alluvial','Sandy'] },
+    { id: 'water', label: 'Water Source', key: 'water_source', options: ['Borewell','Canal','River','Well'] },
+  ],
+  residential: [],
+};
+
+function genericSelect(key, val) {
+  FS[key] = val;
+  go();
+}
+
+function renderCategoryPills() {
+  const catKey = (FS.category || 'residential').toLowerCase();
+  const pills = CATEGORY_PILLS_CONFIG[catKey] || [];
+  const container = document.getElementById('categoryPillsContainer');
+  if (!container) return;
+
+  container.innerHTML = pills.map(p => {
+    const activeVal = FS[p.key];
+    const isActive = !!activeVal;
+    const activeLabel = Array.isArray(p.options[0])
+      ? ((p.options.find(o => o[0] === activeVal) || [])[1] || p.label)
+      : (activeVal || p.label);
+
+    const optsHtml = p.options.map(opt => {
+      const val = Array.isArray(opt) ? opt[0] : opt;
+      const label = Array.isArray(opt) ? opt[1] : opt;
+      const sel = activeVal === val ? 'sel' : '';
+      return `<button class="pp-btn ${sel}" onclick="genericSelect('${p.key}','${val}')">${label}</button>`;
+    }).join('');
+
+    return `
+      <div class="fpill ${isActive ? 'active' : ''}" id="pill-${p.id}" onclick="togglePanel('panel-${p.id}',this)">
+        ${isActive ? '<span class="dot"></span> ' + activeLabel : p.label}
+        <i class="bi bi-chevron-down chevron"></i>
+        <div class="pill-panel" id="panel-${p.id}" onclick="event.stopPropagation()">
+          <div class="pp-title">${p.label}</div>
+          <div class="pp-options">
+            ${optsHtml}
+            <button class="pp-btn" onclick="genericSelect('${p.key}','')">Any</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', renderCategoryPills);
+
+
+// ════════════════════════════════════════
+// AMENITIES SPLIT & RENDER (fixes character-splitting bug)
+// ════════════════════════════════════════
+
+// ════════════════════════════════════════
+// AMENITIES SPLIT & RENDER (with expandable "+N More")
+// ════════════════════════════════════════
+function renderAmenityChips(holder, list, expanded) {
+    const visibleCount = expanded ? list.length : 4;
+    let html = '';
+    list.slice(0, visibleCount).forEach(amenity => {
+        html += `<span class="bg-gray-50 border border-gray-200 px-2 py-1 rounded text-[10px] font-medium whitespace-nowrap"><i class="fa-solid fa-check text-green-600 mr-1"></i>${amenity}</span>`;
+    });
+    if (list.length > 4) {
+        if (expanded) {
+            html += `<span class="text-brand-blue font-medium cursor-pointer ml-1 hover:underline text-[11px]" onclick="toggleAmenitiesExpand(this)">Show Less</span>`;
+        } else {
+            html += `<span class="text-brand-blue font-medium cursor-pointer ml-1 hover:underline text-[11px]" onclick="toggleAmenitiesExpand(this)">+ ${list.length - 4} More</span>`;
+        }
+    }
+    holder.innerHTML = html;
+}
+
+function toggleAmenitiesExpand(triggerEl) {
+    const holder = triggerEl.closest('.amenities-holder');
+    if (!holder) return;
+    const raw = holder.getAttribute('data-amenities') || '';
+    const list = raw.split(',').map(a => a.trim()).filter(Boolean);
+    const isExpanded = holder.getAttribute('data-expanded') === '1';
+    holder.setAttribute('data-expanded', isExpanded ? '0' : '1');
+    renderAmenityChips(holder, list, !isExpanded);
+}
+
+function renderAmenities() {
+    document.querySelectorAll('.amenities-holder').forEach(holder => {
+        const raw = holder.getAttribute('data-amenities') || '';
+        const list = raw.split(',').map(a => a.trim()).filter(Boolean);
+        if (!list.length) return;
+        holder.setAttribute('data-expanded', '0');
+        renderAmenityChips(holder, list, false);
+    });
+}
+document.addEventListener("DOMContentLoaded", renderAmenities);
+// ════════════════════════════════════════
+// PRESERVED COMPLEX JS FILTER LOGIC
 // ════════════════════════════════════════
 const FS = {
   type: '{{ listing_type|default:"rent"|escapejs }}',
@@ -800,33 +1094,29 @@ const FS = {
   prop_type: '{{ current_prop_type|default:""|escapejs }}',
   sort: '{{ current_sort|default:"relevant"|escapejs }}',
   verified: '{{ filter_verified|default:""|escapejs }}',
-  owner: '{{ filter_owner|default:""|escapejs }}',
-  agent: '{{ filter_agent|default:""|escapejs }}',
-  builder: '{{ filter_builder|default:""|escapejs }}',
+
+  listed_by: '{{ filter_listed_by|default:""|escapejs }}',
+
   pet: '{{ filter_pet|default:""|escapejs }}',
   lease: '{{ filter_lease|default:""|escapejs }}',
   bathrooms: '{{ filter_bathrooms|default:""|escapejs }}',
   area_range: '{{ filter_area_range|default:""|escapejs }}',
   age: '{{ filter_age|default:""|escapejs }}',
+
   amenities: {{ amenities_json|default:"[]"|safe }},
   parking: '{{ filter_parking|default:""|escapejs }}',
   added: '{{ filter_added|default:""|escapejs }}',
+  seats: '', cabins: '', meeting_rooms: '',
+  room_type: '', pg_for: '', meals: '',
+  road_facing: '', corner_plot: '', fencing: '',
+  power_supply: '', crane: '', loading_dock: '',
+  soil_type: '', irrigation: '', water_source: '',
 };
 
-let MF = {
-  verified: FS.verified,
-  lease: FS.lease,
-  bathrooms: FS.bathrooms,
-  area_range: FS.area_range,
-  age: FS.age,
-  amenities: [...FS.amenities],
-  parking: FS.parking,
-  added: FS.added,
-};
+let MF = { amenities: [...FS.amenities] };
+Object.keys(FS).forEach(k => { if (!(k in MF)) MF[k] = FS[k]; });
 
-// ════════════════════════════════════════
-// URL BUILDER ENGINE
-// ════════════════════════════════════════
+
 function buildURL(page) {
   const p = new URLSearchParams();
   p.set('type', FS.type);
@@ -839,9 +1129,9 @@ function buildURL(page) {
   if (FS.prop_type) p.set('prop_type', FS.prop_type);
   if (FS.sort) p.set('sort', FS.sort);
   if (FS.verified) p.set('verified', '1');
-  if (FS.owner) p.set('owner', '1');
-  if (FS.agent) p.set('agent', '1');
-  if (FS.builder) p.set('builder', '1');
+
+  if (FS.listed_by) p.set('listed_by', FS.listed_by);
+
   if (FS.pet) p.set('pet', '1');
   if (FS.lease) p.set('lease', FS.lease);
   if (FS.bathrooms) p.set('bathrooms', FS.bathrooms);
@@ -850,8 +1140,14 @@ function buildURL(page) {
   if (FS.amenities.length) p.set('amenities', FS.amenities.join(','));
   if (FS.parking) p.set('parking', FS.parking);
   if (FS.added) p.set('added', FS.added);
-  if (page && page > 1) p.set('page', page);
 
+  // NEW: category-specific filter fields
+  ['seats','cabins','meeting_rooms','room_type','pg_for','meals',
+   'road_facing','corner_plot','fencing','power_supply','crane',
+   'loading_dock','soil_type','irrigation','water_source'
+  ].forEach(k => { if (FS[k]) p.set(k, FS[k]); });
+
+  if (page && page > 1) p.set('page', page);
   return window.location.pathname + '?' + p.toString();
 }
 
@@ -861,9 +1157,17 @@ function go(page) {
 
 function switchType(t) {
   FS.type = t;
-  document.getElementById('toggleRent').classList.toggle('active', t === 'rent');
-  document.getElementById('toggleSale').classList.toggle('active', t === 'sale');
   go();
+}
+
+function switchCategory(cat) {
+    FS.category = cat;
+    
+    // Smart routing: Ensure valid listing types based on category
+    if (cat === 'pg') FS.type = 'rent';
+    if (['plot', 'industrial', 'agricultural'].includes(cat)) FS.type = 'sale';
+    
+    go();
 }
 
 function removeAreaChip(area) {
@@ -880,9 +1184,6 @@ function applyLocSearch() {
   go();
 }
 
-// ════════════════════════════════════════
-// AUTOCOMPLETE ENGINE
-// ════════════════════════════════════════
 let acTimer = null, acIndex = -1, acData = [];
 
 function fetchAC(q) {
@@ -892,14 +1193,17 @@ function fetchAC(q) {
     closeAC();
     return;
   }
+  
+  // CRITICAL FIX: Convert FS.type to 'sale' if it is set to 'resale'
+  let t = FS.type === 'resale' ? 'sale' : FS.type;
+
   acTimer = setTimeout(() => {
-    fetch(`/api/search-suggestions/?q=${encodeURIComponent(q)}&type=${FS.type}`)
+    fetch(`/api/search-suggestions/?q=${encodeURIComponent(q)}&type=${t}`)
       .then(r => r.json())
       .then(d => renderAC(d.suggestions || []))
       .catch(() => closeAC());
   }, 220);
 }
-
 function renderAC(items) {
   const drop = document.getElementById('acDrop');
   acData = items;
@@ -935,10 +1239,7 @@ function pickAC(text) {
 
 function closeAC() {
   const d = document.getElementById('acDrop');
-  if (d) {
-    d.classList.remove('open');
-    d.innerHTML = '';
-  }
+  if (d) { d.classList.remove('open'); d.innerHTML = ''; }
   acIndex = -1;
 }
 
@@ -965,7 +1266,7 @@ function handleACKey(e) {
 }
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.loc-wrap')) closeAC();
+  if (!e.target.closest('#expandedSearchOverlay')) closeAC();
   if (!e.target.closest('.fpill')) closeAllPanels();
 });
 
@@ -990,7 +1291,6 @@ function togglePanel(id, pillEl) {
 function closeAllPanels() {
   document.querySelectorAll('.pill-panel').forEach(p => p.classList.remove('open'));
 }
-
 window.addEventListener('scroll', closeAllPanels, { passive: true });
 window.addEventListener('resize', closeAllPanels, { passive: true });
 
@@ -999,14 +1299,11 @@ function selectFurn(btn, val) { FS.furnishing = val; go(); }
 function selectPropType(btn, val) { FS.prop_type = val; go(); }
 function toggleFilter(key, pill) { FS[key] = FS[key] ? '' : '1'; go(); }
 
+
 function selectListedBy(type) {
-  FS.owner = ''; FS.agent = ''; FS.builder = '';
-  if (type === 'owner') FS.owner = '1';
-  else if (type === 'agent') FS.agent = '1';
-  else if (type === 'builder') FS.builder = '1';
+  FS.listed_by = type;
   go();
 }
-
 function fmtMoney(v) {
   v = parseInt(v);
   if (v >= 100000) return '₹' + (v/100000).toFixed(v%100000===0?0:1) + 'L';
@@ -1018,30 +1315,24 @@ function updateRange() {
   const rMin = document.getElementById('rangeMin');
   const rMax = document.getElementById('rangeMax');
   if (!rMin || !rMax) return;
-
   let lo = parseInt(rMin.value);
   let hi = parseInt(rMax.value);
   if (lo > hi) { rMin.value = hi; lo = hi; }
-
   const pct_lo = (lo / 200000) * 100;
   const pct_hi = (hi / 200000) * 100;
-
   const fill = document.getElementById('rangeFill');
   if (fill) {
     fill.style.left = pct_lo + '%';
     fill.style.width = (pct_hi - pct_lo) + '%';
   }
-
   document.getElementById('bValMin').textContent = fmtMoney(lo);
   document.getElementById('bValMax').textContent = hi >= 200000 ? '₹Any' : fmtMoney(hi);
-
   const bars = document.querySelectorAll('.hist-bar');
   bars.forEach((bar, i) => {
     const barPct = (i + 0.5) / bars.length * 100;
     bar.classList.toggle('in-range', barPct >= pct_lo && barPct <= pct_hi);
   });
 }
-
 function applyBudget() {
   const lo = document.getElementById('rangeMin').value;
   const hi = document.getElementById('rangeMax').value;
@@ -1049,27 +1340,112 @@ function applyBudget() {
   FS.budget_max = parseInt(hi) < 200000 ? String(hi) : '';
   go();
 }
-
 document.addEventListener('DOMContentLoaded', () => { updateRange(); });
 
+
+
 // ════════════════════════════════════════
-// MORE FILTERS DRAWER MANAGEMENT
+// CATEGORY-SPECIFIC MORE FILTERS CONFIG
 // ════════════════════════════════════════
+const MF_CATEGORY_CONFIG = {
+  residential: [
+    { id: 'verified', title: 'Verified', type: 'toggle', key: 'verified', label: 'Show only verified properties' },
+    { id: 'lease', title: 'Lease Type', type: 'single', key: 'lease', options: ['Family', 'Company', 'Bachelor'] },
+    { id: 'bathrooms', title: 'Bathrooms', type: 'single', key: 'bathrooms', options: ['1', '2', '3', '4'], suffix: '+' },
+    { id: 'area', title: 'Built-up Area (sq.ft)', type: 'single', key: 'area_range', options: [['0-500','Under 500'],['500-1000','500 – 1000'],['1000-1500','1000 – 1500'],['1500-2000','1500 – 2000'],['2000+','2000+']] },
+    { id: 'age', title: 'Age of Property', type: 'single', key: 'age', options: [['0-1','Under 1 Year'],['1-5','1 – 5 Years'],['5-10','5 – 10 Years'],['10-20','10 – 20 Years'],['20+','20+ Years']] },
+    { id: 'amenities', title: 'Amenities', type: 'multi', key: 'amenities', options: ['Lift','Power Backup','Security','CCTV','Gym','Swimming Pool','Club House','Park','Intercom','Gated Society','Vastu Compliant','Water Supply 24x7'] },
+    { id: 'parking', title: 'Parking', type: 'single', key: 'parking', options: ['Covered', 'Open', 'Both'] },
+    { id: 'added', title: 'Added On', type: 'single', key: 'added', options: [['1','Last 1 Day'],['7','Last 7 Days'],['30','Last 30 Days']] },
+  ],
+  commercial: [
+    { id: 'verified', title: 'Verified', type: 'toggle', key: 'verified', label: 'Show only verified properties' },
+    { id: 'seats', title: 'Seating Capacity', type: 'single', key: 'seats', options: [['0-10','Up to 10'],['10-25','10 – 25'],['25-50','25 – 50'],['50+','50+']] },
+    { id: 'cabins', title: 'Cabins', type: 'single', key: 'cabins', options: ['1', '2', '3', '5'], suffix: '+' },
+    { id: 'meeting_rooms', title: 'Meeting Rooms', type: 'single', key: 'meeting_rooms', options: ['1', '2', '3'], suffix: '+' },
+    { id: 'parking', title: 'Parking', type: 'single', key: 'parking', options: ['Covered', 'Open', 'Both'] },
+    { id: 'added', title: 'Added On', type: 'single', key: 'added', options: [['1','Last 1 Day'],['7','Last 7 Days'],['30','Last 30 Days']] },
+  ],
+  pg: [
+    { id: 'verified', title: 'Verified', type: 'toggle', key: 'verified', label: 'Show only verified properties' },
+    { id: 'room_type', title: 'Room Type', type: 'single', key: 'room_type', options: ['Single', 'Double', 'Triple', 'Quad'] },
+    { id: 'pg_for', title: 'Suitable For', type: 'single', key: 'pg_for', options: ['Boys', 'Girls', 'Co-Living'] },
+    { id: 'meals', title: 'Meals', type: 'toggle', key: 'meals', label: 'Meals Included' },
+    { id: 'added', title: 'Added On', type: 'single', key: 'added', options: [['1','Last 1 Day'],['7','Last 7 Days'],['30','Last 30 Days']] },
+  ],
+  plot: [
+    { id: 'verified', title: 'Verified', type: 'toggle', key: 'verified', label: 'Show only verified properties' },
+    { id: 'road_facing', title: 'Road Facing', type: 'single', key: 'road_facing', options: ['North', 'South', 'East', 'West'] },
+    { id: 'corner_plot', title: 'Corner Plot', type: 'toggle', key: 'corner_plot', label: 'Corner Plot Only' },
+    { id: 'fencing', title: 'Fencing', type: 'toggle', key: 'fencing', label: 'Fenced Plots Only' },
+    { id: 'added', title: 'Added On', type: 'single', key: 'added', options: [['1','Last 1 Day'],['7','Last 7 Days'],['30','Last 30 Days']] },
+  ],
+  industrial: [
+    { id: 'verified', title: 'Verified', type: 'toggle', key: 'verified', label: 'Show only verified properties' },
+    { id: 'power_supply', title: 'Power Supply', type: 'toggle', key: 'power_supply', label: 'Heavy Industrial Power Available' },
+    { id: 'crane', title: 'Crane / Heavy Machinery', type: 'toggle', key: 'crane', label: 'Crane Support Available' },
+    { id: 'loading_dock', title: 'Loading Dock', type: 'toggle', key: 'loading_dock', label: 'Loading Dock Available' },
+    { id: 'added', title: 'Added On', type: 'single', key: 'added', options: [['1','Last 1 Day'],['7','Last 7 Days'],['30','Last 30 Days']] },
+  ],
+  agricultural: [
+    { id: 'verified', title: 'Verified', type: 'toggle', key: 'verified', label: 'Show only verified properties' },
+    { id: 'soil_type', title: 'Soil Type', type: 'single', key: 'soil_type', options: ['Black Soil', 'Red Soil', 'Alluvial', 'Sandy'] },
+    { id: 'irrigation', title: 'Irrigation', type: 'toggle', key: 'irrigation', label: 'Irrigation Facility Available' },
+    { id: 'water_source', title: 'Water Source', type: 'single', key: 'water_source', options: ['Borewell', 'Canal', 'River', 'Well'] },
+    { id: 'added', title: 'Added On', type: 'single', key: 'added', options: [['1','Last 1 Day'],['7','Last 7 Days'],['30','Last 30 Days']] },
+  ],
+};
+
+function getMFCategoryKey() {
+  const cat = (FS.category || 'residential').toLowerCase();
+  return MF_CATEGORY_CONFIG[cat] ? cat : 'residential';
+}
+
+function renderMoreFiltersDrawer() {
+  const catKey = getMFCategoryKey();
+  const sections = MF_CATEGORY_CONFIG[catKey];
+  const sidebar = document.getElementById('mfSidebar');
+  const content = document.getElementById('mfContent');
+
+  sidebar.innerHTML = sections.map((s, i) =>
+    `<div class="mf-sidebar-item ${i === 0 ? 'active' : ''}" onclick="switchMFSection('sec-${s.id}',this)">${s.title}</div>`
+  ).join('');
+
+  content.innerHTML = sections.map((s, i) => {
+    let optsHtml = '';
+    if (s.type === 'toggle') {
+      const isSel = !!MF[s.key];
+      optsHtml = `<button class="mf-btn ${isSel ? 'sel' : ''}" onclick="toggleMFBtn(this,'mf_${s.key}')">${s.label}</button>`;
+    } else if (s.type === 'multi') {
+      optsHtml = s.options.map(opt =>
+        `<button class="mf-btn ${MF[s.key] && MF[s.key].includes(opt) ? 'sel' : ''}" data-amenity="${opt}" onclick="toggleAmenity(this,'${opt}')">${opt}</button>`
+      ).join('');
+    } else {
+      optsHtml = s.options.map(opt => {
+        const val = Array.isArray(opt) ? opt[0] : opt;
+        const label = Array.isArray(opt) ? opt[1] : (opt + (s.suffix || ''));
+        const isSel = MF[s.key] === val;
+        return `<button class="mf-btn ${isSel ? 'sel' : ''}" onclick="toggleMFBtn(this,'mf_${s.key}','${val}')">${label}</button>`;
+      }).join('');
+    }
+    return `<div class="mf-section ${i === 0 ? 'active' : ''}" id="sec-${s.id}">
+      <div class="mf-section-title">${s.title}</div>
+      <div class="mf-options">${optsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
 function openMoreFilters() {
+  renderMoreFiltersDrawer();
   document.getElementById('mfOverlay').classList.add('open');
   document.getElementById('mfDrawer').classList.add('open');
   document.body.style.overflow = 'hidden';
-  document.querySelectorAll('#amenitiesBtns .mf-btn').forEach(btn => {
-    btn.classList.toggle('sel', MF.amenities.includes(btn.dataset.amenity));
-  });
 }
-
 function closeMoreFilters() {
   document.getElementById('mfOverlay').classList.remove('open');
   document.getElementById('mfDrawer').classList.remove('open');
   document.body.style.overflow = '';
 }
-
 function switchMFSection(sectionId, item) {
   document.querySelectorAll('.mf-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.mf-sidebar-item').forEach(s => s.classList.remove('active'));
@@ -1077,15 +1453,20 @@ function switchMFSection(sectionId, item) {
   item.classList.add('active');
 }
 
+
 function toggleMFBtn(btn, key, val) {
+  const cleanKey = key.replace('mf_', '');
   const isActive = btn.classList.contains('sel');
-  const siblings = btn.closest('.mf-options').querySelectorAll('.mf-btn');
-  siblings.forEach(b => b.classList.remove('sel'));
+  if (val) {
+    const siblings = btn.closest('.mf-options').querySelectorAll('.mf-btn');
+    siblings.forEach(b => b.classList.remove('sel'));
+  }
   if (!isActive) {
     btn.classList.add('sel');
-    MF[key.replace('mf_', '')] = val || '1';
+    MF[cleanKey] = val || '1';
   } else {
-    MF[key.replace('mf_', '')] = '';
+    btn.classList.remove('sel');
+    MF[cleanKey] = '';
   }
 }
 
@@ -1098,36 +1479,38 @@ function toggleAmenity(btn, name) {
   }
 }
 
+
 function clearMoreFilters() {
-  MF = { verified: '', lease: '', bathrooms: '', area_range: '', age: '', amenities: [], parking: '', added: '' };
+  const catKey = getMFCategoryKey();
+  MF_CATEGORY_CONFIG[catKey].forEach(s => { MF[s.key] = s.type === 'multi' ? [] : ''; });
   document.querySelectorAll('#mfDrawer .mf-btn').forEach(b => b.classList.remove('sel'));
 }
-
 function applyMoreFilters() {
-  FS.verified = MF.verified;
-  FS.lease = MF.lease;
-  FS.bathrooms = MF.bathrooms;
-  FS.area_range = MF.area_range;
-  FS.age = MF.age;
-  FS.amenities = [...MF.amenities];
-  FS.parking = MF.parking;
-  FS.added = MF.added;
+  const catKey = getMFCategoryKey();
+  MF_CATEGORY_CONFIG[catKey].forEach(s => {
+    FS[s.key] = s.type === 'multi' ? [...(MF[s.key] || [])] : (MF[s.key] || '');
+  });
+  if (MF.amenities) FS.amenities = [...MF.amenities];
   closeMoreFilters();
   go();
 }
 
+
 function removeFilterParam(key) {
   const p = new URLSearchParams(window.location.search);
-  const map = { bhk: 'bhk', budget_min: 'budget_min', budget_max: 'budget_max', furnishing: 'furnishing', prop_type: 'prop_type', verified: 'verified', owner: 'owner', agent: 'agent', builder: 'builder', pet: 'pet', lease: 'lease', area: 'areas' };
+
+  const map = { bhk: 'bhk', budget_min: 'budget_min', budget_max: 'budget_max', furnishing: 'furnishing', prop_type: 'prop_type', verified: 'verified', listed_by: 'listed_by', pet: 'pet', lease: 'lease', area: 'areas' };
+
   p.delete(map[key] || key);
   window.location.href = window.location.pathname + '?' + p.toString();
 }
-
 function resetAllFilters() {
-  FS.areas = []; FS.bhk = ''; FS.budget_min = ''; FS.budget_max = ''; FS.furnishing = ''; FS.prop_type = ''; FS.verified = ''; FS.owner = ''; FS.agent = ''; FS.builder = ''; FS.pet = ''; FS.lease = ''; FS.bathrooms = ''; FS.area_range = ''; FS.age = ''; FS.amenities = []; FS.parking = ''; FS.added = '';
+
+   FS.areas = []; FS.bhk = ''; FS.budget_min = ''; FS.budget_max = ''; FS.furnishing = ''; FS.prop_type = ''; FS.verified = ''; FS.listed_by = ''; FS.pet = ''; FS.lease = ''; FS.bathrooms = ''; FS.area_range = ''; FS.age = ''; FS.amenities = []; FS.parking = ''; FS.added = '';
+
+
   go();
 }
-
 function applySorting(val) {
   const p = new URLSearchParams(window.location.search);
   p.set('sort', val);
@@ -1136,7 +1519,13 @@ function applySorting(val) {
 
 function toggleSave(id, btn) {
   btn.classList.toggle('saved');
-  btn.querySelector('i').className = btn.classList.contains('saved') ? 'bi bi-heart-fill' : 'bi bi-heart';
+  if (btn.classList.contains('saved')) {
+      btn.querySelector('i').classList.replace('fa-regular', 'fa-solid');
+      btn.classList.replace('text-gray-400', 'text-red-500');
+  } else {
+      btn.querySelector('i').classList.replace('fa-solid', 'fa-regular');
+      btn.classList.replace('text-red-500', 'text-gray-400');
+  }
 }
 
 function callListing(phone, ownerName) {
@@ -1162,6 +1551,396 @@ function whatsappListing(phone, title) {
   const msg = encodeURIComponent(`Hi, I found your property "${title}" on PropCRM. Is it still available?`);
   window.open(`https://wa.me/91${phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
 }
+
+// ════════════════════════════════════════
+// IMAGE CAROUSEL SLIDER LOGIC
+// ════════════════════════════════════════
+function slideImage(propertyId, step) {
+    const track = document.getElementById('track-' + propertyId);
+    const counter = document.getElementById('counter-' + propertyId);
+    
+    if (!track || !counter) return;
+
+    // We count how many physical <img> tags are in the HTML
+    const totalImages = track.children.length; 
+    
+    // If the backend only sent 1 image, don't try to slide into empty space
+    if (totalImages <= 1) return; 
+
+    let currentIndex = parseInt(track.getAttribute('data-current') || '0');
+    currentIndex += step;
+    
+    // Loop around logic
+    if (currentIndex < 0) {
+        currentIndex = totalImages - 1;
+    } else if (currentIndex >= totalImages) {
+        currentIndex = 0;
+    }
+    
+    // Apply transform to slide
+    track.setAttribute('data-current', currentIndex);
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    counter.innerText = currentIndex + 1;
+}
+
+
+
+// ════════════════════════════════════════
+// DYNAMIC UI RENDERING (Filters & Dropdowns)
+// ════════════════════════════════════════
+function renderDynamicUI() {
+    const FS_category = '{{ category|default:"residential"|escapejs }}'.toLowerCase();
+    const currentPropType = '{{ current_prop_type|default:""|escapejs }}';
+
+    // 1. Show/Hide Pills based on Category
+    document.querySelectorAll('.fpill[data-valid-for]').forEach(pill => {
+        const validFor = pill.getAttribute('data-valid-for').split(',');
+        if (validFor.includes('all') || validFor.includes(FS_category) || FS_category === 'all') {
+            pill.style.display = 'inline-flex';
+        } else {
+            pill.style.display = 'none';
+        }
+    });
+
+    // 2. Render correct options inside "Property Type" dropdown
+    const typeMap = {
+        'residential': ['Apartment', 'Independent House', 'Villa', 'Builder Floor', 'Studio', 'Duplex', 'Penthouse'],
+        'commercial': ['Office Space', 'Shop', 'Showroom', 'Warehouse', 'Industrial Building'],
+        'pg': ['Boys PG', 'Girls PG', 'Co-Living'],
+        'plot': ['Residential Plot', 'Commercial Plot', 'Agricultural Plot', 'Industrial Plot'],
+        'industrial': ['Factory', 'Manufacturing', 'Warehouse', 'Industrial Shed'],
+        'agricultural': ['Farm Land', 'Orchard', 'Plantation']
+    };
+
+    const typesToRender = typeMap[FS_category] || typeMap['residential'];
+    const container = document.getElementById('dynamicPropTypes');
+    
+    if(!container) return;
+
+    let html = '';
+    typesToRender.forEach(type => {
+        const isSel = (currentPropType === type) ? 'sel' : '';
+        html += `<button class="pp-btn ${isSel}" onclick="selectPropType(this,'${type}')">${type}</button>`;
+    });
+    html += `<button class="pp-btn ${!currentPropType ? 'sel' : ''}" onclick="selectPropType(this,'')">Any</button>`;
+    
+    container.innerHTML = html;
+}
+
+// Execute immediately when the page loads
+document.addEventListener("DOMContentLoaded", renderDynamicUI);
+
+
+// ════════════════════════════════════════
+// PRICE BREAKDOWN POPOVER LOGIC
+// ════════════════════════════════════════
+
+function togglePriceBreakup(event, popoverId) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const targetPopover = document.getElementById(popoverId);
+    const isCurrentlyHidden = targetPopover.classList.contains('hidden');
+
+    document.querySelectorAll('.price-breakup-popover').forEach(p => p.classList.add('hidden'));
+
+    if (isCurrentlyHidden) {
+        const trigger = event.currentTarget;
+        const rect = trigger.getBoundingClientRect();
+        const popW = Math.min(window.innerWidth * 0.92, 480);
+        const popH = 340; // approx popover height
+
+        let left = rect.left;
+        let top = rect.bottom + 8;
+
+        if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+        if (left < 12) left = 12;
+        if (top + popH > window.innerHeight && rect.top - popH > 0) {
+            top = rect.top - popH - 8;
+        }
+
+        targetPopover.style.left = left + 'px';
+        targetPopover.style.top = top + 'px';
+        targetPopover.classList.remove('hidden');
+    }
+}
+
+document.addEventListener('click', function(event) {
+    document.querySelectorAll('.price-breakup-popover').forEach(p => {
+        if (!p.contains(event.target)) p.classList.add('hidden');
+    });
+});
+
+window.addEventListener('scroll', () => {
+    document.querySelectorAll('.price-breakup-popover').forEach(p => p.classList.add('hidden'));
+}, { passive: true, capture: true });
+
+
+</script>
+
+
+<script>
+// Built straight from the `properties` you already render — no view.py changes required.
+// If a property has a real video, wire p.video_url / p.video_source into your
+// normalize function later and this will automatically prefer the real video over the slideshow.
+const SHORTS = [
+  {% for p in properties %}
+  {
+    id: "{{ p.id|escapejs }}",
+    title: "{{ p.title|escapejs }}",
+    location: "{{ p.location|escapejs }}",
+    price: "{{ p.price_display|default:"Price on Request"|escapejs }}",
+    area: "{{ p.area|default:""|escapejs }}",
+    beds: "{{ p.beds|default:""|escapejs }}",
+    furnishing: "{{ p.furnishing|default:""|escapejs }}",
+
+    ownerName: "{{ p.listed_by_name|default:p.uploaded_by_name|default:"Owner"|escapejs }}",
+    ownerRole: "{{ p.listed_by_role|default:p.uploaded_by_role|default:"Listed by"|escapejs }}",
+
+    phone: "{{ p.phone|escapejs }}",
+    propertyType: "{{ p.property_type|default:""|escapejs }}",
+    amenities: "{{ p.amenities|default:""|escapejs }}",
+    images: [
+      {% if p.images_list %}{% for img in p.images_list %}"{{ img|escapejs }}",{% endfor %}
+      {% elif p.image_url %}"{{ p.image_url|escapejs }}",{% endif %}
+    ],
+    url: "{% url 'property_detail' listing_type=p.listing_type|lower category=p.url_category|slugify slug=p.title|slugify pk=p.id %}",
+       videoUrl: {% if p.video_url %}"{{ p.video_url|escapejs }}"{% else %}null{% endif %}
+  },
+  {% endfor %}
+].filter(s => s.images.length > 0 || s.videoUrl);
+
+let shortsCurrentIndex = 0, shortsFrameIndex = 0, shortsFrameTimer = null, shortsFrameStart = 0;
+let shortsPaused = false, shortsMuted = true;
+const SHORT_FRAME_DURATION = 3500;
+
+function renderShortsRail() {
+  const track = document.getElementById('shortsTrack');
+  if (!track || !SHORTS.length) {
+    const section = document.querySelector('.shorts-section');
+    if (section) section.style.display = 'none';
+    return;
+  }
+  track.innerHTML = SHORTS.map((s, i) => {
+    const thumb = s.images[0] || '';
+    const initial = (s.ownerName || 'P').trim().charAt(0).toUpperCase();
+    return `
+      <div class="short-card" onclick="openShorts(${i})">
+        <img class="sc-img active" src="${thumb}" alt="">
+        <div class="sc-grad"></div>
+        <div class="sc-avatar">${initial}</div>
+        ${s.videoUrl ? '<div class="sc-play"><i class="fa-solid fa-play"></i></div>' : ''}
+        <div class="sc-badge">${s.videoUrl ? 'Video' : 'Shorts'}</div>
+        <div class="sc-info">
+          <div class="sc-price">${s.price}</div>
+          <div class="sc-sub">${s.beds ? s.beds + ' • ' : ''}${s.location}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  track.querySelectorAll('.short-card').forEach((card, i) => {
+    const imgs = SHORTS[i].images;
+    if (imgs.length < 2) return;
+    let idx = 0;
+    setInterval(() => {
+      if (!isElementVisible(card)) return;
+      idx = (idx + 1) % imgs.length;
+      const im = card.querySelector('.sc-img');
+      im.style.opacity = 0;
+      setTimeout(() => { im.src = imgs[idx]; im.style.opacity = 1; }, 250);
+    }, 2200 + i * 130);
+  });
+}
+
+function isElementVisible(el) {
+  const r = el.getBoundingClientRect();
+  return r.right > 0 && r.left < window.innerWidth;
+}
+
+function openShorts(index) {
+  shortsCurrentIndex = index;
+  document.getElementById('shortsOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadShortsProperty();
+}
+
+function closeShorts() {
+  document.getElementById('shortsOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+
+  
+  stopShortsFrame();
+  document.getElementById('shortsMedia').innerHTML = '';
+
+
+  document.getElementById('shortsSheet').classList.remove('expanded');
+}
+
+function loadShortsProperty() {
+  const s = SHORTS[shortsCurrentIndex];
+  if (!s) return;
+
+  stopShortsFrame();
+  shortsFrameIndex = 0;
+
+  document.getElementById('shortsAvatar').textContent = (s.ownerName || 'P').charAt(0).toUpperCase();
+  document.getElementById('shortsOwnerName').innerHTML = `${s.ownerName}<small>${s.ownerRole || 'Listed by'}</small>`;
+  document.getElementById('ssPrice').textContent = s.price;
+  document.getElementById('ssTitle').textContent = s.title;
+  document.getElementById('ssLoc').textContent = s.location;
+
+  const stats = [];
+  if (s.beds) stats.push([s.beds, 'Config']);
+  if (s.area) stats.push([s.area, 'Area']);
+  if (s.furnishing) stats.push([s.furnishing, 'Furnishing']);
+  if (s.propertyType) stats.push([s.propertyType, 'Type']);
+  document.getElementById('ssStats').innerHTML = stats.map(([v, l]) =>
+    `<div class="ss-stat"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  const amenityList = (s.amenities || '').split(',').map(a => a.trim()).filter(Boolean).slice(0, 8);
+  document.getElementById('ssAmenities').innerHTML = amenityList.map(a =>
+    `<span><i class="fa-solid fa-check" style="margin-right:4px;"></i>${a}</span>`).join('');
+
+  const frameCount = s.videoUrl ? 1 : Math.max(1, s.images.length);
+  const row = document.getElementById('shortsProgressRow');
+  row.innerHTML = '';
+  for (let i = 0; i < frameCount; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'sp-bar';
+    bar.innerHTML = '<div class="sp-fill"></div>';
+    row.appendChild(bar);
+  }
+
+  const media = document.getElementById('shortsMedia');
+  media.innerHTML = '';
+
+  if (s.videoUrl) {
+    const vid = document.createElement('video');
+    vid.src = s.videoUrl;
+    vid.autoplay = true;
+    vid.muted = shortsMuted;
+    vid.playsInline = true;
+    vid.onended = () => shortsNextProperty();
+    vid.ontimeupdate = () => {
+      if (!vid.duration) return;
+      const fill = row.querySelector('.sp-bar .sp-fill');
+      if (fill) fill.style.width = ((vid.currentTime / vid.duration) * 100) + '%';
+    };
+    media.appendChild(vid);
+    updateMuteIcon();
+  } else {
+    s.images.forEach((src, i) => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.dataset.i = i;
+      if (i === 0) img.classList.add('active');
+      media.appendChild(img);
+    });
+    
+    startShortsFrame();
+  }
+}
+
+function startShortsFrame() { shortsFrameStart = Date.now(); animateFrameProgress(); }
+
+function animateFrameProgress() {
+  if (shortsPaused) { shortsFrameTimer = requestAnimationFrame(animateFrameProgress); return; }
+  const elapsed = Date.now() - shortsFrameStart;
+  const pct = Math.min(100, (elapsed / SHORT_FRAME_DURATION) * 100);
+  const bars = document.querySelectorAll('#shortsProgressRow .sp-bar');
+  const activeBar = bars[shortsFrameIndex];
+  if (activeBar) activeBar.querySelector('.sp-fill').style.width = pct + '%';
+  if (elapsed >= SHORT_FRAME_DURATION) { shortsNextFrame(); return; }
+  shortsFrameTimer = requestAnimationFrame(animateFrameProgress);
+}
+
+function stopShortsFrame() { if (shortsFrameTimer) cancelAnimationFrame(shortsFrameTimer); shortsFrameTimer = null; }
+
+function shortsNextFrame() {
+  const s = SHORTS[shortsCurrentIndex];
+  if (!s || s.videoUrl) return;
+  const bars = document.querySelectorAll('#shortsProgressRow .sp-bar');
+  if (bars[shortsFrameIndex]) bars[shortsFrameIndex].querySelector('.sp-fill').style.width = '100%';
+  if (shortsFrameIndex >= s.images.length - 1) { shortsNextProperty(); return; }
+  shortsFrameIndex++;
+  document.querySelectorAll('#shortsMedia img').forEach(im =>
+    im.classList.toggle('active', Number(im.dataset.i) === shortsFrameIndex));
+  startShortsFrame();
+}
+
+function shortsPrevFrame() {
+  const s = SHORTS[shortsCurrentIndex];
+  if (!s || s.videoUrl) { shortsPrevProperty(); return; }
+  if (shortsFrameIndex === 0) { shortsPrevProperty(); return; }
+  shortsFrameIndex--;
+  document.querySelectorAll('#shortsMedia img').forEach(im =>
+    im.classList.toggle('active', Number(im.dataset.i) === shortsFrameIndex));
+  startShortsFrame();
+}
+
+function shortsNextProperty() {
+  if (shortsCurrentIndex < SHORTS.length - 1) { shortsCurrentIndex++; loadShortsProperty(); }
+  else closeShorts();
+}
+function shortsPrevProperty() {
+  if (shortsCurrentIndex > 0) { shortsCurrentIndex--; loadShortsProperty(); }
+}
+
+function toggleShortsPause() {
+  shortsPaused = !shortsPaused;
+  document.querySelector('#shortsPauseBtn i').className = shortsPaused ? 'bi bi-play-fill' : 'bi bi-pause-fill';
+  const vid = document.querySelector('#shortsMedia video');
+  if (vid) shortsPaused ? vid.pause() : vid.play();
+
+
+}
+
+
+
+
+
+
+function updateMuteIcon() {
+  document.querySelector('#shortsMuteBtn i').className = shortsMuted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+}
+
+
+
+
+
+function toggleShortsMute() {
+  shortsMuted = !shortsMuted;
+  updateMuteIcon();
+  const vid = document.querySelector('#shortsMedia video');
+  if (vid) vid.muted = shortsMuted;
+}
+
+
+
+
+function toggleShortsSheet() { document.getElementById('shortsSheet').classList.toggle('expanded'); }
+function shortsKnowMore() { const s = SHORTS[shortsCurrentIndex]; if (s && s.url) window.location.href = s.url; }
+function shortsContact() { const s = SHORTS[shortsCurrentIndex]; if (s) callListing(s.phone, s.ownerName); }
+
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('shortsOverlay').classList.contains('open')) return;
+  if (e.key === 'Escape') closeShorts();
+  if (e.key === 'ArrowRight') shortsNextFrame();
+  if (e.key === 'ArrowLeft') shortsPrevFrame();
+});
+
+let shortsTouchStartY = 0;
+document.getElementById('shortsStage').addEventListener('touchstart', e => { shortsTouchStartY = e.touches[0].clientY; });
+document.getElementById('shortsStage').addEventListener('touchend', e => {
+  const dy = e.changedTouches[0].clientY - shortsTouchStartY;
+  if (dy < -60) document.getElementById('shortsSheet').classList.add('expanded');
+  if (dy > 60) document.getElementById('shortsSheet').classList.remove('expanded');
+});
+
+document.addEventListener('DOMContentLoaded', renderShortsRail);
+
+
+
 </script>
 </body>
 </html>

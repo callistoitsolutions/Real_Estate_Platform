@@ -11,17 +11,6 @@ from django.db import models, transaction # 🚀 MAKE SURE ", transaction" IS AD
 
 import random
 
-class SeoMetaTag(models.Model):
-    page_name = models.CharField(max_length=60)
-    meta_title = models.CharField(max_length=60)
-    canonical_url = models.URLField(max_length=255, blank=True, null=True)
-    meta_description = models.CharField(max_length=160)
-    keywords = models.TextField(help_text="Comma-separated keywords", blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.page_name
 
 
 
@@ -123,39 +112,87 @@ class HeroSection(models.Model):
 from django.utils.text import slugify
 
 from ckeditor_uploader.fields import RichTextUploadingField
+from ckeditor.fields import RichTextField
+
+
 
 
 
 class Blog(models.Model):
-    title = models.CharField(max_length=200)
-    author = models.CharField(max_length=100, null=True, blank=True)
-    featured_image = models.ImageField(upload_to="blog_images/")
-    content = RichTextUploadingField()
-    category = models.CharField(max_length=100, null=True, blank=True)  # ✅ FIX
-    reading_time = models.CharField(max_length=50, null=True, blank=True)
-    date_posted = models.DateTimeField(auto_now_add=True)
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("published", "Published"),
+    ]
+
+    CATEGORY_CHOICES = [
+        ("Buying Guide", "Buying Guide"),
+        ("Selling Guide", "Selling Guide"),
+        ("Rental Guide", "Rental Guide"),
+        ("RERA & Legal Guide", "RERA & Legal Guide"),
+        ("Home Loan Guide", "Home Loan Guide"),
+        ("Investment Guide", "Investment Guide"),
+        ("Broker Guide", "Broker Guide"),
+        ("Interior Design Guide", "Interior Design Guide"),
+        ("Government Norms", "Government Norms"),
+        ("Tax & Registration", "Tax & Registration"),
+    ]
+
+    title = models.CharField(max_length=200)                                      # name="title"
+    reading_time = models.CharField(max_length=50, null=True, blank=True)          # name="reading_time"
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES,
+                                 null=True, blank=True)                            # name="category"
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                               default="published")                                # name="status"
+    author = models.CharField(max_length=100, null=True, blank=True,
+                               default="PropCRM Team")                             # name="author"
+    published_date = models.DateField(null=True, blank=True)                       # name="published_date"
+    short_description = models.CharField(max_length=180, null=True, blank=True)    # name="short_description"
+    featured_image = models.ImageField(upload_to="blog_images/", null=True, blank=True)  # name="featured_image"
+    content = RichTextUploadingField()                                             # name="content"
+
+    date_posted = models.DateTimeField(auto_now_add=True)  # record creation timestamp (not on the form)
+
+    class Meta:
+        ordering = ["-published_date", "-date_posted"]
 
     def __str__(self):
         return self.title
 
-
-
-
-
-
-
-from ckeditor.fields import RichTextField
 
 class Service(models.Model):
-    title = models.CharField(max_length=200)
-    icon = models.CharField(max_length=50, blank=True, help_text="Bootstrap icon class (e.g. bi bi-key)")
-    short_description = models.TextField()
-    content = RichTextField()   # CKEditor field
-    featured_image = models.ImageField(upload_to="services/", blank=True, null=True)
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("inactive", "Inactive"),
+    ]
+
+    CATEGORY_CHOICES = [
+        ("legal_services", "Legal Services"),
+        ("loan_services", "Loan Services"),
+        ("interior_services", "Interior Services"),
+        ("packers_movers", "Packers & Movers"),
+        ("vastu_services", "Vastu Services"),
+        ("property_valuation", "Property Valuation"),
+        ("property_photography", "Property Photography"),
+    ]
+
+    title = models.CharField(max_length=200)                                       # name="title"
+    icon = models.CharField(max_length=50, blank=True,
+                             help_text="Bootstrap icon class (e.g. bi bi-house)")   # name="icon"
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES,
+                                 null=True, blank=True)                             # name="category"
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                               default="active")                                    # name="status"
+    cta_text = models.CharField(max_length=50, default="Request Callback")          # name="cta_text"
+    sort_order = models.PositiveIntegerField(default=0, blank=True, null=True)      # name="sort_order"
+    short_description = models.TextField()                                          # name="short_description"
+    featured_image = models.ImageField(upload_to="services/", blank=True, null=True)  # name="featured_image"
+    content = RichTextField()                                                       # name="content"
+
+    class Meta:
+        ordering = ["sort_order", "title"]
 
     def __str__(self):
         return self.title
-
 
 
 
@@ -6848,3 +6885,25 @@ class AgriculturalPlotResaleActivityLog(models.Model):
         ordering = ["-timestamp"]
 
 ################## END MODEL SECTION Agricultural Plot RESALE LISTING################
+
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+class PropertyInteraction(models.Model):
+    INTERACTION_CHOICES = (
+        ('view', 'View'), ('click', 'Click'),
+        ('whatsapp', 'WhatsApp'), ('call', 'Call'),
+    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.CharField(max_length=50)   # CharField because your PKs are strings (EFPRR-xxxx etc.)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    interaction_type = models.CharField(max_length=10, choices=INTERACTION_CHOICES)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['content_type', 'object_id', 'interaction_type']),
+            models.Index(fields=['created_at']),
+        ]

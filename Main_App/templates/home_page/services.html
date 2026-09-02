@@ -1,333 +1,280 @@
-{% include 'home_page/header.html' %}
-
-{% block title %}Services | PropCRM{% endblock %}
-
-{% block extra_css %}
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Property Services in Nagpur — Legal, Home Loans, Verification & More | PropCRM</title>
+<meta name="description" content="Legal documentation, home loan assistance, property verification, interior design, packers & movers, Vastu, valuation and photography — all property services under one roof with a dedicated Relationship Manager.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-main:#f8fafc; --bg-card:#ffffff; --primary:#006ce4; --primary-dark:#0050a8;
-  --accent:#f59e0b; --text-dark:#1e293b; --text-body:#475569; --text-muted:#64748b;
-  --border:#e2e8f0; --shadow-1:0 4px 12px rgba(0,0,0,.06); --shadow-2:0 12px 30px rgba(0,0,0,.1); --radius:12px;
+    --primary: #006ce4;
+    --primary-dark: #0050a8;
+    --pr: #f97316;
+    --pr2: #ea580c;
+    --accent: #f59e0b;
+    --text-dark: #1e293b;
+    --text-body: #475569;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-2: 0 12px 30px rgba(0,0,0,0.1);
+    --radius: 12px;
 }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Poppins", sans-serif; background: var(--bg); color: var(--text-body); overflow-x: hidden; }
+a { color: inherit; }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-body); line-height:1.6; }
+.section-wrap { max-width: 1300px; margin: 0 auto; padding: 50px 20px; }
+.section-title { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+.section-subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+.sec-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
 
-/* PAGE HERO */
-.page-hero {
-  background:linear-gradient(135deg, #002347 0%, #004282 50%, #0059b3 100%);
-  padding:80px 20px 60px; text-align:center; position:relative; overflow:hidden;
-}
-.page-hero::before {
-  content:''; position:absolute; inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.04)'/%3E%3C/svg%3E");
-  animation:drift 60s linear infinite;
-}
-@keyframes drift { to { background-position:60px 60px; } }
+.top-util-bar { background: #0f172a; color: rgba(255,255,255,.75); font-size: .78rem; padding: 8px 24px; }
+.top-util-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.top-util-inner .tu-left, .top-util-inner .tu-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.top-util-inner i { margin-right: 6px; color: rgba(255,255,255,.5); }
+.top-util-inner a { color: inherit; text-decoration: none; }
+@media(max-width:768px) { .top-util-bar { display: none; } }
 
-.page-hero h1 { font-size:2.8rem; font-weight:900; color:#fff; margin-bottom:14px; position:relative; letter-spacing:-0.5px; }
-.page-hero h1 em { font-style:normal; color:#f9b449; }
-.page-hero p { font-size:1.1rem; color:rgba(255,255,255,.85); max-width:600px; margin:0 auto 32px; position:relative; font-weight:500; }
+.breadcrumb-bar { background: #fff; border-bottom: 1px solid var(--border); }
+.breadcrumb-bar .bb-inner { max-width: 1300px; margin: 0 auto; padding: 12px 20px; font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+.breadcrumb-bar a { color: var(--text-muted); text-decoration: none; }
+.breadcrumb-bar a:hover { color: var(--primary); }
+.breadcrumb-bar .bb-current { color: var(--text-dark); }
 
-.hero-stats { display:flex; justify-content:center; gap:50px; flex-wrap:wrap; position:relative; }
-.hs-item { text-align:center; }
-.hs-v { font-size:1.6rem; font-weight:900; color:#fff; }
-.hs-l { font-size:.78rem; color:rgba(255,255,255,.7); margin-top:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.inner-hero { background: linear-gradient(to right, rgba(15,23,42,.88), rgba(15,23,42,.72)), url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'); background-size: cover; background-position: center; padding: 56px 20px 48px; text-align: center; }
+.inner-hero h1 { font-size: 2.3rem; font-weight: 900; line-height: 1.25; color: #fff; margin-bottom: 10px; }
+.inner-hero h1 span { color: var(--accent); }
+.inner-hero p.hero-sub { font-size: 1rem; color: rgba(255,255,255,.85); margin: 0 auto; max-width: 640px; font-weight: 500; }
+@media(max-width:768px) { .inner-hero { padding: 40px 16px 36px; } .inner-hero h1 { font-size: 1.6rem; } }
 
-/* TRUST BAR */
-.trust-bar { background:#fff; border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,.03); }
-.trust-inner { max-width:1280px; margin:0 auto; padding:20px 20px;
-  display:flex; justify-content:center; gap:45px; flex-wrap:wrap; align-items:center; }
-.trust-item { display:flex; align-items:center; gap:10px; font-size:.88rem;
-  font-weight:600; color:var(--text-body); transition:.3s; }
-.trust-item:hover { color:var(--primary); transform:translateY(-2px); }
-.trust-item i { color:var(--primary); font-size:1.2rem; }
+.hiw-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: -60px; position: relative; z-index: 5; }
+@media(max-width:768px) { .hiw-grid { grid-template-columns: 1fr; margin-top: -40px; } }
+.hiw-card { text-align: center; padding: 28px 20px; background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-2); }
+.hiw-num { width: 52px; height: 52px; background: rgba(0,108,228,.1); color: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 16px; }
+.hiw-title { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.hiw-desc { font-size: .85rem; color: var(--text-body); line-height: 1.6; }
 
-/* SECTION WRAP */
-.section-wrap { max-width:1320px; margin:0 auto; padding:60px 20px 90px; }
-.sec-header { text-align:center; margin-bottom:55px; }
-.sec-header h2 { font-size:2rem; font-weight:900; color:var(--text-dark); margin-bottom:10px; letter-spacing:-0.5px; }
-.sec-header p { font-size:1rem; color:var(--text-muted); font-weight:500; }
+.service-grid-home { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media(max-width:1100px) { .service-grid-home { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:640px) { .service-grid-home { grid-template-columns: 1fr; } }
+.pcard-svc { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: .3s; box-shadow: var(--shadow-1); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+.pcard-svc:hover { box-shadow: var(--shadow-2); }
+.pcard-svc:hover img { transform: scale(1.06); }
+.pc-img-svc { height: 180px; position: relative; overflow: hidden; background: linear-gradient(135deg,#e0f2fe,#dbeafe); display: flex; align-items: center; justify-content: center; }
+.pc-img-svc img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; position: absolute; inset: 0; }
+.pc-img-svc::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,.65), transparent); }
+.pc-img-svc i.pc-fallback-icon { font-size: 2.2rem; color: #93c5fd; position: relative; z-index: 1; }
+.pc-img-svc i.pc-corner-icon { position: absolute; bottom: 12px; left: 14px; color: #fff; font-size: 1.5rem; z-index: 2; }
+.pc-body-svc { padding: 22px; flex: 1; display: flex; flex-direction: column; }
+.pc-body-svc h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.pc-body-svc p { font-size: .85rem; color: var(--text-body); margin-bottom: 16px; flex: 1; }
+.pc-body-svc button, .pc-body-svc .pc-btn-svc { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--primary); color: var(--primary); background: none; font-weight: 700; font-size: .85rem; cursor: pointer; transition: .2s; text-align: center; text-decoration: none; display: block; }
+.pc-body-svc button:hover, .pc-body-svc .pc-btn-svc:hover { background: var(--primary); color: #fff; }
 
-/* SERVICE GRID */
-.service-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(350px, 1fr)); gap:28px; }
-@media(max-width:768px){ .service-grid{ grid-template-columns:1fr; } }
+.banner-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+@media(max-width:768px) { .banner-split { grid-template-columns: 1fr; } }
+.bs-card { border-radius: 18px; padding: 30px; position: relative; overflow: hidden; }
+.bs-card.bs-blue { background: #eff6ff; }
+.bs-card.bs-indigo { background: #eef2ff; }
+.bs-card p.bs-eyebrow { font-size: .85rem; color: var(--text-muted); margin-bottom: 4px; }
+.bs-card h3 { font-size: 1.3rem; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; }
+.bs-card p.bs-desc { font-size: .88rem; color: var(--text-body); margin-bottom: 18px; }
+.bs-card ul { list-style: none; margin-bottom: 22px; }
+.bs-card ul li { font-size: .85rem; color: var(--text-body); margin-bottom: 8px; }
+.bs-card ul li i { color: #22c55e; margin-right: 8px; }
+.bs-card .bs-icon-bg { position: absolute; right: -10px; bottom: -14px; font-size: 8rem; opacity: .12; color: var(--primary); }
+.bs-btn { background: var(--text-dark); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; text-decoration: none; display: inline-block; }
+.bs-btn:hover { background: #000; color: #fff; }
 
-/* SERVICE CARD */
-.service-card {
-  background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border);
-  overflow:hidden; transition:.3s; box-shadow:var(--shadow-1);
-  display:flex; flex-direction:column; position:relative;
-}
-.service-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:5px;
-  background:linear-gradient(90deg, var(--primary), #38bdf8);
-  transform:scaleX(0); transform-origin:left; transition:.3s;
-}
-.service-card:hover::before { transform:scaleX(1); }
-.service-card:hover { transform:translateY(-8px); box-shadow:var(--shadow-2); border-color:rgba(0,108,228,.3); }
+.knowledge-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start; }
+@media(max-width:900px) { .knowledge-grid { grid-template-columns: 1fr; } }
+.kh-sidebar { background: #eff6ff; border-radius: 14px; padding: 22px; }
+.kh-sidebar .kh-eyebrow { font-size: .72rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: .5px; }
+.kh-sidebar h4 { font-size: 1rem; font-weight: 800; color: var(--text-dark); margin: 8px 0 12px; }
+.filter-chip-static { border: 1px solid #dbeafe; border-radius: 999px; padding: 8px 14px; background: #fff; color: var(--primary); font-size: .78rem; font-weight: 600; cursor: pointer; transition: .2s; display: inline-block; margin: 3px; text-decoration:none; }
+.filter-chip-static:hover { background: #eff6ff; color: var(--primary); }
+.accordion-item { background: white; border: 1px solid var(--border) !important; border-radius: 12px !important; overflow: hidden; margin-bottom: 12px; box-shadow: var(--shadow-1); }
+.accordion-button { background: white; color: var(--text-dark); font-weight: 700; font-size: .95rem; padding: 18px 20px; font-family: "Poppins", sans-serif; }
+.accordion-button:not(.collapsed) { background: #f8fafc; color: var(--primary); box-shadow: none; }
+.accordion-body { background: white; color: var(--text-body); font-size: .9rem; line-height: 1.7; padding: 0 20px 20px; }
 
-/* Service Image/Icon Area */
-.sc-image {
-  height:180px; background:linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
-  display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
-}
-.sc-image::before {
-  content:''; position:absolute; inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1' fill='rgba(0,108,228,.05)'/%3E%3C/svg%3E");
-}
-.sc-icon-large {
-  width:90px; height:90px; border-radius:20px;
-  background:linear-gradient(135deg, rgba(0,108,228,.1), rgba(56,189,248,.15));
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 8px 24px rgba(0,108,228,.15); transition:.3s; position:relative;
-}
-.service-card:hover .sc-icon-large { transform:scale(1.1) rotate(5deg); }
-.sc-icon-large i { font-size:2.2rem; color:var(--primary); }
-
-.sc-body { padding:32px; flex:1; display:flex; flex-direction:column; }
-
-.sc-title { font-size:1.2rem; font-weight:800; color:var(--text-dark); margin-bottom:12px; line-height:1.4; }
-.sc-desc { font-size:.9rem; color:var(--text-body); line-height:1.7; margin-bottom:20px; flex:1; }
-
-/* Feature bullets */
-.sc-features { list-style:none; padding:0; margin:0 0 24px; border-top:1px solid var(--border); padding-top:18px; }
-.sc-features li { display:flex; align-items:center; gap:10px; font-size:.85rem;
-  font-weight:600; color:var(--text-body); padding:6px 0; }
-.sc-features li i { color:#10b981; font-size:.9rem; flex-shrink:0; }
-
-.sc-btn {
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  background:var(--primary); color:#fff; border-radius:10px; font-weight:700;
-  font-size:.9rem; padding:14px 20px; text-decoration:none; transition:.2s;
-  box-shadow:0 4px 12px rgba(0,108,228,.2);
-}
-.sc-btn:hover { background:var(--primary-dark); color:#fff; transform:translateY(-2px);
-  box-shadow:0 6px 20px rgba(0,108,228,.35); }
-.sc-btn i { font-size:1rem; }
-
-/* FEATURED card */
-.service-card.featured {
-  grid-column:span 2; flex-direction:row;
-  background:linear-gradient(135deg, rgba(0,108,228,.02), rgba(56,189,248,.02));
-}
-.service-card.featured .sc-image { width:300px; height:auto; }
-.service-card.featured .sc-body { padding:40px; }
-.service-card.featured .sc-title { font-size:1.4rem; }
-.service-card.featured .sc-desc { font-size:.95rem; }
-@media(max-width:1050px){
-  .service-card.featured{ grid-column:span 1; flex-direction:column; }
-  .service-card.featured .sc-image{ width:100%; height:180px; }
-}
-
-/* Specific service icons - you can customize these */
-.sc-image[data-service="consulting"] { background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
-.sc-image[data-service="consulting"] .sc-icon-large { background:linear-gradient(135deg, rgba(245,158,11,.15), rgba(251,191,36,.2)); }
-.sc-image[data-service="consulting"] .sc-icon-large i { color:#f59e0b; }
-
-.sc-image[data-service="legal"] { background:linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); }
-.sc-image[data-service="legal"] .sc-icon-large { background:linear-gradient(135deg, rgba(99,102,241,.15), rgba(129,140,248,.2)); }
-.sc-image[data-service="legal"] .sc-icon-large i { color:#6366f1; }
-
-.sc-image[data-service="valuation"] { background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); }
-.sc-image[data-service="valuation"] .sc-icon-large { background:linear-gradient(135deg, rgba(16,185,129,.15), rgba(52,211,153,.2)); }
-.sc-image[data-service="valuation"] .sc-icon-large i { color:#10b981; }
-
-/* WHY SECTION */
-.why-section { background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
-  padding:70px 20px; }
-.why-inner { max-width:1280px; margin:0 auto; }
-.why-inner h2 { font-size:1.8rem; font-weight:900; color:var(--text-dark); text-align:center; margin-bottom:45px; letter-spacing:-0.5px; }
-.why-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:28px; }
-
-.why-card { background:#fff; border-radius:var(--radius); padding:32px 24px; text-align:center;
-  border:1px solid var(--border); box-shadow:var(--shadow-1); transition:.3s; position:relative; overflow:hidden; }
-.why-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:4px;
-  background:linear-gradient(90deg, var(--primary), #38bdf8);
-}
-.why-card:hover { transform:translateY(-6px); box-shadow:var(--shadow-2); }
-
-.why-num { width:56px; height:56px; background:rgba(0,108,228,.1); color:var(--primary);
-  border-radius:16px; display:flex; align-items:center; justify-content:center;
-  font-size:1.3rem; font-weight:900; margin:0 auto 18px; transition:.3s; }
-.why-card:hover .why-num { background:var(--primary); color:#fff; transform:scale(1.1); }
-
-.why-title { font-size:1rem; font-weight:800; color:var(--text-dark); margin-bottom:10px; }
-.why-desc { font-size:.87rem; color:var(--text-muted); line-height:1.65; }
-
-/* EMPTY STATE */
-.empty-state { grid-column:1/-1; text-align:center; padding:100px 20px;
-  background:#fff; border-radius:var(--radius); border:2px dashed var(--border); }
-.empty-state i { font-size:4rem; color:#cbd5e1; display:block; margin-bottom:20px; }
-.empty-state h4 { font-size:1.3rem; font-weight:800; color:var(--text-dark); margin-bottom:10px; }
-.empty-state p { font-size:.95rem; color:var(--text-muted); }
-
-/* FOOTER STYLES */
-footer { background:#1e293b; color:rgba(255,255,255,.7); padding:60px 20px 30px; margin-top:0; }
-.footer-inner { max-width:1280px; margin:0 auto; }
-.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:40px; }
-@media(max-width:992px){ .footer-grid{ grid-template-columns:1fr 1fr; gap:30px; } }
-@media(max-width:640px){ .footer-grid{ grid-template-columns:1fr; gap:25px; } }
-
-.fl-brand { font-size:1.5rem; font-weight:900; color:#fff; margin-bottom:14px; }
-.fl-desc { font-size:.9rem; line-height:1.7; margin-bottom:20px; }
-.footer-social { display:flex; gap:12px; }
-.footer-social a { width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,.1);
-  display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.7);
-  text-decoration:none; transition:.3s; font-size:1.1rem; }
-.footer-social a:hover { background:var(--primary); color:#fff; transform:translateY(-3px); }
-
-.fl-title { font-size:.85rem; font-weight:700; color:#fff; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.5px; }
-.fl-link { display:block; color:rgba(255,255,255,.7); text-decoration:none; font-size:.9rem;
-  margin-bottom:10px; transition:.3s; font-weight:500; }
-.fl-link:hover { color:var(--primary); padding-left:8px; }
-
-.footer-bottom { border-top:1px solid rgba(255,255,255,.1); padding-top:25px;
-  display:flex; justify-content:space-between; align-items:center; font-size:.85rem;
-  flex-wrap:wrap; gap:15px; }
-.footer-bottom a { color:rgba(255,255,255,.7); text-decoration:none; margin:0 8px; }
-.footer-bottom a:hover { color:var(--primary); }
-
-@media(max-width:640px){ .footer-bottom{ flex-direction:column; text-align:center; } }
+footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
+.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
+.footer-newsletter-inner { max-width: 1300px; margin: 0 auto; padding: 24px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.footer-newsletter-inner h3 { color: #fff; font-size: 1.05rem; font-weight: 800; }
+.footer-newsletter-inner p { font-size: .82rem; color: rgba(255,255,255,.55); }
+.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: .9rem; text-decoration: none; transition: .2s; }
+.footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+.footer-inner { max-width: 1300px; margin: 0 auto; padding: 40px 20px; }
+.footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+@media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
+@media(max-width:580px) { .footer-grid { grid-template-columns: 1fr; } }
+.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; }
+.fl-desc { font-size: .85rem; line-height: 1.7; margin-bottom: 14px; }
+.fl-title { font-size: .85rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: .2s; }
+.fl-link:hover { color: white; padding-left: 4px; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1300px; margin: 0 auto; }
 </style>
-{% endblock %}
+</head>
+<body>
 
-{% block content %}
-
-<!-- HERO -->
-<section class="page-hero">
-  <h1>Our <em>Professional</em> Services</h1>
-  <p>End-to-end real estate services for buyers, sellers, tenants, and investors in Nagpur.</p>
-  <div class="hero-stats">
-    <div class="hs-item"><div class="hs-v">{{ services|length }}+</div><div class="hs-l">Services</div></div>
-    <div class="hs-item"><div class="hs-v">87</div><div class="hs-l">Expert RMs</div></div>
-    <div class="hs-item"><div class="hs-v">50K+</div><div class="hs-l">Happy Clients</div></div>
-    <div class="hs-item"><div class="hs-v">5★</div><div class="hs-l">Avg. Rating</div></div>
-  </div>
-</section>
-
-<!-- TRUST BAR -->
-<div class="trust-bar">
-  <div class="trust-inner">
-    <div class="trust-item"><i class="bi bi-shield-check-fill"></i> 100% Verified</div>
-    <div class="trust-item"><i class="bi bi-lightning-fill"></i> Quick Response</div>
-    <div class="trust-item"><i class="bi bi-people-fill"></i> Expert Team</div>
-    <div class="trust-item"><i class="bi bi-award-fill"></i> Award Winning</div>
-    <div class="trust-item"><i class="bi bi-chat-dots-fill"></i> 24/7 Support</div>
-  </div>
-</div>
-
-<!-- SERVICES GRID -->
-<div class="section-wrap">
-  <div class="sec-header">
-    <h2>What We Offer</h2>
-    <p>Comprehensive real estate solutions tailored to your needs</p>
-  </div>
-
- <div class="service-grid">
-  {% for seo in services %}
-  <div class="service-card {% if forloop.first %}featured{% endif %}">
-    
-    <div class="sc-image" style="background: #f1f5f9; position: relative; overflow: hidden; height: 220px;">
-      {% if seo.content_object.featured_image %}
-        <img src="{{ seo.content_object.featured_image.url }}" 
-             alt="{{ seo.content_object.title }}" 
-             style="width: 100%; height: 100%; object-fit: cover;">
-      {% else %}
-        <div class="sc-icon-large" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-          <i class="{{ seo.content_object.icon|default:'bi bi-house-door' }}"></i>
+<div class="top-util-bar">
+    <div class="top-util-inner">
+        <div class="tu-left"><span><i class="bi bi-geo-alt"></i>Serving Nagpur &amp; 50+ Cities</span></div>
+        <div class="tu-right">
+            <span><i class="bi bi-telephone"></i>+91 90000 00000</span>
+            <a href="#"><i class="bi bi-question-circle"></i>Help &amp; Support</a>
         </div>
-      {% endif %}
     </div>
-
-    <div class="sc-body">
-      <div class="sc-title" style="min-height: 3rem;">
-        {{ seo.meta_title|default:seo.content_object.title }}
-      </div>
-      
-      <div class="sc-desc">
-        {{ seo.meta_description|default:seo.content_object.short_description|truncatechars:120 }}
-      </div>
-
-      <ul class="sc-features">
-        <li><i class="bi bi-check-circle-fill"></i> Expert Consultation</li>
-        <li><i class="bi bi-check-circle-fill"></i> Verified Listings Access</li>
-        <li><i class="bi bi-check-circle-fill"></i> End-to-End Support</li>
-      </ul>
-
-      <a href="{% url 'services_details' key=seo.key %}" class="sc-btn">
-        Explore Service <i class="bi bi-arrow-right"></i>
-      </a>
-    </div>
-  </div>
-  {% empty %}
-  <div class="empty-state">
-    <i class="bi bi-tools"></i>
-    <h4>No services available yet.</h4>
-    <p>We're working on bringing you amazing services. Check back soon!</p>
-  </div>
-  {% endfor %}
-</div>
 </div>
 
-<!-- WHY CHOOSE US -->
-<section class="why-section">
-  <div class="why-inner">
-    <h2>Why Choose PropCRM?</h2>
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="why-num">01</div>
-        <div class="why-title">Verified Properties</div>
-        <div class="why-desc">Every listing is personally verified by our team of 87 relationship managers.</div>
-      </div>
-      <div class="why-card">
-        <div class="why-num">02</div>
-        <div class="why-title">No Hidden Charges</div>
-        <div class="why-desc">Transparent pricing with zero brokerage and no hidden fees ever.</div>
-      </div>
-      <div class="why-card">
-        <div class="why-num">03</div>
-        <div class="why-title">Expert Guidance</div>
-        <div class="why-desc">Dedicated relationship managers to guide you at every step of the journey.</div>
-      </div>
-      <div class="why-card">
-        <div class="why-num">04</div>
-        <div class="why-title">Fast Closings</div>
-        <div class="why-desc">Verified listings close in an average of 18 days with our process.</div>
-      </div>
-    </div>
-  </div>
-</section>
+{% include 'home_page/header.html' %}
 
-<!-- FOOTER -->
+<div class="breadcrumb-bar">
+    <div class="bb-inner">
+        <a href="/">Home</a> <i class="bi bi-chevron-right" style="font-size:.65rem;"></i> <span class="bb-current">Services</span>
+    </div>
+</div>
+
+<div class="inner-hero">
+    <h1>Comprehensive <span>Property Services</span></h1>
+    <p class="hero-sub">Everything you need for a seamless real estate experience under one roof. Expert guidance, verified professionals, and hassle-free execution.</p>
+</div>
+
+<div class="section-wrap" style="padding-bottom:0;">
+    <div class="hiw-grid">
+        <div class="hiw-card"><div class="hiw-num"><i class="bi bi-shield-check"></i></div><div class="hiw-title">Verified Partners</div><div class="hiw-desc">All service providers are strictly vetted for quality, reliability, and market reputation.</div></div>
+        <div class="hiw-card"><div class="hiw-num"><i class="bi bi-person-badge"></i></div><div class="hiw-title">Dedicated RM Support</div><div class="hiw-desc">A dedicated Relationship Manager oversees your service delivery from start to finish.</div></div>
+        <div class="hiw-card"><div class="hiw-num"><i class="bi bi-file-earmark-text"></i></div><div class="hiw-title">Transparent Pricing</div><div class="hiw-desc">No hidden charges. Get clear quotations upfront before you commit to any service.</div></div>
+    </div>
+</div>
+
+<!-- Services grid — loops over Service.objects.all(), passed from the view as `services` -->
+<div class="section-wrap" style="padding-top:40px;">
+    <div class="sec-header"><div><div class="section-title">Explore Our Services</div><div class="section-subtitle">Select a service to get a callback from our experts</div></div></div>
+    <div class="service-grid-home">
+        {% for service in services %}
+  
+        <a href="{% url 'services_details' slug=service.seo_slug %}" class="pcard-svc">
+
+            <div class="pc-img-svc">
+                {% if service.featured_image %}
+                    <img src="{{ service.featured_image.url }}" alt="{{ service.title }}">
+                {% else %}
+                    <i class="{{ service.icon|default:'bi bi-briefcase' }} pc-fallback-icon"></i>
+                {% endif %}
+                <i class="{{ service.icon|default:'bi bi-briefcase' }} pc-corner-icon"></i>
+            </div>
+            <div class="pc-body-svc">
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.short_description|truncatewords:20 }}</p>
+              <span class="pc-btn-svc">{{ service.cta_text|default:'Request Callback' }}</span>
+            </div>
+        </a>
+        {% empty %}
+        <p style="color:var(--text-muted);grid-column:1/-1;">No services added yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="section-wrap" style="padding-top:10px;">
+    <div class="banner-split">
+        <div class="bs-card bs-blue">
+            <i class="bi bi-clipboard-check bs-icon-bg"></i>
+            <p class="bs-eyebrow">Not sure which service you need?</p>
+            <h3>Tell us your requirement</h3>
+            <p class="bs-desc">We'll assess your requirements and curate the exact services you need to close your property deal smoothly.</p>
+            <ul>
+                <li><i class="bi bi-check-circle-fill"></i>Free analysis</li>
+                <li><i class="bi bi-check-circle-fill"></i>Custom packages</li>
+                <li><i class="bi bi-check-circle-fill"></i>Dedicated RM</li>
+            </ul>
+            <a href="#" class="bs-btn">Submit Requirement <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="bs-card bs-indigo">
+            <i class="bi bi-headset bs-icon-bg"></i>
+            <h3>Talk to a Property Advisor</h3>
+            <p class="bs-desc">Get expert advice. Save time &amp; money.</p>
+            <ul>
+                <li><i class="bi bi-check-circle-fill"></i>Verified partners</li>
+                <li><i class="bi bi-check-circle-fill"></i>Best deals &amp; offers</li>
+                <li><i class="bi bi-check-circle-fill"></i>Hassle-free execution</li>
+            </ul>
+            <a href="#" class="bs-btn">Talk to an Advisor</a>
+        </div>
+    </div>
+</div>
+
+<div id="faqs" class="section-wrap">
+    <div class="knowledge-grid">
+        <div>
+            <div class="section-title">Service FAQs</div>
+            <div class="section-subtitle" style="margin-bottom:20px;">Common questions about how our service marketplace works</div>
+            <div class="accordion" id="faqAcc">
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#sfaq1">How much brokerage or service fee is charged?</button></h2>
+                    <div id="sfaq1" class="accordion-collapse collapse show" data-bs-parent="#faqAcc"><div class="accordion-body">Fees vary by service and are always shared upfront in a transparent quotation before you commit — no hidden charges added later.</div></div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sfaq2">Do I get a dedicated Relationship Manager?</button></h2>
+                    <div id="sfaq2" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Yes, every service request is assigned a dedicated Relationship Manager who coordinates the vetted provider and follows up until the work is complete.</div></div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sfaq3">Are your service partners verified?</button></h2>
+                    <div id="sfaq3" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">All legal, loan, interior, moving, Vastu, valuation, and photography partners are vetted for quality, reliability, and market reputation before joining the network.</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="kh-sidebar">
+            <div class="kh-eyebrow">Free Consultation</div>
+            <h4>Talk to an Advisor</h4>
+            <a href="#" class="filter-chip-static">Legal Help</a>
+            <a href="#" class="filter-chip-static">Loan Offers</a>
+            <a href="#" class="filter-chip-static">Interior Quote</a>
+            <a href="#" class="filter-chip-static">Schedule Callback</a>
+        </div>
+    </div>
+</div>
+
 <footer>
+    <div class="footer-newsletter">
+        <div class="footer-newsletter-inner">
+            <div><h3>Stay Updated!</h3><p>Subscribe to get the latest property updates.</p></div>
+            <div class="footer-social d-flex gap-2">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-whatsapp"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+            </div>
+        </div>
+    </div>
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
                 <div class="fl-brand">🏠 PropCRM</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
-                <div class="footer-social">
-                    <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                    <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
-                </div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
             </div>
             <div>
-                <div class="fl-title">For Tenants</div>
-                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
-                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
-                <a href="#" class="fl-link">Short-term Stays</a>
-                <a href="#" class="fl-link">Rent Agreement</a>
+                <div class="fl-title">Services</div>
+                {% for service in services|slice:":4" %}
+              <a href="{% url 'services_details' slug=service.seo_slug %}" class="fl-link">{{ service.title }}</a>
+                {% endfor %}
             </div>
             <div>
-                <div class="fl-title">For Buyers</div>
-                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
-                <a href="#" class="fl-link">New Projects</a>
-                <a href="#" class="fl-link">Plots &amp; Land</a>
-                <a href="#" class="fl-link">Home Loans</a>
+                <div class="fl-title">More Services</div>
+                {% for service in services|slice:"4:8" %}
+              <a href="{% url 'services_details' slug=service.seo_slug %}" class="fl-link">{{ service.title }}</a>
+                {% endfor %}
             </div>
             <div>
                 <div class="fl-title">For Owners</div>
@@ -336,16 +283,21 @@ footer { background:#1e293b; color:rgba(255,255,255,.7); padding:60px 20px 30px;
                 <a href="#" class="fl-link">PropCRM Plans</a>
                 <a href="#" class="fl-link">Contact Support</a>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
             <div>
-                <a href="/privacy">Privacy Policy</a> ·
-                <a href="/terms">Terms of Service</a> ·
-                <a href="/sitemap">Sitemap</a>
+                <div class="fl-title">Company</div>
+                <a href="{% url 'blog' %}" class="fl-link">Guides</a>
+                
+                <a href="#faqs" class="fl-link">FAQs</a>
+                <a href="#" class="fl-link">Contact Us</a>
             </div>
         </div>
     </div>
+    <div class="footer-bottom">
+        <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+        <span>Privacy Policy · Terms · Sitemap</span>
+    </div>
 </footer>
 
-{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

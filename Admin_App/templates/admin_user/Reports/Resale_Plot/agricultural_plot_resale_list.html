@@ -1300,31 +1300,35 @@ function executeBulkDelete(){
     payload.page_ids = ids;
   }
 
- 
   Swal.fire({ title: 'Are you sure?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444' }).then(res => {
     if (!res.isConfirmed) return;
+    
     fetch("{% url 'agricultural_plot_resale_bulk_delete' %}", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest' },
       body: JSON.stringify(payload)
-    }).then(r => r.json()).then(data => {
-
-.then(data => {
-    if (data.status === 'success') {
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
-        }).then(() => {
-            window.location.href = data.redirect_url;
-        });
-    } else {
-        Swal.fire('Error', data.message, 'error');
-    }
-})
-    
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: data.message,
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = data.redirect_url;
+            });
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error("Bulk delete error:", error);
+        Swal.fire('Error', 'A server error occurred during deletion.', 'error');
+    });
+  });
 }
 
 

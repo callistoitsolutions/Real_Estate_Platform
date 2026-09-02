@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Add Brand Ad | PropCRM Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: #006ce4;
+        --primary-dark: #0050a8;
+        --text-dark: #1e293b;
+        --text-body: #475569;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --bg: #f8fafc;
+        --radius: 12px;
+        --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Poppins", sans-serif; background: var(--bg); color: var(--text-body); padding: 40px 20px; }
+
+    .page-wrap { max-width: 820px; margin: 0 auto; }
+    .page-head { margin-bottom: 24px; }
+    .page-head h1 { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+    .page-head p { font-size: .88rem; color: var(--text-muted); margin-top: 4px; }
+
+    .card-form { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-1); padding: 32px; }
+
+    .form-section-label { font-size: .78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; margin-top: 28px; }
+    .form-section-label:first-child { margin-top: 0; }
+
+    .form-label-custom { font-size: .85rem; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; display: block; }
+    .form-control-custom, .form-select-custom {
+        width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px;
+        font-size: .9rem; font-family: "Poppins", sans-serif; outline: none; transition: .2s;
+    }
+    .form-control-custom:focus, .form-select-custom:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,108,228,.1); }
+    .form-hint { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+    .field-row { margin-bottom: 18px; }
+    .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:640px) { .field-grid-2 { grid-template-columns: 1fr; } }
+
+    /* Placement toggle cards */
+    .placement-choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:640px) { .placement-choice-row { grid-template-columns: 1fr; } }
+    .placement-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: .2s; position: relative; }
+    .placement-card:hover { border-color: #93c5fd; }
+    .placement-card.selected { border-color: var(--primary); background: #eff6ff; }
+    .placement-card input[type=radio] { position: absolute; top: 14px; right: 14px; }
+    .placement-card h6 { font-size: .9rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+    .placement-card p { font-size: .78rem; color: var(--text-muted); }
+
+    /* Upload boxes */
+    .upload-box { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: .2s; background: var(--bg); }
+    .upload-box:hover { border-color: var(--primary); background: #eff6ff; }
+    .upload-box i { font-size: 1.6rem; color: var(--text-muted); margin-bottom: 6px; display: block; }
+    .upload-box p { font-size: .82rem; color: var(--text-muted); font-weight: 600; }
+    .upload-box input[type=file] { display: none; }
+    .upload-preview { margin-top: 10px; max-height: 100px; border-radius: 8px; display: none; }
+
+    .conditional-block { display: none; }
+    .conditional-block.show { display: block; }
+
+    .form-check-custom { display: flex; align-items: center; gap: 10px; }
+    .form-check-custom label { font-size: .88rem; font-weight: 600; color: var(--text-dark); }
+
+    .btn-row { display: flex; gap: 12px; margin-top: 30px; justify-content: flex-end; }
+    .btn-cancel { background: #fff; border: 1px solid var(--border); color: var(--text-body); padding: 11px 24px; border-radius: 8px; font-weight: 700; font-size: .88rem; text-decoration: none; }
+    .btn-submit { background: var(--primary); border: none; color: #fff; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; transition: .2s; }
+    .btn-submit:hover { background: var(--primary-dark); }
+
+    .alert-custom { border-radius: 8px; padding: 12px 16px; font-size: .85rem; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+    <div class="page-head">
+        <h1><i class="bi bi-megaphone"></i> Add Brand Ad</h1>
+        <p>Create a promoted ad slot for a brand — appears on the PropCRM homepage.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert-custom alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card-form">
+        <form method="post" enctype="multipart/form-data" id="brandAdForm">
+            {% csrf_token %}
+
+            <div class="form-section-label">Brand Details</div>
+            <div class="field-row">
+                <label class="form-label-custom">Brand Name *</label>
+                <input type="text" name="brand_name" class="form-control-custom" placeholder="e.g. HDFC Home Loans" value="{{ form_data.brand_name|default:'' }}" required>
+            </div>
+            <div class="field-row">
+                <label class="form-label-custom">Tagline (used only for Native Strip ads)</label>
+                <input type="text" name="tagline" class="form-control-custom" placeholder="e.g. Home loans at 8.4% interest" value="{{ form_data.tagline|default:'' }}">
+            </div>
+            <div class="field-row">
+                <label class="form-label-custom">Click-through URL *</label>
+                <input type="url" name="click_url" class="form-control-custom" placeholder="https://brand-website.com/offer" value="{{ form_data.click_url|default:'' }}" required>
+                <div class="form-hint">Where the user lands after clicking the ad.</div>
+            </div>
+
+            <div class="form-section-label">Ad Placement</div>
+            <div class="placement-choice-row" style="grid-template-columns:1fr 1fr 1fr;">
+                <label class="placement-card" id="cardLeaderboard">
+                    <input type="radio" name="placement" value="leaderboard" onchange="updatePlacement(this.value)" required>
+                    <h6>Leaderboard Banner</h6>
+                    <p>Full-width strip below the hero search. Premium tier, max visibility.</p>
+                </label>
+                <label class="placement-card" id="cardNative">
+                    <input type="radio" name="placement" value="native" onchange="updatePlacement(this.value)" required>
+                    <h6>Native Strip Card</h6>
+                    <p>Logo card inline with content. Mid tier, looks native, higher CTR.</p>
+                </label>
+                <label class="placement-card" id="cardFooter">
+                    <input type="radio" name="placement" value="footer" onchange="updatePlacement(this.value)" required>
+                    <h6>Footer Banner</h6>
+                    <p>Wide banner above the footer. Budget tier, still full-width.</p>
+                </label>
+            </div>
+            <style>
+                @media(max-width:640px){ .placement-choice-row{ grid-template-columns:1fr !important; } }
+            </style>
+
+            <div id="bannerUploadBlock" class="conditional-block" style="margin-top:18px;">
+                <label class="form-label-custom">Banner Image * <span class="form-hint">(recommended 1300×120px)</span></label>
+                <label class="upload-box" for="bannerInput">
+                    <i class="bi bi-image"></i>
+                    <p>Click to upload banner image</p>
+                    <input type="file" id="bannerInput" name="banner_image" accept="image/*" onchange="previewImg(this,'bannerPreview')">
+                </label>
+                <img id="bannerPreview" class="upload-preview" style="width:100%;">
+            </div>
+
+            <div id="footerUploadBlock" class="conditional-block" style="margin-top:18px;">
+                <label class="form-label-custom">Banner Image * <span class="form-hint">(recommended 1300×100px)</span></label>
+                <label class="upload-box" for="footerBannerInput">
+                    <i class="bi bi-image"></i>
+                    <p>Click to upload footer banner image</p>
+                    <input type="file" id="footerBannerInput" name="footer_banner_image" accept="image/*" onchange="previewImg(this,'footerBannerPreview')">
+                </label>
+                <img id="footerBannerPreview" class="upload-preview" style="width:100%;">
+            </div>
+
+            <div id="logoUploadBlock" class="conditional-block" style="margin-top:18px;">
+                <label class="form-label-custom">Logo * <span class="form-hint">(square, min 200×200px)</span></label>
+                <label class="upload-box" for="logoInput">
+                    <i class="bi bi-image"></i>
+                    <p>Click to upload logo</p>
+                    <input type="file" id="logoInput" name="logo" accept="image/*" onchange="previewImg(this,'logoPreview')">
+                </label>
+                <img id="logoPreview" class="upload-preview" style="width:80px;height:80px;object-fit:cover;">
+            </div>
+
+            <div class="form-section-label">Campaign Duration</div>
+            <div class="field-grid-2">
+                <div class="field-row">
+                    <label class="form-label-custom">Start Date *</label>
+                    <input type="date" name="start_date" class="form-control-custom" value="{{ form_data.start_date|default:'' }}" required>
+                </div>
+                <div class="field-row">
+                    <label class="form-label-custom">End Date *</label>
+                    <input type="date" name="end_date" class="form-control-custom" value="{{ form_data.end_date|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="field-row form-check-custom" style="margin-top:10px;">
+                <input type="checkbox" name="is_active" id="isActive" checked style="width:16px;height:16px;">
+                <label for="isActive">Activate immediately</label>
+            </div>
+
+            <div class="btn-row">
+                <a href="" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit"><i class="bi bi-check-lg"></i> Create Ad</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updatePlacement(value) {
+    document.getElementById('cardLeaderboard').classList.toggle('selected', value === 'leaderboard');
+    document.getElementById('cardNative').classList.toggle('selected', value === 'native');
+    document.getElementById('cardFooter').classList.toggle('selected', value === 'footer');
+    document.getElementById('bannerUploadBlock').classList.toggle('show', value === 'leaderboard');
+    document.getElementById('logoUploadBlock').classList.toggle('show', value === 'native');
+    document.getElementById('footerUploadBlock').classList.toggle('show', value === 'footer');
+}
+
+function previewImg(input, previewId) {
+    const preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.getElementById('brandAdForm').addEventListener('submit', function(e) {
+    const placement = document.querySelector('input[name="placement"]:checked');
+    if (!placement) {
+        e.preventDefault();
+        Swal.fire({ icon: 'warning', title: 'Select a placement', text: 'Choose Leaderboard or Native Strip before submitting.' });
+    }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+</body>
+</html>

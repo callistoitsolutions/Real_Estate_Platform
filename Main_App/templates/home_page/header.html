@@ -289,7 +289,7 @@
     </a>
 
     <nav class="desktop-menu">
-        <a href="{% url 'index' %}" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+        <a href="{% url 'index' %}" hidden class="{% if request.path == '/' %}active{% endif %}">Home</a>
         
         <div class="nav-dropdown">
             <a href="#">For Rent</a>
@@ -312,7 +312,7 @@
         </div>
 
         <a href="{% url 'services' %}">Services</a>
-        <a href="{% url 'blog' %}">Blogs</a>
+        <a href="{% url 'blog' %}">News/Guide</a>
   
     {% comment %} <a href="{% url 'dynamic_property_faq' %}">FAQs</a> {% endcomment %}
 </li>
@@ -379,11 +379,11 @@
     </button>
 
     <div id="hdrMobileMenu" class="hdr-mobile-menu">
-        <a href="{% url 'index' %}">Home</a>
+        <a href="{% url 'index' %}" hidden>Home</a>
         <a href="/listingpage/?type=rent">For Rent</a>
         <a href="/listingpage/?type=sale">For Sale</a>
         <a href="{% url 'services' %}">Services</a>
-        <a href="{% url 'blog' %}">Blogs</a>
+        <a href="{% url 'blog' %}">News/Guide</a>
         <a href="{% url 'login' %}">Login</a>
         <a href="{% url 'Adminlogin' %}">Admin Login</a>
         <a href="{% url 'Contact_Us' %}">Contact Us</a>

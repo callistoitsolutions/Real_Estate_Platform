@@ -570,6 +570,8 @@ urlpatterns = [
     path("toggle/<int:pk>/", views.toggle_seo_status, name="seo_toggle"),
     path("delete/<int:pk>/", views.delete_seo_page, name="seo_delete"),
     path("edit/<int:pk>/", views.edit_seo_page, name="seo_edit"),
+    # Place this at the end of urlpatterns
+    
     
     
      
@@ -1019,6 +1021,9 @@ urlpatterns = [
 
   
     path('blogs/import/', views.import_blog_excel, name='import_blog_excel'),
+   
+    path('download-blog-sample/', views.download_blog_sample, name='download_blog_sample'),
+
 
 
 #########################START URL SECTION Blogs##############################################################
@@ -1029,12 +1034,13 @@ urlpatterns = [
 
 
      path("add_service", views.add_service, name="add_service"),
-    
+     path('download-service-sample/', views.download_service_sample, name='download_service_sample'),
    
      path('services/import/', views.import_services_excel, name='import_services_excel'),
      path("services-list/", views.services_list, name="services_list"),
      path("delete-service/<int:service_id>/", views.delete_service, name="delete_service"),
      path("services/", views.services_list1, name="services_list1"),
+     path('<str:seo_key>/', views.seo_url_redirect, name='seo_redirect'),
     
     
     
@@ -1045,6 +1051,8 @@ urlpatterns = [
 
 #########################END URL SECTION Services Landing Page##############################################################
 
+
+    
 ]
 
 

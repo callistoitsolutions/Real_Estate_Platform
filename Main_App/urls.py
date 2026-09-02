@@ -91,19 +91,16 @@ urlpatterns = [
     path("create/", views.create_blog, name="create_blog"),
    # path('blog/<int:id>/', views.blog_details, name='blog_detail'),# Blog create form
     #path('blog/<int:id>/', views.blog_details, name='blog_details'),
-    path(
-    "blogs/<slug:key>/",
-    views.blog_details,
-    name="blog_details"
-),
+    path("blogs/<slug:slug>/", views.blog_details, name="blog_details"),
 
 
     
   #  path('services_details', views.services_details, name='services_details'),
    # path("<int:pk>/", views.services_details, name="services_details"),
-    path("service/<str:key>/", views.services_details, name="services_details"),
+    path("services/<slug:slug>/", views.services_details, name="services_details"),
    # path("property/<str:type>/<int:id>/faqs/", views.property_faq_view, name="property_faq"),
     path("faqs/", views.all_faqs, name="all_faqs"),
+    path('property-analytics/', views.property_analytics, name='property_analytics'),
     
 
 
@@ -116,8 +113,16 @@ urlpatterns = [
     path('listingpage/', views.listings_view, name='listings'),
    
     
-    # Change <int:pk> to <str:pk> to allow alphanumeric UUIDs
-    path('listing/<str:listing_type>/<str:category>/<str:pk>/', views.property_detail_view, name='property_detail'),
+    
+    # 1. SEO-friendly URL (with slug)
+    path('listing/<str:listing_type>/<str:category>/<str:slug>/<str:pk>/', views.property_detail_view, name='property_detail'),
+
+# 2. Legacy fallback (so old links without slug still work)
+    path('listing/<str:listing_type>/<str:category>/<str:pk>/', views.property_detail_view, name='property_detail_legacy'),
+
+    # urls.py
+    path('api/track-interaction/', views.track_interaction, name='track_interaction'),
+    path('api/track-search/', views.track_search_click, name='track_search_click'),
 
     ############ urls for track utm link #######################
 
@@ -160,6 +165,12 @@ urlpatterns = [
 
 
         #######################END URL SECTION OF POST PROPERTY##################################
+
+    path('ads/add/', views.add_brand_ad, name='add_brand_ad'),
+    path('api/log-search/', views.log_search, name='log_search'),
+    path('api/popular-searches/', views.popular_searches_api, name='popular_searches_api'),
+    path('api/popular-localities/', views.popular_localities_api, name='popular_localities_api'),
+  
 
 
 

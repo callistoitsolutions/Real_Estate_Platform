@@ -35,3 +35,6 @@ class MainAppConfig(AppConfig):
 
     def ready(self):
         print("Django Server Started Successfully")
+
+        from Main_App.locality_signals import connect_locality_signals
+        connect_locality_signals()

@@ -1,4 +1,4 @@
-{% include "agent/agent_header.html" %}
+{% include "admin_user/admin_header.html" %}
 {% load static %}
 
 <!-- =========================================================
@@ -102,7 +102,7 @@
        
 
 
-         <a href="{% url 'residential_plot_resale_agent' %}" class="btn-primary-custom">
+         <a href="{% url 'residential_plot_resale' %}" class="btn-primary-custom">
           <i class="fas fa-plus"></i> Add New Residential Plot
         </a>
 
@@ -670,8 +670,8 @@
 
 <script>
 
-$("#Resale_Plot").addClass("active");
-
+    $("#PlotResale").addClass("active");
+    
 let dtTable;
 $(document).ready(function(){
   dtTable = $('#plotTable').DataTable({
