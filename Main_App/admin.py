@@ -20,3 +20,22 @@ admin.site.register(WishlistProperty)
 admin.site.register(NormalFAQ)
 
 ############ Register Normal FAQ Modal Ends Here ##############################
+
+
+
+admin.site.register(BrandAd)
+
+############ Register Normal FAQ Modal Ends Here ##############################
+
+
+
+
+
+admin.site.register(LocalityInsight)
+
+############ Register LocalityInsight Modal Ends Here ##############################
+
+
+admin.site.register(LocalityPriceTrend)
+
+############ Register LocalityInsight Modal Ends Here ##############################

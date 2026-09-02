@@ -1,31 +1,270 @@
-<div class="blog-detail container">
-  <h1>{{ blog.title }}</h1>
-  <p class="lead">{{ blog.description }}</p>
-  <div>
-    {% if blog.img_position == 'center' %}
-      <img src="{{ blog.featured_image.url }}" class="mx-auto d-block img-fluid my-3" alt="Main Image">
-    {% elif blog.img_position == 'left' %}
-      <img src="{{ blog.featured_image.url }}" class="float-start img-fluid m-3" alt="Left Image">
-    {% elif blog.img_position == 'right' %}
-      <img src="{{ blog.featured_image.url }}" class="float-end img-fluid m-3" alt="Right Image">
+{% include 'home_page/header.html' %}
+
+<style>
+/* Reset & Core */
+body { 
+    background-color: #fcfcfc; 
+    font-family: 'Inter', sans-serif; 
+    margin: 0;
+    color: #2d3748;
+}
+
+/* Editorial Hero */
+.article-hero { 
+    position: relative; 
+    width: 100%; 
+    height: 60vh; 
+    min-height: 400px; 
+    display: flex; 
+    align-items: flex-end; 
+    background-color: #000; 
+}
+.article-hero img { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    opacity: 0.6; 
+}
+.article-hero-gradient { 
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 80%; 
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); 
+}
+.hero-content-wrapper { 
+    position: relative; 
+    z-index: 10; 
+    max-width: 1000px; 
+    margin: 0 auto; 
+    padding: 0 30px 50px; 
+    width: 100%; 
+    color: #fff; 
+}
+.article-tag-category { 
+    background: #006ce4; 
+    color: #fff; 
+    padding: 6px 14px; 
+    font-size: 0.8rem; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    border-radius: 4px; 
+    margin-right: 10px; 
+    display: inline-block;
+    margin-bottom: 20px;
+}
+.hero-title { 
+    font-size: clamp(2.5rem, 4vw, 3.5rem); 
+    font-weight: 900; 
+    line-height: 1.1; 
+    margin: 15px 0 25px; 
+}
+.author-meta-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    font-size: 0.95rem; 
+    color: rgba(255,255,255,0.8); 
+}
+.author-avatar { 
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    background: #fff; 
+    color: #000; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 800; 
+    font-size: 1.2rem; 
+}
+
+/* Article Reading Area */
+.article-reading-container { 
+    max-width: 800px; 
+    margin: 60px auto; 
+    padding: 0 20px; 
+    background: #fff; 
+}
+.article-lead-text { 
+    font-size: 1.4rem; 
+    line-height: 1.7; 
+    color: #4a5568; 
+    margin-bottom: 40px; 
+    padding-bottom: 40px; 
+    border-bottom: 1px solid #e2e8f0; 
+}
+.article-prose { 
+    font-size: 1.15rem; 
+    line-height: 2; 
+}
+
+/* Image Positioning Options */
+.inline-media-center { 
+    margin: 50px 0; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+}
+.inline-media-center img { 
+    width: 100%; 
+    height: auto; 
+    display: block; 
+}
+.inline-media-left { 
+    float: left; 
+    max-width: 350px; 
+    margin: 10px 30px 20px 0; 
+    border-radius: 8px; 
+}
+.inline-media-right { 
+    float: right; 
+    max-width: 350px; 
+    margin: 10px 0 20px 30px; 
+    border-radius: 8px; 
+}
+
+/* Rebranded Topics/Keywords Section */
+.related-topics-wrapper {
+    margin-top: 60px;
+    padding: 30px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+.related-topics-wrapper h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #1a202c;
+    font-weight: 700;
+}
+.topic-pill {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+.topic-pill:hover {
+    background: #006ce4;
+    color: #fff;
+    border-color: #006ce4;
+}
+
+/* Editorial Footer */
+.editorial-footer { 
+    background: #111827; 
+    color: #9ca3af; 
+    padding: 70px 20px 30px; 
+    text-align: center;
+    margin-top: 60px;
+}
+.editorial-footer h3 { 
+    color: #fff; 
+    font-size: 1.5rem; 
+    margin-bottom: 20px; 
+}
+.editorial-footer a { 
+    color: #3b82f6; 
+    text-decoration: none; 
+}
+</style>
+
+<header class="article-hero">
+    {% if blog.featured_image %}
+        <img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}">
     {% endif %}
-  </div>
-  <div>
-    {% if blog.img_position == "inline" %}
-      {{ blog.content|safe|linebreaksbr }}
-      <!-- Alternatively, add logic/placeholders to put image in between paragraphs -->
-      <img src="{{ blog.featured_image.url }}" class="img-fluid my-4 d-block mx-auto" alt="Inline Image">
-    {% else %}
-      {{ blog.content|safe|linebreaksbr }}
+    <div class="article-hero-gradient"></div>
+    
+    <div class="hero-content-wrapper">
+        <div>
+            {% for category in blog.categories.all %}
+                <span class="article-tag-category">{{ category }}</span>
+            {% empty %}
+                <span class="article-tag-category">Industry Insights</span>
+            {% endfor %}
+        </div>
+        
+        <h1 class="hero-title">{{ blog.title }}</h1>
+        
+        <div class="author-meta-row">
+            <div class="author-avatar">
+                {{ blog.author.first_name|default:'P'|slice:":1" }}
+            </div>
+            <div>
+                <strong style="color:#fff; display:block; font-size:1.05rem;">
+                    {{ blog.author.get_full_name|default:blog.author.username }}
+                </strong>
+                Published on {{ blog.created_at|date:"F d, Y" }}
+            </div>
+        </div>
+    </div>
+</header>
+
+<article class="article-reading-container">
+    {% if blog.description %}
+    <p class="article-lead-text">
+        {{ blog.description }}
+    </p>
     {% endif %}
-  </div>
-  <div class="mt-4">
-    <span>Category: {{ blog.categories.all|join:", " }}</span> |
-    <span>By {{ blog.author.get_full_name }}</span> |
-    <span>Posted: {{ blog.created_at|date:"M d, Y" }}</span>
-  </div>
-  <div class="mt-2">
-    <span class="badge bg-info">Primary: {{ blog.primary_keyword }}</span>
-    <span class="badge bg-secondary">Sec: {{ blog.secondary_keywords }}</span>
-  </div>
-</div>
+
+    <div class="article-prose">
+        {% if blog.featured_image %}
+            {% if blog.img_position == 'left' %}
+                <img src="{{ blog.featured_image.url }}" class="inline-media-left shadow-sm" alt="Left Image">
+            {% elif blog.img_position == 'right' %}
+                <img src="{{ blog.featured_image.url }}" class="inline-media-right shadow-sm" alt="Right Image">
+            {% endif %}
+        {% endif %}
+
+        {{ blog.content|safe|linebreaksbr }}
+
+        {% if blog.featured_image and blog.img_position == "inline" or blog.img_position == "center" %}
+            <div class="inline-media-center">
+                <img src="{{ blog.featured_image.url }}" alt="Article Graphic">
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Redesigned Keywords Section (No SEO Jargon) -->
+    {% if blog.primary_keyword or blog.secondary_keywords %}
+    <div class="related-topics-wrapper">
+        <h4>Explore Related Topics</h4>
+        <div>
+            {% if blog.primary_keyword %}
+                <span class="topic-pill">{{ blog.primary_keyword }}</span>
+            {% endif %}
+            
+            {% if blog.secondary_keywords %}
+                <span class="topic-pill">{{ blog.secondary_keywords }}</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</article>
+
+<footer class="editorial-footer">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <h3>PropCRM Editorial</h3>
+        <p style="margin-bottom: 30px;">Delivering verified insights, market trends, and technical guides for modern real estate professionals.</p>
+        <div style="font-size: 0.9rem;">
+            <a href="/blog/">View all articles</a> &nbsp;|&nbsp; 
+            <a href="/subscribe/">Subscribe to Newsletter</a>
+        </div>
+        <div style="margin-top: 40px; font-size: 0.8rem; border-top: 1px solid #374151; padding-top: 20px;">
+            &copy; 2026 PropCRM. All rights reserved.
+        </div>
+    </div>
+</footer>

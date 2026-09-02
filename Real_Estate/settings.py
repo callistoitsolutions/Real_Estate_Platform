@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'django.contrib.sitemaps',
    
     'Admin_App',
     'django_user_agents',   # ADD THIS
@@ -142,7 +144,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'Admin_App.context_processors.admin_alerts'
+                'Admin_App.context_processors.admin_alerts',
+                'Main_App.context_processors.global_seo',
                 
             ],
         },

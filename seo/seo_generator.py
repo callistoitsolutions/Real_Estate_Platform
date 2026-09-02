@@ -80,15 +80,15 @@ def create_dynamic_seo(instance, page_type):
 
             bhk = safe(instance.bhk_type)
             property_type = safe(instance.property_type)
-            locality = safe(instance.locality)
+            locality_area = safe(instance.locality_area)
             city = safe(instance.city)
             rent = format_price(instance.monthly_rent)
 
-            title = f"{bhk} {property_type} for Rent in {locality}, {city}"
+            title = f"{bhk} {property_type} for Rent in {locality_area}, {city}"
 
             description = seo_limit(
                 f"Premium {bhk} {property_type} available for rent in "
-                f"{locality}, {city}. Monthly rent ₹{rent}. "
+                f"{locality_area}, {city}. Monthly rent ₹{rent}. "
                 f"Explore verified rental homes with modern amenities."
             )
 
@@ -97,7 +97,7 @@ def create_dynamic_seo(instance, page_type):
             secondary_keywords = (
                 f"flat for rent in {city}, "
                 f"{property_type} rent, "
-                f"rental homes in {locality}"
+                f"rental homes in {locality_area}"
             )
 
             intro_html = f"""
@@ -105,7 +105,7 @@ def create_dynamic_seo(instance, page_type):
 
             <p>
             Find premium {bhk} {property_type} for rent in
-            {locality}, {city}.
+            {locality_area}, {city}.
             </p>
             """
 
@@ -123,15 +123,15 @@ def create_dynamic_seo(instance, page_type):
         elif page_type == "commercial_rental":
 
             property_type = safe(instance.property_type)
-            locality = safe(instance.area_locality)
+            locality = safe(instance.locality) # FIXED: Changed from area_locality to locality
             city = safe(instance.city)
-            rent = format_price(instance.expected_rent)
+            rent = format_price(instance.monthly_rent) # FIXED: Changed from expected_rent to monthly_rent
 
             title = f"{property_type} for Rent in {locality}, {city}"
 
             description = seo_limit(
                 f"Commercial {property_type} available for rent in "
-                f"{locality}, {city}. Expected rent ₹{rent}."
+                f"{locality}, {city}. Monthly rent ₹{rent}."
             )
 
             keyword = f"commercial property for rent in {city}"
@@ -163,7 +163,7 @@ def create_dynamic_seo(instance, page_type):
 
         elif page_type == "pg_coliving":
 
-            pg_name = safe(instance.pg_name)
+            pg_name = safe(instance.property_title) # FIXED: Changed from pg_name to property_title
             locality = safe(instance.locality)
             city = safe(instance.city)
 
@@ -203,12 +203,12 @@ def create_dynamic_seo(instance, page_type):
 
         elif page_type == "resale_residential":
 
-            property_title = safe(instance.title)
+            property_title = safe(instance.property_title) # FIXED: Changed from title to property_title
             property_type = safe(instance.property_type)
             locality = safe(instance.locality)
             city = safe(instance.city)
             bhk = safe(instance.bhk)
-            price = format_price(instance.expected_price)
+            price = format_price(instance.selling_price) # FIXED: Changed from expected_price to selling_price
 
             title = f"{bhk} {property_type} for Sale in {locality}, {city}"
 
@@ -257,7 +257,7 @@ def create_dynamic_seo(instance, page_type):
             property_type = safe(instance.property_type)
             locality = safe(instance.locality)
             city = safe(instance.city)
-            price = format_price(instance.expected_price)
+            price = format_price(instance.selling_price) # FIXED: expected_price to selling_price
 
             title = f"{property_type} Commercial Property for Sale in {city}"
 
@@ -338,7 +338,7 @@ def create_dynamic_seo(instance, page_type):
             property_type = safe(instance.property_type)
             locality = safe(instance.locality)
             city = safe(instance.city)
-            price = format_price(instance.expected_price)
+            price = format_price(instance.selling_price) # FIXED: expected_price to selling_price
 
             title = f"{property_type} Industrial Property in {city}"
 
@@ -378,7 +378,7 @@ def create_dynamic_seo(instance, page_type):
 
             locality = safe(instance.village)
             city = safe(instance.city)
-            price = format_price(instance.expected_price)
+            price = format_price(instance.selling_price) # FIXED: expected_price to selling_price
 
             title = f"Agricultural Land for Sale in {locality}, {city}"
 
@@ -411,47 +411,247 @@ def create_dynamic_seo(instance, page_type):
             }
 
         # =====================================================
+        # RESIDENTIAL PLOT RESALE
+        # =====================================================
+
+        elif page_type == "residential_plot_resale":
+
+            property_title = safe(instance.property_title)
+            locality = safe(instance.locality)
+            city = safe(instance.city)
+            price = format_price(instance.selling_price)
+            plot_area = safe(instance.plot_area)
+
+            title = f"Residential Plot for Sale in {locality}, {city}"
+            if property_title:
+                title = property_title
+
+            description = seo_limit(
+                f"Buy residential plot in {locality}, {city} at ₹{price}. "
+                f"Area: {plot_area} sq.ft. Premium residential land ready for construction."
+            )
+
+            keyword = f"residential plot for sale in {city}"
+
+            secondary_keywords = (
+                f"residential land for sale, "
+                f"plot in {locality}"
+            )
+
+            intro_html = f"""
+            <h1>{title}</h1>
+            <p>
+            Explore verified residential plots for sale in
+            {locality}, {city}.
+            </p>
+            """
+
+            schema = {
+                "@context": "https://schema.org",
+                "@type": "Landform",
+                "name": title,
+                "description": description,
+            }
+
+        # =====================================================
+        # COMMERCIAL PLOT RESALE
+        # =====================================================
+
+        elif page_type == "commercial_plot_resale":
+
+            property_title = safe(instance.property_title)
+            locality = safe(instance.locality)
+            city = safe(instance.city)
+            price = format_price(instance.selling_price)
+            zone_type = safe(instance.commercial_zone_type)
+
+            title = f"Commercial Plot for Sale in {locality}, {city}"
+            if property_title:
+                title = property_title
+
+            description = seo_limit(
+                f"Commercial plot available for sale in {locality}, {city} at ₹{price}. "
+                f"Zone: {zone_type}. Ideal for business and retail development."
+            )
+
+            keyword = f"commercial plot for sale in {city}"
+
+            secondary_keywords = (
+                f"commercial land in {city}, "
+                f"commercial property {locality}"
+            )
+
+            intro_html = f"""
+            <h1>{title}</h1>
+            <p>
+            Find premium commercial plots for sale in
+            {locality}, {city}.
+            </p>
+            """
+
+            schema = {
+                "@context": "https://schema.org",
+                "@type": "Landform",
+                "name": title,
+                "description": description,
+            }
+
+        # =====================================================
+        # INDUSTRIAL PLOT RESALE
+        # =====================================================
+
+        elif page_type == "industrial_plot_resale":
+
+            property_title = safe(instance.property_title)
+            locality = safe(instance.locality)
+            city = safe(instance.city)
+            price = format_price(instance.selling_price)
+            estate_name = safe(instance.industrial_estate_name)
+
+            title = f"Industrial Plot for Sale in {locality}, {city}"
+            if property_title:
+                title = property_title
+
+            description = seo_limit(
+                f"Industrial plot for sale in {estate_name}, {locality}, {city} at ₹{price}. "
+                f"Suitable for manufacturing and warehousing operations."
+            )
+
+            keyword = f"industrial plot for sale in {city}"
+
+            secondary_keywords = (
+                f"industrial land {locality}, "
+                f"factory plot in {city}"
+            )
+
+            intro_html = f"""
+            <h1>{title}</h1>
+            <p>
+            Explore verified industrial plots in
+            {locality}, {city}.
+            </p>
+            """
+
+            schema = {
+                "@context": "https://schema.org",
+                "@type": "Landform",
+                "name": title,
+                "description": description,
+            }
+
+        # =====================================================
+        # AGRICULTURAL PLOT RESALE
+        # =====================================================
+
+        elif page_type == "agricultural_plot_resale":
+
+            property_title = safe(instance.property_title)
+            locality = safe(instance.locality)
+            city = safe(instance.city)
+            price = format_price(instance.selling_price)
+            area_unit = safe(instance.agr_area_unit)
+
+            title = f"Agricultural Land for Sale in {locality}, {city}"
+            if property_title:
+                title = property_title
+
+            description = seo_limit(
+                f"Buy agricultural land in {locality}, {city} at ₹{price}. "
+                f"Premium farmland measured in {area_unit}s available for cultivation."
+            )
+
+            keyword = f"agricultural land for sale in {city}"
+
+            secondary_keywords = (
+                f"farm land in {locality}, "
+                f"agricultural plot {city}"
+            )
+
+            intro_html = f"""
+            <h1>{title}</h1>
+            <p>
+            Discover agricultural land and farm plots in
+            {locality}, {city}.
+            </p>
+            """
+
+            schema = {
+                "@context": "https://schema.org",
+                "@type": "Landform",
+                "name": title,
+                "description": description,
+            }
+
+        # =====================================================
+        # BLOG
+        # =====================================================
+
+        # =====================================================
         # BLOG
         # =====================================================
 
         elif page_type == "blog":
 
-            title = f"{safe(instance.title)} | Real Estate Blog"
+            blog_title = safe(instance.title)
+            category = safe(instance.category)
+            author = safe(instance.author)
+            short_desc = safe(instance.short_description)
+            pub_date = safe(instance.published_date)
 
+            # Dynamically add category to the title if it exists
+            title_suffix = f" - {category}" if category else ""
+            title = f"{blog_title}{title_suffix} | Real Estate Blog"
+
+            # Use the newly added short_description for better SEO
             description = seo_limit(
-                f"Read expert insights about {safe(instance.title)}."
+                short_desc if short_desc else f"Read expert insights about {blog_title}."
             )
 
-            keyword = safe(instance.title)
+            keyword = blog_title
 
-            secondary_keywords = "real estate blog"
+            secondary_keywords = f"real estate blog, {category.lower() if category else 'property news'}"
 
             intro_html = f"""
             <h1>{title}</h1>
             """
 
+            # Enrich the schema with author and publish date for rich search results
             schema = {
                 "@context": "https://schema.org",
                 "@type": "BlogPosting",
-                "headline": safe(instance.title),
+                "headline": blog_title,
                 "description": description,
+                "author": {
+                    "@type": "Person",
+                    "name": author if author else "PropCRM Team"
+                }
             }
+            
+            if pub_date:
+                schema["datePublished"] = str(pub_date)
 
         # =====================================================
         # SERVICE
         # =====================================================
 
         elif page_type == "service":
+            
+            service_title = safe(instance.title)
+            short_desc = safe(instance.short_description)
+            category = safe(instance.category)
 
-            title = f"{safe(instance.title)} Property Service"
+            title = f"{service_title} Property Service"
 
+            # Use the newly added short_description for better SEO
             description = seo_limit(
-                f"Professional {safe(instance.title)} services."
+                short_desc if short_desc else f"Professional {service_title} services."
             )
 
-            keyword = safe(instance.title)
+            keyword = service_title
 
-            secondary_keywords = "property services"
+            # Include category in secondary keywords
+            cat_keyword = f", {category.replace('_', ' ')}" if category else ""
+            secondary_keywords = f"property services{cat_keyword}"
 
             intro_html = f"""
             <h1>{title}</h1>
@@ -460,9 +660,12 @@ def create_dynamic_seo(instance, page_type):
             schema = {
                 "@context": "https://schema.org",
                 "@type": "Service",
-                "name": safe(instance.title),
+                "name": service_title,
                 "description": description,
             }
+            
+            if category:
+                schema["category"] = category
 
         # =====================================================
         # SUBSCRIPTION
@@ -510,7 +713,7 @@ def create_dynamic_seo(instance, page_type):
 
                 "content_type": ContentType.objects.get_for_model(instance),
 
-                "object_id": instance.id,
+                "object_id": str(instance.id), # ensuring object_id is saved as a string to accommodate character-based UUIDs
 
                 "meta_title": title[:255],
 

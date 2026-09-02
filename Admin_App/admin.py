@@ -133,3 +133,30 @@ admin.site.register(CommercialPlotResaleProperty)
 admin.site.register(CommercialPlotResaleFAQ)
 admin.site.register(CommercialPlotResaleImage)
 admin.site.register(CommercialPlotResaleVideo)
+
+
+
+
+############ Register Agriculture Resale Plot Property Table/Modal ####################
+
+admin.site.register(AgriculturalPlotResaleProperty)
+admin.site.register(AgriculturalPlotResaleFAQ)
+admin.site.register(AgriculturalPlotResaleImage)
+admin.site.register(AgriculturalPlotResaleVideo)
+
+
+
+############ Register Industrial Resale Plot Property Table/Modal ####################
+
+admin.site.register(IndustrialPlotResaleProperty)
+admin.site.register(IndustrialPlotResaleFAQ)
+admin.site.register(IndustrialPlotResaleImage)
+admin.site.register(IndustrialPlotResaleVideo)
+
+
+
+
+############ Register PropertyInteraction Table/Modal ####################
+
+admin.site.register(PropertyInteraction)
+

@@ -67,10 +67,11 @@
                         <td style="padding: 15px; vertical-align: middle;">
                             <input type="checkbox" class="row-checkbox" onclick="updateBulkBar()" value="{{ page.id }}" style="transform: scale(1.2); cursor: pointer;">
                         </td>
+                       
                         <td style="padding: 15px; vertical-align: middle;">
-                            <a href="/{{ page.slug }}/" target="_blank" style="color:#6366f1; font-weight:700; text-decoration:none;">{{ page.key }}</a>
-                            <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px;">Slug: {{ page.slug }}</div>
-                        </td>
+    <a href="{% url 'seo_redirect' page.key %}" target="_blank" style="color:#6366f1; font-weight:700; text-decoration:none;">{{ page.key }}</a>
+    <div style="font-size:0.7rem; color:#94a3b8; margin-top:2px;">Slug: {{ page.slug }}</div>
+</td>
                         <td style="padding: 15px; vertical-align: middle;">
                             <span style="background:#e0e7ff; color:#4338ca; padding:5px 10px; border-radius:6px; font-size:0.7rem; font-weight:700;">{{ page.pagetype|title }}</span>
                         </td>

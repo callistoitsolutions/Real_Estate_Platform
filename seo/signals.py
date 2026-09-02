@@ -225,3 +225,67 @@ def subscription_seo(sender, instance, created, **kwargs):
     except Exception as e:
 
         print("SUBSCRIPTION SEO ERROR:", str(e))
+
+
+# =====================================================
+# RESIDENTIAL PLOT RESALE
+# =====================================================
+
+@receiver(post_save, sender=ResidentialPlotResaleProperty)
+def residential_plot_resale_seo(sender, instance, created, **kwargs):
+
+    print("RESIDENTIAL PLOT RESALE SIGNAL")
+
+    try:
+        create_dynamic_seo(instance, "residential_plot_resale")
+        print("RESIDENTIAL PLOT RESALE SEO CREATED")
+    except Exception as e:
+        print("RESIDENTIAL PLOT RESALE SEO ERROR:", str(e))
+
+
+# =====================================================
+# COMMERCIAL PLOT RESALE
+# =====================================================
+
+@receiver(post_save, sender=CommercialPlotResaleProperty)
+def commercial_plot_resale_seo(sender, instance, created, **kwargs):
+
+    print("COMMERCIAL PLOT RESALE SIGNAL")
+
+    try:
+        create_dynamic_seo(instance, "commercial_plot_resale")
+        print("COMMERCIAL PLOT RESALE SEO CREATED")
+    except Exception as e:
+        print("COMMERCIAL PLOT RESALE SEO ERROR:", str(e))
+
+
+# =====================================================
+# INDUSTRIAL PLOT RESALE
+# =====================================================
+
+@receiver(post_save, sender=IndustrialPlotResaleProperty)
+def industrial_plot_resale_seo(sender, instance, created, **kwargs):
+
+    print("INDUSTRIAL PLOT RESALE SIGNAL")
+
+    try:
+        create_dynamic_seo(instance, "industrial_plot_resale")
+        print("INDUSTRIAL PLOT RESALE SEO CREATED")
+    except Exception as e:
+        print("INDUSTRIAL PLOT RESALE SEO ERROR:", str(e))
+
+
+# =====================================================
+# AGRICULTURAL PLOT RESALE
+# =====================================================
+
+@receiver(post_save, sender=AgriculturalPlotResaleProperty)
+def agricultural_plot_resale_seo(sender, instance, created, **kwargs):
+
+    print("AGRICULTURAL PLOT RESALE SIGNAL")
+
+    try:
+        create_dynamic_seo(instance, "agricultural_plot_resale")
+        print("AGRICULTURAL PLOT RESALE SEO CREATED")
+    except Exception as e:
+        print("AGRICULTURAL PLOT RESALE SEO ERROR:", str(e))

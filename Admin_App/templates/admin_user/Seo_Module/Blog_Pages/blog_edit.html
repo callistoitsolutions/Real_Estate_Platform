@@ -41,8 +41,47 @@
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label style="font-weight: 600; color: #475569;">Reading Time <span style="color:red;">*</span></label>
-                    <input type="text" name="reading_time" class="form-control" value="{{ blog.reading_time }}" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                    <label style="font-weight: 600; color: #475569;">Author <span style="color:red;">*</span></label>
+                    <input type="text" name="author" class="form-control" value="{{ blog.author }}" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Reading Time</label>
+                    <input type="text" name="reading_time" class="form-control" value="{{ blog.reading_time }}" placeholder="e.g. 5 Min Read" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Status</label>
+                    <select name="status" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+                        <option value="Draft" {% if blog.status == 'Draft' %}selected{% endif %}>Draft</option>
+                        <option value="Published" {% if blog.status == 'Published' %}selected{% endif %}>Published</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Published Date</label>
+                    <input type="date" name="published_date" class="form-control" value="{{ blog.published_date|date:'Y-m-d' }}" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <i class="fas fa-search text-warning"></i> Search & Summary Details
+            </h3>
+
+            <div class="row mb-4">
+                <div class="col-md-12 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Short Description</label>
+                    <textarea name="short_description" class="form-control" rows="3" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">{{ blog.short_description }}</textarea>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Primary Keyword</label>
+                    <input type="text" name="primary_keyword" class="form-control" value="{{ blog.primary_keyword }}" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Secondary Keywords (Comma Separated)</label>
+                    <input type="text" name="secondary_keywords" class="form-control" value="{{ blog.secondary_keywords }}" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
                 </div>
             </div>
 
@@ -51,7 +90,7 @@
             </h3>
 
             <div class="row mb-4">
-                <div class="col-md-12 mb-3">
+                <div class="col-md-8 mb-3">
                     <label style="font-weight: 600; color: #475569;">Featured Image</label>
                     <div style="border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; background: #f8fafc; display: flex; align-items: center; gap: 20px;">
                         {% if blog.featured_image %}
@@ -59,6 +98,16 @@
                         {% endif %}
                         <input type="file" name="featured_image" accept="image/*" class="form-control-file">
                     </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Image Layout Position</label>
+                    <select name="img_position" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+                        <option value="center" {% if blog.img_position == 'center' %}selected{% endif %}>Center Default</option>
+                        <option value="left" {% if blog.img_position == 'left' %}selected{% endif %}>Float Left</option>
+                        <option value="right" {% if blog.img_position == 'right' %}selected{% endif %}>Float Right</option>
+                        <option value="inline" {% if blog.img_position == 'inline' %}selected{% endif %}>Inline Within Content</option>
+                    </select>
                 </div>
 
                 <div class="col-md-12 mb-3">
@@ -81,6 +130,5 @@
 <script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
 <script>
     $("#SEO").addClass("active");
-
     CKEDITOR.replace('editor');
 </script>

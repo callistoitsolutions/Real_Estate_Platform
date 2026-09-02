@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
-
 class LocationSEO(models.Model):
 
     key = models.CharField(max_length=250, unique=True)
@@ -16,7 +15,9 @@ class LocationSEO(models.Model):
         blank=True
     )
 
-    object_id = models.PositiveIntegerField(
+    # UPDATED: Changed from PositiveIntegerField to CharField to support string-based IDs
+    object_id = models.CharField(
+        max_length=255,
         null=True,
         blank=True
     )
@@ -72,3 +73,18 @@ class LocationSEO(models.Model):
 
     def __str__(self):
         return self.meta_title
+
+
+
+
+class SeoMetaTag(models.Model):
+    page_name = models.CharField(max_length=60)
+    meta_title = models.CharField(max_length=60)
+    canonical_url = models.URLField(max_length=255, blank=True, null=True)
+    meta_description = models.CharField(max_length=160)
+    keywords = models.TextField(help_text="Comma-separated keywords", blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.page_name

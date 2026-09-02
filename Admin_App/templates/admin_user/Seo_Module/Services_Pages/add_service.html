@@ -30,14 +30,46 @@
             </h3>
 
             <div class="row mb-4">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-8 mb-3">
                     <label style="font-weight: 600; color: #475569;">Title <span style="color:red;">*</span></label>
-                    <input type="text" name="title" class="form-control" placeholder="e.g. Property Management" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                    <input type="text" name="title" id="id_title" class="form-control" placeholder="e.g. Home Loan Assistance" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <label style="font-weight: 600; color: #475569;">Icon (Bootstrap class) <span style="color:red;">*</span></label>
                     <input type="text" name="icon" class="form-control" placeholder="e.g. bi bi-house" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Service Category <span style="color:red;">*</span></label>
+                    <select name="category" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="legal_services">Legal Services</option>
+                        <option value="loan_services">Loan Services</option>
+                        <option value="interior_services">Interior Services</option>
+                        <option value="packers_movers">Packers &amp; Movers</option>
+                        <option value="vastu_services">Vastu Services</option>
+                        <option value="property_valuation">Property Valuation</option>
+                        <option value="property_photography">Property Photography</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Status</label>
+                    <select name="status" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+                        <option value="active" selected>Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-8 mb-3">
+                    <label style="font-weight: 600; color: #475569;">CTA Button Text <span style="color:red;">*</span></label>
+                    <input type="text" name="cta_text" class="form-control" placeholder="e.g. Request Callback, Get Loan Offers, Book a Shoot" value="Request Callback" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Display Order</label>
+                    <input type="number" name="sort_order" class="form-control" placeholder="1" min="1" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
                 </div>
 
                 <div class="col-md-12 mb-3">
@@ -47,7 +79,7 @@
             </div>
 
             <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
-                <i class="fas fa-image text-success"></i> Media & Content
+                <i class="fas fa-image text-success"></i> Media &amp; Content
             </h3>
 
             <div class="row mb-4">
@@ -66,7 +98,9 @@
                 </div>
             </div>
 
-            <div style="text-align: right; margin-top: 30px;">
+            <p style="font-size:.82rem; color:#94a3b8; margin-top:24px;"><i class="fas fa-circle-info"></i> Slug and meta title/description for this service are managed in the SEO section after saving.</p>
+
+            <div style="text-align: right; margin-top: 10px;">
                 <button type="submit" class="btn" style="background: #0ea5e9; color: white; padding: 12px 30px; border-radius: 8px; font-weight: 700; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);">
                     <i class="fas fa-save"></i> Save Service
                 </button>
@@ -85,37 +119,37 @@
 
     $("#SEO").addClass("active");
 
-  CKEDITOR.replace('editor', {
-    height: 300,
-    extraPlugins: 'colorbutton,font',
-    toolbar: [
-      { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
-      { name: 'colors', items: ['TextColor', 'BGColor'] },
-      { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
-      { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
-      { name: 'insert', items: ['Image', 'Table'] },
-      { name: 'links', items: ['Link', 'Unlink'] },
-      { name: 'document', items: ['Source'] }
-    ]
-  });
+    CKEDITOR.replace('editor', {
+        height: 300,
+        extraPlugins: 'colorbutton,font',
+        toolbar: [
+            { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
+            { name: 'colors', items: ['TextColor', 'BGColor'] },
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+            { name: 'insert', items: ['Image', 'Table'] },
+            { name: 'links', items: ['Link', 'Unlink'] },
+            { name: 'document', items: ['Source'] }
+        ]
+    });
 </script>
 
 <!-- Sidebar Menu Fix -->
 <script>
     function toggleSubmenu(event, element) {
-        event.preventDefault(); 
+        event.preventDefault();
         event.stopPropagation();
-        
+
         const submenu = element.nextElementSibling;
-        
-        document.querySelectorAll('.submenu').forEach(s => { 
-            if(s !== submenu) s.classList.remove('active'); 
+
+        document.querySelectorAll('.submenu').forEach(s => {
+            if (s !== submenu) s.classList.remove('active');
         });
-        
-        document.querySelectorAll('.menu-link').forEach(l => { 
-            if(l !== element) l.classList.remove('dropdown-open'); 
+
+        document.querySelectorAll('.menu-link').forEach(l => {
+            if (l !== element) l.classList.remove('dropdown-open');
         });
-        
+
         if (submenu) {
             submenu.classList.toggle('active');
             element.classList.toggle('dropdown-open');

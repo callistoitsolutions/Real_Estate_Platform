@@ -1,6 +1,6 @@
 from django.contrib import admin
 from Admin_App.models import Blog   # <-- replace 'yourapp' with your actual app name
-from seo.models import LocationSEO
+from seo.models import LocationSEO,SeoMetaTag
 
 from django.utils.html import format_html
 
@@ -63,3 +63,11 @@ class BlogAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" style="max-width: 200px;"/>', obj.featured_image.url)
         return "-"
     preview.short_description = "Preview Image"
+
+
+
+
+@admin.register(SeoMetaTag)
+class SeoMetaTagAdmin(admin.ModelAdmin):
+    list_display = ('page_name', 'meta_title', 'created_at')
+    search_fields = ('page_name',)
