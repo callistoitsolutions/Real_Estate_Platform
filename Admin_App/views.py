@@ -33,6 +33,7 @@ from django.contrib import messages
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
+from django.db.models.functions import TruncMonth
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -60,6 +61,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from openpyxl import Workbook
+from Admin_App.utils import generate_property_slideshow
 from django.db import transaction
 import pandas as pd
 import io
@@ -346,7 +348,7 @@ def global_search(request):
             {'model': AgriculturalResaleProperty, 'label': 'Agricultural', 'url_name': 'agricultural_detail'},
         ]
 
-        # 🟢 1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
+        #  1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
         for table in property_tables:
             ModelClass = table['model']
             
@@ -365,7 +367,7 @@ def global_search(request):
                     'url': reverse(table['url_name'], args=[match.id]) 
                 })
         
-        # 🟢 2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
+        #  2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
         users = User_Details.objects.filter(
             Q(user_name__icontains=query) | 
             Q(user_email__icontains=query) |
@@ -375,7 +377,7 @@ def global_search(request):
             Q(user_role__icontains=query)         # Search by Role (e.g., "Tenant")
         )[:5]
         
-       # 🟢 Create a map that connects the exact database role to its URLs.py name
+       #  Create a map that connects the exact database role to its URLs.py name
         role_url_map = {
             'Tenant': 'Update_Tenant',     # Replace 'tenant_detail' with actual url name
             'Landlord': 'Update_Landlord', # Replace 'landlord_detail' with actual url name
@@ -387,7 +389,7 @@ def global_search(request):
         }
 
         for user in users:
-            # 🟢 Look up the correct URL name based on the user's role
+            #  Look up the correct URL name based on the user's role
             url_name = role_url_map.get(user.user_role)
             
             # If the role exists in our map, generate the real link. 
@@ -416,7 +418,8 @@ def get_todays_notifications(request):
     today = datetime.today()
     master_feed = []
 
-    # 🟢 1. Create the Map linking Roles to their specific URLs
+    #  1. Create the Map linking Roles to their specific URLs
+    
     role_url_map = {
         'Relationship Manager': 'Update_RM',             
         'Landlord': 'Update_Landlord', 
@@ -499,6 +502,226 @@ def get_todays_notifications(request):
 
 ############# Views endd for notifications ###############################
 
+
+############ Views start for display approval pending listings #############
+
+def Listing_Approval_Admin(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        rental_deleted = calculate_retention(RentalResidentialProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        commercial_deleted = calculate_retention(CommercialRentalProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        commercial_count =CommercialRentalProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+        pg_deleted = calculate_retention(PGColivingProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        resale_deleted = calculate_retention(ResaleResidentialProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        commercial_resale_deleted = calculate_retention(CommercialResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        
+        industrial_resale_deleted = calculate_retention(IndustrialResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        agricultural_resale_deleted = calculate_retention(AgriculturalResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        
+        # ── NEW: Plot Resale modules (Residential Plot/ Commercial Plot/ Industrial Plot / Agricultural Plot) ──
+
+        residential_plot_deleted = calculate_retention(ResidentialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        commercial_plot_deleted = calculate_retention(CommercialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        industrial_plot_deleted = calculate_retention(IndustrialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        agricultural_plot_deleted = calculate_retention(AgriculturalPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending"))
+        
+        context = {'admin_obj':admin_obj,
+            'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
+            'commercial_deleted': commercial_deleted, 'commercial_count': commercial_count,
+            'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
+            'resale_deleted': resale_deleted, 'resale_count': len(resale_deleted),
+            'commercial_resale_deleted': commercial_resale_deleted, 'commercial_resale_count': len(commercial_resale_deleted),
+            'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
+            'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
+        
+            # ── NEW ──
+            'residential_plot_deleted':residential_plot_deleted,
+            'residential_plot_count':len(residential_plot_deleted),
+
+            'commercial_plot_deleted':commercial_plot_deleted,
+            'commercial_plot_count':len(commercial_plot_deleted),
+
+            'industrial_plot_deleted': industrial_plot_deleted, 'industrial_plot_count': len(industrial_plot_deleted),
+
+            'agricultural_plot_deleted': agricultural_plot_deleted, 'agricultural_plot_count': len(agricultural_plot_deleted),
+        
+            'total_deleted_all': (
+                len(rental_deleted) + len(commercial_deleted) + len(pg_deleted) +
+                len(resale_deleted) + len(commercial_resale_deleted) +
+                len(industrial_resale_deleted) + len(agricultural_resale_deleted) +
+                len(industrial_plot_deleted) + len(agricultural_plot_deleted) + len(residential_plot_deleted) + len(commercial_plot_deleted)
+            )
+        }
+    
+        return render(request,"admin_user/Listing_Approve/listing_approve.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for display approval pending listings ####################
+
+
+########## Views start for display subscription pending approval ##############
+
+def Payment_Approval_Admin(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Pending")
+        landlord_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Pending").count()
+
+        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Pending")
+        agent_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Pending").count()
+
+        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Pending")
+        agency_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Pending").count()
+
+        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Pending")
+        tenant_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Pending").count()
+
+        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Pending")
+        buyer_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Pending").count()
+
+        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Pending")
+        vendor_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Pending").count()
+        
+        
+        context = {'admin_obj':admin_obj,
+            'landlord_pending': landlord_pending, 'landlord_count': landlord_count,'agent_pending': agent_pending, 'agent_count': agent_count,
+            'agency_pending': agency_pending, 'agency_count': agency_count,
+            'tenant_pending': tenant_pending, 'tenant_count': tenant_count,
+            'buyer_pending': buyer_pending, 'buyer_count': buyer_count,
+            'vendor_pending': vendor_pending, 'vendor_count': vendor_count,
+
+            'total_pending': (
+                landlord_count + agent_count + agency_count +
+                tenant_count + buyer_count +
+                vendor_count
+            )
+        }
+    
+        return render(request,"admin_user/Payment_Approve/payment_approve.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+
+########### Views end for display subscription pending approval #############
+
+
+########### Views start for update subscriptions payments ###################
+
+def Update_Payment_Admin(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        payment = Subscription_Purchase_Details.objects.get(id=id)
+        
+        context = {'admin_obj':admin_obj,'payment':payment}
+    
+        return render(request,"admin_user/Payment_Approve/update_payment_approve.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+
+########### Views start for generate invoice for subscription payments ############
+
+def Payment_Invoice_Admin(request,id):
+    session_id = request.session.get('Admin_id')
+
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        payment = Subscription_Purchase_Details.objects.get(id=id)
+        
+        context = {'admin_obj':admin_obj,'payment':payment}
+    
+        return render(request,"admin_user/Payment_Approve/payment_invoice.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for generate invoice for subscription payments ###############
+
+############# Views start for display payments list ###################
+
+def Payments_List_Admin(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord")
+        landlord_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").count()
+        landlord_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Done").count()
+        landlord_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Cancel").count()
+        landlord_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status__in=['Pending','Hold']).count()
+
+        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent")
+        agent_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").count()
+        agent_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Done").count()
+        agent_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Cancel").count()
+        agent_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status__in=['Pending','Hold']).count()
+
+
+        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder")
+        agency_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").count()
+        agency_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Done").count()
+        agency_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Cancel").count()
+        agency_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status__in=['Pending','Hold']).count()
+
+        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant")
+        tenant_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").count()
+        tenant_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Done").count()
+        tenant_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Cancel").count()
+        tenant_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status__in=['Pending','Hold']).count()
+
+        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer")
+        buyer_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").count()
+        buyer_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Done").count()
+        buyer_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Cancel").count()
+        buyer_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status__in=['Pending','Hold']).count()
+
+        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor")
+        vendor_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").count()
+        vendor_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Done").count()
+        vendor_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Cancel").count()
+        vendor_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status__in=['Pending','Hold']).count()
+        
+        
+        context = {'admin_obj':admin_obj,
+            'landlord_pending': landlord_pending, 'landlord_count': landlord_count,
+            'landlord_done':landlord_done,'landlord_cancel':landlord_cancel,'landlord_hold':landlord_hold,
+
+            'agent_pending': agent_pending, 'agent_count': agent_count,
+            'agent_done':agent_done,'agent_cancel':agent_cancel,'agent_hold':agent_hold,
+                         
+            'agency_pending': agency_pending, 'agency_count': agency_count,
+            'agency_done':agency_done,'agency_cancel':agency_cancel,'agency_hold':agency_hold,
+
+            'tenant_pending': tenant_pending, 'tenant_count': tenant_count,
+            'tenant_done':tenant_done,'tenant_cancel':tenant_cancel,'tenant_hold':tenant_hold,
+
+            'buyer_pending': buyer_pending, 'buyer_count': buyer_count,
+            'buyer_done':buyer_done,'buyer_cancel':buyer_cancel,'buyer_hold':buyer_hold,
+
+            'vendor_pending': vendor_pending, 'vendor_count': vendor_count,'vendor_done':vendor_done,'vendor_cancel':vendor_cancel,'vendor_hold':vendor_hold,
+
+            'total_pending': (
+                landlord_count + agent_count + agency_count +
+                tenant_count + buyer_count +
+                vendor_count
+            )
+        }
+    
+        return render(request,"admin_user/Payment_Approve/payment_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+
+########### Views end for display payments list ########################
+
+############# Views end for update subscriptions payments ####################
 
 def index3(request):
     return render(request,"admin_user/index3.html")
@@ -639,8 +862,6 @@ def Delete_Contact_Enquiry(request):
     except:
         traceback.print_exc()
         return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
-
-
 
 ############## Views end for delete contact enquiry ######################
 
@@ -900,7 +1121,7 @@ def Contacts_Data(request):
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
   
 
-############### Views end for upload contact enquiries data via excel ###################
+############### Views end for upload contact enquiries data via excel ############
    
 
 ############## Views start for ameneties list ##########################
@@ -1787,7 +2008,11 @@ def Add_Subscriptions(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        context = {'admin_obj':admin_obj}
+        packages_obj = Package_Details.objects.all()
+        plans_obj = Plan_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'packages_obj':packages_obj,'plans_obj':plans_obj}
+
         return render(request,"admin_user/Subscription/add_subscription.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -1805,6 +2030,16 @@ def Subscriptions_Ajax(request):
         data.pop("id", None)        
         data['plan_upload_date'] = datetime.today()
         data['plan_upload_time'] = datetime.now()
+
+        # Generate a professional, natural-sounding sentence for plan_desc
+        data['plan_desc'] = (
+            f"The {data.get('package_name')} Package features the {data.get('plan_type')} plan "
+            f"tailored for {data.get('plan_for')}, valid for a {data.get('plan_duration')} duration. It is attractively priced at a base rate "
+            f"of ₹{data.get('plan_base_price')}, available at a special offer price of ₹{data.get('plan_offer_price')} "
+            f"after a {data.get('plan_discount')}% discount, and supports up to {data.get('plan_max_listings')} "
+            f"maximum listings or enquiries."
+        )
+        
         Subscription_Details.objects.create(**data)
         return JsonResponse({"status":"1", "msg" : f"Subscription Details added successfully"})
 
@@ -1815,6 +2050,14 @@ def Subscriptions_Ajax(request):
         except Subscription_Details.DoesNotExist:
             return JsonResponse({'status': '0', 'msg': 'Subscription Details not found'})
 
+        # Generate a professional, natural-sounding sentence for plan_desc
+        data['plan_desc'] = (
+            f"The {data.get('package_name')} Package features the {data.get('plan_type')} plan "
+            f"tailored for {data.get('plan_for')}, valid for a {data.get('plan_duration')} duration. It is attractively priced at a base rate "
+            f"of ₹{data.get('plan_base_price')}, available at a special offer price of ₹{data.get('plan_offer_price')} "
+            f"after a {data.get('plan_discount')}% discount, and supports up to {data.get('plan_max_listings')} "
+            f"maximum listings or enquiries."
+        )
 
         # Update withdraw fields (unchanged)
         for key, value in data.items():
@@ -1854,7 +2097,11 @@ def Update_Subscriptions(request,id):
 
         subscription = Subscription_Details.objects.get(id=id)
 
-        context = {'admin_obj':admin_obj,'subscription':subscription}
+        packages_obj = Package_Details.objects.all()
+        plans_obj = Plan_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'subscription':subscription,'packages_obj':packages_obj,'plans_obj':plans_obj}
+
         return render(request,"admin_user/Subscription/update_subscription.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -2356,7 +2603,8 @@ def export_commercial_rent(request):
 
 
 
-from django.db.models.functions import TruncMonth
+
+
 
 def commercial_list(request):
     session_id = request.session.get('Admin_id')
@@ -2368,18 +2616,20 @@ def commercial_list(request):
     except Admin_Login.DoesNotExist:
         return render(request, 'home_page/Adminlogin.html')
 
-    print(">>> COMMERCIAL LIST VIEW IS RUNNING! <<<")
-
     # ── 1. GET ALL SEARCH PARAMS ──
-    search_query    = request.GET.get('search', '').strip()
-    prop_type_query = request.GET.get('property_type', '').strip()
-    city_query      = request.GET.get('city', '').strip()
-    zone_query      = request.GET.get('zone_type', '').strip()
-    possession_query= request.GET.get('possession', '').strip()
-    listed_by_query = request.GET.get('listed_by', '').strip()
-    budget_query    = request.GET.get('budget', '').strip()
-    from_date       = request.GET.get('from_date', '').strip()
-    to_date         = request.GET.get('to_date', '').strip()
+    search_query        = request.GET.get('search', '').strip()
+    prop_type_query      = request.GET.get('property_type', '').strip()
+    city_query           = request.GET.get('city', '').strip()
+    zone_query           = request.GET.get('zone_type', '').strip()
+    possession_query     = request.GET.get('possession', '').strip()
+    listed_by_query      = request.GET.get('listed_by', '').strip()
+    uploaded_by_query    = request.GET.get('uploaded_by', '').strip()
+    budget_query         = request.GET.get('budget', '').strip()
+    listing_status_query = request.GET.get('listing_status', '').strip()
+    approval_status_query = request.GET.get('approval_status', '').strip()
+    duplicate_query      = request.GET.get('duplicate', '').strip()
+    from_date            = request.GET.get('from_date', '').strip()
+    to_date              = request.GET.get('to_date', '').strip()
 
     # ── Base queryset ──
     try:
@@ -2388,13 +2638,34 @@ def commercial_list(request):
         properties = CommercialRentalProperty.objects.all().order_by('-id')
 
     # ── 2. APPLY FILTERS ──
+    # NOTE: search now checks across every meaningful text/identifier field,
+    # not just title/city/locality/owner name.
     if search_query:
         properties = properties.filter(
+            Q(id__icontains=search_query) |
+            Q(property_unique_key__icontains=search_query) |
             Q(property_title__icontains=search_query) |
             Q(building_name__icontains=search_query) |
+            Q(property_no__icontains=search_query) |
+            Q(wing_number__icontains=search_query) |
             Q(city__icontains=search_query) |
+            Q(state__icontains=search_query) |
             Q(locality__icontains=search_query) |
-            Q(listed_by_name__icontains=search_query)
+            Q(address__icontains=search_query) |
+            Q(pincode__icontains=search_query) |
+            Q(property_type__icontains=search_query) |
+            Q(zone_type__icontains=search_query) |
+            Q(availability_status__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(listed_by_contact__icontains=search_query) |
+            Q(listed_by_email__icontains=search_query) |
+            Q(listed_by_role__icontains=search_query) |
+            Q(uploaded_by_name__icontains=search_query) |
+            Q(uploaded_by_email__icontains=search_query) |
+            Q(uploaded_by_contact__icontains=search_query) |
+            Q(uploaded_by_role__icontains=search_query) |
+            Q(listing_status__icontains=search_query) |
+            Q(approval_status__icontains=search_query)
         )
 
     if prop_type_query and prop_type_query != 'All Types':
@@ -2407,6 +2678,18 @@ def commercial_list(request):
         properties = properties.filter(availability_status__icontains=possession_query)
     if listed_by_query and listed_by_query != 'All Roles':
         properties = properties.filter(listed_by_role__icontains=listed_by_query)
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__icontains=uploaded_by_query)
+
+    if listing_status_query and listing_status_query != 'All Status':
+        properties = properties.filter(listing_status__iexact=listing_status_query)
+    if approval_status_query and approval_status_query != 'All Approval':
+        properties = properties.filter(approval_status__iexact=approval_status_query)
+
+    if duplicate_query == 'duplicates_only':
+        properties = properties.filter(is_duplicate=True)
+    elif duplicate_query == 'unique_only':
+        properties = properties.filter(is_duplicate=False)
 
     if from_date:
         try:
@@ -2430,205 +2713,23 @@ def commercial_list(request):
             properties = properties.filter(monthly_rent__gt=500000)
 
     properties = properties.prefetch_related(
-    Prefetch(
-        'walkthrough_video',
-        queryset=CommercialRentalVideo.objects.all(),
-        to_attr='all_videos'
+        Prefetch(
+            'walkthrough_video',
+            queryset=CommercialRentalVideo.objects.all(),
+            to_attr='all_videos'
+        )
     )
-)
-
-    # ── Exhaustive Field Definition for Exports ──
-    EXPORT_COLS = [
-        ("System Data", "id", False, "Database ID"),
-        ("System Data", "property_unique_key", False, "Duplicate Checker Key"),
-        ("System Data", "is_duplicate", False, "True/False"),
-        ("System Data", "property_title", False, "Auto Generated Title"),
-        
-        ("Basic Info", "property_type", True, "office-space / shop / warehouse / industrial / land"),
-        ("Basic Info", "property_condition", True, "bare-shell / warm-shell / fitted / furnished"),
-        ("Basic Info", "city", True, "City name"),
-        ("Basic Info", "locality", True, "Area/locality"),
-        ("Basic Info", "address", True, "Complete address"),
-        ("Basic Info", "building_name", True, "Building/project name"),
-        ("Basic Info", "wing_number", False, "Wing/Tower"),
-        ("Basic Info", "property_no", True, "Internal Unit No"),
-        ("Basic Info", "availability_status", True, "Available Status"),
-        ("Basic Info", "available_from", False, "YYYY-MM-DD"),
-        ("Basic Info", "property_age", True, "Age in Years"),
-        ("Basic Info", "zone_type", False, "industrial / commercial / mixed_use"),
-        ("Basic Info", "location_hub", False, "it_park / business_district"),
-        ("Basic Info", "ownership_type", True, "freehold / leasehold"),
-        
-        ("Area & Pricing", "builtup_area", True, "Number in sq.ft"),
-        ("Area & Pricing", "carpet_area", False, "Number in sq.ft"),
-        ("Area & Pricing", "monthly_rent", True, "Monthly rent in ₹"),
-        ("Area & Pricing", "advanced_rent_type", False, "Advance Type"),
-        ("Area & Pricing", "advanced_rent_amount", False, "Advance Amount"),
-        ("Area & Pricing", "security_deposit_type", False, "Deposit Type"),
-        ("Area & Pricing", "security_deposit_amount", False, "Deposit Amount"),
-        ("Area & Pricing", "maintenance_type", False, "Included/Extra"),
-        ("Area & Pricing", "maintenance_charges", False, "Monthly maintenance in ₹"),
-        ("Area & Pricing", "total_move_in_cost", False, "Total ₹"),
-        ("Area & Pricing", "negotiable", False, "Yes / No"),
-        ("Area & Pricing", "brokerage_percentage", False, "Brokerage Terms"),
-        ("Area & Pricing", "manual_brokerage", False, "Manual Amount"),
-        ("Area & Pricing", "dg_ups_included", False, "true / false"),
-        ("Area & Pricing", "electricity_included", False, "true / false"),
-        ("Area & Pricing", "water_included", False, "true / false"),
-        ("Area & Pricing", "lockin_period", False, "Lock-in months"),
-        ("Area & Pricing", "rent_increase", False, "% per year"),
-        
-        ("Building", "building_configuration", False, "e.g., G+3"),
-        ("Building", "total_floors", False, "Total floors"),
-        ("Building", "staircases", False, "Number of staircases"),
-        ("Building", "passenger_lifts", False, "Number (0 if none)"),
-        ("Building", "service_lifts", False, "Number (0 if none)"),
-        ("Building", "private_parking", False, "Private parking spots"),
-        ("Building", "min_seats", False, "Min seating"),
-        ("Building", "max_seats", False, "Max seating"),
-        ("Building", "cabins", False, "Number of cabins"),
-        ("Building", "meeting_rooms", False, "Number of meeting rooms"),
-        ("Building", "private_washroom", False, "Number (0 if none)"),
-        ("Building", "public_washroom", False, "Number (0 if none)"),
-        ("Building", "flooring_type", False, "marble / vitrified / granite / wooden / ceramic"),
-        
-        ("Amenities", "amenities", True, "Comma-separated"),
-        ("Amenities", "nearby_facilities", True, "Comma-separated"),
-        ("Amenities", "property_summary", False, "Short Summary"),
-        ("Amenities", "property_description", False, "Auto Generated Detailed description"),
-        ("Amenities", "user_description", False, "User Added Detailed description"),
-        
-        ("Media & Contact", "listed_by_type", True, "Self/Other"),
-        ("Media & Contact", "listed_by_name", True, "Full name"),
-        ("Media & Contact", "listed_by_contact", True, "Contact Number"),
-        ("Media & Contact", "listed_by_email", True, "Email"),
-        ("Media & Contact", "listed_by_role", True, "Role"),
-        
-        ("Uploader Tracking", "uploaded_by_name", False, "Auto-filled"),
-        ("Uploader Tracking", "uploaded_by_email", False, "Auto-filled"),
-        ("Uploader Tracking", "uploaded_by_contact", False, "Auto-filled"),
-        ("Uploader Tracking", "uploaded_by_role", False, "Auto-filled"),
-        
-        ("System Tracking", "created_at", False, "Datetime created"),
-        ("System Tracking", "is_deleted", False, "True/False"),
-        ("System Tracking", "upload_file_name", False, "Source Form"),
-    ]
 
     # ════════════════════════════════════════════════
-    # 🛑 ROBUST EXPORT LOGIC 🛑
+    #  EXCEL / CSV DOWNLOAD BLOCK REMOVED
+    # (the openpyxl / csv export code that used to live here has been
+    #  deleted per request — this view no longer serves file downloads)
     # ════════════════════════════════════════════════
-
-    # ── Excel Download ──
-    if request.GET.get('download') == 'excel':
-        try:
-            wb = openpyxl.Workbook()
-            ws = wb.active
-            ws.title = "Commercial Rental"
-
-            HDR_BG  = "667EEA"
-            REQ_BG  = "FEF3C7"
-            OPT_BG  = "F0FDF4"
-            thin = Side(style="thin", color="CBD5E1")
-            bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
-
-            # Row 1: Section Banners
-            sec_spans = OrderedDict()
-            for i, (sec, *_) in enumerate(EXPORT_COLS):
-                sec_spans.setdefault(sec, []).append(i + 1)
-
-            for sec, cols in sec_spans.items():
-                c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
-                c.font      = Font(bold=True, color="FFFFFF", name="Arial", size=11)
-                c.fill      = PatternFill("solid", fgColor=HDR_BG)
-                c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                c.border    = bdr
-                if len(cols) > 1:
-                    ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
-
-            # Rows 2 & 3: Labels and Hints
-            for ci, (sec, field, req, hint) in enumerate(EXPORT_COLS, 1):
-                lc = ws.cell(row=2, column=ci, value=field + (" *" if req else ""))
-                lc.font      = Font(bold=True, color="1E293B", name="Arial", size=9)
-                lc.fill      = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
-                lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                lc.border    = bdr
-
-                hc = ws.cell(row=3, column=ci, value=hint)
-                hc.font      = Font(italic=True, color="64748B", name="Arial", size=8)
-                hc.fill      = PatternFill("solid", fgColor="FFFFFF")
-                hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                hc.border    = bdr
-
-                ws.column_dimensions[get_column_letter(ci)].width = max(18, len(field) + 4)
-
-            # Rows 4+: Database Data Injection
-            for row_idx, prop in enumerate(properties, start=4):
-                for col_idx, (_, field_name, _, _) in enumerate(EXPORT_COLS, start=1):
-                    val = getattr(prop, field_name, "")
-                    
-                    if val is True: val = "Yes"
-                    elif val is False: val = "No"
-                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
-                    elif isinstance(val, list): val = ", ".join(map(str, val))
-                    elif hasattr(val, 'url'): val = val.url if val else ""
-                    
-                    cell = ws.cell(row=row_idx, column=col_idx, value=str(val) if val is not None else "")
-                    cell.alignment = Alignment(vertical="center", wrap_text=True)
-                    cell.border = bdr
-
-            ws.row_dimensions[1].height = 28
-            ws.row_dimensions[2].height = 36
-            ws.row_dimensions[3].height = 42
-            ws.freeze_panes = "A4"
-
-            buf = io.BytesIO()
-            wb.save(buf)
-            buf.seek(0)
-            
-            response = HttpResponse(
-                buf.getvalue(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
-            response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Listing_Export.xlsx"'
-            return response
-
-        except Exception as e:
-            error_msg = f"ERROR GENERATING EXCEL:\n\n{str(e)}\n\n{traceback.format_exc()}"
-            print(error_msg)
-            return HttpResponse(f"<pre>{error_msg}</pre>", status=500)
-
-    # ── CSV Download ──
-    if request.GET.get('download') == 'csv':
-        try:
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="commercial_rental_properties.csv"'
-            writer = csv.writer(response)
-            
-            writer.writerow([field for _, field, _, _ in EXPORT_COLS])
-            
-            for prop in properties:
-                row_data = []
-                for _, field_name, _, _ in EXPORT_COLS:
-                    val = getattr(prop, field_name, "")
-                    if val is True: val = "Yes"
-                    elif val is False: val = "No"
-                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
-                    elif isinstance(val, list): val = ", ".join(map(str, val))
-                    elif hasattr(val, 'url'): val = val.url if val else ""
-                    row_data.append(val if val is not None else "")
-                writer.writerow(row_data)
-            
-            return response
-            
-        except Exception as e:
-            error_msg = f"ERROR GENERATING CSV:\n\n{str(e)}\n\n{traceback.format_exc()}"
-            print(error_msg)
-            return HttpResponse(f"<pre>{error_msg}</pre>", status=500)
 
     # ── Pagination ──
-    paginator    = Paginator(properties, 10)
-    page_number  = request.GET.get('page', 1)
-    page_obj     = paginator.get_page(page_number)
+    paginator      = Paginator(properties, 10)
+    page_number    = request.GET.get('page', 1)
+    page_obj       = paginator.get_page(page_number)
     filtered_count = properties.count()
 
     for prop in page_obj:
@@ -2663,6 +2764,15 @@ def commercial_list(request):
     unique_roles = (all_props
         .exclude(listed_by_role__isnull=True).exclude(listed_by_role='')
         .values_list('listed_by_role', flat=True).distinct())
+    unique_uploaded_roles = (all_props
+        .exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='')
+        .values_list('uploaded_by_role', flat=True).distinct())
+    unique_listing_status = (all_props
+        .exclude(listing_status__isnull=True).exclude(listing_status='')
+        .values_list('listing_status', flat=True).distinct())
+    unique_approval_status = (all_props
+        .exclude(approval_status__isnull=True).exclude(approval_status='')
+        .values_list('approval_status', flat=True).distinct())
 
     # ── Occupancy KPIs ──
     active_count   = all_props.exclude(availability_status__isnull=True).exclude(availability_status='').count()
@@ -2709,11 +2819,21 @@ def commercial_list(request):
     image_pct    = round((with_images_count    / total_count * 100)) if total_count > 0 else 0
     premium_pct  = round((premium_properties_count / total_count * 100)) if total_count > 0 else 0
 
+    # ── NEW: Listing / Approval / Duplicate status KPIs ──
+    active_listing_count   = all_props.filter(listing_status__iexact='Active').count()
+    inactive_listing_count = all_props.filter(listing_status__iexact='Inactive').count()
+    sold_listing_count     = all_props.filter(listing_status__iexact='Sold').count()
+    rented_listing_count   = all_props.filter(listing_status__iexact='Rented').count()
+    pending_approval_count = all_props.filter(approval_status__iexact='Pending').count()
+    approved_count         = all_props.filter(approval_status__iexact='Approved').count()
+    rejected_count         = all_props.filter(approval_status__iexact='Rejected').count()
+    duplicate_properties_count = all_props.filter(is_duplicate=True).count()
+    unique_properties_count    = total_count - duplicate_properties_count
+
     # ── Uploaded file names (for bulk delete) ──
     try:
         uploaded_files = (all_props.exclude(upload_file_name__isnull=True)
-                          .exclude(upload_file_name='')
-                          .values_list('upload_file_name', flat=True).distinct())
+        .exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct())
     except Exception:
         uploaded_files = []
 
@@ -2759,22 +2879,29 @@ def commercial_list(request):
         'admin_obj': admin_obj,
         'page_obj': page_obj,
 
-        'search_query':     search_query,
-        'prop_type_query':  prop_type_query,
-        'city_query':       city_query,
-        'zone_query':       zone_query,
-        'possession_query': possession_query,
-        'listed_by_query':  listed_by_query,
-        'budget_query':     budget_query,
-        'from_date':        from_date,
-        'to_date':          to_date,
+        'search_query':          search_query,
+        'prop_type_query':       prop_type_query,
+        'city_query':            city_query,
+        'zone_query':            zone_query,
+        'possession_query':      possession_query,
+        'listed_by_query':       listed_by_query,
+        'uploaded_by_query':     uploaded_by_query,
+        'budget_query':          budget_query,
+        'listing_status_query':  listing_status_query,
+        'approval_status_query': approval_status_query,
+        'duplicate_query':       duplicate_query,
+        'from_date':             from_date,
+        'to_date':               to_date,
 
-        'unique_property_types': unique_property_types,
-        'unique_cities':         unique_cities,
-        'unique_zones':          unique_zones,
-        'unique_possession':     unique_possession,
-        'unique_roles':          unique_roles,
-        'uploaded_files':        uploaded_files,
+        'unique_property_types':  unique_property_types,
+        'unique_cities':          unique_cities,
+        'unique_zones':           unique_zones,
+        'unique_possession':      unique_possession,
+        'unique_roles':           unique_roles,
+        'unique_uploaded_roles':  unique_uploaded_roles,
+        'unique_listing_status':  unique_listing_status,
+        'unique_approval_status': unique_approval_status,
+        'uploaded_files':         uploaded_files,
 
         'filtered_count':            filtered_count,
         'total_count':               total_count,
@@ -2802,6 +2929,17 @@ def commercial_list(request):
         'image_pct':                 image_pct,
         'premium_pct':               premium_pct,
 
+        # NEW status KPIs
+        'active_listing_count':      active_listing_count,
+        'inactive_listing_count':    inactive_listing_count,
+        'sold_listing_count':        sold_listing_count,
+        'rented_listing_count':      rented_listing_count,
+        'pending_approval_count':    pending_approval_count,
+        'approved_count':            approved_count,
+        'rejected_count':            rejected_count,
+        'duplicate_properties_count': duplicate_properties_count,
+        'unique_properties_count':    unique_properties_count,
+
         'total_tenants':    total_tenants,
         'collection_rate':  collection_rate,
         'pending_payments': pending_payments,
@@ -2815,8 +2953,8 @@ def commercial_list(request):
         'monthly_labels_json':    monthly_labels_json,
         'monthly_revenue_json':   monthly_revenue_json,
     }
-    return render(request, 'admin_user/Reports/Rental/commercial_list.html', context)
 
+    return render(request, 'admin_user/Reports/Rental/commercial_list.html', context)
 
 
 
@@ -2969,7 +3107,7 @@ def commercial_reports(request):
     ]
 
     # ════════════════════════════════════════════════
-    # 🛑 ROBUST EXPORT LOGIC 🛑
+    #  ROBUST EXPORT LOGIC 
     # ════════════════════════════════════════════════
 
     # ── Excel Download ──
@@ -4216,7 +4354,6 @@ def User_Ajax(request):
         return JsonResponse({"status":"1", "msg" : f"User Details updated successfully"})
 
 ########### Views end for ajax for add/update rm functionality ###################
-
 
 ############ Views start for ajax for delete bulk users #####################
 
@@ -7976,19 +8113,22 @@ def rental_residential_add(request):
             image_paths = [img.image.path for img in saved_images if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)]
 
             if len(image_paths) >= 3:
+                from Admin_App.utils import generate_property_slideshow
+
+                output_relative_path = f"residential_rent/videos/auto_{prop.id}.mp4"
                 try:
-                    from .utils.video_generator import generate_property_slideshow
-                    import time
-                    out_path = f"residential_rent/videos/auto_{prop.id}_{int(time.time())}.mp4"
-                    result = generate_property_slideshow(image_paths, out_path)
-                    if result:
-                        RentalResidentialVideo.objects.create(
+                    result_path = generate_property_slideshow(image_paths, output_relative_path)
+                    if result_path:
+                        RentalResidentialVideo.objects.update_or_create(
                             property=prop,
-                            video=out_path,
-                            source='auto'
+                            source='auto',
+                            defaults={
+                                'video': result_path,
+                                'video_url': None
+                                }
                         )
-                except Exception as ve:
-                    print("RESIDENTIAL VIDEO GEN FAILED:", str(ve))
+                except Exception as video_err:
+                    import traceback
                     traceback.print_exc()
 
             # 2. Save Manual Upload Video as a separate row
@@ -9242,7 +9382,7 @@ def rental_bulk_delete(request):
         data = json.loads(request.body)
         delete_type = data.get('delete_type')
         
-        # 👈 1. Get the deleter's name
+        #  1. Get the deleter's name
         deleter_name = _get_deleter_name(request)
         
         # IMPORTANT: Only target properties that are NOT currently in the Recycle Bin
@@ -9250,7 +9390,7 @@ def rental_bulk_delete(request):
         
         if delete_type == 'delete_all':
             count = properties.count()
-            # 👈 2. Add deleted_by=deleter_name to the update query
+            # 2. Add deleted_by=deleter_name to the update query
             properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
             return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} properties to Recycle Bin.'})
             
@@ -9317,42 +9457,85 @@ def rental_bulk_delete(request):
 def rental_residential_delete(request, pk):
     """Soft delete a single property."""
     try:
-        session_id = request.session.get('Admin_id')
-        user_identity = "Unknown Admin"
-        if session_id:
+
+        # ======================================
+        # Detect Logged-In User (Admin or User)
+        # ======================================
+        user_identity = "Unknown User"
+        user_role = "Unknown"
+
+        # Admin Login
+        admin_session_id = request.session.get('Admin_id')
+
+        if admin_session_id:
             try:
-                admin_obj = Admin_Login.objects.get(id=session_id)
-                user_identity = admin_obj.email or admin_obj.username
+                admin_obj = Admin_Login.objects.get(id=admin_session_id)
+
+                user_identity = (
+                    f"Admin ID: {admin_obj.id} | "
+                    f"Email: {admin_obj.email} | "
+                    f"Phone: {admin_obj.phone}"
+                )
+
+                user_role = "Admin"
+
             except Admin_Login.DoesNotExist:
                 pass
 
+        # User Login
+        elif request.session.get('user_id'):
+            try:
+                user_obj = User_Details.objects.get(
+                    id=request.session.get('user_id')
+                )
+
+                user_identity = (
+                    f"User ID: {user_obj.user_id} | "
+                    f"Name: {user_obj.user_name} | "
+                    f"Email: {user_obj.user_email} | "
+                    f"Phone: {user_obj.user_phone}"
+                )
+
+                user_role = user_obj.user_role or "User"
+
+            except User_Details.DoesNotExist:
+                pass
+
+        # ======================================
+        # Property Fetch
+        # ======================================
         prop = RentalResidentialProperty.objects.get(id=pk)
 
-        # Snapshot file source metadata before deletion mapping executions
         associated_origin_file = prop.upload_file_name or "Web UI Form"
-        property_title_ref = prop.property_title or "—"
+        property_title_ref = prop.property_title or "N/A"
 
+        # ======================================
+        # Soft Delete
+        # ======================================
         prop.is_deleted = True
         prop.deleted_at = timezone.now()
+
         if hasattr(prop, 'deleted_by'):
             prop.deleted_by = user_identity
 
         prop.save()
 
-        # =====================================================
-        # AUDIT LOGIC: Operational Deletion Trace Serialization
-        # =====================================================
+        # ======================================
+        # Audit Log
+        # ======================================
         RentalActivityLog.objects.create(
             user_identity=user_identity,
-            user_role="Admin",
+            user_role=user_role,
             action_type='DELETE',
-            property_id=pk,
-            targeted_fields="Entire Record Purged",
+            property_id=str(pk),
+            targeted_fields="Entire Record Delete",
             associated_file=associated_origin_file,
             action_payload=json.dumps({
                 "deleted_property_id": pk,
                 "property_title": property_title_ref,
-                "action": "soft_delete_to_recycle_bin"
+                "action": "soft_delete_to_recycle_bin",
+                "deleted_by": user_identity,
+                "role": user_role
             }),
             ip_address=_get_client_ip(request),
             status='SUCCESS'
@@ -9368,12 +9551,12 @@ def rental_residential_delete(request, pk):
             'status': 'error',
             'message': 'Property not found.'
         })
+
     except Exception as e:
         return JsonResponse({
             'status': 'error',
             'message': str(e)
         })
-
 
 
 
@@ -9397,9 +9580,15 @@ def calculate_retention(queryset):
 from django.db import transaction
 
 # ── UNIFIED GLOBAL RECYCLE BIN VIEW ──────────────────────────────────────────
+
+
+
+
 def global_recycle_bin(request):
     """Unified Recycle Bin displaying deleted items from all property modules."""
+    
     session_id = request.session.get('Admin_id')
+    admin_obj = Admin_Login.objects.get(id=session_id)
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
@@ -9412,6 +9601,10 @@ def global_recycle_bin(request):
     industrial_resale_deleted = calculate_retention(IndustrialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
     agricultural_resale_deleted = calculate_retention(AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
 
+    # ── NEW: Plot Resale modules (Industrial Plot / Agricultural Plot) ──
+    industrial_plot_deleted = calculate_retention(IndustrialPlotResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    agricultural_plot_deleted = calculate_retention(AgriculturalPlotResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+
     context = {
         'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
         'commercial_deleted': commercial_deleted, 'commercial_count': len(commercial_deleted),
@@ -9421,13 +9614,24 @@ def global_recycle_bin(request):
         'plot_sale_deleted': plot_sale_deleted, 'plot_sale_count': len(plot_sale_deleted),
         'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
         'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
+
+        # ── NEW ──
+        'industrial_plot_deleted': industrial_plot_deleted, 'industrial_plot_count': len(industrial_plot_deleted),
+        'agricultural_plot_deleted': agricultural_plot_deleted, 'agricultural_plot_count': len(agricultural_plot_deleted),
+
+        'admin_obj':admin_obj,
+
         'total_deleted_all': (
             len(rental_deleted) + len(commercial_deleted) + len(pg_deleted) +
             len(resale_deleted) + len(commercial_resale_deleted) + len(plot_sale_deleted) +
-            len(industrial_resale_deleted) + len(agricultural_resale_deleted)
+            len(industrial_resale_deleted) + len(agricultural_resale_deleted) +
+            len(industrial_plot_deleted) + len(agricultural_plot_deleted)
         )
     }
     return render(request, 'admin_user/Reports/Rental/global_recycle_bin.html', context)
+
+
+
 
 def system_audit_logs(request):
     """A completely separate view for tracking Deletion and Restore Audit Logs."""
@@ -9448,19 +9652,21 @@ def system_audit_logs(request):
         'Plot/Land': PlotSaleProperty,
         'Industrial Resale': IndustrialResaleProperty,
         'Agricultural Resale': AgriculturalResaleProperty,
+        # ── NEW ──
+        'Industrial Plot Resale': IndustrialPlotResaleProperty,
+        'Agricultural Plot Resale': AgriculturalPlotResaleProperty,
     }
 
     def get_display_id(obj):
-        # Look for custom model unique IDs before falling back to PK
         id_fields = [
-            'rental_residential_id', 'commercial_rental_id', 'pg_property_id', 
-            'property_id', 'commercial_id', 'plot_property_id', 
-            'industrial_id', 'agri_property_id'
+            'rental_residential_id', 'commercial_rental_id', 'pg_property_id',
+            'property_id', 'commercial_id', 'plot_property_id',
+            'industrial_id', 'agri_property_id',
         ]
         for field in id_fields:
             if hasattr(obj, field) and getattr(obj, field):
                 return getattr(obj, field)
-        return obj.pk
+        return obj.pk  # covers IndustrialPlotResaleProperty / AgriculturalPlotResaleProperty (id IS the pk)
 
     def get_display_title(obj):
         if hasattr(obj, 'property_title') and obj.property_title:
@@ -9472,7 +9678,6 @@ def system_audit_logs(request):
         return 'N/A'
 
     for module_name, model in models_map.items():
-        # 1. Fetch Deletion Logs
         try:
             deleted_items = model.objects.filter(is_deleted=True).exclude(deleted_at__isnull=True)
             for p in deleted_items:
@@ -9486,7 +9691,6 @@ def system_audit_logs(request):
         except Exception:
             pass
 
-        # 2. Fetch Restore Logs (if restored_at is later implemented in models)
         try:
             restored_items = model.objects.filter(restored_at__isnull=False)
             for p in restored_items:
@@ -9500,7 +9704,6 @@ def system_audit_logs(request):
         except Exception:
             pass
 
-    # Sort both lists by date (Newest logs first)
     deletion_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
     restore_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
 
@@ -9533,16 +9736,18 @@ def bulk_restore_route(request, property_type):
     try:
         # Complete dictionary mapping for all active property models
         model_map = {
-            'rental-residential': RentalResidentialProperty,
-            'commercial': CommercialRentalProperty,
-            'pg-coliving': PGColivingProperty,
-            'resale-residential': ResaleResidentialProperty,
-            'commercial-resale': CommercialResaleProperty,
-            'plot-sale': PlotSaleProperty,
-            'industrial-resale': IndustrialResaleProperty,
-            'agricultural-resale': AgriculturalResaleProperty,
-        }
-
+    'rental-residential': RentalResidentialProperty,
+    'commercial': CommercialRentalProperty,
+    'pg-coliving': PGColivingProperty,
+    'resale-residential': ResaleResidentialProperty,
+    'commercial-resale': CommercialResaleProperty,
+    'plot-sale': PlotSaleProperty,
+    'industrial-resale': IndustrialResaleProperty,
+    'agricultural-resale': AgriculturalResaleProperty,
+    # ── NEW ──
+    'industrial-plot-resale': IndustrialPlotResaleProperty,
+    'agricultural-plot-resale': AgriculturalPlotResaleProperty,
+}
         # Guard against invalid module requests
         if property_type not in model_map:
             return JsonResponse({
@@ -9597,15 +9802,18 @@ def bulk_hard_delete_properties(request, property_type):
     try:
         # 1. Map endpoint slugs to their respective Models
         model_map = {
-            'rental-residential': RentalResidentialProperty,
-            'commercial': CommercialRentalProperty,
-            'pg-coliving': PGColivingProperty,
-            'resale-residential': ResaleResidentialProperty,
-            'commercial-resale': CommercialResaleProperty,
-            'plot-sale': PlotSaleProperty,
-            'industrial-resale': IndustrialResaleProperty,   
-            'agricultural-resale': AgriculturalResaleProperty,
-        }
+    'rental-residential': RentalResidentialProperty,
+    'commercial': CommercialRentalProperty,
+    'pg-coliving': PGColivingProperty,
+    'resale-residential': ResaleResidentialProperty,
+    'commercial-resale': CommercialResaleProperty,
+    'plot-sale': PlotSaleProperty,
+    'industrial-resale': IndustrialResaleProperty,
+    'agricultural-resale': AgriculturalResaleProperty,
+    # ── NEW ──
+    'industrial-plot-resale': IndustrialPlotResaleProperty,
+    'agricultural-plot-resale': AgriculturalPlotResaleProperty,
+}
 
         if property_type not in model_map:
             return JsonResponse({'status': 'error', 'message': f'Invalid property module context: {property_type}'}, status=400)
@@ -10311,7 +10519,7 @@ def import_residential_excel(request):
     
     'address',
     'city',
-    'locality_area',
+    'locality',
     'state',
     'pincode',
    
@@ -10726,10 +10934,13 @@ from collections import OrderedDict
 
 
 
-def _norm(value):
-    """Normalize any category string for safe comparison: lowercase + stripped."""
-    return (value or '').strip().lower()
 
+
+
+
+def _norm(val):
+    return val.strip().lower() if val else ''
+    
 
 def rental_residential_view(request, pk):
     session_id = request.session.get('Admin_id')
@@ -10739,7 +10950,7 @@ def rental_residential_view(request, pk):
     admin_obj = Admin_Login.objects.get(id=session_id)
 
     prop = get_object_or_404(
-        RentalResidentialProperty.objects.prefetch_related('images', 'faqs'),
+        RentalResidentialProperty.objects.prefetch_related('images', 'faqs', 'video'),
         pk=pk
     )
 
@@ -10759,7 +10970,7 @@ def rental_residential_view(request, pk):
         'kitchen': 'Kitchen', 'bathroom': 'Bathroom', 'balcony': 'Balcony', 'others': 'Others',
     }
 
-    # ---------- IMAGES (sorted using NORMALIZED category so case/whitespace in the DB can't break ordering) ----------
+    # ---------- IMAGES ----------
     all_images = sorted(
         prop.images.all(),
         key=lambda img: (
@@ -10768,14 +10979,14 @@ def rental_residential_view(request, pk):
         )
     )
 
-    # ---------- GROUPED BY CATEGORY (normalized matching) ----------
+    # ---------- GROUPED BY CATEGORY ----------
     grouped_images = OrderedDict()
     for cat in CATEGORY_ORDER:
         cat_images = [img for img in all_images if _norm(img.category) == cat]
         if cat_images:
             grouped_images[cat] = {'label': CATEGORY_LABELS[cat], 'images': cat_images}
 
-    # ---------- DEDICATED THUMBNAIL SLOTS (normalized matching — THIS is what was silently failing before) ----------
+    # ---------- DEDICATED THUMBNAIL SLOTS ----------
     THUMB_PRIORITY = ['bathroom', 'living', 'bedroom', 'kitchen', 'balcony', 'others']
 
     def first_image_index(category):
@@ -10803,8 +11014,24 @@ def rental_residential_view(request, pk):
     thumb1_image = all_images[thumb1_idx] if thumb1_idx is not None else None
     thumb2_image = all_images[thumb2_idx] if thumb2_idx is not None else None
 
-    # ---------- VIDEO ----------
-    video_obj = RentalResidentialVideo.objects.filter(property=prop).first()
+    # ---------- VIDEO HIERARCHY ENGINE ----------
+    videos_queryset = prop.video.all() if hasattr(prop, 'video') else RentalResidentialVideo.objects.filter(property=prop)
+    rm_video = videos_queryset.filter(source='rm_assisted', video_url__isnull=False).exclude(video_url='').first()
+    manual_video = videos_queryset.filter(source='uploaded', video__isnull=False).first()
+    auto_video = videos_queryset.filter(source='auto', video__isnull=False).first()
+
+    selected_video = None
+    video_display_mode = None
+
+    if rm_video:
+        selected_video = rm_video
+        video_display_mode = 'rm_assisted'
+    elif manual_video:
+        selected_video = manual_video
+        video_display_mode = 'manual'
+    elif auto_video:
+        selected_video = auto_video
+        video_display_mode = 'auto'
 
     context = {
         'property': prop,
@@ -10814,14 +11041,13 @@ def rental_residential_view(request, pk):
         'thumb1_idx': thumb1_idx,
         'thumb2_image': thumb2_image,
         'thumb2_idx': thumb2_idx,
-        'video_obj': video_obj,
+        'selected_video': selected_video,
+        'video_display_mode': video_display_mode,
         'faqs': prop.faqs.all(),
         'amenities_list': amenities_list,
         'facilities_list': facilities_list,
         'latest_properties': latest_properties,
         'admin_obj': admin_obj,
-        # TEMP DEBUG — remove once confirmed. Shows raw category values as stored in DB.
-        'debug_categories': [(img.id, repr(img.category)) for img in all_images],
     }
     return render(request, 'admin_user/Reports/Rental/rental_residential_detail.html', context)
 
@@ -11049,30 +11275,22 @@ def rental_residential_edit(request, pk):
                 ]
 
                 if len(image_paths) >= 3:
+               
+
+                    output_relative_path = f"residential_rent/videos/auto_{prop.id}.mp4"
                     try:
-                        from .utils.video_generator import generate_property_slideshow
-
-                        video_row, _ = RentalResidentialVideo.objects.get_or_create(
-                            property=prop, 
-                            source='auto'
-                        )
-
-                        # Clean up old file to save disk space
-                        if video_row.video and video_row.video.name:
-                            old_path = video_row.video.path
-                            if os.path.exists(old_path):
-                                try: os.remove(old_path)
-                                except Exception as del_err: print("Could not delete old auto video:", del_err)
-
-                        # Timestamped file path to prevent browser caching stale videos
-                        out_path = f"residential_rent/videos/auto_{prop.id}_{int(time.time())}.mp4"
-
-                        result = generate_property_slideshow(image_paths, out_path)
-                        if result:
-                            video_row.video = out_path
-                            video_row.save()
-                    except Exception as ve:
-                        print("RESIDENTIAL VIDEO REGEN FAILED:", str(ve))
+                        result_path = generate_property_slideshow(image_paths, output_relative_path)
+                        if result_path:
+                            RentalResidentialVideo.objects.update_or_create(
+                                property=prop,
+                                source='auto',
+                                defaults={
+                                    'video': result_path,
+                                    'video_url': None
+                                    }
+                            )
+                    except Exception as video_err:
+                        import traceback
                         traceback.print_exc()
             # =====================================================
             # 10. AUDIT LOGGING & DIFF DICTIONARY
@@ -11302,8 +11520,8 @@ def commercial_rental_add(request):
                 ownership_type=request.POST.get('ownership_type'),
                 property_condition=request.POST.get('property_condition'),
 
-                builtup_area=to_int(request.POST.get('builtup_area')),
-                carpet_area=to_int_or_none(request.POST.get('carpet_area')),
+                builtup_area=to_decimal_or_none(request.POST.get('builtup_area')),
+                carpet_area=to_decimal_or_none(request.POST.get('carpet_area')),
 
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 manual_brokerage=request.POST.get('manual_brokerage'),
@@ -11404,30 +11622,36 @@ def commercial_rental_add(request):
 
             if len(image_paths) >= 3:
                 try:
-                    from .utils.commercial_video_generator import generate_commercial_property_slideshow
-                    out_path = f"commercial_rent/videos/auto_{prop.id}.mp4"
-                    result = generate_commercial_property_slideshow(image_paths, out_path)
-                    print("AUTO SLIDESHOW RESULT:", result)
-                    if result:
-                        CommercialRentalVideo.objects.create(
+                    from Admin_App.utils import generate_property_slideshow
+                    output_relative_path = f"commercial_rent/videos/auto_{prop.id}.mp4"
+                    
+                    result_path = generate_property_slideshow(image_paths, output_relative_path)
+                    print("AUTO SLIDESHOW RESULT:", result_path)
+                    
+                    if result_path:
+                        CommercialRentalVideo.objects.update_or_create(
                             property=prop,
-                            video=out_path,
                             source='auto',
-                            video_status='Done',
-                            video_url=None
+                            defaults={
+                                'video': result_path,
+                                'video_status': 'Done',
+                                'video_url': None
+                            }
                         )
                 except Exception as ve:
+                    import traceback
                     print("COMMERCIAL VIDEO GEN FAILED:", str(ve))
                     traceback.print_exc()
             else:
-                CommercialRentalVideo.objects.create(
+                CommercialRentalVideo.objects.update_or_create(
                     property=prop,
-                    video=None,
                     source='auto',
-                    video_status='Pending (Insufficient Images)',
-                    video_url=None
+                    defaults={
+                        'video': None,
+                        'video_status': 'Pending (Insufficient Images)',
+                        'video_url': None
+                    }
                 )
-
             # 2. Manual Upload Logic (separate row, source='uploaded')
             if video_option == 'upload' and uploaded_video:
                 if uploaded_video.size > 20 * 1024 * 1024:
@@ -11535,6 +11759,18 @@ def commercial_view(request, pk):
 # COMMERCIAL EDIT/UPDATE VIEW
 # ═══════════════════════════════════════
 
+from decimal import Decimal, InvalidOperation
+
+def to_decimal_or_none(value):
+    if value in (None, "", "None"):
+        return None
+    try:
+        return Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+
+
+
 def commercial_edit(request, pk):
     admin_id = request.session.get('Admin_id')
     if not admin_id:
@@ -11596,8 +11832,8 @@ def commercial_edit(request, pk):
             prop.ownership_type    = p.get('ownership_type')
             prop.property_condition = p.get('property_condition')
 
-            prop.builtup_area = to_int(p.get('builtup_area'))
-            prop.carpet_area  = to_int_or_none(p.get('carpet_area'))
+            prop.builtup_area = to_decimal_or_none(p.get('builtup_area'))
+            prop.carpet_area  = to_decimal_or_none(p.get('carpet_area'))
 
             # ---------- LOCATION ----------
             prop.address           = p.get('address')
@@ -11734,16 +11970,16 @@ def commercial_edit(request, pk):
                     img.image.path for img in saved_images
                     if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)
                 ]
+                
                 if len(image_paths) >= 3:
                     try:
-                        from .utils.commercial_video_generator import generate_commercial_property_slideshow
+                        from Admin_App.utils import generate_property_slideshow
                         import time
-
-                        video_row, _ = CommercialRentalVideo.objects.get_or_create(property=prop, source='auto')
 
                         # Delete the old physical file before writing a new one, so we don't
                         # leave orphaned video files piling up on disk with every edit.
-                        if video_row.video and video_row.video.name:
+                        video_row = CommercialRentalVideo.objects.filter(property=prop, source='auto').first()
+                        if video_row and video_row.video and video_row.video.name:
                             old_path = video_row.video.path
                             if os.path.exists(old_path):
                                 try:
@@ -11751,24 +11987,35 @@ def commercial_edit(request, pk):
                                 except Exception as del_err:
                                     print("Could not delete old auto video:", del_err)
 
-                        # Unique filename per regeneration — this is the actual fix.
-                        # A deterministic filename (auto_{id}.mp4) gets cached by the browser
-                        # forever since the URL never changes even when the file content does.
-                        out_path = f"commercial_rent/videos/auto_{prop.id}_{int(time.time())}.mp4"
+                        # Unique filename per regeneration to break browser caching
+                        output_relative_path = f"commercial_rent/videos/auto_{prop.id}_{int(time.time())}.mp4"
 
-                        result = generate_commercial_property_slideshow(image_paths, out_path)
-                        if result:
-                            video_row.video = out_path
-                            video_row.video_status = 'Done'
-                            video_row.save()
+                        result_path = generate_property_slideshow(image_paths, output_relative_path)
+                        
+                        if result_path:
+                            CommercialRentalVideo.objects.update_or_create(
+                                property=prop,
+                                source='auto',
+                                defaults={
+                                    'video': result_path,
+                                    'video_status': 'Done',
+                                    'video_url': None
+                                }
+                            )
                     except Exception as ve:
+                        import traceback
                         print("COMMERCIAL VIDEO REGEN FAILED:", str(ve))
                         traceback.print_exc()
                 else:
-                    video_row, _ = CommercialRentalVideo.objects.get_or_create(property=prop, source='auto')
-                    video_row.video_status = 'Pending (Insufficient Images)'
-                    video_row.save()
-
+                    CommercialRentalVideo.objects.update_or_create(
+                        property=prop,
+                        source='auto',
+                        defaults={
+                            'video': None,
+                            'video_status': 'Pending (Insufficient Images)',
+                            'video_url': None
+                        }
+                    )
             return JsonResponse({"status": "success", "message": "Commercial Rental Property Updated Successfully"})
 
         except Exception as e:
@@ -12401,7 +12648,8 @@ def import_commercial_rental_excel(request):
             })
             continue # Don't process further if missing core fields
 
-        # ---- ADMIN/USER 'LISTED BY' VALIDATION ----
+       # ---- ADMIN/USER 'LISTED BY' VALIDATION ----
+        row_errors = []
         l_role = str(obj_data.get('listed_by_role', '')).strip().title()
         l_email = str(obj_data.get('listed_by_email', '')).strip().lower()
         l_contact = str(obj_data.get('listed_by_contact', '')).strip()
@@ -12411,23 +12659,32 @@ def import_commercial_rental_excel(request):
         assigned_to = ""
         if l_email or l_contact or l_name or l_id:
             is_registered = False
+            details_mismatch = False
+            mismatch_reason = ""
 
             if l_role.lower() == 'admin':        
                 admin_query = Q()
-                if l_email: admin_query &= Q(email=l_email)
-                if l_contact: admin_query &= Q(phone=l_contact)
-                if l_name: admin_query &= Q(name__iexact=l_name)
-                if l_id and l_id.isdigit(): admin_query &= Q(id=l_id)
+                # 1. FETCH: Find user securely via unique fields (OR)
+                if l_email: admin_query |= Q(email=l_email)
+                if l_contact: admin_query |= Q(phone=l_contact)
                 
                 if admin_query:
-                    is_registered = Admin_Login.objects.filter(admin_query).exists()
+                    matched_admin = Admin_Login.objects.filter(admin_query).first()
+                    
+                    if matched_admin:
+                        # 2. VERIFY: Strictly check if the provided Name matches the Database Name
+                        db_name = str(getattr(matched_admin, 'name', '') or getattr(matched_admin, 'username', '')).strip()
+                        if l_name and db_name.lower() != l_name.lower():
+                            details_mismatch = True
+                            mismatch_reason = f"Name in Excel '{l_name}' does not match the registered name '{db_name}'."
+                        else:
+                            is_registered = True
 
             else:
                 user_query = Q()
-                if l_email: user_query &= Q(user_email=l_email)
-                if l_contact: user_query &= Q(user_phone=l_contact)
-                if l_name: user_query &= Q(user_name__iexact=l_name)
-                if l_id: user_query &= Q(user_id=l_id)
+                # 1. FETCH: Find user securely via unique fields (OR)
+                if l_email: user_query |= Q(user_email=l_email)
+                if l_contact: user_query |= Q(user_phone=l_contact)
 
                 if user_query:
                     if l_role:
@@ -12436,17 +12693,26 @@ def import_commercial_rental_excel(request):
                         matched_user = User_Details.objects.filter(user_query).first()
 
                     if matched_user:
-                        is_registered = True
-                        assigned_to = f"{matched_user.id}-{matched_user.user_role}"
-                        obj_data['assigned_to'] = assigned_to
+                        # 2. VERIFY: Strictly check if the provided Name matches the Database Name
+                        db_name = str(matched_user.user_name or "").strip()
+                        if l_name and db_name.lower() != l_name.lower():
+                            details_mismatch = True
+                            mismatch_reason = f"Name in Excel '{l_name}' does not match the registered name '{db_name}'."
+                        else:
+                            is_registered = True
+                            assigned_to = f"{matched_user.id}-{matched_user.user_role}"
+                            obj_data['assigned_to'] = assigned_to
 
             if not is_registered:
                 searched_info = filter(None, [l_id, l_name, l_email, l_contact, l_role])
                 identity = " + ".join(searched_info) or "Unknown"
-                row_errors.append(
-                    f"Listed By {l_role or 'user'} '{identity}' is not present in our records. "
-                    f"Please register this {l_role or 'user'} first, then re-upload this row."
-                )
+                
+                if details_mismatch:
+                    # Specific error if the user exists but details (like name) were altered
+                    row_errors.append(f"Listed By {l_role or 'user'} validation failed: {mismatch_reason}")
+                else:
+                    # Standard error if the user is completely missing
+                    row_errors.append(f"Listed By {l_role or 'user'} '{identity}' is not present in our records. Please register them first.")
 
         if row_errors:
             listed_by_mismatch_errors.append({
@@ -12455,6 +12721,8 @@ def import_commercial_rental_excel(request):
             })
             skipped_listed_by_mismatch += 1
             continue
+
+        
 
         parsed_rows.append({'row_idx': r_idx + 1, 'data': obj_data})
 
@@ -12557,6 +12825,7 @@ def import_commercial_rental_excel(request):
             )
 
         # Append final fields and create
+        # Append final fields and create
         o_data["property_unique_key"] = fingerprint_key
         o_data["is_duplicate"] = is_dup_flag
         o_data["duplicate_count"] = total_dup_count
@@ -12565,6 +12834,10 @@ def import_commercial_rental_excel(request):
         o_data["listing_type"] = o_data.get("listing_type") or "Rental"
         o_data["category"] = o_data.get("category") or "Commercial"
         o_data["upload_file_name"] = excel_file.name
+        
+        # 👇 THIS IS THE MISSING LINE THAT SAVES THE ACTUAL EXCEL FILE TO THE DB 👇
+        o_data["upload_file"] = excel_file 
+        
         o_data["uploaded_by_name"] = uploader_name
         o_data["uploaded_by_email"] = uploader_email
         o_data["uploaded_by_contact"] = uploader_contact
@@ -13297,28 +13570,52 @@ def pg_list(request):
     admin_obj = Admin_Login.objects.get(id=session_id)
 
     # ── READ FILTER STRINGS ──
-    search_query   = request.GET.get('search', '').strip()
-    pg_for_filter  = request.GET.get('pg_for', '').strip()
-    city_filter    = request.GET.get('city', '').strip()
-    furnish_filter = request.GET.get('furnish', '').strip()
-    meals_filter   = request.GET.get('meals', '').strip()
-    sharing_filter = request.GET.get('sharing', '').strip()
-    from_date      = request.GET.get('from_date', '').strip()
-    to_date        = request.GET.get('to_date', '').strip()
+    search_query          = request.GET.get('search', '').strip()
+    pg_for_filter          = request.GET.get('pg_for', '').strip()
+    city_filter            = request.GET.get('city', '').strip()
+    furnish_filter         = request.GET.get('furnish', '').strip()
+    meals_filter           = request.GET.get('meals', '').strip()
+    sharing_filter         = request.GET.get('sharing', '').strip()
+    listed_by_filter       = request.GET.get('listed_by', '').strip()
+    uploaded_by_filter     = request.GET.get('uploaded_by', '').strip()
+    listing_status_filter  = request.GET.get('listing_status', '').strip()
+    approval_status_filter = request.GET.get('approval_status', '').strip()
+    duplicate_filter       = request.GET.get('duplicate', '').strip()
+    from_date              = request.GET.get('from_date', '').strip()
+    to_date                = request.GET.get('to_date', '').strip()
 
     # ── FILTER SOFT DELETIONS ──
     all_props  = PGColivingProperty.objects.filter(is_deleted=False)
     properties = all_props.order_by('-created_at')
 
+    # NOTE: search now checks every meaningful text/identifier field,
+    # not just title/city/locality/owner name/contact/id.
     if search_query:
         properties = properties.filter(
-            Q(property_title__icontains=search_query) | 
-            Q(city__icontains=search_query) |
-            Q(locality__icontains=search_query) | 
+            Q(id__icontains=search_query) |
+            Q(property_unique_key__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
             Q(building_name__icontains=search_query) |
-            Q(listed_by_name__icontains=search_query) | 
+            Q(property_no__icontains=search_query) |
+            Q(wing_number__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(state__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(address__icontains=search_query) |
+            Q(pincode__icontains=search_query) |
+            Q(pg_for__icontains=search_query) |
+            Q(furnishing_status__icontains=search_query) |
+            Q(room_type__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
             Q(listed_by_contact__icontains=search_query) |
-            Q(id__icontains=search_query)
+            Q(listed_by_email__icontains=search_query) |
+            Q(listed_by_role__icontains=search_query) |
+            Q(uploaded_by_name__icontains=search_query) |
+            Q(uploaded_by_email__icontains=search_query) |
+            Q(uploaded_by_contact__icontains=search_query) |
+            Q(uploaded_by_role__icontains=search_query) |
+            Q(listing_status__icontains=search_query) |
+            Q(approval_status__icontains=search_query)
         )
     if pg_for_filter:
         properties = properties.filter(pg_for__iexact=pg_for_filter)
@@ -13332,14 +13629,53 @@ def pg_list(request):
         properties = properties.filter(meals_available=False)
     if sharing_filter:
         properties = properties.filter(room_type__iexact=sharing_filter)
+
+    if listed_by_filter and listed_by_filter != 'All Roles':
+        properties = properties.filter(listed_by_role__icontains=listed_by_filter)
+    if uploaded_by_filter and uploaded_by_filter != 'All Roles':
+        properties = properties.filter(uploaded_by_role__icontains=uploaded_by_filter)
+    if listing_status_filter and listing_status_filter != 'All Status':
+        properties = properties.filter(listing_status__iexact=listing_status_filter)
+    if approval_status_filter and approval_status_filter != 'All Approval':
+        properties = properties.filter(approval_status__iexact=approval_status_filter)
+
+    if duplicate_filter == 'duplicates_only':
+        properties = properties.filter(is_duplicate=True)
+    elif duplicate_filter == 'unique_only':
+        properties = properties.filter(is_duplicate=False)
+
     if from_date:
         properties = properties.filter(created_at__date__gte=from_date)
     if to_date:
         properties = properties.filter(created_at__date__lte=to_date)
 
+    # ── NEW: prefetch videos so uploaded_video / auto_video / rm_video
+    # actually exist on each row instead of being undefined in the template.
+    # PGColivingVideo.property has related_name="videos", so we prefetch
+    # 'videos' (not 'video') and stash the whole list on each row as
+    # `all_videos`, then split by `source` below. ──
+    properties = properties.prefetch_related(
+        Prefetch(
+            'videos',
+            queryset=PGColivingVideo.objects.all(),
+            to_attr='all_videos'
+        )
+    )
+
     # ── PAGINATION SYSTEM ──
     paginator = Paginator(properties, 10)
     page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    # ── NEW: split each property's prefetched videos into the 3 source
+    # buckets the template expects (mirrors commercial_list's pattern).
+    # This MUST run on page_obj (after pagination), not on the full
+    # `properties` queryset, so the prefetch is only evaluated for the
+    # 10 rows actually shown on this page. ──
+    for prop in page_obj:
+        videos_by_source = {v.source: v for v in prop.all_videos}
+        prop.uploaded_video = videos_by_source.get('uploaded')
+        prop.auto_video     = videos_by_source.get('auto')
+        prop.rm_video       = videos_by_source.get('rm_assisted')
 
     # ── SUMMARY CARD KPI AGGREGATIONS ──
     total_count    = properties.count()
@@ -13379,9 +13715,35 @@ def pg_list(request):
     except Exception:
         with_images_count = 0
 
+    # ── Listing / Approval / Duplicate status KPIs (unfiltered dataset) ──
+    active_listing_count   = all_props.filter(listing_status__iexact='Active').count()
+    inactive_listing_count = all_props.filter(listing_status__iexact='Inactive').count()
+    sold_listing_count     = all_props.filter(listing_status__iexact='Sold').count()
+    rented_listing_count   = all_props.filter(listing_status__iexact='Rented').count()
+    pending_approval_count = all_props.filter(approval_status__iexact='Pending').count()
+    approved_count         = all_props.filter(approval_status__iexact='Approved').count()
+    rejected_count         = all_props.filter(approval_status__iexact='Rejected').count()
+    all_props_total        = all_props.count()
+    duplicate_properties_count = all_props.filter(is_duplicate=True).count()
+    unique_properties_count    = all_props_total - duplicate_properties_count
+
     uploaded_files = PGColivingProperty.objects.filter(
         is_deleted=False, upload_file_name__isnull=False
     ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct().order_by('upload_file_name')
+
+    # ── Dropdown unique values (roles / statuses) ──
+    unique_roles = (all_props
+        .exclude(listed_by_role__isnull=True).exclude(listed_by_role='')
+        .values_list('listed_by_role', flat=True).distinct())
+    unique_uploaded_roles = (all_props
+        .exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='')
+        .values_list('uploaded_by_role', flat=True).distinct())
+    unique_listing_status = (all_props
+        .exclude(listing_status__isnull=True).exclude(listing_status='')
+        .values_list('listing_status', flat=True).distinct())
+    unique_approval_status = (all_props
+        .exclude(approval_status__isnull=True).exclude(approval_status='')
+        .values_list('approval_status', flat=True).distinct())
 
     # ── CHARTS ──
     pg_for_qs     = properties.values('pg_for').annotate(c=Count('id')).order_by('-c')
@@ -13404,57 +13766,76 @@ def pg_list(request):
 
     return render(request, 'admin_user/Reports/Rental/pg_list.html', {
         'admin_obj': admin_obj,
-        'page_obj': page_obj, 
-        'search_query': search_query, 
+        'page_obj': page_obj,
+        'search_query': search_query,
         'pg_for_filter': pg_for_filter,
-        'city_filter': city_filter, 
-        'furnish_filter': furnish_filter, 
+        'city_filter': city_filter,
+        'furnish_filter': furnish_filter,
         'meals_filter': meals_filter,
-        'sharing_filter': sharing_filter, 
-        'from_date': from_date, 
-        'to_date': to_date, 
+        'sharing_filter': sharing_filter,
+        'listed_by_filter': listed_by_filter,
+        'uploaded_by_filter': uploaded_by_filter,
+        'listing_status_filter': listing_status_filter,
+        'approval_status_filter': approval_status_filter,
+        'duplicate_filter': duplicate_filter,
+        'from_date': from_date,
+        'to_date': to_date,
         'cities': cities,
-        'total_count': total_count, 
-        'city_count': city_count, 
+        'unique_roles': unique_roles,
+        'unique_uploaded_roles': unique_uploaded_roles,
+        'unique_listing_status': unique_listing_status,
+        'unique_approval_status': unique_approval_status,
+
+        'total_count': total_count,
+        'city_count': city_count,
         'boys_count': boys_count,
-        'girls_count': girls_count, 
-        'coliving_count': coliving_count, 
+        'girls_count': girls_count,
+        'coliving_count': coliving_count,
         'total_beds': total_beds,
-        'boys_pct': boys_pct, 
-        'girls_pct': girls_pct, 
+        'boys_pct': boys_pct,
+        'girls_pct': girls_pct,
         'coliving_pct': coliving_pct,
-        'avg_rent': rent_stats['avg_rent'] or 0, 
+        'avg_rent': rent_stats['avg_rent'] or 0,
         'max_rent': rent_stats['max_rent'] or 0,
-        'min_rent': rent_stats['min_rent'] or 0, 
+        'min_rent': rent_stats['min_rent'] or 0,
         'total_revenue': rent_stats['tot_rev'] or 0,
-        'total_deposit': rent_stats['tot_dep'] or 0, 
+        'total_deposit': rent_stats['tot_dep'] or 0,
         'avg_deposit': rent_stats['avg_dep'] or 0,
-        'meals_available_count': meals_available_count, 
+        'meals_available_count': meals_available_count,
         'meals_pct': meals_pct,
-        'furnished_count': furnished_count, 
+        'furnished_count': furnished_count,
         'furnished_pct': furnished_pct,
-        'single_room_count': single_room_count, 
+        'single_room_count': single_room_count,
         'shared_room_count': shared_room_count,
-        'non_veg_allowed': meals_available_count, 
+        'non_veg_allowed': meals_available_count,
         'with_images_count': with_images_count,
-        'anytime_entry': anytime_entry, 
+        'anytime_entry': anytime_entry,
         'visitors_allowed': visitors_allowed,
-        'premium_pg_count': premium_pg_count, 
+        'premium_pg_count': premium_pg_count,
         'budget_pg_count': budget_pg_count,
-        'with_owner_count': with_owner_count, 
+        'with_owner_count': with_owner_count,
         'uploaded_files': uploaded_files,
-        'pg_for_labels': pg_for_labels, 
+
+        # status KPIs
+        'active_listing_count': active_listing_count,
+        'inactive_listing_count': inactive_listing_count,
+        'sold_listing_count': sold_listing_count,
+        'rented_listing_count': rented_listing_count,
+        'pending_approval_count': pending_approval_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'duplicate_properties_count': duplicate_properties_count,
+        'unique_properties_count': unique_properties_count,
+
+        'pg_for_labels': pg_for_labels,
         'pg_for_data': pg_for_data,
-        'rent_range_labels': rent_range_labels, 
+        'rent_range_labels': rent_range_labels,
         'rent_range_data': rent_range_data,
-        'furnishing_labels': furnishing_labels, 
+        'furnishing_labels': furnishing_labels,
         'furnishing_data': furnishing_data,
-        'city_labels': city_labels, 
+        'city_labels': city_labels,
         'city_data': city_data,
     })
-
-
-
 
 def pg_reports(request):
     session_id = request.session.get('Admin_id')
@@ -13808,12 +14189,14 @@ def _to_bool(val):
     return str(val).strip().lower() in ("true", "1", "yes", "on")
 
 
-def build_pg_fingerprint(address, locality, city, property_no, monthly_rent):
+
+
+def build_pg_fingerprint(address, locality, city, property_no, pincode):
     """
     Mirrors PGColivingProperty.save()'s own key_source construction exactly,
     so the pre-create duplicate lookup matches what the model would generate.
     """
-    key_source = f"{address}|{locality}|{city}|{property_no}|{monthly_rent}"
+    key_source = f"{address}|{locality}|{city}|{property_no}|{pincode}"
     return key_source.strip().lower().replace(" ", "")
 
 
@@ -13868,8 +14251,10 @@ def add_pg(request):
         }
 
         total_images = sum(len(request.FILES.getlist(f)) for f in IMAGE_CATEGORY_FIELDS.values())
-        if total_images < 3 or total_images > 30:
-            return JsonResponse({"status": "error", "message": "Upload minimum 3 and maximum 30 images"})
+        
+
+        if total_images > 30:
+            return JsonResponse({"status": "error", "message": "You can upload maximum 30 images"})
 
         # ---------- LISTED BY ----------
         input_listed_by_id = (request.POST.get('listed_by_id') or uploader_id).strip()
@@ -13884,11 +14269,12 @@ def add_pg(request):
         input_locality = (request.POST.get('locality') or '').strip()
         input_city = (request.POST.get('city') or '').strip()
         input_address = (request.POST.get('address') or '').strip()
-        input_monthly_rent = _to_int(request.POST.get('room_rent'))  # form field name -> monthly_rent
+        input_pincode = (request.POST.get('pincode') or '').strip()
+        input_monthly_rent = _to_int_or_none(request.POST.get('room_rent'))
 
         # ---------- DUPLICATE DETECTION (mirrors model.save()'s key + commercial's approach) ----------
         fingerprint_key = build_pg_fingerprint(
-            input_address, input_locality, input_city, input_property_no, input_monthly_rent
+            input_address, input_locality, input_city, input_property_no, input_pincode
         )
 
         direct_duplicates = PGColivingProperty.objects.filter(
@@ -13896,7 +14282,7 @@ def add_pg(request):
             locality__iexact=input_locality,
         )
         if input_property_no:
-            direct_duplicates = direct_duplicates.filter(address__icontains=input_property_no)
+            direct_duplicates = direct_duplicates.filter(property_no__iexact=input_property_no)
         if input_building_name:
             direct_duplicates = direct_duplicates.filter(building_name__iexact=input_building_name)
 
@@ -13926,6 +14312,13 @@ def add_pg(request):
                                     f"Please edit the existing listing instead.")
                     })
 
+            # Reuse an existing group id if the old rows already have one,
+            # instead of overwriting it with this new record's fingerprint.
+            existing_with_group = existing_duplicates.exclude(
+                duplicate_group_id__isnull=True
+            ).exclude(duplicate_group_id="").first()
+            dup_group_id = existing_with_group.duplicate_group_id if existing_with_group else fingerprint_key
+
             is_dup_flag = True
             total_dup_count = existing_duplicates.count() + 1
             existing_duplicates.update(
@@ -13933,7 +14326,6 @@ def add_pg(request):
                 duplicate_count=total_dup_count,
                 duplicate_group_id=dup_group_id,
             )
-
         # ---------- DATE PARSING ----------
         date_val = request.POST.get('available_from')
         available_from = None
@@ -13978,7 +14370,7 @@ def add_pg(request):
                 address=input_address,
                 property_landmark=request.POST.get('property_landmark'),
                 state=request.POST.get('state'),
-                pincode=request.POST.get('pincode'),
+                pincode=input_pincode,
                 google_maps_link=request.POST.get('google_maps_link'),
                 latitude=request.POST.get('latitude'),
                 longitude=request.POST.get('longitude'),
@@ -14057,12 +14449,11 @@ def add_pg(request):
                     )
                     saved_count += 1
 
-           
             video_option = request.POST.get('video_option', 'auto')
             uploaded_video = request.FILES.get('property_video')
             property_video_link = request.POST.get('property_video_link', '')
 
-            # 1. ALWAYS auto-generate the slideshow (runs every time, unconditionally)
+            # 1. Auto-generate the slideshow
             saved_images = list(PGPropertyImage.objects.filter(property=pg))
             image_paths = []
             for img_obj in saved_images:
@@ -14071,20 +14462,38 @@ def add_pg(request):
 
             if len(image_paths) >= 3:
                 try:
-                    from .utils.video_generator import generate_property_slideshow
-                    out_path = f"pg/videos/auto_{pg.id}.mp4"
-                    result = generate_property_slideshow(image_paths, out_path)
-                    print("AUTO SLIDESHOW RESULT:", result)
-                    if result:
-                        PGColivingVideo.objects.create(
+                    from Admin_App.utils import generate_property_slideshow
+                    import time
+
+                    # Define the output path securely with a timestamp
+                    out_path = f"pg_coliving/videos/auto_{pg.id}_{int(time.time())}.mp4"
+
+                    result_path = generate_property_slideshow(image_paths, out_path)
+                    print("AUTO SLIDESHOW RESULT:", result_path)
+
+                    if result_path:
+                        PGColivingVideo.objects.update_or_create(
                             property=pg,
-                            video=out_path,
-                            source='auto'
+                            source='auto',
+                            defaults={
+                                'video': result_path,
+                                'video_url': None
+                            }
                         )
                 except Exception as ve:
+                    import traceback
                     print("PG VIDEO GEN FAILED:", str(ve))
                     traceback.print_exc()
-
+            else:
+                # Fallback if there are less than 3 images
+                PGColivingVideo.objects.update_or_create(
+                    property=pg,
+                    source='auto',
+                    defaults={
+                        'video': None,
+                        'video_url': None
+                    }
+                )
             # 2. Manual Upload Logic (separate row, source='uploaded')
             if video_option == 'upload' and uploaded_video:
                 if uploaded_video.size > 20 * 1024 * 1024:
@@ -14121,9 +14530,15 @@ def add_pg(request):
         return JsonResponse({"status": "success", "message": "PG Added Successfully"})
 
     except Exception as e:
-        print("ERROR IN PG ADD:", str(e))
-        traceback.print_exc()
-        return JsonResponse({"status": "error", "message": f"Server Error: {str(e)}"})
+        try:
+            print("ERROR IN PG ADD:", str(e).encode("ascii", "replace").decode())
+            traceback.print_exc()
+        except Exception:
+            pass  # never let logging itself crash the response
+        return JsonResponse(
+            {"status": "error", "message": f"Server Error: {str(e)}"},
+            status=500
+        )
 
 
 
@@ -14532,6 +14947,8 @@ def import_pg_excel(request):
             continue
 
         # ---- ADMIN/USER 'LISTED BY' VALIDATION ----
+        # ---- ADMIN/USER 'LISTED BY' VALIDATION ----
+        # ---- ADMIN/USER 'LISTED BY' VALIDATION ----
         row_errors = []
         l_role = str(obj_data.get('listed_by_role', '')).strip().title()
         l_email = str(obj_data.get('listed_by_email', '')).strip().lower()
@@ -14542,23 +14959,32 @@ def import_pg_excel(request):
         assigned_to = ""
         if l_email or l_contact or l_name or l_id:
             is_registered = False
+            details_mismatch = False
+            mismatch_reason = ""
 
-            if l_role.lower() == 'admin':
+            if l_role.lower() == 'admin':        
                 admin_query = Q()
-                if l_email: admin_query &= Q(email=l_email)
-                if l_contact: admin_query &= Q(phone=l_contact)
-                if l_name: admin_query &= Q(name__iexact=l_name)
-                if l_id and l_id.isdigit(): admin_query &= Q(id=l_id)
-
+                # 1. FETCH: Find user securely via unique fields (OR)
+                if l_email: admin_query |= Q(email=l_email)
+                if l_contact: admin_query |= Q(phone=l_contact)
+                
                 if admin_query:
-                    is_registered = Admin_Login.objects.filter(admin_query).exists()
+                    matched_admin = Admin_Login.objects.filter(admin_query).first()
+                    
+                    if matched_admin:
+                        # 2. VERIFY: Strictly check if the provided Name matches the Database Name
+                        db_name = str(getattr(matched_admin, 'name', '') or getattr(matched_admin, 'username', '')).strip()
+                        if l_name and db_name.lower() != l_name.lower():
+                            details_mismatch = True
+                            mismatch_reason = f"Name in Excel '{l_name}' does not match the registered name '{db_name}'."
+                        else:
+                            is_registered = True
 
             else:
                 user_query = Q()
-                if l_email: user_query &= Q(user_email=l_email)
-                if l_contact: user_query &= Q(user_phone=l_contact)
-                if l_name: user_query &= Q(user_name__iexact=l_name)
-                if l_id: user_query &= Q(user_id=l_id)
+                # 1. FETCH: Find user securely via unique fields (OR)
+                if l_email: user_query |= Q(user_email=l_email)
+                if l_contact: user_query |= Q(user_phone=l_contact)
 
                 if user_query:
                     if l_role:
@@ -14567,17 +14993,26 @@ def import_pg_excel(request):
                         matched_user = User_Details.objects.filter(user_query).first()
 
                     if matched_user:
-                        is_registered = True
-                        assigned_to = f"{matched_user.id}-{matched_user.user_role}"
-                        obj_data['assigned_to'] = assigned_to
+                        # 2. VERIFY: Strictly check if the provided Name matches the Database Name
+                        db_name = str(matched_user.user_name or "").strip()
+                        if l_name and db_name.lower() != l_name.lower():
+                            details_mismatch = True
+                            mismatch_reason = f"Name in Excel '{l_name}' does not match the registered name '{db_name}'."
+                        else:
+                            is_registered = True
+                            assigned_to = f"{matched_user.id}-{matched_user.user_role}"
+                            obj_data['assigned_to'] = assigned_to
 
             if not is_registered:
                 searched_info = filter(None, [l_id, l_name, l_email, l_contact, l_role])
                 identity = " + ".join(searched_info) or "Unknown"
-                row_errors.append(
-                    f"Listed By {l_role or 'user'} '{identity}' is not present in our records. "
-                    f"Please register this {l_role or 'user'} first, then re-upload this row."
-                )
+                
+                if details_mismatch:
+                    # Specific error if the user exists but details (like name) were altered
+                    row_errors.append(f"Listed By {l_role or 'user'} validation failed: {mismatch_reason}")
+                else:
+                    # Standard error if the user is completely missing
+                    row_errors.append(f"Listed By {l_role or 'user'} '{identity}' is not present in our records. Please register them first.")
 
         if row_errors:
             listed_by_mismatch_errors.append({
@@ -14586,7 +15021,6 @@ def import_pg_excel(request):
             })
             skipped_listed_by_mismatch += 1
             continue
-
         parsed_rows.append({'row_idx': r_idx + 1, 'data': obj_data})
 
     wb.close()
@@ -14691,7 +15125,11 @@ def import_pg_excel(request):
 
         o_data["listing_type"] = o_data.get("listing_type") or "Rental"
         o_data["category"] = o_data.get("category") or "PG/Co-living"
+        
         o_data["upload_file_name"] = excel_file.name
+        # 👇 ADDED THIS LINE TO SAVE THE PHYSICAL FILE
+        o_data["upload_file"] = excel_file 
+        
         o_data["uploaded_by_name"] = uploader_name
         o_data["uploaded_by_email"] = uploader_email
         o_data["uploaded_by_contact"] = uploader_contact
@@ -14964,6 +15402,8 @@ REQUIRED_FIELDS = [
 
 from collections import defaultdict
 
+
+
 def pg_edit(request, pk):
     property_id = pk
     session_id = request.session.get('Admin_id')
@@ -15054,6 +15494,29 @@ def pg_edit(request, pk):
             pg.furnishing_status = request.POST.get('furnishing_status') or request.POST.get('furnishing_type') or pg.furnishing_status
             pg.best_suited_for = (request.POST.get('best_suited_for') or '').strip()
 
+            pg.wing_number = (request.POST.get('wing_number') or '').strip()
+            pg.property_landmark = (request.POST.get('property_landmark') or '').strip()
+            pg.pincode = (request.POST.get('pincode') or '').strip()
+            pg.state = (request.POST.get('state') or '').strip()
+            pg.google_maps_link = (request.POST.get('google_maps_link') or '').strip()
+            pg.latitude = (request.POST.get('latitude') or '').strip()
+            pg.longitude = (request.POST.get('longitude') or '').strip()
+
+            # Room type & pricing (Step 2)
+            pg.room_type = (request.POST.get('room_type') or pg.room_type or '').strip()
+            monthly_rent_val = _to_int_or_none(request.POST.get('room_rent') or request.POST.get('monthly_rent'))
+            if monthly_rent_val is not None:
+                pg.monthly_rent = monthly_rent_val
+            pg.advance_rent_month = (request.POST.get('advance_rent_month') or '').strip()
+            pg.advance_rent_amount = _to_int_or_none(request.POST.get('advance_rent_amount'))
+            pg.security_deposit_type = (request.POST.get('security_deposit_type') or '').strip()
+            pg.security_deposit_amount = _to_int_or_none(request.POST.get('security_deposit_amount'))
+            pg.maintenance_type = (request.POST.get('maintenance_type') or '').strip()
+            pg.maintenance_amount = _to_int_or_none(request.POST.get('maintenance_amount'))
+            pg.total_move_in_cost = _to_int_or_none(request.POST.get('total_move_in_cost'))
+            pg.brokerage_percentage = (request.POST.get('brokerage_percentage') or '').strip()
+            pg.manual_brokerage = (request.POST.get('manual_brokerage') or '').strip()
+
             meals_available = _to_bool(request.POST.get('meals_available'))
             pg.meals_available = meals_available
             pg.meal_offerings = (request.POST.get('meal_offerings') or '').strip() if meals_available else None
@@ -15072,6 +15535,18 @@ def pg_edit(request, pk):
 
             pg.property_managed_by = request.POST.get('property_managed_by', pg.property_managed_by)
             pg.manager_stays = _to_bool(request.POST.get('manager_stays'))
+            # Listed By
+            listed_by_type = request.POST.get('listed_by_type', 'self')
+            pg.listed_by_type = listed_by_type
+            pg.listed_by_id = (request.POST.get('listed_by_id') or '').strip()
+            pg.listed_by_name = (request.POST.get('listed_by_name') or '').strip()
+            pg.listed_by_email = (request.POST.get('listed_by_email') or '').strip()
+            pg.listed_by_contact = (request.POST.get('listed_by_contact') or '').strip()
+            pg.listed_by_role = (request.POST.get('listed_by_role') or '').strip()
+            if listed_by_type == 'other':
+                pg.assigned_to = (request.POST.get('assigned_to') or '').strip()
+            else:
+                pg.assigned_to = ''
 
             # Regulations
             pg.opposite_gender_visitors_allowed = "opposite_gender_visitors_allowed" in request.POST or "opposite_sex_allowed" in request.POST
@@ -15098,6 +15573,13 @@ def pg_edit(request, pk):
             pg.contact_number = request.POST.get("contact_number", "")
             pg.email = request.POST.get("email", "")
             pg.alternate_contact = request.POST.get("alternate_contact", "")
+            # Listed elsewhere / portal
+            pg.listed_elsewhere = (request.POST.get('listed_elsewhere') or '').strip()
+            pg.portal_name = (request.POST.get('portal_name') or '').strip()
+
+            # Listing status & approval status (new fields added to Step 4)
+            pg.listing_status = (request.POST.get('listing_status') or pg.listing_status or '').strip()
+            pg.approval_status = (request.POST.get('approval_status') or pg.approval_status or '').strip()
 
             pg.uploaded_by_name = admin_obj.name
             pg.uploaded_by_email = admin_obj.email
@@ -15127,6 +15609,7 @@ def pg_edit(request, pk):
                     saved_count += 1
 
             # ---------- Video handling ----------
+            # ---------- Video handling ----------
             video_option = request.POST.get('video_option', 'auto')
             uploaded_video = request.FILES.get('property_video') or request.FILES.get('video')
             property_video_link = request.POST.get('property_video_link', '')
@@ -15136,32 +15619,81 @@ def pg_edit(request, pk):
                 PGColivingVideo.objects.filter(property=pg).delete()
 
             saved_images = list(PGPropertyImage.objects.filter(property=pg))
-            image_paths = [i.image.path for i in saved_images if i.image and hasattr(i.image, 'path') and os.path.exists(i.image.path)]
+            image_paths = [
+                i.image.path for i in saved_images 
+                if i.image and hasattr(i.image, 'path') and os.path.exists(i.image.path)
+            ]
 
-            regenerate_slideshow = request.POST.get('regenerate_slideshow')
-            has_existing_auto_video = PGColivingVideo.objects.filter(property=pg, source='auto').exists()
+            # 1. Detect if images were added or removed in this request
+            images_changed = False
+            if request.POST.getlist('delete_image_ids[]'):
+                images_changed = True
+            for key in request.FILES.keys():
+                if 'image' in key.lower():  # Catches property_images_bedroom, etc.
+                    images_changed = True
+                    break
 
-            # Regenerate only when explicitly requested, or when there's no auto video yet
-            # and the person picked "auto" for the first time on this save.
+            regenerate_slideshow = request.POST.get('regenerate_slideshow') == 'on'
+            
+            # 2. Strictly check if an ACTUAL video file exists, not just an empty database row
+            has_existing_valid_video = PGColivingVideo.objects.filter(
+                property=pg, source='auto'
+            ).exclude(video='').exclude(video__isnull=True).exists()
+
+            # 3. Regenerate if requested, missing, OR if images were changed
             should_generate = video_option == 'auto' and len(image_paths) >= 3 and (
-                regenerate_slideshow or not has_existing_auto_video
+                regenerate_slideshow or not has_existing_valid_video or images_changed
             )
 
             if should_generate:
                 try:
-                    from .utils.video_generator import generate_property_slideshow
-                    out_path = f"pg/videos/auto_{pg.id}.mp4"
-                    result = generate_property_slideshow(image_paths, out_path)
-                    if result:
+                    from Admin_App.utils import generate_property_slideshow
+                    import time
+               
+
+                    # Delete the old physical file before writing a new one
+                    video_row = PGColivingVideo.objects.filter(property=pg, source='auto').first()
+                    if video_row and video_row.video and video_row.video.name:
+                        old_path = video_row.video.path
+                        if os.path.exists(old_path):
+                            try:
+                                os.remove(old_path)
+                            except Exception as del_err:
+                                print("Could not delete old auto video:", del_err)
+
+                    # Unique filename per regeneration to break browser caching
+                    out_path = f"pg_coliving/videos/auto_{pg.id}_{int(time.time())}.mp4"
+                    
+                    result_path = generate_property_slideshow(image_paths, out_path)
+                    print("AUTO SLIDESHOW RESULT:", result_path)
+                    
+                    if result_path:
                         PGColivingVideo.objects.update_or_create(
-                            property=pg, source='auto', defaults={'video': out_path, 'video_url': None}
+                            property=pg, 
+                            source='auto', 
+                            defaults={
+                                'video': result_path, 
+                                'video_url': None
+                            }
                         )
                 except Exception as ve:
+                    import traceback
                     print("PG VIDEO GEN FAILED:", str(ve))
+                    traceback.print_exc()
+            elif video_option == 'auto' and len(image_paths) < 3:
+                # Fallback: Clear it out if they requested 'auto' but removed too many images
+                PGColivingVideo.objects.update_or_create(
+                    property=pg,
+                    source='auto',
+                    defaults={
+                        'video': None,
+                        'video_url': None
+                    }
+                )
 
             if video_option == 'upload' and uploaded_video and uploaded_video.size <= 50 * 1024 * 1024:
                 PGColivingVideo.objects.update_or_create(
-                    property=pg, source='uploaded', defaults={'video': uploaded_video, 'video_url': None}
+                    property=pg, source='upload', defaults={'video': uploaded_video, 'video_url': None}
                 )
             elif video_option == 'rm_assisted' and property_video_link:
                 PGColivingVideo.objects.update_or_create(
@@ -15206,7 +15738,7 @@ def pg_coliving_delete(request, pk):
         # ✅ USING NEW PRIMARY KEY FIELD
         pg = get_object_or_404(
             PGColivingProperty,
-            pg_property_id=pk
+            id=pk
         )
 
         pg.is_deleted = True
@@ -15234,7 +15766,7 @@ def pg_restore(request, id):
     if not admin_id:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
-    PGColivingProperty.objects.filter(pg_property_id=id).update(
+    PGColivingProperty.objects.filter(id=id).update(
         is_deleted=False,
         deleted_at=None,
         deleted_by=None
@@ -15252,7 +15784,7 @@ def pg_hard_delete(request, id):
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     try:
-        pg = get_object_or_404(PGColivingProperty, pg_property_id=id)
+        pg = get_object_or_404(PGColivingProperty, id=id)
 
         # Clean up related asset files safely
         for img in pg.images.all():
@@ -15270,36 +15802,65 @@ def pg_hard_delete(request, id):
 
 
 
-def pg_coliving_view(request, pk):
-    # session_id = request.session.get('Admin_id')
-    # admin_obj = Admin_Login.objects.get(id=session_id)
-    # ^ Replace with your standard auth logic
-    
-    pg = get_object_or_404(PGColivingProperty, pk=pk)
 
-    # 1. Safely query the new relational Room models
-    parsed_rooms = pg.rooms.all()
-    
-    # Calculate sidebar pricing metrics dynamically
-    rent_stats = parsed_rooms.aggregate(min_rent=Min('room_rent'), max_rent=Max('room_rent'))
-    starting_rent = rent_stats['min_rent'] or 0
+def pg_coliving_view(request, pk):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+        
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    pg = get_object_or_404(PGColivingProperty, pk=pk)
 
     # 2. Parse Comma-Separated Strings into Lists for HTML "Chips"
     def split_to_list(db_string):
         return [x.strip() for x in db_string.split(',') if x.strip()] if db_string else []
 
+    # --- CATEGORY-WISE IMAGE GROUPING ---
+    category_labels = dict(PGPropertyImage.CATEGORY_CHOICES)
+    images_queryset = pg.images.all()
+    
+    grouped_images = {}
+    for img in images_queryset:
+        cat_key = img.category
+        if cat_key not in grouped_images:
+            grouped_images[cat_key] = {
+                'label': category_labels.get(cat_key, cat_key.title()),
+                'images': []
+            }
+        grouped_images[cat_key]['images'].append(img)
+
+    # --- VIDEO HIERARCHY ENGINE ---
+    videos_queryset = pg.videos.all()
+    rm_video = videos_queryset.filter(source='rm_assisted', video_url__isnull=False).exclude(video_url='').first()
+    manual_video = videos_queryset.filter(source='uploaded', video__isnull=False).first()
+    auto_video = videos_queryset.filter(source='auto', video__isnull=False).first()
+
+    selected_video = None
+    video_display_mode = None
+
+    if rm_video:
+        selected_video = rm_video
+        video_display_mode = 'rm_assisted'
+    elif manual_video:
+        selected_video = manual_video
+        video_display_mode = 'manual'
+    elif auto_video:
+        selected_video = auto_video
+        video_display_mode = 'auto'
+
     context = {
-        # 'admin_obj': admin_obj,
+        'admin_obj': admin_obj,
         'pg': pg,
-        'parsed_rooms': parsed_rooms,
-        'starting_rent': starting_rent, # Passed to the sidebar
-        'pg_for_list': split_to_list(pg.pg_for),
-        'sharing_type_list': split_to_list(pg.sharing_type),
+        'starting_rent': pg.monthly_rent or 0,
+        'sharing_type_list': split_to_list(pg.room_type), # Mapped to flattened field
         'best_suited_list': split_to_list(pg.best_suited_for),
         'amenities_list': split_to_list(pg.amenities),
         'facilities_list': split_to_list(pg.nearby_facilities),
         'meal_offerings_list': split_to_list(pg.meal_offerings),
         'meal_speciality_list': split_to_list(pg.meal_speciality),
+        'grouped_images': grouped_images,
+        'selected_video': selected_video,
+        'video_display_mode': video_display_mode,
     }
 
     return render(request, "admin_user/Reports/Rental/pg_coliving_view.html", context)
@@ -15352,17 +15913,7 @@ def industrial_plot_resale(request):
 
 
 
-def agricultural_plot_resale(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Resale_plot/agricultural_plot_resale.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
+
 
 
 ###################End VIEW SECTION RESALE PLOT Type LISTING Forms###########################
@@ -15375,31 +15926,9 @@ def agricultural_plot_resale(request):
 
 
 
-def industrial_plot_resale_list(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Reports/Resale_Plot/industrial_plot_resale_list.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
 
 
 
-def agricultural_plot_resale_list(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Reports/Resale_Plot/agricultural_plot_resale_list.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
 
 
 
@@ -17905,24 +18434,52 @@ def industrial_bulk_delete(request):
         return JsonResponse({'status': 'error', 'message': str(e)})
 
 
+
 @require_POST
-def industrial_resale_hard_delete(request, id):
-    """Permanently deletes the record from the database."""
+def industrial_plot_resale_restore(request, pk):
+    """Restore an Industrial Plot Resale property from the recycle bin."""
     try:
-        IndustrialResaleProperty.objects.filter(id=id).delete()
-        return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
+        prop = IndustrialPlotResaleProperty.objects.get(id=pk, is_deleted=True)
+        prop.is_deleted = False
+        prop.deleted_at = None
+        if hasattr(prop, 'deleted_by'):
+            prop.deleted_by = None
+        prop.save()
+        return JsonResponse({'status': 'success', 'message': 'Property successfully restored!'})
+    except IndustrialPlotResaleProperty.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Property not found.'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 @require_POST
-def industrial_resale_restore(request, id):
-    """Restores the record from the Recycle Bin."""
+def industrial_plot_resale_hard_delete(request, pk):
+    """Permanently delete an Industrial Plot Resale property and its media."""
     try:
-        IndustrialResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
-        return JsonResponse({'status': 'success', 'message': 'Industrial property restored!'})
+        prop = IndustrialPlotResaleProperty.objects.get(id=pk, is_deleted=True)
+
+        for img in prop.images.all():
+            if img.image:
+                img.image.delete(save=False)
+        for vid in prop.video.all():
+            if vid.video:
+                vid.video.delete(save=False)
+        for file_field in ['encumbrance_cert', 'layout_plan', 'social_video', 'upload_file']:
+            f = getattr(prop, file_field, None)
+            if f:
+                try:
+                    f.delete(save=False)
+                except Exception:
+                    pass
+
+        prop.delete()
+        return JsonResponse({'status': 'success', 'message': 'Property permanently deleted.'})
+    except IndustrialPlotResaleProperty.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Property not found.'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+
 
 # ── 1. SINGLE DELETE VIEW (Soft Delete) ──
 
@@ -19730,7 +20287,10 @@ def resale_hard_delete(request, id):
         id=id
     )
 
+
     property_id = prop.id
+
+    id = prop.id
 
     # Delete related images automatically
     prop.images.all().delete()
@@ -19740,7 +20300,7 @@ def resale_hard_delete(request, id):
 
     return JsonResponse({
         'status': 'success',
-        'message': f'{property_id} permanently deleted!'
+        'message': f'{id} permanently deleted!'
     })
 
 
@@ -20099,6 +20659,7 @@ def resale_residential_import_excel(request):
             'enter fixed brokerage': 'manual_brokerage',
             'fixed brokerage amount': 'manual_brokerage', 
             'city': 'city',
+            'area / locality': 'locality',
             'locality': 'locality',
             'building/society name': 'building_name',
             'complete address': 'address',
@@ -20761,7 +21322,7 @@ def resale_residential_sample_excel(request):
 # Field keys, labels, and required (*) markers all verified directly
 # against the resale listing form (residential_resale.html) — a field
 # only carries '*' in its label if the form itself marks it required.
-EXPORT_COLUMNS_BLUEPRINT = [
+EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE = [
     # System Control & Identification (system/auto fields — never required on the form)
     {'field': 'id', 'label': 'Property ID', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
     {'field': 'property_unique_key', 'label': 'Property Unique Key', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
@@ -20923,7 +21484,7 @@ def export_resale_excel(request):
     left_alignment = Alignment(horizontal="left", vertical="center")
 
     # ── RENDER HEADERS FROM THE SINGLE MASTER BLUEPRINT MATRIX ──
-    for col_idx, column_meta in enumerate(EXPORT_COLUMNS_BLUEPRINT, start=1):
+    for col_idx, column_meta in enumerate(EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE, start=1):
         # Render Row 1 Section Group Block
         cell_step = ws.cell(row=1, column=col_idx, value=column_meta['section_name'])
         cell_step.font = font_step_title
@@ -20943,7 +21504,7 @@ def export_resale_excel(request):
     all_properties = ResaleResidentialProperty.objects.all()
     
     for row_idx, property_obj in enumerate(all_properties, start=3):
-        for col_idx, column_meta in enumerate(EXPORT_COLUMNS_BLUEPRINT, start=1):
+        for col_idx, column_meta in enumerate(EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE, start=1):
             cell_value = getattr(property_obj, column_meta['field'], '')
             if cell_value is None:
                 cell_value = ''
@@ -28085,17 +28646,7 @@ def Resale_Commercial_Plot_Ajax(request):
 
 ############ Views start for plot industrial list #######################
 
-def industrial_plot_resale_list(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Reports/Resale_Plot/industrial_plot_resale_list.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
+
 
 ############# Views end for plot industrial list ###############################
 
@@ -29230,17 +29781,7 @@ def industrial_plot_resale(request):
 
 ############# Views start for plot agricultural list ######################
 
-def agricultural_plot_resale_list(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Reports/Resale_Plot/agricultural_plot_resale_list.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
+
 
 ########### Views end for plot agricultural list #########################
 
@@ -29654,3 +30195,4401 @@ def import_services_excel(request):
 
 
 #######################END View SERVICES LANDING PAGE  MODULE SECTION###################################
+
+
+
+#######################START View Industrial Plot Resale Listing MODULE SECTION###################################
+
+
+
+
+
+def industrial_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/industrial_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+
+
+
+
+
+from Admin_App.utils import generate_property_slideshow
+
+
+def industrial_plot_resale_add(request):
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = None
+    user_obj = None
+
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+
+    if user_id:
+        user_obj = User_Details.objects.filter(id=user_id).first()
+
+    if not admin_obj and not user_obj:
+        return render(request, 'home_page/Adminlogin.html')
+
+    if request.method == 'POST':
+        try:
+            # ---------- SAFE TYPE CONVERSIONS ----------
+            def to_int(val):
+                try:
+                    return int(val) if val else None
+                except:
+                    return None
+
+            def to_decimal(val):
+                try:
+                    return float(val) if val else None
+                except:
+                    return None
+
+            def to_date(val):
+                if not val:
+                    return None
+                try:
+                    return datetime.strptime(val, "%Y-%m-%d").date()
+                except:
+                    return None
+
+            # ---------- AMENITIES & FACILITIES ----------
+            amenities = ",".join(request.POST.getlist('amenities[]'))
+            nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+
+            # ---------- UPLOADER IDENTIFICATION (Who submitted the HTML form) ----------
+            if admin_obj:
+                uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+                uploader_email = getattr(admin_obj, 'email', '')
+                uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+                uploader_role = "Admin"
+                uploader_id = f"ADMIN_{admin_id}"
+            elif user_obj:
+                uploader_name = user_obj.user_name
+                uploader_email = user_obj.user_email
+                uploader_contact = user_obj.user_phone
+                uploader_role = "User"
+                uploader_id = f"USER_{user_id}"
+            else:
+                uploader_name, uploader_email, uploader_contact, uploader_role, uploader_id = "", "", "", "", ""
+
+            # ---------- LISTED BY IDENTIFICATION (Who owns/manages the listing) ----------
+            input_listed_by_id = (request.POST.get('listed_by_id') or uploader_id).strip()
+            input_listed_by_name = (request.POST.get('listed_by_name') or uploader_name).strip()
+            input_listed_by_email = (request.POST.get('listed_by_email') or uploader_email).strip().lower()
+            input_listed_by_contact = (request.POST.get('listed_by_contact') or uploader_contact).strip()
+            input_listed_by_role = (request.POST.get('listed_by_role') or uploader_role).strip()
+
+            # ==========================================================
+            # DUPLICATE DETECTION ENGINE (Checking LISTED BY, not UPLOADED BY)
+            # ==========================================================
+            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_industrial_estate_name = (request.POST.get('industrial_estate_name') or '').strip()
+            input_locality = (request.POST.get('locality') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            fingerprint_key = generate_industrial_plot_fingerprint(
+                input_property_no,
+                input_industrial_estate_name,
+                input_locality,
+                input_pincode
+            )
+
+            # 1. Direct Case-Insensitive Query for same plot in same locality/estate
+            direct_duplicates = IndustrialPlotResaleProperty.objects.filter(
+                is_deleted=False,
+                property_no__iexact=input_property_no,
+                locality__iexact=input_locality
+            )
+            if input_industrial_estate_name:
+                direct_duplicates = direct_duplicates.filter(industrial_estate_name__iexact=input_industrial_estate_name)
+
+            # Combine fingerprint match OR direct field match
+            existing_duplicates = (
+                IndustrialPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False) | direct_duplicates
+            ).distinct()
+
+            is_dup_flag = False
+            dup_group_id = fingerprint_key
+            total_dup_count = 1
+
+            if existing_duplicates.exists():
+                # Level 1: Hard Block if LISTED BY the exact same person (ID, Email, OR Phone match)
+                for existing_prop in existing_duplicates:
+                    same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                               existing_prop.listed_by_id.strip() == input_listed_by_id)
+
+                    same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                                  existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+
+                    same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                    existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+
+                    if same_id or same_email or same_contact:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f"Duplicate Blocked: This plot (No {input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}. Please edit the existing listing instead."
+                        })
+
+                # Level 2: Different Agent/User listing the exact same physical plot -> Allow save & Flag
+                is_dup_flag = True
+                total_dup_count = existing_duplicates.count() + 1
+                existing_duplicates.update(
+                    is_duplicate=True,
+                    duplicate_count=total_dup_count,
+                    duplicate_group_id=dup_group_id
+                )
+
+            # ---------- CREATE DATABASE OBJECT ----------
+            prop = IndustrialPlotResaleProperty.objects.create(
+                property_unique_key=fingerprint_key,
+                is_duplicate=is_dup_flag,
+                duplicate_count=total_dup_count,
+                duplicate_group_id=dup_group_id if is_dup_flag else None,
+
+                listing_type="Resale",
+                category="Plot",
+                sub_category=request.POST.get('sub_category', 'Industrial'),
+              
+
+                listed_by_type=request.POST.get('listed_by_type'),
+                assigned_to=request.POST.get('assigned_to'),
+                listed_by_id=input_listed_by_id,
+                listed_by_name=input_listed_by_name,
+                listed_by_email=input_listed_by_email,
+                listed_by_contact=input_listed_by_contact,
+                listed_by_role=input_listed_by_role,
+
+                property_title=request.POST.get('property_title'),
+                property_no=input_property_no,
+
+                plot_area=to_decimal(request.POST.get('plot_area')),
+                property_type=request.POST.get('property_type'),
+                land_use=request.POST.get('land_use'),
+                industrial_zone_type=request.POST.get('industrial_zone_type'),
+                industrial_estate_name=input_industrial_estate_name,
+                na_status=request.POST.get('na_status'),
+                layout_approval_status=request.POST.get('layout_approval_status'),
+                industrial_fsi=request.POST.get('industrial_fsi'),
+
+                plot_frontage=to_decimal(request.POST.get('plot_frontage')),
+                plot_depth=to_decimal(request.POST.get('plot_depth')),
+                plot_shape=request.POST.get('plot_shape'),
+                plot_road_facing=request.POST.get('plot_road_facing'),
+                road_width=request.POST.get('road_width'),
+                corner_plot=request.POST.get('corner_plot', 'no'),
+
+                power_supply=request.POST.get('power_supply'),
+                power_load_kva=to_int(request.POST.get('power_load_kva')),
+                industrial_water_supply=request.POST.get('industrial_water_supply'),
+                effluent_treatment=request.POST.get('effluent_treatment'),
+                industry_type_permissible=request.POST.get('industry_type_permissible'),
+                plot_fencing=request.POST.get('plot_fencing'),
+                loading_dock=request.POST.get('loading_dock'),
+                current_possession_status=request.POST.get('current_possession_status'),
+
+                selling_price=to_int(request.POST.get('selling_price')),
+                price_per_sqft=to_int(request.POST.get('price_per_sqft')),
+                price_negotiable=request.POST.get('price_negotiable', 'no'),
+                additional_charges=request.POST.get('additional_charges'),
+                brokerage_percentage=request.POST.get('brokerage_percentage'),
+                manual_brokerage=request.POST.get('manual_brokerage'),
+
+                ownership_type=request.POST.get('ownership_type'),
+                ownership_document_type=request.POST.get('ownership_document_type'),
+                other_document_type=request.POST.get('other_document_type'),
+                midc_allotment=request.POST.get('midc_allotment'),
+                midc_transfer_noc=request.POST.get('midc_transfer_noc'),
+                environmental_clearance=request.POST.get('environmental_clearance'),
+                rera_status=request.POST.get('rera_status'),
+                title_clearance=request.POST.get('title_clearance'),
+                property_encumbrance_status=request.POST.get('property_encumbrance_status'),
+
+                property_tax_status=request.POST.get('property_tax_status'),
+                outstanding_tax_amount=to_int(request.POST.get('outstanding_tax_amount')),
+                pending_since=to_date(request.POST.get('pending_since')),
+                property_loan_status=request.POST.get('property_loan_status'),
+                financing_bank=request.POST.get('financing_bank'),
+                outstanding_loan_amount=to_int(request.POST.get('outstanding_loan_amount')),
+                sanctioning_authority=request.POST.get('sanctioning_authority'),
+
+                amenities=amenities,
+                nearby_facilities=nearby_facilities,
+                user_description=request.POST.get('user_description'),
+                property_summary=request.POST.get('property_summary'),
+                property_description=request.POST.get('property_description'),
+
+                state=request.POST.get('state'),
+                city=request.POST.get('city'),
+                locality=input_locality,
+                property_landmark=request.POST.get('property_landmark'),
+                pincode=input_pincode,
+                address=request.POST.get('address'),
+                google_maps_link=request.POST.get('google_maps_link'),
+                latitude=request.POST.get('latitude'),
+                longitude=request.POST.get('longitude'),
+
+                encumbrance_cert=request.FILES.get('encumbrance_cert'),
+                layout_plan=request.FILES.get('layout_plan'),
+
+                listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
+                portal_name=request.POST.get('portal_name'),
+
+                uploaded_by_name=uploader_name,
+                uploaded_by_email=uploader_email,
+                uploaded_by_contact=uploader_contact,
+                uploaded_by_role=uploader_role,
+                upload_file_name=None,
+            )
+
+            # ---------- IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE) ----------
+            IMAGE_CATEGORY_FIELDS = {
+                'full_plot':         'plot_images_full_plot[]',
+                'main_entrance':     'plot_images_main_entrance[]',
+                'boundary_fencing':  'plot_images_boundary_fencing[]',
+                'road_facing':       'plot_images_road_facing[]',
+                'approach_road':     'plot_images_approach_road[]',
+                'truck_access':      'plot_images_truck_access[]',
+                'industrial_estate': 'plot_images_industrial_estate[]',
+                'electricity_infra': 'plot_images_electricity_infra[]',
+                'water_infra':       'plot_images_water_infra[]',
+                'aerial_drone':      'plot_images_aerial_drone[]',
+                'layout_site_plan':  'plot_images_layout_site_plan[]',
+            }
+
+            saved_count = 0
+            for category, field_name in IMAGE_CATEGORY_FIELDS.items():
+                cat_images = request.FILES.getlist(field_name)
+                for cat_index, img in enumerate(cat_images):
+                    if saved_count >= 25:
+                        break
+                    IndustrialPlotResaleImage.objects.create(
+                        property=prop,
+                        image=img,
+                        category=category,
+                        sequence_order=cat_index,
+                    )
+                    saved_count += 1
+
+            # ---------- PLOT VIDEO (UPLOAD, RM LINK, OR AUTO SLIDESHOW) ----------
+            video_option = request.POST.get('video_option') or request.POST.get('video_source') or 'auto'
+            uploaded_video = request.FILES.get('property_video') or request.FILES.get('social_video')
+            property_video_link = request.POST.get('property_video_link', '').strip()
+
+            # 1. ALWAYS auto-generate the slideshow row if >= 3 photos exist
+            CATEGORY_ORDER = list(IMAGE_CATEGORY_FIELDS.keys())
+            saved_images = list(IndustrialPlotResaleImage.objects.filter(property=prop))
+            saved_images.sort(key=lambda img: (CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99, img.sequence_order))
+            image_paths = [img.image.path for img in saved_images if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)]
+
+            if len(image_paths) >= 3:
+                output_relative_path = f"industrial_plot/videos/auto_{prop.id}.mp4"
+                try:
+                    result_path = generate_property_slideshow(image_paths, output_relative_path)
+                    if result_path:
+                        IndustrialPlotResaleVideo.objects.update_or_create(
+                            property=prop,
+                            source='auto',
+                            defaults={
+                                'video': result_path,
+                                'video_url': None
+                            }
+                        )
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+
+            # 2. Save Manual Upload Video as a separate row
+            if video_option == 'upload' and uploaded_video:
+                IndustrialPlotResaleVideo.objects.create(
+                    property=prop,
+                    video=uploaded_video,
+                    source='uploaded'
+                )
+
+            # 3. Save RM Assisted Link Video as a separate row
+            elif video_option == 'rm_assisted' and property_video_link:
+                IndustrialPlotResaleVideo.objects.create(
+                    property=prop,
+                    video_url=property_video_link,
+                    source='rm_assisted'
+                )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': "Industrial Plot Listing Added Successfully"
+            })
+
+        except Exception as e:
+            print("ERROR DETECTED:", str(e))
+            return JsonResponse({
+                'status': 'error',
+                'message': f"Error while saving listing: {str(e)}"
+            })
+
+    return render(request, 'admin_user/Reports/Industrial/industrial_plot_resale_list.html', {
+        'admin_obj': admin_obj,
+        'user_obj': user_obj,
+        'ameneties_obj': Ameneties_Details.objects.all(),
+        'facilities_obj': Facilities_Details.objects.all(),
+        'image_category_choices': IndustrialPlotResaleImage.CATEGORY_CHOICES,
+    })
+
+
+def _industrial_field_map():
+    """Returns (sections, field_to_label, label_to_field, system_injected,
+    helper_only_labels, decimal_fields, int_fields). Called fresh by both
+    the download view and the import view — always local, never global.
+
+    Section order / labels are deliberately kept 1:1 with the live
+    'Sell Your Industrial Plot' form (Step 1 -> Step 4), so the Excel
+    template reads the same way the form does.
+    """
+
+    sections = OrderedDict([
+        ("Listed By", [
+            ("listed_by_type",   "Listed By Type (Self/Other)", False),
+            ("listed_by_id",     "Listed By Id", False),
+            ("listed_by_name",   "Listed By Name", False),
+            ("listed_by_email",  "Listed By Email", False),
+            ("listed_by_contact","Listed By Contact", False),
+            ("listed_by_role",   "Listed By Role", True),   # drives the brokerage label
+        ]),
+        ("Basic Industrial Plot Information", [
+            ("property_no",   "Plot / Survey Number", True),
+            ("plot_area",     "Plot Area (sq.m)", True),
+            ("property_type", "Industrial Plot Type", True),
+        ]),
+        ("Industrial Zone, Estate & Authority Details", [
+            ("land_use",                "Industrial Zone / Land Use", True),
+            ("industrial_zone_type",    "Industrial Zone Type", True),
+            ("industrial_estate_name",  "Industrial Estate / Park Name", False),
+            ("na_status",                "NA Status / Industrial Conversion", True),
+            ("layout_approval_status",  "Industrial Authority / Estate Approval", False),
+            ("industrial_fsi",          "Permissible FSI / Coverage", False),
+        ]),
+        ("Industrial Plot Specifications & Infrastructure", [
+            ("plot_frontage",             "Plot Frontage / Width (m)", False),
+            ("plot_depth",                 "Depth / Length (m)", False),
+            ("plot_shape",                 "Plot Shape", False),
+            ("plot_road_facing",          "Road Access & Entry", True),
+            ("road_width",                 "Road Width (Front of Plot)", False),
+            ("corner_plot",                "Corner Plot (yes/no)", False),
+            ("power_supply",               "Power Supply Available", False),
+            ("power_load_kva",             "Power Load Sanctioned (KVA)", False),
+            ("industrial_water_supply",   "Water Supply", False),
+            ("effluent_treatment",        "Drain / Effluent Facility", False),
+            ("industry_type_permissible", "Permissible Industry Type", False),
+            ("plot_fencing",               "Compound Wall / Security Fencing", False),
+            ("loading_dock",               "Loading / Unloading Facility", False),
+            ("current_possession_status", "Current Plot / Shed Status", False),
+        ]),
+        ("Pricing Details", [
+            ("selling_price",         "Selling Price", True),
+            ("price_per_sqft",         "Price per Sq.m(Auto-calculated)",False),
+            ("price_negotiable",      "Is the Price Negotiable (Yes/No)", False),
+            ("additional_charges",    "Additional Industrial Charges", False),
+            ("brokerage_percentage",  "Brokerage / Service Fee", True),
+            ("manual_brokerage",      "Fixed Brokerage Amount", False),
+        ]),
+        ("Legal, Title & Industrial Authority Details", [
+            ("ownership_type",              "Ownership / Tenure Type", False),
+            ("ownership_document_type",     "Primary Title / Ownership Document", False),
+            ("other_document_type",         "Specify Other Ownership Document Type", False),
+            ("midc_allotment",               "MIDC / Authority Allotment Letter", False),
+            ("midc_transfer_noc",           "MIDC Transfer / NOC Status", False),
+            ("environmental_clearance",     "Environmental Clearance (EC)", False),
+            ("rera_status",                  "RERA / Industrial Authority Status", False),
+            ("title_clearance",             "Title Clarity / Marketability", False),
+            ("property_encumbrance_status", "Encumbrance / Charge Status", False),
+            ("property_tax_status",         "Industrial Property Tax / Assessment Status", False),
+            ("outstanding_tax_amount",      "Outstanding Tax / Dues Amount", False),
+            ("pending_since",                "Dues Pending Since", False),
+            ("property_loan_status",        "Existing Loan / Mortgage on Property", False),
+            ("financing_bank",               "Lender Bank / NBFC Name", False),
+            ("outstanding_loan_amount",     "Outstanding Loan Amount", False),
+            ("sanctioning_authority",       "Industrial Authority / Estate Developer", False),
+        ]),
+        ("Amenities & Facilities", [
+            ("amenities", "Amenities (comma-separated)", False),
+        ]),
+        ("Nearby Facilities", [
+            ("nearby_facilities", "Nearby Facilities (comma-separated)", False),
+        ]),
+        ("Property Descriptions", [
+            ("user_description", "Property Description", False),
+        ]),
+        ("Property Location Details", [
+            ("address",            "Complete Industrial Plot Address", True),
+            ("locality",           "MIDC Phase / Industrial Area Name", True),
+            ("property_landmark",  "Nearest Highway / Railway / Port Reference", False),
+            ("city",               "City / District", True),
+            ("state",              "State", True),
+            ("pincode",             "PIN Code", False),
+            ("google_maps_link",   "Google Maps Link", False),
+            ("latitude",            "Latitude", False),
+            ("longitude",           "Longitude", False),
+        ]),
+        ("Media & Listing Status", [
+            ("listed_elsewhere", "Listed Elsewhere (Yes/No)", False),
+            ("portal_name",      "Portal Name", False),
+        ]),
+        ("Property Uploaded By(Auto Generated)", [
+            ("uploaded_by_name",    "Uploaded By Name (Auto)", False),
+            ("uploaded_by_email",   "Uploaded By Email (Auto)", False),
+            ("uploaded_by_contact", "Uploaded By Contact (Auto)", False),
+            ("uploaded_by_role",    "Uploaded By Role (Auto)", False),
+            ("created_at",          "Created At (Auto)", False),
+        ]),
+    ])
+
+    field_to_label = {f: lbl for _, fields in sections.items() for f, lbl, _ in fields}
+    label_to_field = {lbl.strip().lower(): f for _, fields in sections.items() for f, lbl, _ in fields}
+
+    system_injected = {
+        "uploaded_by_name", "uploaded_by_email", "uploaded_by_contact",
+        "uploaded_by_role", "created_at",
+    }
+    helper_only_labels = {"brokerage label preview (auto)"}
+    decimal_fields = {"plot_area", "plot_frontage", "plot_depth"}
+    int_fields = {
+        "power_load_kva", "selling_price",
+        "outstanding_tax_amount", "outstanding_loan_amount",
+    }
+
+    return sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields
+
+
+def _industrial_sample_row_data():
+    """One complete example value per column so every column in the
+    downloaded template shows the expected format — nothing left blank."""
+    return {
+        "listed_by_type": "self", "listed_by_role": "Agent",
+        "listed_by_id": "ag0217", "listed_by_name": "Vikas", "listed_by_email": "vikas@test.com",
+        "listed_by_contact": "9876543210",
+
+        "property_no": "MIDC Plot No. B-45, Sector 3",
+        "plot_area": "2000",
+        "property_type": "midc_industrial",
+
+        "land_use": "MIDC_Zone", "industrial_zone_type": "MIDC",
+        "industrial_estate_name": "Butibori MIDC", "na_status": "MIDC_Allotted",
+        "layout_approval_status": "MIDC_Approved", "industrial_fsi": "1.0",
+
+        "plot_frontage": "30", "plot_depth": "80", "plot_shape": "Rectangular",
+        "plot_road_facing": "MIDC_Road", "road_width": "24m", "corner_plot": "no",
+        "power_supply": "3Phase_Available", "power_load_kva": "200",
+        "industrial_water_supply": "MIDC_Water", "effluent_treatment": "Common_ETP",
+        "industry_type_permissible": "Light_Non_Polluting", "plot_fencing": "full_compound",
+        "loading_dock": "Loading_Dock_Available", "current_possession_status": "Vacant_Ready",
+
+        "selling_price": "15000000", "price_negotiable": "no",
+        "additional_charges": "none", "brokerage_percentage": "1% of amount",
+        "manual_brokerage": "",
+
+        "ownership_type": "midc_lease", "ownership_document_type": "MIDC_Allotment_Letter",
+        "other_document_type": "", "midc_allotment": "Available",
+        "midc_transfer_noc": "NOC_Available", "environmental_clearance": "Not_Required",
+        "rera_status": "Not Applicable", "title_clearance": "Clear & Marketable Title",
+        "property_encumbrance_status": "No Encumbrance", "property_tax_status": "Fully Paid",
+        "outstanding_tax_amount": "", "pending_since": "",
+        "property_loan_status": "No Active Loan", "financing_bank": "",
+        "outstanding_loan_amount": "", "sanctioning_authority": "MIDC Nagpur, MIDC Butibori",
+
+        "amenities": "Security, Compound Wall, Loading Dock",
+        "nearby_facilities": "Highway, Railway Siding, Warehouse Hub",
+
+        "user_description": "2,000 sq.m MIDC Butibori plot with 3-phase power (200 KVA), MIDC piped water, 24 ft road frontage, clear title.",
+       
+        "address": "Plot No. B-45, Sector 3, Butibori MIDC, Nagpur – 441108, Maharashtra", "locality": "Butibori MIDC Phase II","property_landmark": "3 km from NH-6",
+        "city": "Nagpur", "state": "Maharashtra", "pincode": "441108",
+        
+        
+        "google_maps_link": "https://maps.google.com/?q=20.9834,79.1567",
+        "latitude": "20.9834", "longitude": "79.1567",
+
+        "listed_elsewhere": "No", "portal_name": "",
+    }
+
+
+def generate_industrial_plot_fingerprint(property_no, industrial_estate_name, locality, pincode):
+    """Fingerprint used ONLY by the bulk-import duplicate engine (mirrors
+    rental's generate_property_fingerprint). Distinct from the model's own
+    save()-time property_unique_key, which keys on address/locality/city/
+    plot_area/property_no."""
+    key_source = f"{property_no}|{industrial_estate_name}|{locality}|{pincode}"
+    return key_source.strip().lower().replace(" ", "")
+
+
+# =====================================================================
+# DOWNLOAD TEMPLATE
+# =====================================================================
+
+def download_industrial_plot_template(request):
+    """Download the upload template for Industrial Plot Resale — column
+    headers are the same human-readable labels used on the actual form,
+    not raw field names. Includes a live 'brokerage label preview'
+    formula so staff can see the label change instantly when they type
+    a different Listed By Role.
+
+    Row 4 (sample data) is LOCKED — visible for reference only, cannot
+    be edited or deleted. Rows 5+ are unlocked for actual data entry.
+    """
+
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
+    from openpyxl.utils import get_column_letter
+    from openpyxl.comments import Comment
+
+    sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _industrial_field_map()
+    sample = _industrial_sample_row_data()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Industrial Plot Resale"
+
+    HDR_BG, REQ_BG, OPT_BG, SAMP_BG = "667EEA", "FEF3C7", "F0FDF4", "ECFDF5"
+    thin = Side(style="thin", color="CBD5E1")
+    bdr = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    col = 1
+    role_col = None
+    brokerage_col = None
+
+    for section, fields in sections.items():
+        start_col = col
+        for field, label, required in fields:
+            header_text = label + (" *" if required else "")
+            c1 = ws.cell(row=2, column=col, value=header_text)
+            c1.font = Font(bold=True, color="1E293B", name="Arial", size=9)
+            c1.fill = PatternFill("solid", fgColor=REQ_BG if required else OPT_BG)
+            c1.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            c1.border = bdr
+
+            sc = ws.cell(row=4, column=col, value=sample.get(field, ""))
+            sc.font = Font(name="Arial", size=9, color="065F46")
+            sc.fill = PatternFill("solid", fgColor=SAMP_BG)
+            sc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            sc.border = bdr
+            sc.protection = Protection(locked=True)  # sample stays read-only
+
+            ws.column_dimensions[get_column_letter(col)].width = max(18, len(label) // 2 + 6)
+
+            if field == "listed_by_role":
+                role_col = col
+            if field == "brokerage_percentage":
+                brokerage_col = col
+            col += 1
+
+        end_col = col - 1
+        hc = ws.cell(row=1, column=start_col, value=f"\U0001F4CB {section}")
+        hc.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+        hc.fill = PatternFill("solid", fgColor=HDR_BG)
+        hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        for cc in range(start_col, end_col + 1):
+            ws.cell(row=1, column=cc).fill = PatternFill("solid", fgColor=HDR_BG)
+            ws.cell(row=1, column=cc).border = bdr
+        if end_col > start_col:
+            ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+
+    # ---- unlock data-entry rows (5+) so users can fill them in ----
+    total_cols = col - 1
+    unlocked = Protection(locked=False)
+    MAX_DATA_ROWS = 500  # adjust if you expect more than 500 rows of data
+    for r in range(5, 5 + MAX_DATA_ROWS):
+        for c in range(1, total_cols + 1):
+            ws.cell(row=r, column=c).protection = unlocked
+
+    # ---- live brokerage label preview column, appended at the end ----
+    preview_col = col
+    pc = ws.cell(row=2, column=preview_col, value="Brokerage Label Preview (auto)")
+    pc.font = Font(bold=True, color="92400E", name="Arial", size=9)
+    pc.fill = PatternFill("solid", fgColor="FEF3C7")
+    pc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    pc.border = bdr
+    ws.column_dimensions[get_column_letter(preview_col)].width = 26
+
+    role_letter = get_column_letter(role_col)
+    formula = (
+        f"=IFERROR(INDEX('Notes - Brokerage Label'!$B$4:$B$11,"
+        f"MATCH(LOWER(TRIM({role_letter}4)),'Notes - Brokerage Label'!$C$4:$C$11,0)),\"Brokerage\")"
+    )
+    fcell = ws.cell(row=4, column=preview_col, value=formula)
+    fcell.fill = PatternFill("solid", fgColor="FEF3C7")
+    fcell.font = Font(bold=True, color="92400E", name="Arial", size=9)
+    fcell.alignment = Alignment(horizontal="center", vertical="center")
+    fcell.protection = Protection(locked=True)  # preview formula stays read-only too
+
+    if brokerage_col:
+        note = (
+            "The LABEL text shown above this field on the live form changes based on\n"
+            "the 'Listed By Role' in the same row. The stored value/column never changes.\n\n"
+            "Admin -> EstateFlow Service Fee\n"
+            "Relationship Manager -> Buyer Service Fee\n"
+            "Landlord -> Buyer Service Fee\n"
+            "Owner -> Buyer Service Fee\n"
+            "Seller -> Buyer Service Fee\n"
+            "Agent -> Brokerage\n"
+            "Agency/Builder or Builder -> Brokerage / Service Fee\n"
+            "Any other role -> Brokerage (default)\n\n"
+            "See 'Notes - Brokerage Label' sheet, and the live preview column at the end of this sheet."
+        )
+        ws.cell(row=2, column=brokerage_col).comment = Comment(note, "System")
+
+    ws.row_dimensions[1].height = 26
+    ws.row_dimensions[2].height = 40
+    ws.row_dimensions[4].height = 24
+    ws.freeze_panes = "A5"
+
+    # ---- Notes sheet (lookup table the formula above reads from) ----
+    notes = wb.create_sheet("Notes - Brokerage Label")
+    notes.column_dimensions['A'].width = 26
+    notes.column_dimensions['B'].width = 26
+    notes.column_dimensions['C'].width = 4
+    notes.sheet_view.showGridLines = False
+
+    t = notes["A1"]
+    notes.merge_cells("A1:B1")
+    t.value = "Brokerage label — driven by Listed By Role"
+    t.font = Font(bold=True, size=13, color="FFFFFF", name="Arial")
+    t.fill = PatternFill("solid", fgColor=HDR_BG)
+    t.alignment = Alignment(horizontal="center", vertical="center")
+
+    hdrs = ["Listed By Role", "Label shown on form"]
+    for i, h in enumerate(hdrs, start=1):
+        c = notes.cell(row=3, column=i, value=h)
+        c.font = Font(bold=True, color="1E293B", name="Arial")
+        c.fill = PatternFill("solid", fgColor=OPT_BG)
+        c.border = bdr
+
+    role_rows = [
+        ("Admin", "EstateFlow Service Fee"),
+        ("Relationship Manager", "Buyer Service Fee"),
+        ("Landlord", "Buyer Service Fee"),
+        ("Owner", "Buyer Service Fee"),
+        ("Seller", "Buyer Service Fee"),
+        ("Agent", "Brokerage"),
+        ("Agency/Builder", "Brokerage / Service Fee"),
+        ("Builder", "Brokerage / Service Fee"),
+    ]
+    for r, (role, label) in enumerate(role_rows, start=4):
+        notes.cell(row=r, column=1, value=role).border = bdr
+        notes.cell(row=r, column=2, value=label).border = bdr
+        notes.cell(row=r, column=3, value=f"=LOWER(TRIM(A{r}))")
+
+    # ---- lock the whole sheet, keep only rows 5+ editable ----
+    ws.protection.sheet = True
+    ws.protection.formatColumns = True   # allow resizing columns
+    ws.protection.formatRows = True      # allow resizing rows
+    ws.protection.insertRows = False     # block inserting rows (protects layout)
+    ws.protection.deleteRows = False     # block deleting rows (protects the sample row)
+    ws.protection.autoFilter = False
+    ws.protection.sort = False
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="Industrial_Plot_Resale_Template.xlsx"'
+    wb.save(response)
+    return response
+
+
+
+
+
+
+
+@csrf_exempt
+@require_POST
+def import_industrial_plot_excel(request):
+    excel_file = request.FILES.get("excel_file")
+    if not excel_file:
+        return JsonResponse({"status": "error", "message": "No file uploaded."}, status=200)
+    if not excel_file.name.endswith(".xlsx"):
+        return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=200)
+
+    sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _industrial_field_map()
+
+    # -------------------------------------------------------------------
+    # REQUIRED FIELDS - must mirror the `required` inputs in the Add form.
+    # -------------------------------------------------------------------
+    REQUIRED_FIELD_KEYS = [
+        'property_no',
+        'plot_area',
+        'property_type',
+        'land_use',
+        'industrial_zone_type',
+        'na_status',
+        'plot_road_facing',
+        'selling_price',
+        'brokerage_percentage',
+        'state',
+        'city',
+        'locality',
+        'address',
+        'listed_by_id',
+        'listed_by_name',
+        'listed_by_email',
+        'listed_by_contact',
+        'listed_by_role',
+    ]
+
+    def _field_label(field):
+        return field_to_label.get(field) or field.replace('_', ' ').title()
+
+    def _is_missing(val):
+        """Treat None / empty-string as missing. Does NOT treat 0 / '0' as missing."""
+        if val is None:
+            return True
+        if isinstance(val, str) and val.strip() == "":
+            return True
+        return False
+
+    # ---- 1. Uploader Identity ----
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = Admin_Login.objects.filter(id=admin_id).first() if admin_id else None
+    user_obj = User_Details.objects.filter(id=user_id).first() if user_id else None
+
+    uploader_name = uploader_email = uploader_contact = ""
+    uploader_role = "Automated Engine"
+    user_identity = "Automated Engine"
+
+    if admin_obj:
+        uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        uploader_email = getattr(admin_obj, 'email', '')
+        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        uploader_role = "Admin"
+        user_identity = uploader_email or uploader_name
+    elif user_obj:
+        uploader_name = user_obj.user_name
+        uploader_email = user_obj.user_email
+        uploader_contact = user_obj.user_phone
+        uploader_role = "User"
+        user_identity = uploader_email or uploader_name
+
+    # ---- 2. Parse Excel ----
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+        ws = wb["Industrial Plot Resale"] if "Industrial Plot Resale" in wb.sheetnames else wb.active
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": f"Cannot open file: {e}"}, status=200)
+
+    header_row, matched_count = _find_header_row(ws, label_to_field)
+
+    if matched_count == 0:
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                "No recognizable column headers were found in this file. "
+                "Please use the official template downloaded from "
+                "'Download Template' — don't rename or re-order the header row."
+            ),
+        }, status=200)
+
+    raw_headers = [cell.value for cell in ws[header_row]]
+    field_headers = []
+    unmatched_headers = []
+
+    for h in raw_headers:
+        norm = _normalize_label(h)
+        if not norm:
+            field_headers.append(None)
+            continue
+        if norm in helper_only_labels:
+            field_headers.append(None)
+            continue
+        field = label_to_field.get(norm)
+        field_headers.append(field)
+        if field is None:
+            unmatched_headers.append(str(h))
+
+    data_start_row = header_row + 1
+
+    parsed_rows = []
+    skipped_empty_after_mapping = 0
+    required_field_errors = []
+    listed_by_mismatch_errors = []
+    skipped_listed_by_mismatch = 0
+
+    for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
+        if all(v is None or str(v).strip() == "" for v in row):
+            continue
+
+        obj_data = {}
+        for col_idx, field in enumerate(field_headers):
+            if not field or field in system_injected:
+                continue
+            val = row[col_idx] if col_idx < len(row) else None
+            if val is not None and str(val).strip() != "":
+                obj_data[field] = val
+
+        if not obj_data:
+            skipped_empty_after_mapping += 1
+            continue
+
+        # ---- Type Coercion ----
+        if 'pending_since' in obj_data:
+            d_val = obj_data['pending_since']
+            if isinstance(d_val, str):
+                c_str = d_val.strip().split(" ")[0]
+                for fmt in ("%Y-%m-%d", "%d-%m-%Y"):
+                    try:
+                        obj_data['pending_since'] = datetime.strptime(c_str, fmt).date()
+                        break
+                    except ValueError:
+                        obj_data['pending_since'] = None
+            elif isinstance(d_val, datetime):
+                obj_data['pending_since'] = d_val.date()
+
+        for f in int_fields:
+            if f in obj_data and obj_data[f] is not None:
+                try:
+                    obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
+                except (TypeError, ValueError):
+                    obj_data[f] = None
+
+        for f in decimal_fields:
+            if f in obj_data and obj_data[f] is not None:
+                try:
+                    obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
+                except (InvalidOperation, ValueError):
+                    obj_data[f] = None
+
+        # ---- REQUIRED-FIELD VALIDATION ----
+        missing_fields = [
+            _field_label(f) for f in REQUIRED_FIELD_KEYS if _is_missing(obj_data.get(f))
+        ]
+        if missing_fields:
+            required_field_errors.append({
+                "row": row_idx,
+                "missing_fields": missing_fields,
+            })
+            continue
+
+        ############## Condition start to check admin and user validations ###########
+        row_errors = []
+        l_role = str(obj_data.get('listed_by_role', '')).strip().title()
+        l_email = str(obj_data.get('listed_by_email', '')).strip().lower()
+        l_contact = str(obj_data.get('listed_by_contact', '')).strip()
+        l_name = str(obj_data.get('listed_by_name', '')).strip()
+        l_id = str(obj_data.get('listed_by_id', '')).strip()
+
+        assigned_to = ""
+
+        if l_email or l_contact or l_name or l_id:
+            is_registered = False
+            details_mismatch = False
+            mismatch_reason = ""
+
+            if l_role.lower() == 'admin':
+                admin_query = Q()
+                if l_email: admin_query |= Q(email=l_email)
+                if l_contact: admin_query |= Q(phone=l_contact)
+
+                if admin_query:
+                    matched_admin = Admin_Login.objects.filter(admin_query).first()
+
+                    if matched_admin:
+                        db_name = str(getattr(matched_admin, 'name', '') or getattr(matched_admin, 'username', '')).strip()
+                        if l_name and db_name.lower() != l_name.lower():
+                            details_mismatch = True
+                            mismatch_reason = f"Name in Excel '{l_name}' does not match the registered name '{db_name}'."
+                        else:
+                            is_registered = True
+
+            else:
+                user_query = Q()
+                if l_email: user_query |= Q(user_email=l_email)
+                if l_contact: user_query |= Q(user_phone=l_contact)
+                if l_id: user_query |= Q(user_id=l_id)
+
+                
+                if user_query:
+                    matched_user = User_Details.objects.filter(user_query).first()
+
+                    if matched_user:
+                        db_name    = str(matched_user.user_name or "").strip()
+                        db_id      = str(getattr(matched_user, 'user_id', '') or "").strip()
+                        db_email   = str(matched_user.user_email or "").strip().lower()
+                        db_contact = str(matched_user.user_phone or "").strip()
+                        db_role    = str(matched_user.user_role or "").strip()
+
+                        mismatches = []
+                        if l_name and db_name.lower() != l_name.lower():
+                            mismatches.append(f"Name in Excel '{l_name}' does not match the registered name '{db_name}'.")
+                        if l_id and db_id and db_id.lower() != l_id.lower():
+                            mismatches.append(f"Listed By Id in Excel '{l_id}' does not match the registered ID '{db_id}'.")
+                        if l_email and db_email and db_email != l_email:
+                            mismatches.append(f"Email in Excel '{l_email}' does not match the registered email '{db_email}'.")
+                        if l_contact and db_contact and db_contact != l_contact:
+                            mismatches.append(f"Contact in Excel '{l_contact}' does not match the registered contact '{db_contact}'.")
+                        if l_role and db_role and db_role.lower() != l_role.lower():
+                            mismatches.append(f"Role in Excel '{l_role}' does not match the registered role '{db_role}'.")
+
+                        if mismatches:
+                            details_mismatch = True
+                            mismatch_reason = " ".join(mismatches)
+                        else:
+                            is_registered = True
+                            assigned_to = f"{matched_user.id}-{matched_user.user_role}"
+                            obj_data['assigned_to'] = assigned_to
+                            # Lock in DB-verified values — never trust the sheet
+                            # once a record is matched.
+                            obj_data['listed_by_id']      = db_id
+                            obj_data['listed_by_name']    = db_name
+                            obj_data['listed_by_email']   = db_email
+                            obj_data['listed_by_contact'] = db_contact
+                            obj_data['listed_by_role']    = db_role
+
+            if not is_registered:
+                searched_info = filter(None, [l_id, l_name, l_email, l_contact, l_role])
+                identity = " + ".join(searched_info) or "Unknown"
+
+                if details_mismatch:
+                    row_errors.append(f"Listed By {l_role or 'user'} validation failed: {mismatch_reason}")
+                else:
+                    row_errors.append(
+                        f"Listed By {l_role or 'user'} '{identity}' is not present in our records. "
+                        f"Please register this {l_role or 'user'} first, then re-upload this row."
+                    )
+
+        ########### Condition end to check admin and user validations ###################
+
+        if row_errors:
+            listed_by_mismatch_errors.append({
+                "row": row_idx,
+                "errors": row_errors,
+            })
+            skipped_listed_by_mismatch += 1
+            continue
+
+        parsed_rows.append({'row_idx': row_idx, 'data': obj_data})
+
+    wb.close()
+
+    # Formatted logs array added here for SweetAlert mapping
+    if required_field_errors:
+        logs_array = [f"Row {err['row']} Missing: {', '.join(err['missing_fields'])}" for err in required_field_errors]
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                f"Upload Denied: {len(required_field_errors)} row(s) are missing mandatory fields. "
+                "Please fill in every required column (as marked * on the Add Listing form) for "
+                "all rows and re-upload the file. No records were saved."
+            ),
+            "logs": logs_array,
+            "row_errors": required_field_errors,
+        }, status=200)
+
+    if not parsed_rows and not listed_by_mismatch_errors:
+        logs_array = [f"Unmatched Header Detected: {h}" for h in unmatched_headers] if unmatched_headers else []
+        return JsonResponse({
+            "status": "warning", 
+            "message": (
+                f"0 usable data rows found. Detected header row {header_row}, "
+                f"data expected from row {data_start_row} onward. "
+                f"{skipped_empty_after_mapping} row(s) had values but none matched a known column."
+            ),
+            "logs": logs_array,
+            "unmatched_headers": unmatched_headers,
+            "header_row_detected": header_row,
+            "data_start_row_assumed": data_start_row,
+        }, status=200)
+
+    # ---- 4. Write to DB (fingerprint-based duplicate engine) ----
+    created, updated, skipped, errors = 0, 0, skipped_empty_after_mapping + skipped_listed_by_mismatch, []
+    duplicate_blocked_rows = []
+
+    for item in parsed_rows:
+        o_data = item['data']
+        row_idx = item['row_idx']
+
+        input_property_no = str(o_data.get('property_no', '')).strip()
+        input_estate_name = str(o_data.get('industrial_estate_name', '')).strip()
+        input_locality = str(o_data.get('locality', '')).strip()
+        input_pincode = str(o_data.get('pincode', '')).strip()
+
+        input_listed_by_id = str(o_data.get('listed_by_id', '')).strip()
+        input_listed_by_name = str(o_data.get('listed_by_name', '')).strip()
+        input_listed_by_email = str(o_data.get('listed_by_email', '')).strip().lower()
+        input_listed_by_contact = str(o_data.get('listed_by_contact', '')).strip()
+
+        fingerprint_key = generate_industrial_plot_fingerprint(
+            input_property_no,
+            input_estate_name,
+            input_locality,
+            input_pincode
+        )
+
+        direct_duplicates = IndustrialPlotResaleProperty.objects.filter(
+            is_deleted=False,
+            property_no__iexact=input_property_no,
+            locality__iexact=input_locality
+        )
+        if input_estate_name:
+            direct_duplicates = direct_duplicates.filter(industrial_estate_name__iexact=input_estate_name)
+
+        existing_duplicates = (
+            IndustrialPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False)
+            | direct_duplicates
+        ).distinct()
+
+        is_dup_flag = False
+        dup_group_id = fingerprint_key
+        total_dup_count = 1
+        hard_blocked = False
+
+        if existing_duplicates.exists():
+            hard_blocked = False
+            for existing_prop in existing_duplicates:
+                same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                        existing_prop.listed_by_id.strip() == input_listed_by_id)
+                same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                            existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+
+                if same_id or same_email or same_contact:
+                    hard_blocked = True
+                    break
+
+            if hard_blocked:
+                duplicate_blocked_rows.append(
+                    f"Row {row_idx}: Duplicate Blocked - Plot '{input_property_no}' is already listed "
+                    f"by/for {input_listed_by_name or 'this user'}. Row skipped; edit the existing listing instead."
+                )
+                skipped += 1
+                continue
+
+            is_dup_flag = True
+            total_dup_count = existing_duplicates.count() + 1
+            existing_duplicates.update(
+                is_duplicate=True,
+                duplicate_count=total_dup_count,
+                duplicate_group_id=dup_group_id
+            )
+
+        o_data["property_unique_key"] = fingerprint_key
+        o_data["is_duplicate"] = is_dup_flag
+        o_data["duplicate_count"] = total_dup_count
+        o_data["duplicate_group_id"] = dup_group_id if is_dup_flag else None
+
+        o_data["listing_type"] = o_data.get("listing_type") or "Resale"
+        o_data["category"] = o_data.get("category") or "Plot"
+        o_data["sub_category"] = o_data.get("sub_category") or "Industrial"
+
+        o_data["upload_file_name"] = excel_file.name
+        o_data["upload_file"] = excel_file
+
+        o_data["uploaded_by_name"] = uploader_name
+        o_data["uploaded_by_email"] = uploader_email
+        o_data["uploaded_by_contact"] = uploader_contact
+        o_data["uploaded_by_role"] = uploader_role
+
+        # --- FIX: Remove fields that don't exist in the database model ---
+        o_data.pop("price_per_sqft", None)
+        o_data.pop("price_per_sqm", None) # Auto-calculated, usually not saved directly in DB
+
+        try:
+            IndustrialPlotResaleProperty.objects.create(**o_data)
+            created += 1
+        except Exception as e:
+            errors.append(f"Row {row_idx} processing failure: {str(e)}")
+
+    errors.extend(duplicate_blocked_rows)
+
+    for entry in listed_by_mismatch_errors:
+        for msg in entry["errors"]:
+            errors.append(f"Row {entry['row']}: {msg}")
+
+    # ---- 5. Audit Log ----
+    IndustrialPlotResaleActivityLog.objects.create(
+        user_identity=user_identity,
+        user_role=uploader_role,
+        action_type='CREATE',
+        property_id="Multiple / Sheet Records",
+        action_payload=json.dumps({
+            "filename": excel_file.name,
+            "records_created": created,
+            "records_updated": updated,
+            "records_skipped": skipped,
+            "duplicates_blocked": len(duplicate_blocked_rows),
+            "listed_by_mismatches": len(listed_by_mismatch_errors),
+            "errors_encountered": len(errors),
+        }),
+        status='SUCCESS' if not errors else 'PARTIAL',
+    )
+
+    # Added logs array here to feed directly into SweetAlert mapping
+    return JsonResponse({
+        "status": "success" if not errors else "warning", # Map partial errors to a warning alert
+        "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
+        "logs": errors, 
+        "created": created, "updated": updated, "skipped": skipped,
+        "duplicates_blocked": len(duplicate_blocked_rows),
+        "listed_by_mismatches": len(listed_by_mismatch_errors),
+        "error_count": len(errors), "errors": errors,
+        "unmatched_headers": unmatched_headers,
+        "header_row_detected": header_row,
+        "data_start_row_used": data_start_row,
+    })
+
+
+
+
+
+
+
+
+
+def industrial_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+    # UPDATED: Added prefetch_related to load images and videos in a single query
+    qs = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).prefetch_related('images', 'video').order_by("-created_at")
+
+    # ---- Search & Filters ----
+    search_query = request.GET.get("search", "").strip()
+    city_query = request.GET.get("city", "").strip()
+    locality_query = request.GET.get("locality", "").strip()
+    property_type_query = request.GET.get("property_type", "").strip()
+    road_facing_query = request.GET.get("road_facing", "").strip()
+    corner_plot_query = request.GET.get("corner_plot", "").strip()
+    loan_query = request.GET.get("loan", "").strip()
+    min_price = request.GET.get("min_price", "").strip()
+    max_price = request.GET.get("max_price", "").strip()
+    from_date = request.GET.get("from_date", "").strip()
+    to_date = request.GET.get("to_date", "").strip()
+    
+    # NEW FILTERS
+    listed_by_query = request.GET.get("listed_by", "").strip()
+    uploaded_by_query = request.GET.get("uploaded_by", "").strip()
+    listing_status_query = request.GET.get("listing_status", "").strip()
+    approval_status_query = request.GET.get("approval_status", "").strip()
+    duplicate_query = request.GET.get("duplicate", "").strip()
+
+    # Apply Filters
+    if listed_by_query and listed_by_query != 'All Roles':
+        qs = qs.filter(listed_by_role__iexact=listed_by_query)
+    
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        qs = qs.filter(uploaded_by_role__iexact=uploaded_by_query)
+        
+    if listing_status_query and listing_status_query != 'All Status':
+        qs = qs.filter(listing_status__iexact=listing_status_query)
+        
+    if approval_status_query and approval_status_query != 'All Approval':
+        qs = qs.filter(approval_status__iexact=approval_status_query)
+        
+    if duplicate_query == 'duplicates_only':
+        qs = qs.filter(is_duplicate=True)
+    elif duplicate_query == 'unique_only':
+        qs = qs.filter(is_duplicate=False)
+
+    if search_query:
+        qs = qs.filter(
+            Q(id__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(property_no__icontains=search_query)
+        )
+
+    if city_query:
+        qs = qs.filter(city__icontains=city_query)
+
+    if locality_query:
+        qs = qs.filter(locality__icontains=locality_query)
+
+    if property_type_query:
+        qs = qs.filter(property_type=property_type_query)
+
+    if road_facing_query:
+        qs = qs.filter(plot_road_facing__icontains=road_facing_query)
+
+    if corner_plot_query in ("yes", "no"):
+        qs = qs.filter(corner_plot__iexact=corner_plot_query)
+
+    if loan_query == "yes":
+        qs = qs.filter(property_loan_status__iexact="Loan Running")
+    elif loan_query == "no":
+        qs = qs.exclude(property_loan_status__iexact="Loan Running")
+
+    if min_price:
+        try:
+            qs = qs.filter(selling_price__gte=int(min_price))
+        except ValueError:
+            pass
+
+    if max_price:
+        try:
+            qs = qs.filter(selling_price__lte=int(max_price))
+        except ValueError:
+            pass
+
+    if from_date:
+        try:
+            qs = qs.filter(created_at__date__gte=datetime.strptime(from_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    if to_date:
+        try:
+            qs = qs.filter(created_at__date__lte=datetime.strptime(to_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    total_properties = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).count()
+    filtered_count = qs.count()
+
+    # ---- KPI Cards (Inventory & Plot Features) ----
+    active_listings = qs.filter(selling_price__isnull=False).count()
+    midc_count = qs.filter(property_type="midc_industrial").count()
+    warehouse_count = qs.filter(property_type="warehouse_logistics").count()
+    sez_count = qs.filter(property_type="sez_plot").count()
+
+    corner_plot_count = qs.filter(corner_plot__iexact="yes").count()
+    fenced_plot_count = qs.exclude(
+        Q(plot_fencing__isnull=True) | Q(plot_fencing="") | Q(plot_fencing="none")
+    ).count()
+    finance_ready_count = qs.filter(property_loan_status__iexact="No Active Loan").count()
+
+    # ---- KPI Cards (Listing, Approval & Duplicates) ----
+    active_listing_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Active").count()
+    inactive_listing_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Inactive").count()
+    sold_listing_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Sold").count()
+    rented_listing_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Rented").count()
+
+    pending_approval_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, approval_status__iexact="Pending").count()
+    approved_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, approval_status__iexact="Approved").count()
+    rejected_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, approval_status__iexact="Rejected").count()
+
+    duplicate_properties_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, is_duplicate=True).count()
+    unique_properties_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False, is_duplicate=False).count()
+
+
+    # ---- Pagination ----
+    paginator = Paginator(qs, 25)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    # give each row a stable serial number across pages
+    start_index = (page_obj.number - 1) * paginator.per_page
+    for i, obj in enumerate(page_obj.object_list, start=1):
+        obj.original_sr_no = start_index + i
+
+    # ---- Dropdown option sources ----
+    unique_cities = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(city__isnull=True).exclude(city="").values_list("city", flat=True).distinct().order_by("city")
+    unique_property_types = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(property_type__isnull=True).exclude(property_type="").values_list("property_type", flat=True).distinct().order_by("property_type")
+    uploaded_files = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(upload_file_name__isnull=True).exclude(upload_file_name="").values_list("upload_file_name", flat=True).distinct()
+    
+    unique_listed_roles = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(listed_by_role__isnull=True).exclude(listed_by_role="").values_list("listed_by_role", flat=True).distinct().order_by("listed_by_role")
+    unique_uploaded_roles = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role="").values_list("uploaded_by_role", flat=True).distinct().order_by("uploaded_by_role")
+    unique_listing_status = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(listing_status__isnull=True).exclude(listing_status="").values_list("listing_status", flat=True).distinct().order_by("listing_status")
+    unique_approval_status = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).exclude(approval_status__isnull=True).exclude(approval_status="").values_list("approval_status", flat=True).distinct().order_by("approval_status")
+    
+    # ---- Ensure Context dictionary has ALL variables ----
+    context = {
+        "properties": page_obj,
+        "page_obj": page_obj,
+        "total_properties": total_properties,
+        "filtered_count": filtered_count,
+        "active_listings": active_listings,
+        "midc_count": midc_count,
+        "warehouse_count": warehouse_count,
+        "sez_count": sez_count,
+        "corner_plot_count": corner_plot_count,
+        "fenced_plot_count": fenced_plot_count,
+        "finance_ready_count": finance_ready_count,
+        
+        # New Status KPI Counts
+        "active_listing_count": active_listing_count,
+        "inactive_listing_count": inactive_listing_count,
+        "sold_listing_count": sold_listing_count,
+        "rented_listing_count": rented_listing_count,
+        "pending_approval_count": pending_approval_count,
+        "approved_count": approved_count,
+        "rejected_count": rejected_count,
+        "duplicate_properties_count": duplicate_properties_count,
+        "unique_properties_count": unique_properties_count,
+
+        # Dropdown Options
+        "unique_cities": unique_cities,
+        "unique_property_types": unique_property_types,
+        "uploaded_files": uploaded_files,
+        "unique_listed_roles": unique_listed_roles,
+        "unique_uploaded_roles": unique_uploaded_roles,
+        "unique_listing_status": unique_listing_status,
+        "unique_approval_status": unique_approval_status,
+        
+        # Selected Queries
+        "search_query": search_query,
+        "city_query": city_query,
+        "locality_query": locality_query,
+        "property_type_query": property_type_query,
+        "road_facing_query": road_facing_query,
+        "corner_plot_query": corner_plot_query,
+        "loan_query": loan_query,
+        "min_price": min_price,
+        "max_price": max_price,
+        "listed_by_query": listed_by_query,
+        "uploaded_by_query": uploaded_by_query,
+        "listing_status_query": listing_status_query,
+        "approval_status_query": approval_status_query,
+        "duplicate_query": duplicate_query,
+        
+        # Base Objects
+        'admin_obj': admin_obj,
+        'ameneties_obj': ameneties_obj,
+        'facilities_obj': facilities_obj,
+        'user_obj': user_obj
+    }
+    return render(request, "admin_user/Reports/Resale_Plot/industrial_plot_resale_list.html", context)
+    
+
+
+
+
+
+
+
+def industrial_plot_resale_view(request, pk):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+ 
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    
+    # UPDATED: We use prefetch_related on the base queryset so Django fetches 
+    # all images, videos, and FAQs in one go before returning the 404 check.
+    queryset = IndustrialPlotResaleProperty.objects.prefetch_related('images', 'video', 'faqs')
+    plot = get_object_or_404(queryset, id=pk, is_deleted=False)
+ 
+    if not plot.faqs.exists():
+        plot.generate_auto_faqs()
+ 
+    amenities_list = [a.strip() for a in plot.amenities.split(',')] if plot.amenities else []
+    facilities_list = [f.strip() for f in plot.nearby_facilities.split(',')] if plot.nearby_facilities else []
+ 
+    # Price/sq.m — precomputed here rather than doing float math in the template
+    price_per_sqm = None
+    if plot.selling_price and plot.plot_area and plot.plot_area > 0:
+        try:
+            price_per_sqm = round(float(plot.selling_price) / float(plot.plot_area))
+        except (TypeError, ZeroDivisionError):
+            price_per_sqm = None
+
+    # Extracted explicitly so you can use {% for vid in videos %} in your template
+    # Extract videos and get the first one for the preview
+    videos = plot.video.all()
+    selected_video = videos.first() if videos.exists() else None
+
+    # Get all images and sort them
+    images = plot.images.all().order_by('category', 'sequence_order')
+    
+    # Group images by category for the filtering tabs
+    grouped_images = {}
+    for img in images:
+        cat = img.category
+        if cat not in grouped_images:
+            # We use get_category_display() if it exists to show the readable label
+            grouped_images[cat] = {
+                'label': img.get_category_display() if hasattr(img, 'get_category_display') else cat.replace('_', ' ').title(),
+                'images': []
+            }
+        grouped_images[cat]['images'].append(img)
+ 
+    return render(request, 'admin_user/Reports/Resale_Plot/industrial_plot_resale_view.html', {
+        'admin_obj': admin_obj,
+        'plot': plot,
+        'amenities_list': amenities_list,
+        'facilities_list': facilities_list,
+        'price_per_sqm': price_per_sqm,
+        'images': images,
+        'grouped_images': grouped_images,
+        'selected_video': selected_video,
+    })
+
+
+
+
+def industrial_plot_resale_edit(request, pk):
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = None
+    user_obj = None
+
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+    
+    if user_id:
+        # Get the single user for auth, but we need ALL users for the dropdown
+        current_user = User_Details.objects.filter(id=user_id).first()
+        
+    # Get ALL users for the "Listed By" dropdown
+    user_obj = User_Details.objects.all()
+
+    if not admin_obj and not user_obj:
+        return render(request, 'home_page/Adminlogin.html')
+
+    prop = get_object_or_404(IndustrialPlotResaleProperty, id=pk, is_deleted=False)
+
+    if request.method == 'POST':
+        try:
+            def to_int(val):
+                try:
+                    return int(val) if val else None
+                except:
+                    return None
+
+            def to_decimal(val):
+                try:
+                    return float(val) if val else None
+                except:
+                    return None
+
+            def to_date(val):
+                if not val:
+                    return None
+                try:
+                    return datetime.strptime(val, "%Y-%m-%d").date()
+                except:
+                    return None
+
+            amenities = ",".join(request.POST.getlist('amenities[]'))
+            nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+
+            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_industrial_estate_name = (request.POST.get('industrial_estate_name') or '').strip()
+            input_locality = (request.POST.get('locality') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            input_listed_by_id = (request.POST.get('listed_by_id') or '').strip()
+            input_listed_by_name = (request.POST.get('listed_by_name') or '').strip()
+            input_listed_by_email = (request.POST.get('listed_by_email') or '').strip().lower()
+            input_listed_by_contact = (request.POST.get('listed_by_contact') or '').strip()
+            input_listed_by_role = (request.POST.get('listed_by_role') or '').strip()
+
+            # ---------- DUPLICATE CHECK (excluding this property itself) ----------
+            fingerprint_key = generate_industrial_plot_fingerprint(
+                input_property_no, input_industrial_estate_name, input_locality, input_pincode
+            )
+
+            direct_duplicates = IndustrialPlotResaleProperty.objects.filter(
+                is_deleted=False,
+                property_no__iexact=input_property_no,
+                locality__iexact=input_locality
+            ).exclude(id=prop.id)
+            if input_industrial_estate_name:
+                direct_duplicates = direct_duplicates.filter(industrial_estate_name__iexact=input_industrial_estate_name)
+
+            existing_duplicates = (
+                IndustrialPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False).exclude(id=prop.id)
+                | direct_duplicates
+            ).distinct()
+
+            for existing_prop in existing_duplicates:
+                same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                           existing_prop.listed_by_id.strip() == input_listed_by_id)
+                same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                              existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+                if same_id or same_email or same_contact:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f"Duplicate Blocked: This plot (No {input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}."
+                    })
+
+            # ---------- UPDATE FIELDS ----------
+            prop.property_unique_key = fingerprint_key
+
+            prop.listed_by_type = request.POST.get('listed_by_type')
+            prop.assigned_to = request.POST.get('assigned_to')
+            prop.listed_by_id = input_listed_by_id
+            prop.listed_by_name = input_listed_by_name
+            prop.listed_by_email = input_listed_by_email
+            prop.listed_by_contact = input_listed_by_contact
+            prop.listed_by_role = input_listed_by_role
+
+            prop.property_title = request.POST.get('property_title')
+            prop.property_no = input_property_no
+
+            prop.plot_area = to_decimal(request.POST.get('plot_area'))
+            prop.property_type = request.POST.get('property_type')
+            prop.land_use = request.POST.get('land_use')
+            prop.industrial_zone_type = request.POST.get('industrial_zone_type')
+            prop.industrial_estate_name = input_industrial_estate_name
+            prop.na_status = request.POST.get('na_status')
+            prop.layout_approval_status = request.POST.get('layout_approval_status')
+            prop.industrial_fsi = request.POST.get('industrial_fsi')
+
+            prop.plot_frontage = to_decimal(request.POST.get('plot_frontage'))
+            prop.plot_depth = to_decimal(request.POST.get('plot_depth'))
+            prop.plot_shape = request.POST.get('plot_shape')
+            prop.plot_road_facing = request.POST.get('plot_road_facing')
+            prop.road_width = request.POST.get('road_width')
+            prop.corner_plot = request.POST.get('corner_plot', 'no')
+
+            prop.power_supply = request.POST.get('power_supply')
+            prop.power_load_kva = to_int(request.POST.get('power_load_kva'))
+            prop.industrial_water_supply = request.POST.get('industrial_water_supply')
+            prop.effluent_treatment = request.POST.get('effluent_treatment')
+            prop.industry_type_permissible = request.POST.get('industry_type_permissible')
+            prop.plot_fencing = request.POST.get('plot_fencing')
+            prop.loading_dock = request.POST.get('loading_dock')
+            prop.current_possession_status = request.POST.get('current_possession_status')
+
+            prop.selling_price = to_int(request.POST.get('selling_price'))
+            prop.price_per_sqft = to_int(request.POST.get('price_per_sqft'))
+            prop.price_negotiable = request.POST.get('price_negotiable', 'no')
+            prop.additional_charges = request.POST.get('additional_charges')
+            prop.brokerage_percentage = request.POST.get('brokerage_percentage')
+            prop.manual_brokerage = request.POST.get('manual_brokerage')
+
+            prop.ownership_type = request.POST.get('ownership_type')
+            prop.ownership_document_type = request.POST.get('ownership_document_type')
+            prop.other_document_type = request.POST.get('other_document_type')
+            prop.midc_allotment = request.POST.get('midc_allotment')
+            prop.midc_transfer_noc = request.POST.get('midc_transfer_noc')
+            prop.environmental_clearance = request.POST.get('environmental_clearance')
+            prop.rera_status = request.POST.get('rera_status')
+            prop.title_clearance = request.POST.get('title_clearance')
+            prop.property_encumbrance_status = request.POST.get('property_encumbrance_status')
+
+            prop.property_tax_status = request.POST.get('property_tax_status')
+            prop.outstanding_tax_amount = to_int(request.POST.get('outstanding_tax_amount'))
+            prop.pending_since = to_date(request.POST.get('pending_since'))
+            prop.property_loan_status = request.POST.get('property_loan_status')
+            prop.financing_bank = request.POST.get('financing_bank')
+            prop.outstanding_loan_amount = to_int(request.POST.get('outstanding_loan_amount'))
+            prop.sanctioning_authority = request.POST.get('sanctioning_authority')
+
+            prop.amenities = amenities
+            prop.nearby_facilities = nearby_facilities
+            prop.user_description = request.POST.get('user_description')
+
+            prop.state = request.POST.get('state')
+            prop.city = request.POST.get('city')
+            prop.locality = input_locality
+            prop.property_landmark = request.POST.get('property_landmark')
+            prop.pincode = input_pincode
+            prop.address = request.POST.get('plot_address')
+            prop.google_maps_link = request.POST.get('google_maps_link')
+            prop.latitude = request.POST.get('plot_latitude')
+            prop.longitude = request.POST.get('plot_longitude')
+
+            if request.FILES.get('encumbrance_cert'):
+                prop.encumbrance_cert = request.FILES.get('encumbrance_cert')
+            if request.FILES.get('layout_plan'):
+                prop.layout_plan = request.FILES.get('layout_plan')
+
+            prop.listed_elsewhere = request.POST.get('listed_elsewhere', 'No')
+            prop.portal_name = request.POST.get('portal_name')
+            # ... other fields ...
+            prop.listed_elsewhere = request.POST.get('listed_elsewhere', 'No')
+            prop.portal_name = request.POST.get('portal_name')
+            
+            # --- ADD THESE TWO LINES ---
+            prop.listing_status = request.POST.get('listing_status')
+            prop.approval_status = request.POST.get('approval_status')
+
+           
+
+            prop.save()
+
+            # ---------- REMOVE IMAGES MARKED FOR DELETION ----------
+            remove_image_ids = request.POST.getlist('delete_image_ids[]') or request.POST.getlist('remove_images[]')
+            if remove_image_ids:
+                IndustrialPlotResaleImage.objects.filter(id__in=remove_image_ids, property=prop).delete()
+
+            # ---------- ADD NEWLY UPLOADED IMAGES (CATEGORY WISE) ----------
+            IMAGE_CATEGORY_FIELDS = {
+                'full_plot':         'plot_images_full_plot[]',
+                'main_entrance':     'plot_images_main_entrance[]',
+                'boundary_fencing':  'plot_images_boundary_fencing[]',
+                'road_facing':       'plot_images_road_facing[]',
+                'approach_road':     'plot_images_approach_road[]',
+                'truck_access':      'plot_images_truck_access[]',
+                'industrial_estate': 'plot_images_industrial_estate[]',
+                'electricity_infra': 'plot_images_electricity_infra[]',
+                'water_infra':       'plot_images_water_infra[]',
+                'aerial_drone':      'plot_images_aerial_drone[]',
+                'layout_site_plan':  'plot_images_layout_site_plan[]',
+            }
+
+            existing_count = IndustrialPlotResaleImage.objects.filter(property=prop).count()
+            saved_count = 0
+            for category, field_name in IMAGE_CATEGORY_FIELDS.items():
+                cat_images = request.FILES.getlist(field_name)
+
+                new_image_objs = []
+                if cat_images:
+                    start_seq = IndustrialPlotResaleImage.objects.filter(property=prop, category=category).count()
+                    for idx, img in enumerate(cat_images):
+                        if existing_count + saved_count >= 25:
+                            break
+                        new_obj = IndustrialPlotResaleImage.objects.create(
+                            property=prop,
+                            image=img,
+                            category=category,
+                            sequence_order=start_seq + idx,
+                        )
+                        new_image_objs.append(new_obj)
+                        saved_count += 1
+
+                # Apply the drag-and-drop order (existing + new images mixed),
+                # e.g. image_order_full_plot[] = ["existing:12", "new:0", "existing:14", ...]
+                order_tokens = request.POST.getlist(f'image_order_{category}[]')
+                for position, token in enumerate(order_tokens):
+                    if token.startswith('existing:'):
+                        img_id = token.split(':', 1)[1]
+                        IndustrialPlotResaleImage.objects.filter(
+                            id=img_id, property=prop, category=category
+                        ).update(sequence_order=position)
+                    elif token.startswith('new:'):
+                        new_idx = int(token.split(':', 1)[1])
+                        if 0 <= new_idx < len(new_image_objs):
+                            new_image_objs[new_idx].sequence_order = position
+                            new_image_objs[new_idx].save(update_fields=['sequence_order'])
+
+            # ---------- VIDEO ----------
+            # Handle Video Deletion
+            if request.POST.get('delete_current_video') == '1':
+                prop.video.filter(source='uploaded').delete()
+
+            video_option = request.POST.get('video_option') or 'auto'
+            uploaded_video = request.FILES.get('property_video')
+            property_video_link = request.POST.get('property_video_link', '').strip()
+            regenerate_slideshow = request.POST.get('regenerate_slideshow') == 'on'
+
+            if uploaded_video:
+                # A real video file was attached in this request — always save it,
+                # regardless of what the (sometimes stale) radio value says.
+                IndustrialPlotResaleVideo.objects.update_or_create(
+                    property=prop, source='uploaded',
+                    defaults={'video': uploaded_video, 'video_url': None}
+                )
+            elif video_option == 'rm_assisted' and property_video_link:
+                IndustrialPlotResaleVideo.objects.update_or_create(
+                    property=prop, source='rm_assisted',
+                    defaults={'video_url': property_video_link, 'video': None}
+                )
+            elif video_option == 'auto':
+                existing_auto = prop.video.filter(source='auto').first()
+                if regenerate_slideshow or not existing_auto:
+                    CATEGORY_ORDER = list(IMAGE_CATEGORY_FIELDS.keys())
+                    all_images = list(IndustrialPlotResaleImage.objects.filter(property=prop))
+                    all_images.sort(key=lambda img: (
+                        CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99,
+                        img.sequence_order
+                    ))
+                    image_paths = [
+                        img.image.path for img in all_images
+                        if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)
+                    ]
+                    if len(image_paths) >= 3:
+                        output_relative_path = f"industrial_plot/videos/auto_{prop.id}.mp4"
+                        try:
+                            result_path = generate_property_slideshow(image_paths, output_relative_path)
+                            if result_path:
+                                IndustrialPlotResaleVideo.objects.update_or_create(
+                                    property=prop, source='auto',
+                                    defaults={'video': result_path, 'video_url': None}
+                                )
+                        except Exception:
+                            import traceback
+                            traceback.print_exc()
+            return JsonResponse({
+    'status': 'success',
+    'message': "Industrial Plot Listing Updated Successfully",
+    "redirect_url": reverse('industrial_plot_resale_list')
+})
+        except Exception as e:
+            print("ERROR DETECTED:", str(e))
+            return JsonResponse({
+                'status': 'error',
+                'message': f"Error while updating listing: {str(e)}"
+            })
+
+    # ---------- GET: render prefilled form ----------
+    existing_images = IndustrialPlotResaleImage.objects.filter(property=prop).order_by('category', 'sequence_order')
+    images_by_category = {}
+    for img in existing_images:
+        images_by_category.setdefault(img.category, []).append(img)
+        
+    existing_image_total = existing_images.count()
+
+    # Query existing videos to pass to template
+    uploaded_video = prop.video.filter(source='uploaded').first()
+    auto_video = prop.video.filter(source='auto').first()
+    rm_video = prop.video.filter(source='rm_assisted').first()
+
+    return render(request, 'admin_user/Reports/Resale_Plot/industrial_plot_resale_edit.html', {
+        'admin_obj': admin_obj,
+        'user_obj': user_obj,
+        'property': prop,
+        'ameneties_obj': Ameneties_Details.objects.all(),
+        'facilities_obj': Facilities_Details.objects.all(),
+        'images_by_category': images_by_category,
+        'existing_image_total': existing_image_total,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video,
+        'selected_amenities': (prop.amenities or '').split(',') if prop.amenities else [],
+        'selected_facilities': (prop.nearby_facilities or '').split(',') if prop.nearby_facilities else [],
+    })
+
+
+# =====================================================================
+# DELETE (single)
+# =====================================================================
+
+def industrial_plot_resale_delete(request, pk):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    plot = get_object_or_404(IndustrialPlotResaleProperty, id=pk)
+
+    admin_id = request.session.get("Admin_id")
+    user_id = request.session.get("User_id")
+    deleter = "Automated Engine"
+    if admin_id:
+        deleter = f"Admin #{admin_id}"
+    elif user_id:
+        deleter = f"User #{user_id}"
+
+    plot.is_deleted = True
+    plot.deleted_at = timezone.now()
+    plot.deleted_by = deleter
+    plot.save(update_fields=["is_deleted", "deleted_at", "deleted_by"])
+
+    IndustrialPlotResaleActivityLog.objects.create(
+        user_identity=deleter,
+        user_role="Admin" if admin_id else "User",
+        action_type="DELETE",
+        property_id=plot.id,
+        action_payload=json.dumps({"reason": "Manual delete via list page"}),
+        status="SUCCESS",
+    )
+
+    return JsonResponse({"status": "success", "message": f"Property {plot.id} moved to recycle bin."})
+
+
+# =====================================================================
+# BULK DELETE
+# =====================================================================
+
+def industrial_plot_resale_bulk_delete(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"status": "error", "message": "Invalid payload."}, status=400)
+
+    delete_type = payload.get("delete_type")
+    qs = IndustrialPlotResaleProperty.objects.filter(is_deleted=False)
+
+    if delete_type == "current_page":
+        ids = payload.get("page_ids", [])
+        qs = qs.filter(id__in=ids)
+
+    elif delete_type == "date_range":
+        from_date = payload.get("from_date")
+        to_date = payload.get("to_date")
+        if not from_date or not to_date:
+            return JsonResponse({"status": "error", "message": "Both dates are required."}, status=400)
+        qs = qs.filter(created_at__date__gte=from_date, created_at__date__lte=to_date)
+
+    elif delete_type == "latest_month":
+        today = timezone.now().date()
+        first_of_month = today.replace(day=1)
+        qs = qs.filter(created_at__date__gte=first_of_month)
+
+    elif delete_type == "old_data":
+        cutoff = timezone.now() - timedelta(days=180)
+        qs = qs.filter(created_at__lt=cutoff)
+
+    elif delete_type == "by_uploader":
+        text = payload.get("uploader_text", "").strip()
+        if not text:
+            return JsonResponse({"status": "error", "message": "Uploader detail is required."}, status=400)
+        qs = qs.filter(
+            Q(uploaded_by_name__icontains=text) |
+            Q(uploaded_by_email__icontains=text) |
+            Q(uploaded_by_role__icontains=text)
+        )
+
+    elif delete_type == "by_file":
+        file_name = payload.get("file_name", "").strip()
+        if not file_name:
+            return JsonResponse({"status": "error", "message": "File name is required."}, status=400)
+        qs = qs.filter(upload_file_name=file_name)
+
+    elif delete_type == "delete_all":
+        pass  # qs already covers all non-deleted rows
+
+    else:
+        return JsonResponse({"status": "error", "message": "Unknown delete criteria."}, status=400)
+
+    count = qs.count()
+    if count == 0:
+        return JsonResponse({"status": "error", "message": "No matching records found to delete."}, status=400)
+
+    admin_id = request.session.get("Admin_id")
+    user_id = request.session.get("User_id")
+    deleter = f"Admin #{admin_id}" if admin_id else (f"User #{user_id}" if user_id else "Automated Engine")
+
+    qs.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter)
+
+    IndustrialPlotResaleActivityLog.objects.create(
+        user_identity=deleter,
+        user_role="Admin" if admin_id else "User",
+        action_type="DELETE",
+        property_id="Multiple / Bulk Action",
+        action_payload=json.dumps({"delete_type": delete_type, "records_deleted": count}),
+        status="SUCCESS",
+    )
+
+    return JsonResponse({"status": "success", "message": f"{count} record(s) deleted successfully."})
+
+
+
+
+
+
+
+
+
+
+def export_industrial_plot_resale(request):
+    """Dedicated view for exporting industrial plot resale properties to CSV or Excel.
+       Includes EVERY database field for full backup and seamless re-upload."""
+    
+    # ── 1. Re-apply the same search filters so the export matches the screen ──
+    try:
+        properties = IndustrialPlotResaleProperty.objects.filter(is_deleted=False).order_by('-id')
+    except Exception:
+        properties = IndustrialPlotResaleProperty.objects.all().order_by('-id')
+
+    search_query        = request.GET.get("search", "").strip()
+    city_query          = request.GET.get("city", "").strip()
+    locality_query      = request.GET.get("locality", "").strip()
+    property_type_query = request.GET.get("property_type", "").strip()
+    road_facing_query   = request.GET.get("road_facing", "").strip()
+    corner_plot_query   = request.GET.get("corner_plot", "").strip()
+    loan_query          = request.GET.get("loan", "").strip()
+    min_price           = request.GET.get("min_price", "").strip()
+    max_price           = request.GET.get("max_price", "").strip()
+    from_date           = request.GET.get("from_date", "").strip()
+    to_date             = request.GET.get("to_date", "").strip()
+    listed_by_query     = request.GET.get("listed_by", "").strip()
+    uploaded_by_query   = request.GET.get("uploaded_by", "").strip()
+    listing_status_query= request.GET.get("listing_status", "").strip()
+    approval_status_query= request.GET.get("approval_status", "").strip()
+    duplicate_query     = request.GET.get("duplicate", "").strip()
+
+    # Apply Filters
+    if listed_by_query and listed_by_query != 'All Roles':
+        properties = properties.filter(listed_by_role__iexact=listed_by_query)
+    
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__iexact=uploaded_by_query)
+        
+    if listing_status_query and listing_status_query != 'All Status':
+        properties = properties.filter(listing_status__iexact=listing_status_query)
+        
+    if approval_status_query and approval_status_query != 'All Approval':
+        properties = properties.filter(approval_status__iexact=approval_status_query)
+        
+    if duplicate_query == 'duplicates_only':
+        properties = properties.filter(is_duplicate=True)
+    elif duplicate_query == 'unique_only':
+        properties = properties.filter(is_duplicate=False)
+
+    if search_query:
+        properties = properties.filter(
+            Q(id__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(property_no__icontains=search_query)
+        )
+
+    if city_query:
+        properties = properties.filter(city__icontains=city_query)
+
+    if locality_query:
+        properties = properties.filter(locality__icontains=locality_query)
+
+    if property_type_query:
+        properties = properties.filter(property_type=property_type_query)
+
+    if road_facing_query:
+        properties = properties.filter(plot_road_facing__icontains=road_facing_query)
+
+    if corner_plot_query in ("yes", "no"):
+        properties = properties.filter(corner_plot__iexact=corner_plot_query)
+
+    if loan_query == "yes":
+        properties = properties.filter(property_loan_status__iexact="Loan Running")
+    elif loan_query == "no":
+        properties = properties.exclude(property_loan_status__iexact="Loan Running")
+
+    if min_price:
+        try:
+            properties = properties.filter(selling_price__gte=int(min_price))
+        except ValueError:
+            pass
+
+    if max_price:
+        try:
+            properties = properties.filter(selling_price__lte=int(max_price))
+        except ValueError:
+            pass
+
+    if from_date:
+        try:
+            properties = properties.filter(created_at__date__gte=datetime.strptime(from_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    if to_date:
+        try:
+            properties = properties.filter(created_at__date__lte=datetime.strptime(to_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+
+  
+    EXPORT_COLS = [
+        ("Sr.No", "sr_no", False, "Sr. No"),
+        ("Listed By", "listed_by_type", False, "Listed By Type (Self/Other)"),
+        ("Listed By", "listed_by_id", False, "Listed By Id"),
+        ("Listed By", "listed_by_name", False, "Listed By Name"),
+        ("Listed By", "listed_by_email", False, "Listed By Email"),
+        ("Listed By", "listed_by_contact", False, "Listed By Contact"),
+        ("Listed By", "listed_by_role", True, "Listed By Role"),
+
+        ("System Generated Property Id(Auto)", "id", False, "Property Id"),
+        ("Basic Industrial Plot Information", "property_title", False, "Property Title"),
+        ("Basic Industrial Plot Information", "property_no", True, "Plot / Survey Number"),
+        ("Basic Industrial Plot Information", "plot_area", True, "Plot Area (sq.m)"),
+        ("Basic Industrial Plot Information", "property_type", True, "Industrial Plot Type"),
+
+        ("Industrial Zone, Estate & Authority Details", "land_use", True, "Industrial Zone / Land Use"),
+        ("Industrial Zone, Estate & Authority Details", "industrial_zone_type", True, "Industrial Zone Type"),
+        ("Industrial Zone, Estate & Authority Details", "industrial_estate_name", False, "Industrial Estate / Park Name"),
+        ("Industrial Zone, Estate & Authority Details", "na_status", True, "NA Status / Industrial Conversion"),
+        ("Industrial Zone, Estate & Authority Details", "layout_approval_status", False, "Industrial Authority / Estate Approval"),
+        ("Industrial Zone, Estate & Authority Details", "industrial_fsi", False, "Permissible FSI / Coverage"),
+
+        ("Industrial Plot Specifications & Infrastructure", "plot_frontage", False, "Plot Frontage / Width (m)"),
+        ("Industrial Plot Specifications & Infrastructure", "plot_depth", False, "Depth / Length (m)"),
+        ("Industrial Plot Specifications & Infrastructure", "plot_shape", False, "Plot Shape"),
+        ("Industrial Plot Specifications & Infrastructure", "plot_road_facing", True, "Road Access & Entry"),
+        ("Industrial Plot Specifications & Infrastructure", "road_width", False, "Road Width (Front of Plot)"),
+        ("Industrial Plot Specifications & Infrastructure", "corner_plot", False, "Corner Plot (yes/no)"),
+        ("Industrial Plot Specifications & Infrastructure", "power_supply", False, "Power Supply Available"),
+        ("Industrial Plot Specifications & Infrastructure", "power_load_kva", False, "Power Load Sanctioned (KVA)"),
+        ("Industrial Plot Specifications & Infrastructure", "industrial_water_supply", False, "Water Supply"),
+        ("Industrial Plot Specifications & Infrastructure", "effluent_treatment", False, "Drain / Effluent Facility"),
+        ("Industrial Plot Specifications & Infrastructure", "industry_type_permissible", False, "Permissible Industry Type"),
+        ("Industrial Plot Specifications & Infrastructure", "plot_fencing", False, "Compound Wall / Security Fencing"),
+        ("Industrial Plot Specifications & Infrastructure", "loading_dock", False, "Loading / Unloading Facility"),
+        ("Industrial Plot Specifications & Infrastructure", "current_possession_status", False, "Current Plot / Shed Status"),
+
+        ("Pricing Details", "selling_price", True, "Selling Price"),
+        ("Pricing Details", "price_per_sqft", False, "Price per Sq.m(Auto-calculated)"),
+        ("Pricing Details", "price_negotiable", False, "Is the Price Negotiable (Yes/No)"),
+        ("Pricing Details", "additional_charges", False, "Additional Industrial Charges"),
+        ("Pricing Details", "brokerage_percentage", True, "Brokerage / Service Fee"),
+        ("Pricing Details", "manual_brokerage", False, "Fixed Brokerage Amount"),
+
+        ("Legal, Title & Industrial Authority Details", "ownership_type", False, "Ownership / Tenure Type"),
+        ("Legal, Title & Industrial Authority Details", "ownership_document_type", False, "Primary Title / Ownership Document"),
+        ("Legal, Title & Industrial Authority Details", "other_document_type", False, "Specify Other Ownership Document Type"),
+        ("Legal, Title & Industrial Authority Details", "midc_allotment", False, "MIDC / Authority Allotment Letter"),
+        ("Legal, Title & Industrial Authority Details", "midc_transfer_noc", False, "MIDC Transfer / NOC Status"),
+        ("Legal, Title & Industrial Authority Details", "environmental_clearance", False, "Environmental Clearance (EC)"),
+        ("Legal, Title & Industrial Authority Details", "rera_status", False, "RERA / Industrial Authority Status"),
+        ("Legal, Title & Industrial Authority Details", "title_clearance", False, "Title Clarity / Marketability"),
+        ("Legal, Title & Industrial Authority Details", "property_encumbrance_status", False, "Encumbrance / Charge Status"),
+        ("Legal, Title & Industrial Authority Details", "property_tax_status", False, "Industrial Property Tax / Assessment Status"),
+        ("Legal, Title & Industrial Authority Details", "outstanding_tax_amount", False, "Outstanding Tax / Dues Amount"),
+        ("Legal, Title & Industrial Authority Details", "pending_since", False, "Dues Pending Since"),
+        ("Legal, Title & Industrial Authority Details", "property_loan_status", False, "Existing Loan / Mortgage on Property"),
+        ("Legal, Title & Industrial Authority Details", "financing_bank", False, "Lender Bank / NBFC Name"),
+        ("Legal, Title & Industrial Authority Details", "outstanding_loan_amount", False, "Outstanding Loan Amount"),
+        ("Legal, Title & Industrial Authority Details", "sanctioning_authority", False, "Industrial Authority / Estate Developer"),
+
+        ("Amenities & Facilities", "amenities", False, "Amenities (comma-separated)"),
+        ("Nearby Facilities", "nearby_facilities", False, "Nearby Facilities (comma-separated)"),
+        
+        ("Property Descriptions(Added By User)", "user_description", False, "Property Description"),
+        ("Property Summary(Auto)", "property_summary", False, "Property Summary"),
+        ("Property Description(Auto)", "property_description", False, "Property Description"),
+
+
+        ("Property Location Details", "address", True, "Complete Industrial Plot Address"),
+        ("Property Location Details", "locality", True, "MIDC Phase / Industrial Area Name"),
+        ("Property Location Details", "property_landmark", False, "Nearest Highway / Railway / Port Reference"),
+        ("Property Location Details", "city", True, "City / District"),
+        ("Property Location Details", "state", True, "State"),
+        ("Property Location Details", "pincode", False, "PIN Code"),
+        ("Property Location Details", "google_maps_link", False, "Google Maps Link"),
+        ("Property Location Details", "latitude", False, "Latitude"),
+        ("Property Location Details", "longitude", False, "Longitude"),
+
+        ("Property Listed Elsewhere", "listed_elsewhere", False, "Listed Elsewhere (Yes/No)"),
+        ("Property Listed Elsewhere", "portal_name", False, "Portal Name"),
+
+
+      
+        ("Media & Listing Status", "listing_status", False, "Listing Status"),
+        ("Media & Listing Status", "approval_status", False, "Approval Status"),
+
+        ("Data Uploadeded Via", "upload_file_name", False, "Upload File Name"),
+        ("Property Uploaded By", "uploaded_by_name", False, "Uploaded By Name"),
+        ("Property Uploaded By", "uploaded_by_email", False, "Uploaded By Email"),
+        ("Property Uploaded By", "uploaded_by_contact", False, "Uploaded By Contact"),
+        ("Property Uploaded By", "uploaded_by_role", False, "Uploaded By Role"),
+
+        ("Database Audit", "created_at", False, "Created At"),
+        ("Database Audit", "updated_at", False, "Updated At"),
+        ("Database Audit", "is_deleted", False, "Is Deleted"),
+        ("Database Audit", "deleted_at", False, "Deleted At"),
+        ("Database Audit", "deleted_by", False, "Deleted By"),
+        ("Database Audit", "is_duplicate", False, "Is Duplicate"),
+        ("Database Audit", "duplicate_count", False, "Duplicate Count"),
+        ("Database Audit", "duplicate_group_id", False, "Duplicate Group ID"),
+        ("Database Audit", "property_unique_key", False, "Property Unique Key"),
+
+        ("Brokerage Label", "get_brokerage_label", False, "Brokerage Label Preview (auto)"),
+    ]
+
+    export_format = request.GET.get('format', 'excel')
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    filename = f"Industrial_Plot_Resale_Full_Export_{timestamp}"
+
+    # Helper for formatting values
+    def format_val(val):
+        if isinstance(val, datetime):
+            return val.strftime("%Y-%m-%d %H:%M:%S")
+        elif isinstance(val, bool):
+            return "Yes" if val else "No"
+        elif val is None:
+            return ""
+        return str(val).strip()
+
+    # ── 3. EXCEL EXPORT ──
+    if export_format == 'excel':
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Industrial Plot Resale DB"
+
+        HDR_BG  = "667EEA"
+        REQ_BG  = "FEF3C7"
+        OPT_BG  = "F0FDF4"
+        thin = Side(style="thin", color="CBD5E1")
+        bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+        sec_spans = OrderedDict()
+        for i, (sec, *_) in enumerate(EXPORT_COLS):
+            sec_spans.setdefault(sec, []).append(i + 1)
+
+        # Write Section Headers (Row 1)
+        for sec, cols in sec_spans.items():
+            c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
+            c.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+            c.fill = PatternFill("solid", fgColor=HDR_BG)
+            c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            c.border = bdr
+            
+            for col_idx in cols[1:]:
+                ws.cell(row=1, column=col_idx).fill = PatternFill("solid", fgColor=HDR_BG)
+                ws.cell(row=1, column=col_idx).border = bdr
+                
+            if len(cols) > 1:
+                ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+
+        # Write Field Headers (Row 2)
+        for ci, (_, _, req, header_name) in enumerate(EXPORT_COLS, 1):
+            lc = ws.cell(row=2, column=ci, value=header_name)
+            lc.font = Font(bold=True, size=9)
+            lc.fill = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
+            lc.border = bdr
+            lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ws.column_dimensions[openpyxl.utils.get_column_letter(ci)].width = max(18, len(header_name) + 5)
+
+        # Write Data (Rows 3+)
+        for row_idx, prop in enumerate(properties, start=3):
+            for col_idx, (_, field, _, _) in enumerate(EXPORT_COLS, 1):
+                
+                # <-- ADDED SR_NO LOGIC HERE
+                if field == "sr_no":
+                    val = row_idx - 2
+                elif field == "upload_file_name":
+                    raw_val = getattr(prop, field, "")
+                    val = "Web UI Listing Form" if not raw_val or raw_val.strip() == "" else raw_val
+                elif field == "get_brokerage_label":
+                    val = format_val(getattr(prop, field)()) if callable(getattr(prop, field, None)) else ""
+                else:
+                    val = format_val(getattr(prop, field, ""))
+                    
+                cell = ws.cell(row=row_idx, column=col_idx, value=val)
+                cell.alignment = Alignment(vertical="center")
+
+        # Layout adjustments
+        ws.row_dimensions[1].height = 25
+        ws.row_dimensions[2].height = 30
+        ws.freeze_panes = "A3"
+
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="{filename}.xlsx"'
+        wb.save(response)
+        return response
+
+    # ── 4. CSV EXPORT ──
+    else:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+
+        writer = csv.writer(response)
+        
+        # Write exact Field Headers
+        headers = [header_name for (_, _, _, header_name) in EXPORT_COLS]
+        writer.writerow(headers)
+
+        # Write Data Rows
+        for row_idx, prop in enumerate(properties, start=1):
+            row_data = []
+            for (_, field, _, _) in EXPORT_COLS:
+                
+                # <-- ADDED SR_NO LOGIC HERE
+                if field == "sr_no":
+                    val = row_idx
+                elif field == "upload_file_name":
+                    raw_val = getattr(prop, field, "")
+                    val = "Web UI Listing Form" if not raw_val or raw_val.strip() == "" else raw_val
+                elif field == "get_brokerage_label":
+                    val = format_val(getattr(prop, field)()) if callable(getattr(prop, field, None)) else ""
+                else:
+                    val = format_val(getattr(prop, field, ""))
+                    
+                row_data.append(val)
+            writer.writerow(row_data)
+
+        return response
+
+
+#######################END View Industrial Plot Resale Listing MODULE SECTION###################################
+
+
+
+
+
+
+#######################START View Agriculture Plot Resale Listing MODULE SECTION###################################
+
+
+
+
+
+def export_agricultural_plot_resale(request):
+    """Dedicated view for exporting agricultural plot resale properties to CSV or Excel.
+       Includes EVERY database field for full backup and seamless re-upload."""
+
+    # ── 1. Re-apply the same search filters so the export matches the screen ──
+    try:
+        properties = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).order_by('-id')
+    except Exception:
+        properties = AgriculturalPlotResaleProperty.objects.all().order_by('-id')
+
+    search_query        = request.GET.get("search", "").strip()
+    city_query          = request.GET.get("city", "").strip()
+    locality_query      = request.GET.get("locality", "").strip()
+    property_type_query = request.GET.get("property_type", "").strip()
+    road_facing_query   = request.GET.get("road_facing", "").strip()
+    corner_plot_query   = request.GET.get("corner_plot", "").strip()
+    loan_query          = request.GET.get("loan", "").strip()
+    min_price           = request.GET.get("min_price", "").strip()
+    max_price           = request.GET.get("max_price", "").strip()
+    from_date           = request.GET.get("from_date", "").strip()
+    to_date              = request.GET.get("to_date", "").strip()
+    listed_by_query     = request.GET.get("listed_by", "").strip()
+    uploaded_by_query   = request.GET.get("uploaded_by", "").strip()
+    listing_status_query= request.GET.get("listing_status", "").strip()
+    approval_status_query= request.GET.get("approval_status", "").strip()
+    duplicate_query     = request.GET.get("duplicate", "").strip()
+
+    # Apply Filters
+    if listed_by_query and listed_by_query != 'All Roles':
+        properties = properties.filter(listed_by_role__iexact=listed_by_query)
+
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__iexact=uploaded_by_query)
+
+    if listing_status_query and listing_status_query != 'All Status':
+        properties = properties.filter(listing_status__iexact=listing_status_query)
+
+    if approval_status_query and approval_status_query != 'All Approval':
+        properties = properties.filter(approval_status__iexact=approval_status_query)
+
+    if duplicate_query == 'duplicates_only':
+        properties = properties.filter(is_duplicate=True)
+    elif duplicate_query == 'unique_only':
+        properties = properties.filter(is_duplicate=False)
+
+    if search_query:
+        properties = properties.filter(
+            Q(id__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(property_no__icontains=search_query)
+        )
+
+    if city_query:
+        properties = properties.filter(city__icontains=city_query)
+
+    if locality_query:
+        properties = properties.filter(locality__icontains=locality_query)
+
+    if property_type_query:
+        properties = properties.filter(property_type=property_type_query)
+
+    if road_facing_query:
+        properties = properties.filter(plot_road_facing__icontains=road_facing_query)
+
+    if corner_plot_query in ("yes", "no"):
+        properties = properties.filter(corner_plot__iexact=corner_plot_query)
+
+    if loan_query == "yes":
+        properties = properties.filter(property_loan_status__iexact="Loan Running")
+    elif loan_query == "no":
+        properties = properties.exclude(property_loan_status__iexact="Loan Running")
+
+    if min_price:
+        try:
+            properties = properties.filter(selling_price__gte=int(min_price))
+        except ValueError:
+            pass
+
+    if max_price:
+        try:
+            properties = properties.filter(selling_price__lte=int(max_price))
+        except ValueError:
+            pass
+
+    if from_date:
+        try:
+            properties = properties.filter(created_at__date__gte=datetime.strptime(from_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    if to_date:
+        try:
+            properties = properties.filter(created_at__date__lte=datetime.strptime(to_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+
+    EXPORT_COLS = [
+        ("Sr.No", "sr_no", False, "Sr. No"),
+        ("Listed By", "listed_by_type", False, "Listed By Type (Self/Other)"),
+        ("Listed By", "listed_by_id", False, "Listed By Id"),
+        ("Listed By", "listed_by_name", False, "Listed By Name"),
+        ("Listed By", "listed_by_email", False, "Listed By Email"),
+        ("Listed By", "listed_by_contact", False, "Listed By Contact"),
+        ("Listed By", "listed_by_role", True, "Listed By Role"),
+
+        ("System Generated Property Id(Auto)", "id", False, "Property Id"),
+        ("Basic Agricultural Land Information", "property_title", False, "Property Title"),
+        ("Basic Agricultural Land Information", "property_no", True, "Gat / Gut / Khasra / Survey Number"),
+        ("Basic Agricultural Land Information", "plot_area", True, "Land Area (acre)"),
+       
+        ("Basic Agricultural Land Information", "property_type", True, "Agricultural Land Type"),
+
+        ("Revenue Classification & Legal Status", "land_use", True, "Revenue / Land Classification"),
+        ("Revenue Classification & Legal Status", "na_status", True, "NA Conversion Status"),
+        ("Revenue Classification & Legal Status", "layout_approval_status", False, "Revenue / Panchayat Sanction"),
+
+      
+
+        ("Land Specifications & Agricultural Details", "plot_frontage", False, "Frontage / Width (ft)"),
+        ("Land Specifications & Agricultural Details", "plot_depth", False, "Depth / Length (ft)"),
+        ("Land Specifications & Agricultural Details", "plot_shape", False, "Plot Shape"),
+        ("Land Specifications & Agricultural Details", "plot_road_facing", True, "Road / Track Access to Land"),
+        ("Land Specifications & Agricultural Details", "road_width", False, "Access Road / Track Width)"),
+        ("Land Specifications & Agricultural Details", "corner_plot", False, "Corner Plot (Two Road Access)?"),
+        ("Land Specifications & Agricultural Details", "agr_area_unit", False, "Land Measurement Unit"),
+
+        ("Land Specifications & Agricultural Details", "soil_type", False, "Soil Type"),
+        ("Land Specifications & Agricultural Details", "current_crop", False, "Current Crop / Plantation"),
+        ("Land Specifications & Agricultural Details", "irrigation_source", False, "Irrigation / Water Source"),
+        ("Land Specifications & Agricultural Details", "agr_electricity", False, "Electricity on Land"),
+        ("Land Specifications & Agricultural Details", "highway_distance", False, "Distance from Nearest Highway / Road"),
+        ("Land Specifications & Agricultural Details", "land_topography", False, "Land Level / Topography"),
+        ("Land Specifications & Agricultural Details", "govt_scheme", False, "Is Land Under Any Government Scheme?"),
+        ("Land Specifications & Agricultural Details", "plot_fencing", False, "Land Demarcation / Boundary"),
+        ("Land Specifications & Agricultural Details", "current_possession_status", False, "Current Land Use / Occupancy"),
+
+        ("Pricing Details", "selling_price", True, "Selling Price"),
+        ("Pricing Details", "price_per_unit", False, "Rate per Unit (Auto-calculated)"),
+        ("Pricing Details", "price_negotiable", False, "Is the Price Negotiable?"),
+        ("Pricing Details", "additional_charges", False, "Transaction / Transfer Charges"),
+        ("Pricing Details", "brokerage_percentage", True, "Brokerage / Service Fee"),
+        ("Pricing Details", "manual_brokerage", False, "Fixed Brokerage Amount"),
+
+        ("Legal, Title & Approval Details", "ownership_type", False, "Ownership / Tenure Type"),
+        ("Legal, Title & Approval Details", "ownership_document_type", False, "Primary Title / Ownership Document"),
+        ("Legal, Title & Approval Details", "other_document_type", False, "Specify Other Ownership Document Type"),
+        ("Legal, Title & Approval Details", "rera_status", False, "RERA / Revenue Department Status"),
+        ("Legal, Title & Approval Details", "title_clearance", False, "Title Clarity / Marketability"),
+        ("Legal, Title & Approval Details", "property_encumbrance_status", False, "Encumbrance / Charge Status"),
+        ("Legal, Title & Approval Details", "satbara_available", False, "7/12 Utara (Satbara) Available?"),
+        ("Legal, Title & Approval Details", "khate_utara", False, "8A Khate Utara (Land Record) Available?"),
+        ("Legal, Title & Approval Details", "section63_clearance", False, "Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?"),
+      
+        
+        
+        ("Legal, Title & Approval Details", "property_tax_status", False, "Land Revenue / Khajana Status"),
+        ("Legal, Title & Approval Details", "outstanding_tax_amount", False, "Outstanding Tax Amount (₹)"),
+        ("Legal, Title & Approval Details", "pending_since", False, "Tax Dues Pending Since"),
+        ("Legal, Title & Approval Details", "property_loan_status", False, "Existing Loan / Mortgage on Property"),
+        ("Legal, Title & Approval Details", "financing_bank", False, "Lender Bank / NBFC Name"),
+        ("Legal, Title & Approval Details", "outstanding_loan_amount", False, "Existing Loan Outstanding Loan Amount (₹)"),
+        ("Legal, Title & Approval Details", "sanctioning_authority", False, "Revenue Authority / Talathi / Tehsil Office"),
+
+        ("Amenities & Facilities", "amenities", False, "Amenities (comma-separated)"),
+        ("Nearby Facilities", "nearby_facilities", False, "Nearby Facilities (comma-separated)"),
+
+        ("Property Descriptions(Added By User)", "user_description", False, "Property Description"),
+        ("Property Summary(Auto)", "property_summary", False, "Property Summary"),
+        ("Property Description(Auto)", "property_description", False, "Property Description"),
+
+        ("Location Details", "address", True, "Complete Land Location / Revenue Address"),
+        ("Location Details", "locality", True, "Village / Mouza / Taluka Name"),
+        ("Location Details", "property_landmark", False, "Nearest Village / Highway / City Landmark"),
+        ("Location Details", "city", True, "City / District"),
+        ("Location Details", "state", True, "State"),
+        ("Location Details", "pincode", False, "PIN Code"),
+        ("Location Details", "google_maps_link", False, "Google Maps Link"),
+        ("Location Details", "latitude", False, "Latitude"),
+        ("Location Details", "longitude", False, "Longitude"),
+
+        ("Property Listed Elsewhere", "listed_elsewhere", False, "Is Property Already Listed Elsewhere?"),
+        ("Property Listed Elsewhere", "portal_name", False, "Portal Name"),
+
+        ("Media & Listing Status", "listing_status", False, "Listing Status"),
+        ("Media & Listing Status", "approval_status", False, "Approval Status"),
+
+        ("Data Uploadeded Via", "upload_file_name", False, "Upload File Name"),
+        ("Property Uploaded By", "uploaded_by_name", False, "Uploaded By Name"),
+        ("Property Uploaded By", "uploaded_by_email", False, "Uploaded By Email"),
+        ("Property Uploaded By", "uploaded_by_contact", False, "Uploaded By Contact"),
+        ("Property Uploaded By", "uploaded_by_role", False, "Uploaded By Role"),
+
+        ("Database Audit", "created_at", False, "Created At"),
+        ("Database Audit", "updated_at", False, "Updated At"),
+        ("Database Audit", "is_deleted", False, "Is Deleted"),
+        ("Database Audit", "deleted_at", False, "Deleted At"),
+        ("Database Audit", "deleted_by", False, "Deleted By"),
+        ("Database Audit", "is_duplicate", False, "Is Duplicate"),
+        ("Database Audit", "duplicate_count", False, "Duplicate Count"),
+        ("Database Audit", "duplicate_group_id", False, "Duplicate Group ID"),
+        ("Database Audit", "property_unique_key", False, "Property Unique Key"),
+
+        ("Brokerage Label", "get_brokerage_label", False, "Brokerage Label Preview (auto)"),
+    ]
+
+    export_format = request.GET.get('format', 'excel')
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    filename = f"Agricultural_Plot_Resale_Full_Export_{timestamp}"
+
+    # Helper for formatting values
+    def format_val(val):
+        if isinstance(val, datetime):
+            return val.strftime("%Y-%m-%d %H:%M:%S")
+        elif isinstance(val, bool):
+            return "Yes" if val else "No"
+        elif val is None:
+            return ""
+        return str(val).strip()
+
+    # ── 3. EXCEL EXPORT ──
+    if export_format == 'excel':
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Agricultural Plot Resale DB"
+
+        HDR_BG  = "667EEA"
+        REQ_BG  = "FEF3C7"
+        OPT_BG  = "F0FDF4"
+        thin = Side(style="thin", color="CBD5E1")
+        bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+        sec_spans = OrderedDict()
+        for i, (sec, *_) in enumerate(EXPORT_COLS):
+            sec_spans.setdefault(sec, []).append(i + 1)
+
+        # Write Section Headers (Row 1)
+        for sec, cols in sec_spans.items():
+            c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
+            c.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+            c.fill = PatternFill("solid", fgColor=HDR_BG)
+            c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            c.border = bdr
+
+            for col_idx in cols[1:]:
+                ws.cell(row=1, column=col_idx).fill = PatternFill("solid", fgColor=HDR_BG)
+                ws.cell(row=1, column=col_idx).border = bdr
+
+            if len(cols) > 1:
+                ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+
+        # Write Field Headers (Row 2)
+        for ci, (_, _, req, header_name) in enumerate(EXPORT_COLS, 1):
+            lc = ws.cell(row=2, column=ci, value=header_name)
+            lc.font = Font(bold=True, size=9)
+            lc.fill = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
+            lc.border = bdr
+            lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ws.column_dimensions[openpyxl.utils.get_column_letter(ci)].width = max(18, len(header_name) + 5)
+
+        # Write Data (Rows 3+)
+        for row_idx, prop in enumerate(properties, start=3):
+            for col_idx, (_, field, _, _) in enumerate(EXPORT_COLS, 1):
+
+                if field == "sr_no":
+                    val = row_idx - 2
+                elif field == "upload_file_name":
+                    raw_val = getattr(prop, field, "")
+                    val = "Web UI Listing Form" if not raw_val or raw_val.strip() == "" else raw_val
+                elif field == "get_brokerage_label":
+                    val = format_val(getattr(prop, field)()) if callable(getattr(prop, field, None)) else ""
+                else:
+                    val = format_val(getattr(prop, field, ""))
+
+                cell = ws.cell(row=row_idx, column=col_idx, value=val)
+                cell.alignment = Alignment(vertical="center")
+
+        # Layout adjustments
+        ws.row_dimensions[1].height = 25
+        ws.row_dimensions[2].height = 30
+        ws.freeze_panes = "A3"
+
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="{filename}.xlsx"'
+        wb.save(response)
+        return response
+
+    # ── 4. CSV EXPORT ──
+    else:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}.csv"'
+
+        writer = csv.writer(response)
+
+        # Write exact Field Headers
+        headers = [header_name for (_, _, _, header_name) in EXPORT_COLS]
+        writer.writerow(headers)
+
+        # Write Data Rows
+        for row_idx, prop in enumerate(properties, start=1):
+            row_data = []
+            for (_, field, _, _) in EXPORT_COLS:
+
+                if field == "sr_no":
+                    val = row_idx
+                elif field == "upload_file_name":
+                    raw_val = getattr(prop, field, "")
+                    val = "Web UI Listing Form" if not raw_val or raw_val.strip() == "" else raw_val
+                elif field == "get_brokerage_label":
+                    val = format_val(getattr(prop, field)()) if callable(getattr(prop, field, None)) else ""
+                else:
+                    val = format_val(getattr(prop, field, ""))
+
+                row_data.append(val)
+            writer.writerow(row_data)
+
+        return response
+
+
+def _agricultural_plot_field_map():
+    """Returns (sections, field_to_label, label_to_field, system_injected,
+    helper_only_labels, decimal_fields, int_fields). Mirrors the
+    industrial plot field-map pattern — section order matches the live
+    'Sell Your Agricultural Plot' form (Step 1 -> Step 4)."""
+
+    sections = OrderedDict([
+        ("Listed By", [
+            ("listed_by_type",   "Listed By Type (Self/Other)", False),
+            ("listed_by_id",     "Listed By Id", False),
+            ("listed_by_name",   "Listed By Name", False),
+            ("listed_by_email",  "Listed By Email", False),
+            ("listed_by_contact","Listed By Contact", False),
+            ("listed_by_role",   "Listed By Role", True),   # drives brokerage label
+        ]),
+        ("Basic Agricultural Land Information", [
+            ("property_no",   "Gat / Gut / Khasra / Survey Number", True),
+            ("plot_area",     "Land Area (acre)", True),
+            
+            ("property_type", "Agricultural Land Type", True),
+        ]),
+        ("Revenue Classification & Legal Status", [
+            ("land_use",               "Revenue / Land Classification", True),
+            ("na_status",              "NA Conversion Status", True),
+            ("layout_approval_status", "Revenue / Panchayat Sanction", False),
+        ]),
+        ("Land Specifications & Agricultural Details", [
+            ("plot_frontage",             "Frontage / Width (ft)", False),
+            ("plot_depth",                 "Depth / Length (ft)", False),
+            ("plot_shape",                 "Plot Shape", False),
+            ("plot_road_facing",           "Road / Track Access to Land", True),
+            ("road_width",                 "Access Road / Track Width", False),
+            ("corner_plot",                "Corner Plot (Two Road Access)?", False),
+            ("agr_area_unit",              "Land Measurement Unit", True),
+            ("soil_type",                  "Soil Type", False),
+            ("current_crop",               "Current Crop / Plantation", False),
+            ("irrigation_source",         "Irrigation / Water Source", False),
+            ("agr_electricity",           "Electricity on Land", False),
+            ("highway_distance",          "Distance from Nearest Highway / Road", False),
+            ("land_topography",           "Land Level / Topography", False),
+            ("govt_scheme",                "Is Land Under Any Government Scheme?", False),
+            ("plot_fencing",               "Land Demarcation / Boundary", False),
+            ("current_possession_status", "Current Land Use / Occupancy", False),
+        ]),
+        ("Pricing Details", [
+            ("selling_price",       "Selling Price", True),
+            ("price_per_unit",      "Rate per Unit (Auto-calculated)", False),
+            ("price_negotiable",    "Is the Price Negotiable (Yes/No)", False),
+            ("additional_charges",  "Transaction / Transfer Charges", False),
+            ("brokerage_percentage","Brokerage / Service Fee", True),
+            ("manual_brokerage",    "Fixed Brokerage Amount", False),
+        ]),
+        ("Legal, Title & Approval Details", [
+            ("ownership_type",              "Ownership / Tenure Type", False),
+            ("ownership_document_type",     "Primary Title / Ownership Document", False),
+            ("other_document_type",         "Specify Other Ownership Document Type", False),
+            ("rera_status",                  "RERA / Revenue Department Status", False),
+            ("title_clearance",             "Title Clarity / Marketability", False),
+            ("property_encumbrance_status", "Encumbrance / Charge Status", False),
+            ("satbara_available",           "7/12 Utara (Satbara) Available", False),
+            ("khate_utara",                  "8A Khate Utara (Land Record) Available", False),
+            ("section63_clearance",         "Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?", False),
+            ("property_tax_status",         "Land Revenue / Khajana Status", False),
+            ("outstanding_tax_amount",      "Outstanding Tax / Dues Amount", False),
+            ("pending_since",                "Tax Dues Pending Since", False),
+            ("property_loan_status",        "Existing Loan / Mortgage on Property", False),
+            ("financing_bank",               "Lender Bank / NBFC Name", False),
+            ("outstanding_loan_amount",     "Existing Loan Outstanding Loan Amount (₹)", False),
+            ("sanctioning_authority",       "Revenue Authority / Talathi / Tehsil Office", False),
+        ]),
+        ("Amenities & Facilities", [
+            ("amenities", "Amenities (comma-separated)", False),
+        ]),
+        ("Nearby Facilities", [
+            ("nearby_facilities", "Nearby Facilities (comma-separated)", False),
+        ]),
+        ("Property Descriptions", [
+            ("user_description", "Property Description", False),
+        ]),
+        ("Property Location Details", [
+            ("address",            "Complete Land Location / Revenue Address", True),
+            ("locality",           "Village / Mouza / Taluka Name", True),
+            ("property_landmark",  "Nearest Village / Highway / City Landmark", False),
+            ("city",               "City / District", True),
+            ("state",              "State", True),
+            ("pincode",             "PIN Code", False),
+            ("google_maps_link",   "Google Maps Link", False),
+            ("latitude",            "Latitude", False),
+            ("longitude",           "Longitude", False),
+        ]),
+        ("Media & Listing Status", [
+            ("listed_elsewhere", "Listed Elsewhere (Yes/No)", False),
+            ("portal_name",      "Portal Name", False),
+        ]),
+        ("Property Uploaded By(Auto Generated)", [
+            ("uploaded_by_name",    "Uploaded By Name (Auto)", False),
+            ("uploaded_by_email",   "Uploaded By Email (Auto)", False),
+            ("uploaded_by_contact", "Uploaded By Contact (Auto)", False),
+            ("uploaded_by_role",    "Uploaded By Role (Auto)", False),
+            ("created_at",          "Created At (Auto)", False),
+        ]),
+    ])
+
+    field_to_label = {f: lbl for _, fields in sections.items() for f, lbl, _ in fields}
+    label_to_field = {lbl.strip().lower(): f for _, fields in sections.items() for f, lbl, _ in fields}
+
+    system_injected = {
+        "uploaded_by_name", "uploaded_by_email", "uploaded_by_contact",
+        "uploaded_by_role", "created_at",
+    }
+    helper_only_labels = {"brokerage label preview (auto)"}
+    decimal_fields = {"plot_area", "plot_frontage", "plot_depth"}
+    int_fields = {
+        "selling_price", "outstanding_tax_amount", "outstanding_loan_amount",
+    }
+
+    return sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields
+
+
+def _agricultural_plot_sample_row_data():
+    """One complete example value per column so every column in the
+    downloaded template shows the expected format."""
+    return {
+        "listed_by_type": "self", "listed_by_role": "Agent",
+        "listed_by_id": "ag0217", "listed_by_name": "Vikas", "listed_by_email": "vikas@test.com",
+        "listed_by_contact": "9876543210",
+
+        "property_no": "Gat No. 234, Khasra 45/B",
+        "plot_area": "3",
+        "agr_area_unit": "acre",
+        "property_type": "irrigated_land",
+
+        "land_use": "Agricultural", "na_status": "Non-NA",
+        "layout_approval_status": "Revenue_Land",
+
+        "plot_frontage": "200", "plot_depth": "400", "plot_shape": "Rectangular",
+        "plot_road_facing": "village_road", "road_width": "10_20ft", "corner_plot": "no",
+        "soil_type": "Black_Cotton", "current_crop": "Soybean",
+        "irrigation_source": "Borewell", "agr_electricity": "Agricultural_Pump_Connection",
+        "highway_distance": "1-3km", "land_topography": "Level_Flat",
+        "govt_scheme": "No", "plot_fencing": "partial_hedge",
+        "current_possession_status": "Under_Cultivation",
+
+        "selling_price": "3500000", "price_negotiable": "no",
+        "additional_charges": "none", "brokerage_percentage": "1% of amount",
+        "manual_brokerage": "",
+
+        "ownership_type": "individual_shetkari", "ownership_document_type": "7/12 Extract",
+        "other_document_type": "", "rera_status": "Not Applicable",
+        "title_clearance": "Clear & Marketable Title", "property_encumbrance_status": "No Encumbrance",
+        "satbara_available": "Yes", "khate_utara": "Yes", "section63_clearance": "Not_Applicable",
+        "property_tax_status": "Fully Paid",
+        "outstanding_tax_amount": "", "pending_since": "",
+        "property_loan_status": "No Active Loan", "financing_bank": "",
+        "outstanding_loan_amount": "", "sanctioning_authority": "Talathi Office, Kalmeshwar Taluka",
+
+        "amenities": "Borewell, Fencing, Farm Shed",
+        "nearby_facilities": "Village Market, Highway, Grain Storage Hub",
+
+        "user_description": "3-acre black-soil irrigated farm with borewell. Currently under soybean cultivation. 2 km from NH-6. Level topography. 7/12 clear.",
+
+        "address": "Gat No. 234, Mouza Khapri, Kalmeshwar Taluka, Nagpur District – 441501",
+        "locality": "Mouza Khapri, Kalmeshwar Taluka", "property_landmark": "Near Kalmeshwar Bus Stand",
+        "city": "Nagpur", "state": "Maharashtra", "pincode": "441501",
+
+        "google_maps_link": "https://maps.google.com/?q=21.1458,79.0882",
+        "latitude": "21.1458", "longitude": "79.0882",
+
+        "listed_elsewhere": "No", "portal_name": "",
+    }
+
+
+def generate_agricultural_plot_fingerprint(property_no, locality, city, pincode):
+    """Fingerprint used ONLY by the bulk-import duplicate engine (mirrors
+    industrial's generate_industrial_plot_fingerprint). Distinct from the
+    model's own save()-time property_unique_key, which keys on
+    address/locality/city/plot_area/property_no."""
+    key_source = f"{property_no}|{locality}|{city}|{pincode}"
+    return key_source.strip().lower().replace(" ", "")
+
+
+
+def download_agricultural_plot_template(request):
+    """Download the upload template for Agricultural Plot Resale — column
+    headers match the live 'Sell Your Agricultural Plot' form. Includes a
+    live 'brokerage label preview' formula. Row 4 (sample) is LOCKED;
+    rows 5+ are unlocked for data entry."""
+
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
+    from openpyxl.utils import get_column_letter
+    from openpyxl.comments import Comment
+
+    sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _agricultural_plot_field_map()
+    sample = _agricultural_plot_sample_row_data()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Agricultural Plot Resale"
+
+    HDR_BG, REQ_BG, OPT_BG, SAMP_BG = "84CC16", "FEF3C7", "F0FDF4", "ECFDF5"
+    thin = Side(style="thin", color="CBD5E1")
+    bdr = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    col = 1
+    role_col = None
+    brokerage_col = None
+
+    for section, fields in sections.items():
+        start_col = col
+        for field, label, required in fields:
+            header_text = label + (" *" if required else "")
+            c1 = ws.cell(row=2, column=col, value=header_text)
+            c1.font = Font(bold=True, color="1E293B", name="Arial", size=9)
+            c1.fill = PatternFill("solid", fgColor=REQ_BG if required else OPT_BG)
+            c1.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            c1.border = bdr
+
+            sc = ws.cell(row=4, column=col, value=sample.get(field, ""))
+            sc.font = Font(name="Arial", size=9, color="065F46")
+            sc.fill = PatternFill("solid", fgColor=SAMP_BG)
+            sc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            sc.border = bdr
+            sc.protection = Protection(locked=True)
+
+            ws.column_dimensions[get_column_letter(col)].width = max(18, len(label) // 2 + 6)
+
+            if field == "listed_by_role":
+                role_col = col
+            if field == "brokerage_percentage":
+                brokerage_col = col
+            col += 1
+
+        end_col = col - 1
+        hc = ws.cell(row=1, column=start_col, value=f"\U0001F33E {section}")
+        hc.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+        hc.fill = PatternFill("solid", fgColor=HDR_BG)
+        hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        for cc in range(start_col, end_col + 1):
+            ws.cell(row=1, column=cc).fill = PatternFill("solid", fgColor=HDR_BG)
+            ws.cell(row=1, column=cc).border = bdr
+        if end_col > start_col:
+            ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+
+    total_cols = col - 1
+    unlocked = Protection(locked=False)
+    MAX_DATA_ROWS = 500
+    for r in range(5, 5 + MAX_DATA_ROWS):
+        for c in range(1, total_cols + 1):
+            ws.cell(row=r, column=c).protection = unlocked
+
+    # live brokerage label preview column
+    preview_col = col
+    pc = ws.cell(row=2, column=preview_col, value="Brokerage Label Preview (auto)")
+    pc.font = Font(bold=True, color="92400E", name="Arial", size=9)
+    pc.fill = PatternFill("solid", fgColor="FEF3C7")
+    pc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    pc.border = bdr
+    ws.column_dimensions[get_column_letter(preview_col)].width = 26
+
+    role_letter = get_column_letter(role_col)
+    formula = (
+        f"=IFERROR(INDEX('Notes - Brokerage Label'!$B$4:$B$11,"
+        f"MATCH(LOWER(TRIM({role_letter}4)),'Notes - Brokerage Label'!$C$4:$C$11,0)),\"Brokerage\")"
+    )
+    fcell = ws.cell(row=4, column=preview_col, value=formula)
+    fcell.fill = PatternFill("solid", fgColor="FEF3C7")
+    fcell.font = Font(bold=True, color="92400E", name="Arial", size=9)
+    fcell.alignment = Alignment(horizontal="center", vertical="center")
+    fcell.protection = Protection(locked=True)
+
+    if brokerage_col:
+        note = (
+            "The LABEL text shown above this field on the live form changes based on\n"
+            "the 'Listed By Role' in the same row. The stored value/column never changes.\n\n"
+            "Admin -> EstateFlow Service Fee\n"
+            "Relationship Manager -> Buyer Service Fee\n"
+            "Landlord -> Buyer Service Fee\n"
+            "Owner -> Buyer Service Fee\n"
+            "Seller -> Buyer Service Fee\n"
+            "Agent -> Brokerage\n"
+            "Agency/Builder or Builder -> Brokerage / Service Fee\n"
+            "Any other role -> Brokerage (default)\n\n"
+            "See 'Notes - Brokerage Label' sheet, and the live preview column at the end of this sheet."
+        )
+        ws.cell(row=2, column=brokerage_col).comment = Comment(note, "System")
+
+    ws.row_dimensions[1].height = 26
+    ws.row_dimensions[2].height = 40
+    ws.row_dimensions[4].height = 24
+    ws.freeze_panes = "A5"
+
+    # Notes sheet
+    notes = wb.create_sheet("Notes - Brokerage Label")
+    notes.column_dimensions['A'].width = 26
+    notes.column_dimensions['B'].width = 26
+    notes.column_dimensions['C'].width = 4
+    notes.sheet_view.showGridLines = False
+
+    t = notes["A1"]
+    notes.merge_cells("A1:B1")
+    t.value = "Brokerage label — driven by Listed By Role"
+    t.font = Font(bold=True, size=13, color="FFFFFF", name="Arial")
+    t.fill = PatternFill("solid", fgColor=HDR_BG)
+    t.alignment = Alignment(horizontal="center", vertical="center")
+
+    hdrs = ["Listed By Role", "Label shown on form"]
+    for i, h in enumerate(hdrs, start=1):
+        c = notes.cell(row=3, column=i, value=h)
+        c.font = Font(bold=True, color="1E293B", name="Arial")
+        c.fill = PatternFill("solid", fgColor=OPT_BG)
+        c.border = bdr
+
+    role_rows = [
+        ("Admin", "EstateFlow Service Fee"),
+        ("Relationship Manager", "Buyer Service Fee"),
+        ("Landlord", "Buyer Service Fee"),
+        ("Owner", "Buyer Service Fee"),
+        ("Seller", "Buyer Service Fee"),
+        ("Agent", "Brokerage"),
+        ("Agency/Builder", "Brokerage / Service Fee"),
+        ("Builder", "Brokerage / Service Fee"),
+    ]
+    for r, (role, label) in enumerate(role_rows, start=4):
+        notes.cell(row=r, column=1, value=role).border = bdr
+        notes.cell(row=r, column=2, value=label).border = bdr
+        notes.cell(row=r, column=3, value=f"=LOWER(TRIM(A{r}))")
+
+    ws.protection.sheet = True
+    ws.protection.formatColumns = True
+    ws.protection.formatRows = True
+    ws.protection.insertRows = False
+    ws.protection.deleteRows = False
+    ws.protection.autoFilter = False
+    ws.protection.sort = False
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="Agricultural_Plot_Resale_Template.xlsx"'
+    wb.save(response)
+    return response
+
+
+@csrf_exempt
+@require_POST
+def import_agricultural_plot_excel(request):
+    excel_file = request.FILES.get("excel_file")
+    if not excel_file:
+        return JsonResponse({"status": "error", "message": "No file uploaded."}, status=200)
+    if not excel_file.name.endswith(".xlsx"):
+        return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=200)
+
+    sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _agricultural_plot_field_map()
+
+    REQUIRED_FIELD_KEYS = [
+        'property_no',
+        'plot_area',
+        'agr_area_unit',
+        'property_type',
+        'land_use',
+        'na_status',
+        'plot_road_facing',
+        'selling_price',
+        'brokerage_percentage',
+        'state',
+        'city',
+        'locality',
+        'address',
+        'listed_by_id',
+        'listed_by_name',
+        'listed_by_email',
+        'listed_by_contact',
+        'listed_by_role',
+    ]
+
+    def _field_label(field):
+        return field_to_label.get(field) or field.replace('_', ' ').title()
+
+    def _is_missing(val):
+        if val is None:
+            return True
+        if isinstance(val, str) and val.strip() == "":
+            return True
+        return False
+
+    # ---- 1. Uploader Identity ----
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = Admin_Login.objects.filter(id=admin_id).first() if admin_id else None
+    user_obj = User_Details.objects.filter(id=user_id).first() if user_id else None
+
+    uploader_name = uploader_email = uploader_contact = ""
+    uploader_role = "Automated Engine"
+    user_identity = "Automated Engine"
+
+    if admin_obj:
+        uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        uploader_email = getattr(admin_obj, 'email', '')
+        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        uploader_role = "Admin"
+        user_identity = uploader_email or uploader_name
+    elif user_obj:
+        uploader_name = user_obj.user_name
+        uploader_email = user_obj.user_email
+        uploader_contact = user_obj.user_phone
+        uploader_role = "User"
+        user_identity = uploader_email or uploader_name
+
+    # ---- 2. Parse Excel ----
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+        ws = wb["Agricultural Plot Resale"] if "Agricultural Plot Resale" in wb.sheetnames else wb.active
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": f"Cannot open file: {e}"}, status=200)
+
+    header_row, matched_count = _find_header_row(ws, label_to_field)
+
+    if matched_count == 0:
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                "No recognizable column headers were found in this file. "
+                "Please use the official template downloaded from "
+                "'Download Template' — don't rename or re-order the header row."
+            ),
+        }, status=200)
+
+    raw_headers = [cell.value for cell in ws[header_row]]
+    field_headers = []
+    unmatched_headers = []
+
+    for h in raw_headers:
+        norm = _normalize_label(h)
+        if not norm:
+            field_headers.append(None)
+            continue
+        if norm in helper_only_labels:
+            field_headers.append(None)
+            continue
+        field = label_to_field.get(norm)
+        field_headers.append(field)
+        if field is None:
+            unmatched_headers.append(str(h))
+
+    data_start_row = header_row + 1
+
+    parsed_rows = []
+    skipped_empty_after_mapping = 0
+    required_field_errors = []
+    listed_by_mismatch_errors = []
+    skipped_listed_by_mismatch = 0
+
+    for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
+        if all(v is None or str(v).strip() == "" for v in row):
+            continue
+
+        obj_data = {}
+        for col_idx, field in enumerate(field_headers):
+            if not field or field in system_injected:
+                continue
+            val = row[col_idx] if col_idx < len(row) else None
+            if val is not None and str(val).strip() != "":
+                obj_data[field] = val
+
+        if not obj_data:
+            skipped_empty_after_mapping += 1
+            continue
+
+        # ---- Type Coercion ----
+        if 'pending_since' in obj_data:
+            d_val = obj_data['pending_since']
+            if isinstance(d_val, str):
+                c_str = d_val.strip().split(" ")[0]
+                for fmt in ("%Y-%m-%d", "%d-%m-%Y"):
+                    try:
+                        obj_data['pending_since'] = datetime.strptime(c_str, fmt).date()
+                        break
+                    except ValueError:
+                        obj_data['pending_since'] = None
+            elif isinstance(d_val, datetime):
+                obj_data['pending_since'] = d_val.date()
+
+        for f in int_fields:
+            if f in obj_data and obj_data[f] is not None:
+                try:
+                    obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
+                except (TypeError, ValueError):
+                    obj_data[f] = None
+
+        for f in decimal_fields:
+            if f in obj_data and obj_data[f] is not None:
+                try:
+                    obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
+                except (InvalidOperation, ValueError):
+                    obj_data[f] = None
+
+        if 'agr_area_unit' in obj_data:
+            obj_data['agr_area_unit'] = str(obj_data['agr_area_unit']).strip().lower()
+
+        # ---- REQUIRED-FIELD VALIDATION ----
+        missing_fields = [
+            _field_label(f) for f in REQUIRED_FIELD_KEYS if _is_missing(obj_data.get(f))
+        ]
+        if missing_fields:
+            required_field_errors.append({
+                "row": row_idx,
+                "missing_fields": missing_fields,
+            })
+            continue
+
+        ############## Condition start to check admin and user validations ###########
+        row_errors = []
+        l_role = str(obj_data.get('listed_by_role', '')).strip().title()
+        l_email = str(obj_data.get('listed_by_email', '')).strip().lower()
+        l_contact = str(obj_data.get('listed_by_contact', '')).strip()
+        l_name = str(obj_data.get('listed_by_name', '')).strip()
+        l_id = str(obj_data.get('listed_by_id', '')).strip()
+
+        assigned_to = ""
+
+        if l_email or l_contact or l_name or l_id:
+            is_registered = False
+            details_mismatch = False
+            mismatch_reason = ""
+
+            if l_role.lower() == 'admin':
+                admin_query = Q()
+                if l_email: admin_query |= Q(email=l_email)
+                if l_contact: admin_query |= Q(phone=l_contact)
+
+                if admin_query:
+                    matched_admin = Admin_Login.objects.filter(admin_query).first()
+
+                    if matched_admin:
+                        db_name = str(getattr(matched_admin, 'name', '') or getattr(matched_admin, 'username', '')).strip()
+                        if l_name and db_name.lower() != l_name.lower():
+                            details_mismatch = True
+                            mismatch_reason = f"Name in Excel '{l_name}' does not match the registered name '{db_name}'."
+                        else:
+                            is_registered = True
+
+            else:
+                user_query = Q()
+                if l_email: user_query |= Q(user_email=l_email)
+                if l_contact: user_query |= Q(user_phone=l_contact)
+                if l_id: user_query |= Q(user_id=l_id)
+
+                if user_query:
+                    matched_user = User_Details.objects.filter(user_query).first()
+
+                    if matched_user:
+                        db_name    = str(matched_user.user_name or "").strip()
+                        db_id      = str(getattr(matched_user, 'user_id', '') or "").strip()
+                        db_email   = str(matched_user.user_email or "").strip().lower()
+                        db_contact = str(matched_user.user_phone or "").strip()
+                        db_role    = str(matched_user.user_role or "").strip()
+
+                        mismatches = []
+                        if l_name and db_name.lower() != l_name.lower():
+                            mismatches.append(f"Name in Excel '{l_name}' does not match the registered name '{db_name}'.")
+                        if l_id and db_id and db_id.lower() != l_id.lower():
+                            mismatches.append(f"Listed By Id in Excel '{l_id}' does not match the registered ID '{db_id}'.")
+                        if l_email and db_email and db_email != l_email:
+                            mismatches.append(f"Email in Excel '{l_email}' does not match the registered email '{db_email}'.")
+                        if l_contact and db_contact and db_contact != l_contact:
+                            mismatches.append(f"Contact in Excel '{l_contact}' does not match the registered contact '{db_contact}'.")
+                        if l_role and db_role and db_role.lower() != l_role.lower():
+                            mismatches.append(f"Role in Excel '{l_role}' does not match the registered role '{db_role}'.")
+
+                        if mismatches:
+                            details_mismatch = True
+                            mismatch_reason = " ".join(mismatches)
+                        else:
+                            is_registered = True
+                            assigned_to = f"{matched_user.id}-{matched_user.user_role}"
+                            obj_data['assigned_to'] = assigned_to
+                            obj_data['listed_by_id']      = db_id
+                            obj_data['listed_by_name']    = db_name
+                            obj_data['listed_by_email']   = db_email
+                            obj_data['listed_by_contact'] = db_contact
+                            obj_data['listed_by_role']    = db_role
+
+            if not is_registered:
+                searched_info = filter(None, [l_id, l_name, l_email, l_contact, l_role])
+                identity = " + ".join(searched_info) or "Unknown"
+
+                if details_mismatch:
+                    row_errors.append(f"Listed By {l_role or 'user'} validation failed: {mismatch_reason}")
+                else:
+                    row_errors.append(
+                        f"Listed By {l_role or 'user'} '{identity}' is not present in our records. "
+                        f"Please register this {l_role or 'user'} first, then re-upload this row."
+                    )
+
+        ########### Condition end to check admin and user validations ###################
+
+        if row_errors:
+            listed_by_mismatch_errors.append({
+                "row": row_idx,
+                "errors": row_errors,
+            })
+            skipped_listed_by_mismatch += 1
+            continue
+
+        parsed_rows.append({'row_idx': row_idx, 'data': obj_data})
+
+    wb.close()
+
+    if required_field_errors:
+        logs_array = [f"Row {err['row']} Missing: {', '.join(err['missing_fields'])}" for err in required_field_errors]
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                f"Upload Denied: {len(required_field_errors)} row(s) are missing mandatory fields. "
+                "Please fill in every required column (as marked * on the Add Listing form) for "
+                "all rows and re-upload the file. No records were saved."
+            ),
+            "logs": logs_array,
+            "row_errors": required_field_errors,
+        }, status=200)
+
+    if not parsed_rows and not listed_by_mismatch_errors:
+        logs_array = [f"Unmatched Header Detected: {h}" for h in unmatched_headers] if unmatched_headers else []
+        return JsonResponse({
+            "status": "warning",
+            "message": (
+                f"0 usable data rows found. Detected header row {header_row}, "
+                f"data expected from row {data_start_row} onward. "
+                f"{skipped_empty_after_mapping} row(s) had values but none matched a known column."
+            ),
+            "logs": logs_array,
+            "unmatched_headers": unmatched_headers,
+            "header_row_detected": header_row,
+            "data_start_row_assumed": data_start_row,
+        }, status=200)
+
+    # ---- 4. Write to DB (fingerprint-based duplicate engine) ----
+    created, updated, skipped, errors = 0, 0, skipped_empty_after_mapping + skipped_listed_by_mismatch, []
+    duplicate_blocked_rows = []
+
+    for item in parsed_rows:
+        o_data = item['data']
+        row_idx = item['row_idx']
+
+        input_property_no = str(o_data.get('property_no', '')).strip()
+        input_locality = str(o_data.get('locality', '')).strip()
+        input_city = str(o_data.get('city', '')).strip()
+        input_pincode = str(o_data.get('pincode', '')).strip()
+
+        input_listed_by_id = str(o_data.get('listed_by_id', '')).strip()
+        input_listed_by_name = str(o_data.get('listed_by_name', '')).strip()
+        input_listed_by_email = str(o_data.get('listed_by_email', '')).strip().lower()
+        input_listed_by_contact = str(o_data.get('listed_by_contact', '')).strip()
+
+        fingerprint_key = generate_agricultural_plot_fingerprint(
+            input_property_no,
+            input_locality,
+            input_city,
+            input_pincode
+        )
+
+        direct_duplicates = AgriculturalPlotResaleProperty.objects.filter(
+            is_deleted=False,
+            property_no__iexact=input_property_no,
+            locality__iexact=input_locality
+        )
+        if input_city:
+            direct_duplicates = direct_duplicates.filter(city__iexact=input_city)
+
+        existing_duplicates = (
+            AgriculturalPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False)
+            | direct_duplicates
+        ).distinct()
+
+        is_dup_flag = False
+        dup_group_id = fingerprint_key
+        total_dup_count = 1
+        hard_blocked = False
+
+        if existing_duplicates.exists():
+            hard_blocked = False
+            for existing_prop in existing_duplicates:
+                same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                        existing_prop.listed_by_id.strip() == input_listed_by_id)
+                same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                            existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+
+                if same_id or same_email or same_contact:
+                    hard_blocked = True
+                    break
+
+            if hard_blocked:
+                duplicate_blocked_rows.append(
+                    f"Row {row_idx}: Duplicate Blocked - Plot '{input_property_no}' is already listed "
+                    f"by/for {input_listed_by_name or 'this user'}. Row skipped; edit the existing listing instead."
+                )
+                skipped += 1
+                continue
+
+            is_dup_flag = True
+            total_dup_count = existing_duplicates.count() + 1
+            existing_duplicates.update(
+                is_duplicate=True,
+                duplicate_count=total_dup_count,
+                duplicate_group_id=dup_group_id
+            )
+
+        o_data["property_unique_key"] = fingerprint_key
+        o_data["is_duplicate"] = is_dup_flag
+        o_data["duplicate_count"] = total_dup_count
+        o_data["duplicate_group_id"] = dup_group_id if is_dup_flag else None
+
+        o_data["listing_type"] = o_data.get("listing_type") or "Resale"
+        o_data["category"] = o_data.get("category") or "Plot"
+        o_data["sub_category"] = o_data.get("sub_category") or "Agricultural"
+
+        
+
+        o_data["upload_file_name"] = excel_file.name
+        o_data["upload_file"] = excel_file
+
+        o_data["uploaded_by_name"] = uploader_name
+        o_data["uploaded_by_email"] = uploader_email
+        o_data["uploaded_by_contact"] = uploader_contact
+        o_data["uploaded_by_role"] = uploader_role
+
+        # --- FIX: Remove auto-calculated field not meant for direct create ---
+        o_data.pop("price_per_unit", None)
+
+        try:
+            AgriculturalPlotResaleProperty.objects.create(**o_data)
+            created += 1
+        except Exception as e:
+            errors.append(f"Row {row_idx} processing failure: {str(e)}")
+
+    errors.extend(duplicate_blocked_rows)
+
+    for entry in listed_by_mismatch_errors:
+        for msg in entry["errors"]:
+            errors.append(f"Row {entry['row']}: {msg}")
+
+    # ---- 5. Audit Log ----
+    AgriculturalPlotResaleActivityLog.objects.create(
+        user_identity=user_identity,
+        user_role=uploader_role,
+        action_type='CREATE',
+        property_id="Multiple / Sheet Records",
+        action_payload=json.dumps({
+            "filename": excel_file.name,
+            "records_created": created,
+            "records_updated": updated,
+            "records_skipped": skipped,
+            "duplicates_blocked": len(duplicate_blocked_rows),
+            "listed_by_mismatches": len(listed_by_mismatch_errors),
+            "errors_encountered": len(errors),
+        }),
+        status='SUCCESS' if not errors else 'PARTIAL',
+    )
+
+    return JsonResponse({
+        "status": "success" if not errors else "warning",
+        "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
+        "logs": errors,
+        "created": created, "updated": updated, "skipped": skipped,
+        "duplicates_blocked": len(duplicate_blocked_rows),
+        "listed_by_mismatches": len(listed_by_mismatch_errors),
+        "error_count": len(errors), "errors": errors,
+        "unmatched_headers": unmatched_headers,
+        "header_row_detected": header_row,
+        "data_start_row_used": data_start_row,
+    })
+
+
+
+
+def agricultural_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/agricultural_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+
+
+
+
+
+def agricultural_plot_resale_add(request):
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = None
+    user_obj = None
+
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+
+    if user_id:
+        user_obj = User_Details.objects.filter(id=user_id).first()
+
+    if not admin_obj and not user_obj:
+        return render(request, 'home_page/Adminlogin.html')
+
+    if request.method == 'POST':
+        try:
+            # ---------- SAFE TYPE CONVERSIONS ----------
+            def to_int(val):
+                try:
+                    return int(val) if val else None
+                except:
+                    return None
+
+            def to_decimal(val):
+                try:
+                    return float(val) if val else None
+                except:
+                    return None
+
+            def to_date(val):
+                if not val:
+                    return None
+                try:
+                    return datetime.strptime(val, "%Y-%m-%d").date()
+                except:
+                    return None
+
+            # ---------- AMENITIES & FACILITIES ----------
+            amenities = ",".join(request.POST.getlist('amenities[]'))
+            nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+
+            # ---------- UPLOADER IDENTIFICATION ----------
+            if admin_obj:
+                uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+                uploader_email = getattr(admin_obj, 'email', '')
+                uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+                uploader_role = "Admin"
+                uploader_id = f"ADMIN_{admin_id}"
+            elif user_obj:
+                uploader_name = user_obj.user_name
+                uploader_email = user_obj.user_email
+                uploader_contact = user_obj.user_phone
+                uploader_role = "User"
+                uploader_id = f"USER_{user_id}"
+            else:
+                uploader_name, uploader_email, uploader_contact, uploader_role, uploader_id = "", "", "", "", ""
+
+            # ---------- LISTED BY IDENTIFICATION ----------
+            input_listed_by_id = (request.POST.get('listed_by_id') or uploader_id).strip()
+            input_listed_by_name = (request.POST.get('listed_by_name') or uploader_name).strip()
+            input_listed_by_email = (request.POST.get('listed_by_email') or uploader_email).strip().lower()
+            input_listed_by_contact = (request.POST.get('listed_by_contact') or uploader_contact).strip()
+            input_listed_by_role = (request.POST.get('listed_by_role') or uploader_role).strip()
+
+            # ==========================================================
+            # DUPLICATE DETECTION ENGINE
+            # ==========================================================
+            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_locality = (request.POST.get('locality') or '').strip()
+            input_city = (request.POST.get('city') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            fingerprint_key = generate_agricultural_plot_fingerprint(
+                input_property_no,
+                input_locality,
+                input_city,
+                input_pincode
+            )
+
+            direct_duplicates = AgriculturalPlotResaleProperty.objects.filter(
+                is_deleted=False,
+                property_no__iexact=input_property_no,
+                locality__iexact=input_locality
+            )
+            if input_city:
+                direct_duplicates = direct_duplicates.filter(city__iexact=input_city)
+
+            existing_duplicates = (
+                AgriculturalPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False) | direct_duplicates
+            ).distinct()
+
+            is_dup_flag = False
+            dup_group_id = fingerprint_key
+            total_dup_count = 1
+
+            if existing_duplicates.exists():
+                for existing_prop in existing_duplicates:
+                    same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                               existing_prop.listed_by_id.strip() == input_listed_by_id)
+                    same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                                  existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                    same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                    existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+
+                    if same_id or same_email or same_contact:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f"Duplicate Blocked: This land parcel ({input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}. Please edit the existing listing instead."
+                        })
+
+                is_dup_flag = True
+                total_dup_count = existing_duplicates.count() + 1
+                existing_duplicates.update(
+                    is_duplicate=True,
+                    duplicate_count=total_dup_count,
+                    duplicate_group_id=dup_group_id
+                )
+
+            # ---------- CREATE DATABASE OBJECT ----------
+            prop = AgriculturalPlotResaleProperty.objects.create(
+                property_unique_key=fingerprint_key,
+                is_duplicate=is_dup_flag,
+                duplicate_count=total_dup_count,
+                duplicate_group_id=dup_group_id if is_dup_flag else None,
+
+                listing_type="Resale",
+                category="Plot",
+                sub_category=request.POST.get('sub_category', 'Agricultural'),
+
+                
+
+                listed_by_type=request.POST.get('listed_by_type'),
+                assigned_to=request.POST.get('assigned_to'),
+                listed_by_id=input_listed_by_id,
+                listed_by_name=input_listed_by_name,
+                listed_by_email=input_listed_by_email,
+                listed_by_contact=input_listed_by_contact,
+                listed_by_role=input_listed_by_role,
+
+                property_no=input_property_no,
+
+                plot_area=to_decimal(request.POST.get('plot_area')),
+                agr_area_unit=request.POST.get('agr_area_unit', 'acre'),
+                property_type=request.POST.get('property_type'),
+                land_use=request.POST.get('land_use'),
+                na_status=request.POST.get('na_status'),
+                layout_approval_status=request.POST.get('layout_approval_status'),
+
+                plot_frontage=to_decimal(request.POST.get('plot_frontage')),
+                plot_depth=to_decimal(request.POST.get('plot_depth')),
+                plot_shape=request.POST.get('plot_shape'),
+                plot_road_facing=request.POST.get('plot_road_facing'),
+                road_width=request.POST.get('road_width'),
+                corner_plot=request.POST.get('corner_plot', 'no'),
+
+                soil_type=request.POST.get('soil_type'),
+                current_crop=request.POST.get('current_crop'),
+                irrigation_source=request.POST.get('irrigation_source'),
+                agr_electricity=request.POST.get('agr_electricity'),
+                highway_distance=request.POST.get('highway_distance'),
+                land_topography=request.POST.get('land_topography'),
+                govt_scheme=request.POST.get('govt_scheme'),
+                plot_fencing=request.POST.get('plot_fencing'),
+                current_possession_status=request.POST.get('current_possession_status'),
+
+                selling_price=to_int(request.POST.get('selling_price')),
+                price_negotiable=request.POST.get('price_negotiable', 'no'),
+                additional_charges=request.POST.get('additional_charges'),
+                brokerage_percentage=request.POST.get('brokerage_percentage'),
+                manual_brokerage=request.POST.get('manual_brokerage'),
+
+                ownership_type=request.POST.get('ownership_type'),
+                ownership_document_type=request.POST.get('ownership_document_type'),
+                other_document_type=request.POST.get('other_document_type'),
+                rera_status=request.POST.get('rera_status'),
+                title_clearance=request.POST.get('title_clearance'),
+                property_encumbrance_status=request.POST.get('property_encumbrance_status'),
+
+                satbara_available=request.POST.get('satbara_available'),
+                khate_utara=request.POST.get('khate_utara'),
+                section63_clearance=request.POST.get('section63_clearance'),
+
+                property_tax_status=request.POST.get('property_tax_status'),
+                outstanding_tax_amount=to_int(request.POST.get('outstanding_tax_amount')),
+                pending_since=to_date(request.POST.get('pending_since')),
+                property_loan_status=request.POST.get('property_loan_status'),
+                financing_bank=request.POST.get('financing_bank'),
+                outstanding_loan_amount=to_int(request.POST.get('outstanding_loan_amount')),
+                sanctioning_authority=request.POST.get('sanctioning_authority'),
+
+                amenities=amenities,
+                nearby_facilities=nearby_facilities,
+                user_description=request.POST.get('user_description'),
+
+                state=request.POST.get('state'),
+                city=input_city,
+                locality=input_locality,
+                property_landmark=request.POST.get('property_landmark'),
+                pincode=input_pincode,
+                address=request.POST.get('address'),
+                google_maps_link=request.POST.get('google_maps_link'),
+                latitude=request.POST.get('latitude'),
+                longitude=request.POST.get('longitude'),
+
+                encumbrance_cert=request.FILES.get('encumbrance_cert'),
+                layout_plan=request.FILES.get('layout_plan'),
+
+                listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
+                portal_name=request.POST.get('portal_name'),
+
+                uploaded_by_name=uploader_name,
+                uploaded_by_email=uploader_email,
+                uploaded_by_contact=uploader_contact,
+                uploaded_by_role=uploader_role,
+                upload_file_name=None,
+            )
+
+            # ---------- IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE) ----------
+            IMAGE_CATEGORY_FIELDS = {
+                'front_view':         'plot_images_front_view[]',
+                'full_plot':          'plot_images_full_plot[]',
+                'farm_gate':          'plot_images_farm_gate[]',
+                'boundary_fencing':   'plot_images_boundary_fencing[]',
+                'road_facing':        'plot_images_road_facing[]',
+                'cultivated_area':    'plot_images_cultivated_area[]',
+                'irrigation_source':  'plot_images_irrigation_source[]',
+                'borewell_well':      'plot_images_borewell_well[]',
+                'electricity_infra':  'plot_images_electricity_infra[]',
+                'farmhouse_shed':     'plot_images_farmhouse_shed[]',
+                'aerial_drone':       'plot_images_aerial_drone[]',
+                'layout_site_plan':   'plot_images_layout_site_plan[]',
+            }
+
+            saved_count = 0
+            for category, field_name in IMAGE_CATEGORY_FIELDS.items():
+                cat_images = request.FILES.getlist(field_name)
+                for cat_index, img in enumerate(cat_images):
+                    if saved_count >= 25:
+                        break
+                    AgriculturalPlotResaleImage.objects.create(
+                        property=prop,
+                        image=img,
+                        category=category,
+                        sequence_order=cat_index,
+                    )
+                    saved_count += 1
+
+            # ---------- PLOT VIDEO (UPLOAD, RM LINK, OR AUTO SLIDESHOW) ----------
+            video_option = request.POST.get('video_option') or request.POST.get('video_source') or 'auto'
+            uploaded_video = request.FILES.get('property_video') or request.FILES.get('social_video')
+            property_video_link = request.POST.get('property_video_link', '').strip()
+
+            # 1. ALWAYS auto-generate the slideshow row if >= 3 photos exist
+            CATEGORY_ORDER = list(IMAGE_CATEGORY_FIELDS.keys())
+            saved_images = list(AgriculturalPlotResaleImage.objects.filter(property=prop))
+            saved_images.sort(key=lambda img: (CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99, img.sequence_order))
+            image_paths = [img.image.path for img in saved_images if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)]
+
+            if len(image_paths) >= 3:
+                output_relative_path = f"agricultural_plot/videos/auto_{prop.id}.mp4"
+                try:
+                    result_path = generate_property_slideshow(image_paths, output_relative_path)
+                    if result_path:
+                        AgriculturalPlotResaleVideo.objects.update_or_create(
+                            property=prop,
+                            source='auto',
+                            defaults={
+                                'video': result_path,
+                                'video_url': None
+                            }
+                        )
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+
+            # 2. Save Manual Upload Video as a separate row
+            if video_option == 'upload' and uploaded_video:
+                AgriculturalPlotResaleVideo.objects.create(
+                    property=prop,
+                    video=uploaded_video,
+                    source='uploaded'
+                )
+
+            # 3. Save RM Assisted Link Video as a separate row
+            elif video_option == 'rm_assisted' and property_video_link:
+                AgriculturalPlotResaleVideo.objects.create(
+                    property=prop,
+                    video_url=property_video_link,
+                    source='rm_assisted'
+                )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': "Agricultural Plot Listing Added Successfully"
+            })
+
+        except Exception as e:
+            print("ERROR DETECTED:", str(e))
+            return JsonResponse({
+                'status': 'error',
+                'message': f"Error while saving listing: {str(e)}"
+            })
+
+    return render(request, 'admin_user/Reports/Resale_Plot/agricultural_plot_resale_list.html', {
+        'admin_obj': admin_obj,
+        'user_obj': user_obj,
+        'ameneties_obj': Ameneties_Details.objects.all(),
+        'facilities_obj': Facilities_Details.objects.all(),
+        'image_category_choices': AgriculturalPlotResaleImage.CATEGORY_CHOICES,
+    })
+
+
+
+
+def agricultural_plot_resale_view(request, pk):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    # UPDATED: prefetch_related on the base queryset so Django fetches
+    # all images, videos, and FAQs in one go before returning the 404 check.
+    queryset = AgriculturalPlotResaleProperty.objects.prefetch_related('images', 'video', 'faqs')
+    plot = get_object_or_404(queryset, id=pk, is_deleted=False)
+
+    if not plot.faqs.exists():
+        plot.generate_auto_faqs()
+
+    amenities_list = [a.strip() for a in plot.amenities.split(',')] if plot.amenities else []
+    facilities_list = [f.strip() for f in plot.nearby_facilities.split(',')] if plot.nearby_facilities else []
+
+    # Rate per unit (e.g. Rate per Acre / Rate per Hectare) — precomputed here
+    # rather than doing float math in the template. plot.price_per_unit is also
+    # auto-calculated in model.save(), this just guards against stale/null values.
+    price_per_unit = plot.price_per_unit
+    if price_per_unit is None and plot.selling_price and plot.plot_area and plot.plot_area > 0:
+        try:
+            price_per_unit = round(float(plot.selling_price) / float(plot.plot_area))
+        except (TypeError, ZeroDivisionError):
+            price_per_unit = None
+
+    rate_label = plot.get_rate_label()  # e.g. "Rate per Acre"
+
+    # Extract videos and get the first one for the preview
+    videos = plot.video.all()
+    selected_video = videos.first() if videos.exists() else None
+
+    # Get all images and sort them
+    images = plot.images.all().order_by('category', 'sequence_order')
+
+    # Group images by category for the filtering tabs
+    grouped_images = {}
+    for img in images:
+        cat = img.category
+        if cat not in grouped_images:
+            grouped_images[cat] = {
+                'label': img.get_category_display() if hasattr(img, 'get_category_display') else cat.replace('_', ' ').title(),
+                'images': []
+            }
+        grouped_images[cat]['images'].append(img)
+
+    return render(request, 'admin_user/Reports/Resale_Plot/agricultural_plot_resale_view.html', {
+        'admin_obj': admin_obj,
+        'plot': plot,
+        'amenities_list': amenities_list,
+        'facilities_list': facilities_list,
+        'price_per_unit': price_per_unit,
+        'rate_label': rate_label,
+        'images': images,
+        'grouped_images': grouped_images,
+        'selected_video': selected_video,
+    })
+
+
+
+
+def agricultural_plot_resale_edit(request, pk):
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = None
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+    if user_id:
+        current_user = User_Details.objects.filter(id=user_id).first()
+
+    user_obj = User_Details.objects.all()
+
+    if not admin_obj and not user_obj:
+        return render(request, 'home_page/Adminlogin.html')
+
+    prop = get_object_or_404(AgriculturalPlotResaleProperty, id=pk, is_deleted=False)
+
+    if request.method == 'POST':
+        try:
+            def to_int(val):
+                try: return int(val) if val else None
+                except: return None
+
+            def to_decimal(val):
+                try: return float(val) if val else None
+                except: return None
+
+            def to_date(val):
+                if not val: return None
+                try: return datetime.strptime(val, "%Y-%m-%d").date()
+                except: return None
+
+            amenities = ",".join(request.POST.getlist('amenities[]'))
+            nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+
+            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_locality = (request.POST.get('locality') or '').strip()
+            input_city = (request.POST.get('city') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            input_listed_by_id = (request.POST.get('listed_by_id') or '').strip()
+            input_listed_by_name = (request.POST.get('listed_by_name') or '').strip()
+            input_listed_by_email = (request.POST.get('listed_by_email') or '').strip().lower()
+            input_listed_by_contact = (request.POST.get('listed_by_contact') or '').strip()
+            input_listed_by_role = (request.POST.get('listed_by_role') or '').strip()
+
+            # ---------- DUPLICATE CHECK (excluding this property) ----------
+            fingerprint_key = generate_agricultural_plot_fingerprint(
+                input_property_no, input_locality, input_city, input_pincode
+            )
+
+            direct_duplicates = AgriculturalPlotResaleProperty.objects.filter(
+                is_deleted=False,
+                property_no__iexact=input_property_no,
+                locality__iexact=input_locality
+            ).exclude(id=prop.id)
+            if input_city:
+                direct_duplicates = direct_duplicates.filter(city__iexact=input_city)
+
+            existing_duplicates = (
+                AgriculturalPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False).exclude(id=prop.id)
+                | direct_duplicates
+            ).distinct()
+
+            for existing_prop in existing_duplicates:
+                same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                           existing_prop.listed_by_id.strip() == input_listed_by_id)
+                same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                              existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+                if same_id or same_email or same_contact:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f"Duplicate Blocked: This land ({input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}."
+                    })
+
+            # ---------- UPDATE FIELDS ----------
+            prop.property_unique_key = fingerprint_key
+
+            prop.listed_by_type = request.POST.get('listed_by_type')
+            prop.assigned_to = request.POST.get('assigned_to')
+            prop.listed_by_id = input_listed_by_id
+            prop.listed_by_name = input_listed_by_name
+            prop.listed_by_email = input_listed_by_email
+            prop.listed_by_contact = input_listed_by_contact
+            prop.listed_by_role = input_listed_by_role
+
+            prop.property_no = input_property_no
+
+            prop.plot_area = to_decimal(request.POST.get('plot_area'))
+            prop.agr_area_unit = request.POST.get('agr_area_unit', 'acre')
+            prop.property_type = request.POST.get('property_type')
+            prop.land_use = request.POST.get('land_use')
+            prop.na_status = request.POST.get('na_status')
+            prop.layout_approval_status = request.POST.get('layout_approval_status')
+
+            prop.plot_frontage = to_decimal(request.POST.get('plot_frontage'))
+            prop.plot_depth = to_decimal(request.POST.get('plot_depth'))
+            prop.plot_shape = request.POST.get('plot_shape')
+            prop.plot_road_facing = request.POST.get('plot_road_facing')
+            prop.road_width = request.POST.get('road_width')
+            prop.corner_plot = request.POST.get('corner_plot', 'no')
+
+            prop.soil_type = request.POST.get('soil_type')
+            prop.current_crop = request.POST.get('current_crop')
+            prop.irrigation_source = request.POST.get('irrigation_source')
+            prop.agr_electricity = request.POST.get('agr_electricity')
+            prop.highway_distance = request.POST.get('highway_distance')
+            prop.land_topography = request.POST.get('land_topography')
+            prop.govt_scheme = request.POST.get('govt_scheme')
+            prop.plot_fencing = request.POST.get('plot_fencing')
+            prop.current_possession_status = request.POST.get('current_possession_status')
+
+            prop.selling_price = to_int(request.POST.get('selling_price'))
+            prop.price_negotiable = request.POST.get('price_negotiable', 'no')
+            prop.additional_charges = request.POST.get('additional_charges')
+            prop.brokerage_percentage = request.POST.get('brokerage_percentage')
+            prop.manual_brokerage = request.POST.get('manual_brokerage')
+
+            prop.ownership_type = request.POST.get('ownership_type')
+            prop.ownership_document_type = request.POST.get('ownership_document_type')
+            prop.other_document_type = request.POST.get('other_document_type')
+            prop.rera_status = request.POST.get('rera_status')
+            prop.title_clearance = request.POST.get('title_clearance')
+            prop.property_encumbrance_status = request.POST.get('property_encumbrance_status')
+
+            prop.satbara_available = request.POST.get('satbara_available')
+            prop.khate_utara = request.POST.get('khate_utara')
+            prop.section63_clearance = request.POST.get('section63_clearance')
+
+            prop.property_tax_status = request.POST.get('property_tax_status')
+            prop.outstanding_tax_amount = to_int(request.POST.get('outstanding_tax_amount'))
+            prop.pending_since = to_date(request.POST.get('pending_since'))
+            prop.property_loan_status = request.POST.get('property_loan_status')
+            prop.financing_bank = request.POST.get('financing_bank')
+            prop.outstanding_loan_amount = to_int(request.POST.get('outstanding_loan_amount'))
+            prop.sanctioning_authority = request.POST.get('sanctioning_authority')
+
+            prop.amenities = amenities
+            prop.nearby_facilities = nearby_facilities
+            prop.user_description = request.POST.get('user_description')
+
+            prop.state = request.POST.get('state')
+            prop.city = input_city
+            prop.locality = input_locality
+            prop.property_landmark = request.POST.get('property_landmark')
+            prop.pincode = input_pincode
+            prop.address = request.POST.get('address')
+            prop.google_maps_link = request.POST.get('google_maps_link')
+            prop.latitude = request.POST.get('latitude')
+            prop.longitude = request.POST.get('longitude')
+
+            if request.FILES.get('encumbrance_cert'):
+                prop.encumbrance_cert = request.FILES.get('encumbrance_cert')
+            if request.FILES.get('layout_plan'):
+                prop.layout_plan = request.FILES.get('layout_plan')
+
+            prop.listed_elsewhere = request.POST.get('listed_elsewhere', 'No')
+            prop.portal_name = request.POST.get('portal_name')
+
+            prop.listing_status = request.POST.get('listing_status')
+            prop.approval_status = request.POST.get('approval_status')
+
+            prop.save()
+
+            # ---------- REMOVE IMAGES MARKED FOR DELETION ----------
+            remove_image_ids = request.POST.getlist('delete_image_ids[]') or request.POST.getlist('remove_images[]')
+            if remove_image_ids:
+                AgriculturalPlotResaleImage.objects.filter(id__in=remove_image_ids, property=prop).delete()
+
+            # ---------- ADD NEWLY UPLOADED IMAGES (CATEGORY WISE) ----------
+            IMAGE_CATEGORY_FIELDS = {
+                'front_view':         'plot_images_front_view[]',
+                'full_plot':          'plot_images_full_plot[]',
+                'farm_gate':          'plot_images_farm_gate[]',
+                'boundary_fencing':   'plot_images_boundary_fencing[]',
+                'road_facing':        'plot_images_road_facing[]',
+                'cultivated_area':    'plot_images_cultivated_area[]',
+                'irrigation_source':  'plot_images_irrigation_source[]',
+                'borewell_well':      'plot_images_borewell_well[]',
+                'electricity_infra':  'plot_images_electricity_infra[]',
+                'farmhouse_shed':     'plot_images_farmhouse_shed[]',
+                'aerial_drone':       'plot_images_aerial_drone[]',
+                'layout_site_plan':   'plot_images_layout_site_plan[]',
+            }
+
+            existing_count = AgriculturalPlotResaleImage.objects.filter(property=prop).count()
+            saved_count = 0
+            for category, field_name in IMAGE_CATEGORY_FIELDS.items():
+                cat_images = request.FILES.getlist(field_name)
+                new_image_objs = []
+                if cat_images:
+                    start_seq = AgriculturalPlotResaleImage.objects.filter(property=prop, category=category).count()
+                    for idx, img in enumerate(cat_images):
+                        if existing_count + saved_count >= 25:
+                            break
+                        new_obj = AgriculturalPlotResaleImage.objects.create(
+                            property=prop, image=img, category=category, sequence_order=start_seq + idx,
+                        )
+                        new_image_objs.append(new_obj)
+                        saved_count += 1
+
+                order_tokens = request.POST.getlist(f'image_order_{category}[]')
+                for position, token in enumerate(order_tokens):
+                    if token.startswith('existing:'):
+                        img_id = token.split(':', 1)[1]
+                        AgriculturalPlotResaleImage.objects.filter(
+                            id=img_id, property=prop, category=category
+                        ).update(sequence_order=position)
+                    elif token.startswith('new:'):
+                        new_idx = int(token.split(':', 1)[1])
+                        if 0 <= new_idx < len(new_image_objs):
+                            new_image_objs[new_idx].sequence_order = position
+                            new_image_objs[new_idx].save(update_fields=['sequence_order'])
+
+            # ---------- VIDEO ----------
+            if request.POST.get('delete_current_video') == '1':
+                prop.video.filter(source='uploaded').delete()
+
+            video_option = request.POST.get('video_option') or 'auto'
+            uploaded_video = request.FILES.get('property_video')
+            property_video_link = request.POST.get('property_video_link', '').strip()
+            regenerate_slideshow = request.POST.get('regenerate_slideshow') == 'on'
+
+            if uploaded_video:
+                AgriculturalPlotResaleVideo.objects.update_or_create(
+                    property=prop, source='uploaded',
+                    defaults={'video': uploaded_video, 'video_url': None}
+                )
+            elif video_option == 'rm_assisted' and property_video_link:
+                AgriculturalPlotResaleVideo.objects.update_or_create(
+                    property=prop, source='rm_assisted',
+                    defaults={'video_url': property_video_link, 'video': None}
+                )
+            elif video_option == 'auto':
+                existing_auto = prop.video.filter(source='auto').first()
+                if regenerate_slideshow or not existing_auto:
+                    CATEGORY_ORDER = list(IMAGE_CATEGORY_FIELDS.keys())
+                    all_images = list(AgriculturalPlotResaleImage.objects.filter(property=prop))
+                    all_images.sort(key=lambda img: (
+                        CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99,
+                        img.sequence_order
+                    ))
+                    image_paths = [
+                        img.image.path for img in all_images
+                        if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)
+                    ]
+                    if len(image_paths) >= 3:
+                        output_relative_path = f"agricultural_plot/videos/auto_{prop.id}.mp4"
+                        try:
+                            result_path = generate_property_slideshow(image_paths, output_relative_path)
+                            if result_path:
+                                AgriculturalPlotResaleVideo.objects.update_or_create(
+                                    property=prop, source='auto',
+                                    defaults={'video': result_path, 'video_url': None}
+                                )
+                        except Exception:
+                            import traceback
+                            traceback.print_exc()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': "Agricultural Plot Listing Updated Successfully",
+                'redirect_url': reverse('agricultural_plot_resale_list')
+            })
+
+        except Exception as e:
+            print("ERROR DETECTED:", str(e))
+            return JsonResponse({'status': 'error', 'message': f"Error while updating listing: {str(e)}"})
+
+    # ---------- GET: render prefilled form ----------
+    existing_images = AgriculturalPlotResaleImage.objects.filter(property=prop).order_by('category', 'sequence_order')
+    images_by_category = {}
+    for img in existing_images:
+        images_by_category.setdefault(img.category, []).append(img)
+
+    existing_image_total = existing_images.count()
+
+    uploaded_video = prop.video.filter(source='uploaded').first()
+    auto_video = prop.video.filter(source='auto').first()
+    rm_video = prop.video.filter(source='rm_assisted').first()
+
+    return render(request, 'admin_user/Reports/Resale_Plot/agricultural_plot_resale_edit.html', {
+        'admin_obj': admin_obj,
+        'user_obj': user_obj,
+        'property': prop,
+        'ameneties_obj': Ameneties_Details.objects.all(),
+        'facilities_obj': Facilities_Details.objects.all(),
+        'images_by_category': images_by_category,
+        'existing_image_total': existing_image_total,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video,
+        'selected_amenities': (prop.amenities or '').split(',') if prop.amenities else [],
+        'selected_facilities': (prop.nearby_facilities or '').split(',') if prop.nearby_facilities else [],
+    })
+
+
+
+
+
+
+
+
+def agricultural_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+    else:
+        return render(request, 'home_page/Adminlogin.html')
+
+    qs = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).prefetch_related('images', 'video').order_by("-created_at")
+
+    # ---- Search & Filters ----
+    search_query = request.GET.get("search", "").strip()
+    city_query = request.GET.get("city", "").strip()
+    locality_query = request.GET.get("locality", "").strip()
+    property_type_query = request.GET.get("property_type", "").strip()
+    road_facing_query = request.GET.get("road_facing", "").strip()
+    corner_plot_query = request.GET.get("corner_plot", "").strip()
+    loan_query = request.GET.get("loan", "").strip()
+    min_price = request.GET.get("min_price", "").strip()
+    max_price = request.GET.get("max_price", "").strip()
+    from_date = request.GET.get("from_date", "").strip()
+    to_date = request.GET.get("to_date", "").strip()
+
+    listed_by_query = request.GET.get("listed_by", "").strip()
+    uploaded_by_query = request.GET.get("uploaded_by", "").strip()
+    listing_status_query = request.GET.get("listing_status", "").strip()
+    approval_status_query = request.GET.get("approval_status", "").strip()
+    duplicate_query = request.GET.get("duplicate", "").strip()
+
+    if listed_by_query and listed_by_query != 'All Roles':
+        qs = qs.filter(listed_by_role__iexact=listed_by_query)
+
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        qs = qs.filter(uploaded_by_role__iexact=uploaded_by_query)
+
+    if listing_status_query and listing_status_query != 'All Status':
+        qs = qs.filter(listing_status__iexact=listing_status_query)
+
+    if approval_status_query and approval_status_query != 'All Approval':
+        qs = qs.filter(approval_status__iexact=approval_status_query)
+
+    if duplicate_query == 'duplicates_only':
+        qs = qs.filter(is_duplicate=True)
+    elif duplicate_query == 'unique_only':
+        qs = qs.filter(is_duplicate=False)
+
+    if search_query:
+        qs = qs.filter(
+            Q(id__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(property_no__icontains=search_query)
+        )
+
+    if city_query:
+        qs = qs.filter(city__icontains=city_query)
+
+    if locality_query:
+        qs = qs.filter(locality__icontains=locality_query)
+
+    if property_type_query:
+        qs = qs.filter(property_type=property_type_query)
+
+    if road_facing_query:
+        qs = qs.filter(plot_road_facing__icontains=road_facing_query)
+
+    if corner_plot_query in ("yes", "no"):
+        qs = qs.filter(corner_plot__iexact=corner_plot_query)
+
+    if loan_query == "yes":
+        qs = qs.filter(property_loan_status__iexact="Loan Running")
+    elif loan_query == "no":
+        qs = qs.exclude(property_loan_status__iexact="Loan Running")
+
+    if min_price:
+        try:
+            qs = qs.filter(selling_price__gte=int(min_price))
+        except ValueError:
+            pass
+
+    if max_price:
+        try:
+            qs = qs.filter(selling_price__lte=int(max_price))
+        except ValueError:
+            pass
+
+    if from_date:
+        try:
+            qs = qs.filter(created_at__date__gte=datetime.strptime(from_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    if to_date:
+        try:
+            qs = qs.filter(created_at__date__lte=datetime.strptime(to_date, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+
+    total_properties = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).count()
+    filtered_count = qs.count()
+
+    # ---- KPI Cards (Inventory & Land Features) ----
+    active_listings = qs.filter(selling_price__isnull=False).count()
+    irrigated_count = qs.filter(property_type="irrigated_land").count()
+    orchard_count = qs.filter(property_type="orchard_plantation").count()
+    na_converted_count = qs.filter(na_status="NA Converted").count()
+
+    corner_plot_count = qs.filter(corner_plot__iexact="yes").count()
+    fenced_plot_count = qs.exclude(
+        Q(plot_fencing__isnull=True) | Q(plot_fencing="") | Q(plot_fencing="none")
+    ).count()
+    finance_ready_count = qs.filter(property_loan_status__iexact="No Active Loan").count()
+    satbara_available_count = qs.filter(satbara_available__iexact="Yes").count()
+
+    # ---- KPI Cards (Listing, Approval & Duplicates) ----
+    active_listing_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Active").count()
+    inactive_listing_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Inactive").count()
+    sold_listing_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Sold").count()
+    rented_listing_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, listing_status__iexact="Rented").count()
+
+    pending_approval_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, approval_status__iexact="Pending").count()
+    approved_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, approval_status__iexact="Approved").count()
+    rejected_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, approval_status__iexact="Rejected").count()
+
+    duplicate_properties_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, is_duplicate=True).count()
+    unique_properties_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, is_duplicate=False).count()
+
+    # ---- Pagination ----
+    paginator = Paginator(qs, 25)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    start_index = (page_obj.number - 1) * paginator.per_page
+    for i, obj in enumerate(page_obj.object_list, start=1):
+        obj.original_sr_no = start_index + i
+
+    # ---- Dropdown option sources ----
+    unique_cities = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(city__isnull=True).exclude(city="").values_list("city", flat=True).distinct().order_by("city")
+    unique_property_types = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(property_type__isnull=True).exclude(property_type="").values_list("property_type", flat=True).distinct().order_by("property_type")
+    uploaded_files = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(upload_file_name__isnull=True).exclude(upload_file_name="").values_list("upload_file_name", flat=True).distinct()
+
+    unique_listed_roles = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(listed_by_role__isnull=True).exclude(listed_by_role="").values_list("listed_by_role", flat=True).distinct().order_by("listed_by_role")
+    unique_uploaded_roles = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role="").values_list("uploaded_by_role", flat=True).distinct().order_by("uploaded_by_role")
+    unique_listing_status = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(listing_status__isnull=True).exclude(listing_status="").values_list("listing_status", flat=True).distinct().order_by("listing_status")
+    unique_approval_status = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).exclude(approval_status__isnull=True).exclude(approval_status="").values_list("approval_status", flat=True).distinct().order_by("approval_status")
+
+    context = {
+        "properties": page_obj,
+        "page_obj": page_obj,
+        "total_properties": total_properties,
+        "filtered_count": filtered_count,
+        "active_listings": active_listings,
+        "irrigated_count": irrigated_count,
+        "orchard_count": orchard_count,
+        "na_converted_count": na_converted_count,
+        "corner_plot_count": corner_plot_count,
+        "fenced_plot_count": fenced_plot_count,
+        "finance_ready_count": finance_ready_count,
+        "satbara_available_count": satbara_available_count,
+
+        "active_listing_count": active_listing_count,
+        "inactive_listing_count": inactive_listing_count,
+        "sold_listing_count": sold_listing_count,
+        "rented_listing_count": rented_listing_count,
+        "pending_approval_count": pending_approval_count,
+        "approved_count": approved_count,
+        "rejected_count": rejected_count,
+        "duplicate_properties_count": duplicate_properties_count,
+        "unique_properties_count": unique_properties_count,
+
+        "unique_cities": unique_cities,
+        "unique_property_types": unique_property_types,
+        "uploaded_files": uploaded_files,
+        "unique_listed_roles": unique_listed_roles,
+        "unique_uploaded_roles": unique_uploaded_roles,
+        "unique_listing_status": unique_listing_status,
+        "unique_approval_status": unique_approval_status,
+
+        "search_query": search_query,
+        "city_query": city_query,
+        "locality_query": locality_query,
+        "property_type_query": property_type_query,
+        "road_facing_query": road_facing_query,
+        "corner_plot_query": corner_plot_query,
+        "loan_query": loan_query,
+        "min_price": min_price,
+        "max_price": max_price,
+        "listed_by_query": listed_by_query,
+        "uploaded_by_query": uploaded_by_query,
+        "listing_status_query": listing_status_query,
+        "approval_status_query": approval_status_query,
+        "duplicate_query": duplicate_query,
+
+        'admin_obj': admin_obj,
+        'ameneties_obj': ameneties_obj,
+        'facilities_obj': facilities_obj,
+        'user_obj': user_obj,
+        'image_category_choices': AgriculturalPlotResaleImage.CATEGORY_CHOICES,
+    }
+    return render(request, "admin_user/Reports/Resale_Plot/agricultural_plot_resale_list.html", context)
+
+
+
+    # =====================================================================
+# DELETE (single)
+# =====================================================================
+
+def agricultural_plot_resale_delete(request, pk):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    plot = get_object_or_404(AgriculturalPlotResaleProperty, id=pk)
+
+    admin_id = request.session.get("Admin_id")
+    user_id = request.session.get("User_id")
+    deleter = "Automated Engine"
+    if admin_id:
+        deleter = f"Admin #{admin_id}"
+    elif user_id:
+        deleter = f"User #{user_id}"
+
+    plot.is_deleted = True
+    plot.deleted_at = timezone.now()
+    plot.deleted_by = deleter
+    plot.save(update_fields=["is_deleted", "deleted_at", "deleted_by"])
+
+    AgriculturalPlotResaleActivityLog.objects.create(
+        user_identity=deleter,
+        user_role="Admin" if admin_id else "User",
+        action_type="DELETE",
+        property_id=plot.id,
+        action_payload=json.dumps({"reason": "Manual delete via list page"}),
+        status="SUCCESS",
+    )
+
+    return JsonResponse({"status": "success", "message": f"Property {plot.id} moved to recycle bin."})
+
+
+
+# =====================================================================
+# BULK DELETE
+# =====================================================================
+
+def agricultural_plot_resale_bulk_delete(request):
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"status": "error", "message": "Invalid payload."}, status=400)
+
+    delete_type = payload.get("delete_type")
+    qs = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False)
+
+    if delete_type == "current_page":
+        ids = payload.get("page_ids", [])
+        qs = qs.filter(id__in=ids)
+
+    elif delete_type == "date_range":
+        from_date = payload.get("from_date")
+        to_date = payload.get("to_date")
+        if not from_date or not to_date:
+            return JsonResponse({"status": "error", "message": "Both dates are required."}, status=400)
+        qs = qs.filter(created_at__date__gte=from_date, created_at__date__lte=to_date)
+
+    elif delete_type == "latest_month":
+        today = timezone.now().date()
+        first_of_month = today.replace(day=1)
+        qs = qs.filter(created_at__date__gte=first_of_month)
+
+    elif delete_type == "old_data":
+        cutoff = timezone.now() - timedelta(days=180)
+        qs = qs.filter(created_at__lt=cutoff)
+
+    elif delete_type == "by_uploader":
+        text = payload.get("uploader_text", "").strip()
+        if not text:
+            return JsonResponse({"status": "error", "message": "Uploader detail is required."}, status=400)
+        qs = qs.filter(
+            Q(uploaded_by_name__icontains=text) |
+            Q(uploaded_by_email__icontains=text) |
+            Q(uploaded_by_role__icontains=text)
+        )
+
+    elif delete_type == "by_file":
+        file_name = payload.get("file_name", "").strip()
+        if not file_name:
+            return JsonResponse({"status": "error", "message": "File name is required."}, status=400)
+        qs = qs.filter(upload_file_name=file_name)
+
+    elif delete_type == "delete_all":
+        pass  # qs already covers all non-deleted rows
+
+    else:
+        return JsonResponse({"status": "error", "message": "Unknown delete criteria."}, status=400)
+
+    count = qs.count()
+    if count == 0:
+        return JsonResponse({"status": "error", "message": "No matching records found to delete."}, status=400)
+
+    admin_id = request.session.get("Admin_id")
+    user_id = request.session.get("User_id")
+    deleter = f"Admin #{admin_id}" if admin_id else (f"User #{user_id}" if user_id else "Automated Engine")
+
+    qs.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter)
+
+    AgriculturalPlotResaleActivityLog.objects.create(
+        user_identity=deleter,
+        user_role="Admin" if admin_id else "User",
+        action_type="DELETE",
+        property_id="Multiple / Bulk Action",
+        action_payload=json.dumps({"delete_type": delete_type, "records_deleted": count}),
+        status="SUCCESS",
+    )
+
+    return JsonResponse({"status": "success", "message": f"{count} record(s) deleted successfully."})
+
+
+
+
+@require_POST
+def agricultural_plot_resale_restore(request, pk):
+    """Restore an Agricultural Plot Resale property from the recycle bin."""
+    try:
+        prop = AgriculturalPlotResaleProperty.objects.get(id=pk, is_deleted=True)
+        prop.is_deleted = False
+        prop.deleted_at = None
+        if hasattr(prop, 'deleted_by'):
+            prop.deleted_by = None
+        prop.save()
+        return JsonResponse({'status': 'success', 'message': 'Property successfully restored!'})
+    except AgriculturalPlotResaleProperty.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Property not found.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+@require_POST
+def agricultural_plot_resale_hard_delete(request, pk):
+    """Permanently delete an Agricultural Plot Resale property and its media."""
+    try:
+        prop = AgriculturalPlotResaleProperty.objects.get(id=pk, is_deleted=True)
+
+        for img in prop.images.all():
+            if img.image:
+                img.image.delete(save=False)
+        for vid in prop.video.all():
+            if vid.video:
+                vid.video.delete(save=False)
+        for file_field in ['encumbrance_cert', 'layout_plan', 'social_video', 'upload_file']:
+            f = getattr(prop, file_field, None)
+            if f:
+                try:
+                    f.delete(save=False)
+                except Exception:
+                    pass
+
+        prop.delete()
+        return JsonResponse({'status': 'success', 'message': 'Property permanently deleted.'})
+    except AgriculturalPlotResaleProperty.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Property not found.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+        
+
+#######################END View Agriculture Plot Resale Listing MODULE SECTION###################################

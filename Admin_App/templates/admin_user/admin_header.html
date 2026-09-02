@@ -1506,6 +1506,22 @@
                 flex-direction: column;
             }
         }
+
+        @keyframes pulseGlow {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+            70% {
+                transform: scale(1.15);
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1527,6 +1543,44 @@
                 <a href="{% url 'admin_page' %}" class="menu-link" id="Admin_Dashboard">
                     <i class="fas fa-tachometer-alt menu-icon"></i>
                     <span class="menu-text" style="color:white;">Dashboard</span>
+                </a>
+            </li>
+
+            <li class="menu-section-title" style="color:white;">NOTIFICATION DETAILS</li>
+            
+            <li class="menu-item">
+                <a href="{% url "Listing_Approval_Admin" %}" class="menu-link" id="List_Approve">
+                    <i class="fas fa-archive menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Listing Approval 
+                        {% if total_count == 0 %}
+                        
+                        {% else %}
+                            <span class="badge bg-danger" style="animation: pulseGlow 1.5s infinite ease-in-out; font-weight: bold; display: inline-block;">{{total_count}}</span>
+                        {% endif %}    
+                    </span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url "Payment_Approval_Admin" %}" class="menu-link" id="Payment_Approve">
+                    <i class="fas fa-money-bill menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Payment Approval 
+                        {% if total_pending_count == 0 %}
+                        
+                        {% else %}
+                            <span class="badge bg-danger" style="animation: pulseGlow 1.5s infinite ease-in-out; font-weight: bold; display: inline-block;">{{total_pending_count}}</span>
+                        {% endif %}    
+                    </span>
+                </a>
+            </li>
+
+            <li class="menu-section-title" style="color:white;">PURCHASE DETAILS</li>
+            
+            <li class="menu-item">
+                <a href="{% url "Payments_List_Admin" %}" class="menu-link" id="Payment_List">
+                    <i class="fas fa-coins menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Payments List   
+                    </span>
                 </a>
             </li>
 
@@ -1555,7 +1609,8 @@
                 </a>
                 <ul class="submenu">
                     <li><a href="{% url 'residential_list' %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
-                                        <li><a href="{% url 'rental_reports' %}" class="submenu-link" style="color:white;" id="Rent_Resident"> Rental Residential Reports</a></li>
+                    
+                    <li><a href="{% url 'rental_reports' %}" class="submenu-link" style="color:white;" id="Rent_Resident"> Rental Residential Reports</a></li>
 
                     <li><a href="{% url 'commercial_list' %}" class="submenu-link" style="color:white;">Commercial</a></li>
                     

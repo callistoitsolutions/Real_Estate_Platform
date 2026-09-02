@@ -1264,6 +1264,76 @@
         });
     }
 
+    function executeBulkDelete() {
+        const type = document.getElementById('deleteType').value;
+        if (!type) {
+            swal('Warning', 'Please select a delete criteria.', 'warning');
+            return;
+        }
+
+        let payload = { delete_type: type };
+
+        if (type === 'date_range') {
+            payload.from_date = document.getElementById('fromDate').value;
+            payload.to_date = document.getElementById('toDate').value;
+            if (!payload.from_date || !payload.to_date) {
+                swal('Warning', 'Please select both From and To dates.', 'warning');
+                return;
+            }
+        } else if (type === 'by_uploader') {
+            payload.uploader_text = document.getElementById('uploaderText').value;
+            if (!payload.uploader_text) {
+                swal('Warning', 'Please enter the uploader detail.', 'warning');
+                return;
+            }
+        } else if (type === 'by_file') {
+            payload.file_name = document.getElementById('selectedFile').value;
+            if (!payload.file_name) {
+                swal('Warning', 'Please select an Excel file from the list.', 'warning');
+                return;
+            }
+        } else if (type === 'current_page') {
+            const rows = document.querySelectorAll('tr[id^="row-"]');
+            const ids = Array.from(rows).map(row => row.id.split('-')[1]);
+            if (ids.length === 0) {
+                swal('Warning', 'No data on the current page to delete.', 'warning');
+                return;
+            }
+            payload.page_ids = ids;
+        }
+
+        swal({
+            title: 'Are you absolutely sure?',
+            text: "This action will permanently delete the selected Resale records and their media!",
+            icon: 'warning',
+            buttons: ['Cancel', 'Yes, delete them!'],
+            dangerMode: true
+        }).then((isConfirmed) => {
+            if (isConfirmed) {
+                fetch("{% url 'resale_commercial_bulk_delete' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        swal('Deleted!', data.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        swal('Error', data.message, 'error');
+                    }
+                })
+                .catch(() => swal('Error', 'Server error occurred.', 'error'));
+            }
+        });
+    }
+
     // File Upload Verification
     function checkSelectedFileSize(input) {
         const defaultState = document.getElementById('dropzoneDefaultState');

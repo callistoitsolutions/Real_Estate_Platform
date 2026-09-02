@@ -177,11 +177,11 @@
         <small style="color:black; font-size:15px;">
             <i class="fas fa-database"></i> Total: <strong>{{ total_count }}</strong> records
         </small>
-        <div style="display:flex; gap:8px;">
+        {% comment %} <div style="display:flex; gap:8px;">
             <a href="{% url "export_commercial_plot_excel" %}" class="btn btn-outline-success btn-sm" style="font-weight:600;">
                 <i class="fas fa-file-excel"></i> Export to Excel
             </a>
-        </div>
+        </div> {% endcomment %}
     </div>
 
     <div class="table-wrap">
@@ -446,9 +446,9 @@
                     <td>{{ p.updated_at|date:"Y-m-d H:i" }}</td>
                     <td style="position:sticky;right:0;background:white;z-index:1;">
                         <div style="display:flex;gap:5px">
-                            <a href="{% url "commercial_plot_resale_update" p.id %}" class="action-btn edit" title="Edit {{ p.id }}"><i class="fas fa-edit"></i></a>
+                            <a href="{% url "plot_resale_comm_rm_update" p.id %}" class="action-btn edit" title="Edit {{ p.id }}"><i class="fas fa-edit"></i></a>
                             <button type="button" class="action-btn del" onclick="confirmPlotDelete('{{ p.id }}')" title="Move to Recycle Bin"><i class="fas fa-trash"></i></button>
-                            <a href="{% url "commercial_plot_resale_view" p.id %}" class="action-btn view" title="View Property"><i class="fas fa-eye"></i></a>
+                            <a href="{% url "plot_resale_comm_rm_view" p.id %}" class="action-btn view" title="View Property"><i class="fas fa-eye"></i></a>
                         </div>
                     </td>
                 </tr>

@@ -1,0 +1,955 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        color: white;
+    }
+
+    /* ── Tab Styling ── */
+    .nav-tabs {
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 20px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .nav-tabs::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .nav-tabs .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 12px 20px;
+        font-size: 14px;
+        background: transparent;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: #334155;
+        border-bottom-color: #cbd5e1;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        background: transparent;
+    }
+
+    .badge-count {
+        background: #e2e8f0;
+        color: #475569;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: 6px;
+    }
+
+    .nav-link.active .badge-count {
+        background: #ede9fe;
+        color: #667eea;
+    }
+
+    /* ── Table Styling ── */
+    .properties-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .properties-table th {
+        background: #f8fafc;
+        padding: 12px;
+        text-align: left;
+        font-weight: 700;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .properties-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    /* ── Action Buttons & Search ── */
+    .btn-restore {
+        background: #d1fae5;
+        color: #059669;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-restore:hover {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-hard-delete {
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-hard-delete:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .search-input {
+        max-width: 250px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    /* ── Audit Badges ── */
+    .badge-safe {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 11px;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 11px;
+    }
+
+    .deleted-by-text {
+        font-weight: 600;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="main-content">
+    <div class="page-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h1 style="margin: 0; font-size: 22px; font-weight: 700;">
+                <i class="fas fa-money-bill"></i>&nbsp; Payment Approval Pending
+            </h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span
+                    style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-right: 5px;">
+                    Total Payment Pending: {{ total_pending }}
+                </span>
+                
+            </div>
+        </div>
+    </div>
+
+    <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+
+        <ul class="nav nav-tabs" id="recycleBinTabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" id="rental-tab" data-bs-toggle="tab" data-bs-target="#rental" type="button" role="tab">Landlords <span class="badge-count" {% if landlord_count == 0 %} {% else %} style="animation: pulseGlow 1.5s infinite ease-in-out; display: inline-block; background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 50%;"{% endif %}>{{ landlord_count }}</span></button></li>
+
+            <li class="nav-item" role="presentation"><button class="nav-link" id="commercial-tab" data-bs-toggle="tab" data-bs-target="#commercial" type="button" role="tab">Agents <span class="badge-count" {% if agent_count == 0 %} {% else %} style="animation: pulseGlow 1.5s infinite ease-in-out; display: inline-block; background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 50%;"{% endif %}>{{ agent_count }}</span></button></li>
+
+            <li class="nav-item" role="presentation"><button class="nav-link" id="pg-tab" data-bs-toggle="tab" data-bs-target="#pg" type="button" role="tab">Agencies/Builders <span class="badge-count" {% if agency_count == 0 %} {% else %} style="animation: pulseGlow 1.5s infinite ease-in-out; display: inline-block; background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 50%;"{% endif %}>{{ agency_count }}</span></button></li>
+
+            <li class="nav-item" role="presentation"><button class="nav-link" id="pg-tab" data-bs-toggle="tab" data-bs-target="#resale" type="button" role="tab">Tenants <span class="badge-count" {% if tenant_count == 0 %} {% else %} style="animation: pulseGlow 1.5s infinite ease-in-out; display: inline-block; background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 50%;"{% endif %}>{{ tenant_count }}</span></button></li>
+
+            <li class="nav-item" role="presentation"><button class="nav-link" id="pg-tab" data-bs-toggle="tab" data-bs-target="#comm-resale" type="button" role="tab">Buyers <span class="badge-count" {% if buyer_count == 0 %} {% else %} style="animation: pulseGlow 1.5s infinite ease-in-out; display: inline-block; background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 50%;"{% endif %}>{{ buyer_count }}</span></button></li>
+
+            <li class="nav-item" role="presentation"><button class="nav-link" id="pg-tab" data-bs-toggle="tab"data-bs-target="#industrial" type="button" role="ta b">Vendors <span class="badge-count" {% if vendor_count == 0 %} {% else %} style="animation: pulseGlow 1.5s infinite ease-in-out; display: inline-block; background-color: #dc3545; color: white; padding: 2px 6px; border-radius: 50%;"{% endif %}>{{ vendor_count }}</span></button></li>
+
+        </ul>
+
+        <div class="tab-content" id="recycleBinTabsContent">
+
+            <div class="tab-pane fade show active" id="rental" role="tabpanel">
+                
+                <!-- Summary Cards Row (4 cards in one line) -->
+                <div class="row mb-4" style="display: flex; gap: 20px; flex-wrap: nowrap; overflow-x: auto;">
+                    
+                    <!-- Card 1: Total Subscriptions -->
+                    <div style="flex: 1; min-width: 200px; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px; text-transform: uppercase; font-weight: 600;">Total Subscriptions (Landlords)</h5>
+                        <h3 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">{{ landlord_pending|length }}</h3>
+                    </div>
+                    </div>
+
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="rental-table">
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Payment Status</th>
+                                <th>Payment Screenshot</th>
+                                <th>User Id</th>
+                                <th>User Name</th>
+                                <th>User Phone</th>
+                                <th>User Role</th>
+                                <th>Package Name</th>
+                                <th>Plan Type</th>
+                                <th>Plan Price</th>
+                                <th>Plan Duration</th>
+                                <th>Plan Start Date</th>
+                                <th>Plan End Date</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in landlord_pending %}
+                            <tr id="rental-row-{{ prop.id }}">
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url "Update_Payment_Admin" prop.id %}" class="btn-action btn-edit" title="Edit Subscription">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if prop.plan_status == "Done" %}
+                                            <a href="{% url "Payment_Invoice_Admin" prop.id %}" class="btn-action btn-edit" title="Download Invoice">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </div>
+                                    
+                                </td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ prop.plan_status }}</strong></td>
+                                <td><strong><a href="{{prop.payment_ss.url}}">View Image</a></strong></td>
+                                <td>{{ prop.fk_user.user_id }}</td>
+                                <td>{{ prop.fk_user.user_name }}</td>
+                                <td>{{ prop.fk_user.user_phone }}</td>
+                                <td>{{ prop.fk_user.user_role }}</td>
+                                <td>{{ prop.fk_subscription.package_name }}</td>
+                                <td>{{ prop.fk_subscription.plan_type }}</td>
+                                <td>{{ prop.fk_subscription.plan_offer_price }}</td>
+                                <td>{{ prop.fk_subscription.plan_duration }}</td>
+                                <td>{{ prop.plan_start_date }}</td>
+                                <td>{{ prop.plan_end_date }}</td>
+                                <td>{{ prop.purchase_date }}</td>
+                                
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No
+                                    Landlords Subscriptions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="commercial" role="tabpanel">
+                <!-- Summary Cards Row (4 cards in one line) -->
+                <div class="row mb-4" style="display: flex; gap: 20px; flex-wrap: nowrap; overflow-x: auto;">
+                    
+                    <!-- Card 1: Total Subscriptions -->
+                    <div style="flex: 1; min-width: 200px; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px; text-transform: uppercase; font-weight: 600;">Total Subscriptions (Agents)</h5>
+                        <h3 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">{{ agent_pending|length }}</h3>
+                    </div>
+                    </div>
+
+                </div>
+
+
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="commercial-table">
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Payment Status</th>
+                                <th>Payment Screenshot</th>
+                                <th>User Id</th>
+                                <th>User Name</th>
+                                <th>User Phone</th>
+                                <th>User Role</th>
+                                <th>Package Name</th>
+                                <th>Plan Type</th>
+                                <th>Plan Price</th>
+                                <th>Plan Duration</th>
+                                <th>Plan Start Date</th>
+                                <th>Plan End Date</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in agent_pending %}
+                            <tr id="comm-row-{{ prop.id }}">
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url "Update_Payment_Admin" prop.id %}" class="btn-action btn-edit" title="Edit Subscription">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if prop.plan_status == "Done" %}
+                                            <a href=""{% url "Payment_Invoice_Admin" prop.id %} class="btn-action btn-edit" title="Download Invoice">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ prop.plan_status }}</strong></td>
+                                <td><strong><a href="{{prop.payment_ss.url}}">View Image</a></strong></td>
+                                <td>{{ prop.fk_user.user_id }}</td>
+                                <td>{{ prop.fk_user.user_name }}</td>
+                                <td>{{ prop.fk_user.user_phone }}</td>
+                                <td>{{ prop.fk_user.user_role }}</td>
+                                <td>{{ prop.fk_subscription.package_name }}</td>
+                                <td>{{ prop.fk_subscription.plan_type }}</td>
+                                <td>{{ prop.fk_subscription.plan_offer_price }}</td>
+                                <td>{{ prop.fk_subscription.plan_duration }}</td>
+                                <td>{{ prop.plan_start_date }}</td>
+                                <td>{{ prop.plan_end_date }}</td>
+                                <td>{{ prop.purchase_date }}</td>
+                                
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No
+                                    Agents Subscriptions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pg" role="tabpanel">
+                
+                <!-- Summary Cards Row (4 cards in one line) -->
+                <div class="row mb-4" style="display: flex; gap: 20px; flex-wrap: nowrap; overflow-x: auto;">
+                    
+                    <!-- Card 1: Total Subscriptions -->
+                    <div style="flex: 1; min-width: 200px; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px; text-transform: uppercase; font-weight: 600;">Total Subscriptions (Agencies/Builders)</h5>
+                        <h3 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">{{ agency_pending|length }}</h3>
+                    </div>
+                    </div>
+
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="pg-table">
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Payment Status</th>
+                                <th>Payment Screenshot</th>
+                                <th>User Id</th>
+                                <th>User Name</th>
+                                <th>User Phone</th>
+                                <th>User Role</th>
+                                <th>Package Name</th>
+                                <th>Plan Type</th>
+                                <th>Plan Price</th>
+                                <th>Plan Duration</th>
+                                <th>Plan Start Date</th>
+                                <th>Plan End Date</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in agency_pending %}
+                            <tr id="pg-row-{{ prop.id }}">
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url "Update_Payment_Admin" prop.id %}" class="btn-action btn-edit" title="Edit Subscription">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if prop.plan_status == "Done" %}
+                                            <a href="{% url "Payment_Invoice_Admin" prop.id %}" class="btn-action btn-edit" title="Download Invoice">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ prop.plan_status }}</strong></td>
+                                <td><strong><a href="{{prop.payment_ss.url}}">View Image</a></strong></td>
+                                <td>{{ prop.fk_user.user_id }}</td>
+                                <td>{{ prop.fk_user.user_name }}</td>
+                                <td>{{ prop.fk_user.user_phone }}</td>
+                                <td>{{ prop.fk_user.user_role }}</td>
+                                <td>{{ prop.fk_subscription.package_name }}</td>
+                                <td>{{ prop.fk_subscription.plan_type }}</td>
+                                <td>{{ prop.fk_subscription.plan_offer_price }}</td>
+                                <td>{{ prop.fk_subscription.plan_duration }}</td>
+                                <td>{{ prop.plan_start_date }}</td>
+                                <td>{{ prop.plan_end_date }}</td>
+                                <td>{{ prop.purchase_date }}</td>
+                                
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No Agencies/Builders Subscriptions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="resale" role="tabpanel">
+                
+                <!-- Summary Cards Row (4 cards in one line) -->
+                <div class="row mb-4" style="display: flex; gap: 20px; flex-wrap: nowrap; overflow-x: auto;">
+                    
+                    <!-- Card 1: Total Subscriptions -->
+                    <div style="flex: 1; min-width: 200px; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px; text-transform: uppercase; font-weight: 600;">Total Subscriptions (Tenants)</h5>
+                        <h3 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">{{ tenant_pending|length }}</h3>
+                    </div>
+                    </div>
+
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="resale-table">
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Payment Status</th>
+                                <th>Payment Screenshot</th>
+                                <th>User Id</th>
+                                <th>User Name</th>
+                                <th>User Phone</th>
+                                <th>User Role</th>
+                                <th>Package Name</th>
+                                <th>Plan Type</th>
+                                <th>Plan Price</th>
+                                <th>Plan Duration</th>
+                                <th>Plan Start Date</th>
+                                <th>Plan End Date</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in tenant_pending %}
+                            <tr id="resale-row-{{ prop.id }}">
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url "Update_Payment_Admin" prop.id %}" class="btn-action btn-edit" title="Edit Subscription">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if prop.plan_status == "Done" %}
+                                            <a href="{% url "Payment_Invoice_Admin" prop.id %}" class="btn-action btn-edit" title="Download Invoice">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ prop.plan_status }}</strong></td>
+                                <td><strong><a href="{{prop.payment_ss.url}}">View Image</a></strong></td>
+                                <td>{{ prop.fk_user.user_id }}</td>
+                                <td>{{ prop.fk_user.user_name }}</td>
+                                <td>{{ prop.fk_user.user_phone }}</td>
+                                <td>{{ prop.fk_user.user_role }}</td>
+                                <td>{{ prop.fk_subscription.package_name }}</td>
+                                <td>{{ prop.fk_subscription.plan_type }}</td>
+                                <td>{{ prop.fk_subscription.plan_offer_price }}</td>
+                                <td>{{ prop.fk_subscription.plan_duration }}</td>
+                                <td>{{ prop.plan_start_date }}</td>
+                                <td>{{ prop.plan_end_date }}</td>
+                                <td>{{ prop.purchase_date }}</td>
+                                
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No Tenants Subscriptions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="comm-resale" role="tabpanel">
+                
+                <!-- Summary Cards Row (4 cards in one line) -->
+                <div class="row mb-4" style="display: flex; gap: 20px; flex-wrap: nowrap; overflow-x: auto;">
+                    
+                    <!-- Card 1: Total Subscriptions -->
+                    <div style="flex: 1; min-width: 200px; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px; text-transform: uppercase; font-weight: 600;">Total Subscriptions (Buyers)</h5>
+                        <h3 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">{{ buyer_pending|length }}</h3>
+                    </div>
+                    </div>
+
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="comm-resale-table">
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Payment Status</th>
+                                <th>Payment Screenshot</th>
+                                <th>User Id</th>
+                                <th>User Name</th>
+                                <th>User Phone</th>
+                                <th>User Role</th>
+                                <th>Package Name</th>
+                                <th>Plan Type</th>
+                                <th>Plan Price</th>
+                                <th>Plan Duration</th>
+                                <th>Plan Start Date</th>
+                                <th>Plan End Date</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in buyer_pending %}
+                            <tr id="comm-resale-row-{{ prop.id }}">
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url "Update_Payment_Admin" prop.id %}" class="btn-action btn-edit" title="Edit Subscription">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if prop.plan_status == "Done" %}
+                                            <a href="{% url "Payment_Invoice_Admin" prop.id %}" class="btn-action btn-edit" title="Download Invoice">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+
+                                    </div>
+                                </td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ prop.plan_status }}</strong></td>
+                                <td><strong><a href="{{prop.payment_ss.url}}">View Image</a></strong></td>
+                                <td>{{ prop.fk_user.user_id }}</td>
+                                <td>{{ prop.fk_user.user_name }}</td>
+                                <td>{{ prop.fk_user.user_phone }}</td>
+                                <td>{{ prop.fk_user.user_role }}</td>
+                                <td>{{ prop.fk_subscription.package_name }}</td>
+                                <td>{{ prop.fk_subscription.plan_type }}</td>
+                                <td>{{ prop.fk_subscription.plan_offer_price }}</td>
+                                <td>{{ prop.fk_subscription.plan_duration }}</td>
+                                <td>{{ prop.plan_start_date }}</td>
+                                <td>{{ prop.plan_end_date }}</td>
+                                <td>{{ prop.purchase_date }}</td>
+                                
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No Buyer Subscriptions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="tab-pane fade" id="industrial" role="tabpanel">
+                
+                <!-- Summary Cards Row (4 cards in one line) -->
+                <div class="row mb-4" style="display: flex; gap: 20px; flex-wrap: nowrap; overflow-x: auto;">
+                    
+                    <!-- Card 1: Total Subscriptions -->
+                    <div style="flex: 1; min-width: 200px; background: #ffffff; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: #eff6ff; color: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 style="font-size: 0.75rem; color: #64748b; margin-bottom: 2px; text-transform: uppercase; font-weight: 600;">Total Subscriptions (Vendors)</h5>
+                        <h3 style="font-size: 1.4rem; font-weight: 700; color: #0f172a; margin: 0;">{{ vendor_pending|length }}</h3>
+                    </div>
+                    </div>
+
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="industrial-table">
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Payment Status</th>
+                                <th>Payment Screenshot</th>
+                                <th>User Id</th>
+                                <th>User Name</th>
+                                <th>User Phone</th>
+                                <th>User Role</th>
+                                <th>Package Name</th>
+                                <th>Plan Type</th>
+                                <th>Plan Price</th>
+                                <th>Plan Duration</th>
+                                <th>Plan Start Date</th>
+                                <th>Plan End Date</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in vendor_pending %}
+                            <tr id="industrial-row-{{ prop.id }}">
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url "Update_Payment_Admin" prop.id %}" class="btn-action btn-edit" title="Edit Subscription">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if prop.plan_status == "Done" %}
+                                            <a href="{% url "Payment_Invoice_Admin" prop.id %}" class="btn-action btn-edit" title="Download Invoice">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+                                        
+                                    </div>
+                                </td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ prop.plan_status }}</strong></td>
+                                <td><strong><a href="{{prop.payment_ss.url}}">View Image</a></strong></td>
+                                <td>{{ prop.fk_user.user_id }}</td>
+                                <td>{{ prop.fk_user.user_name }}</td>
+                                <td>{{ prop.fk_user.user_phone }}</td>
+                                <td>{{ prop.fk_user.user_role }}</td>
+                                <td>{{ prop.fk_subscription.package_name }}</td>
+                                <td>{{ prop.fk_subscription.plan_type }}</td>
+                                <td>{{ prop.fk_subscription.plan_offer_price }}</td>
+                                <td>{{ prop.fk_subscription.plan_duration }}</td>
+                                <td>{{ prop.plan_start_date }}</td>
+                                <td>{{ prop.plan_end_date }}</td>
+                                <td>{{ prop.purchase_date }}</td>
+                                
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No Vendor Subscriptions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $("#Payment_Approve").addClass("active");
+
+    const csrfToken = '{{ csrf_token }}';
+
+    // Real-time table filter logic for the "Deleted By" column (index 4)
+    function filterTable(tableId, query) {
+        const filter = query.toLowerCase();
+        const table = document.getElementById(tableId);
+        const tr = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < tr.length; i++) {
+            const td = tr[i].getElementsByTagName("td")[4];
+            if (td) {
+                const txtValue = td.textContent || td.innerText;
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    // safely hits ALL endpoints sequentially to empty everything
+    function emptyAllBins() {
+        Swal.fire({
+            title: 'Empty ALL Recycle Bins?',
+            text: 'This will PERMANENTLY delete ALL properties across EVERY category! This is extremely irreversible.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Nuke Everything!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Processing...', text: 'Clearing all databases...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+                const endpoints = [
+                    'rental-residential', 'commercial', 'pg-coliving', 'resale-residential',
+                    'commercial-resale', 'plot-sale', 'industrial-resale', 'agricultural-resale'
+                ];
+
+                const promises = endpoints.map(ep =>
+                    fetch(`/Admin_App/bulk-hard-delete/${ep}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                );
+
+                Promise.all(promises)
+                    .then(() => {
+                        Swal.fire('Emptied!', 'All recycle bins have been completely cleared.', 'success')
+                            .then(() => { window.location.reload(); });
+                    })
+                    .catch(err => Swal.fire('Error', 'Server error occurred during mass deletion.', 'error'));
+            }
+        });
+    }
+
+    function processBulkDelete(propertyType, label) {
+        Swal.fire({
+            title: `Empty ${label} Bin?`,
+            text: `This will PERMANENTLY delete ALL soft-deleted ${label} records! This action is irreversible.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Delete All Forever!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+                fetch(`/Admin_App/bulk-hard-delete/${propertyType}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire('Emptied!', data.message, 'success').then(() => { window.location.reload(); });
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
+            }
+        });
+    }
+
+    function processAction(actionType, targetUrl, rowId) {
+        let swalTitle, swalText, swalIcon, swalConfirmColor, swalConfirmText;
+
+        if (actionType === 'restore') {
+            swalTitle = 'Restore Property?';
+            swalText = 'This will move the property back to the main list in its original sequence. This action is recorded in the Audit Log.';
+            swalIcon = 'info';
+            swalConfirmColor = '#10b981';
+            swalConfirmText = 'Yes, Restore it!';
+        } else {
+            swalTitle = 'PERMANENTLY Delete?';
+            swalText = 'This action CANNOT be undone! The data will be wiped forever from the database.';
+            swalIcon = 'error';
+            swalConfirmColor = '#dc2626';
+            swalConfirmText = 'Permanently Delete';
+        }
+
+        Swal.fire({
+            title: swalTitle,
+            text: swalText,
+            icon: swalIcon,
+            showCancelButton: true,
+            confirmButtonColor: swalConfirmColor,
+            confirmButtonText: swalConfirmText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+                fetch(targetUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire(actionType === 'restore' ? 'Restored!' : 'Deleted!', data.message, 'success');
+
+                            const row = document.getElementById(rowId);
+                            if (row) {
+                                row.style.opacity = '0';
+                                setTimeout(() => row.remove(), 300);
+                            } else {
+                                window.location.reload();
+                            }
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
+            }
+        });
+    }
+
+    function restoreAllBins() {
+        Swal.fire({
+            title: 'Restore All Recycle Bins?',
+            text: 'This will instantly restore ALL deleted listings across EVERY single category back to live views.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-undo"></i> Yes, Restore Everything!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing Request...',
+                    text: 'Re-activating records across databases...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const endpoints = [
+                    'rental-residential', 'commercial', 'pg-coliving', 'resale-residential',
+                    'commercial-resale', 'plot-sale', 'industrial-resale', 'agricultural-resale',
+                    'industrial-plot-resale', 'agricultural-plot-resale'
+                ];
+                const promises = endpoints.map(ep =>
+                    fetch(`/Admin_App/bulk-restore/${ep}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                );
+
+                Promise.all(promises)
+                    .then(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'All Bins Restored!',
+                            text: 'Every real estate listing has been successfully returned to live status dashboards.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Bulk restoration tracking crash:", err);
+                        Swal.fire('Error', 'Server connection timed out during mass restoration.', 'error');
+                    });
+            }
+        });
+    }
+
+    function processBulkRestore(propertyType, label) {
+        Swal.fire({
+            title: `Restore All ${label} items?`,
+            text: `This will bulk restore all soft-deleted records currently listed inside the ${label} container view.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Restore All!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                fetch(`/Admin_App/bulk-restore/${propertyType}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Restored Successfully!',
+                                text: data.message,
+                                timer: 1800,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Operational Error', data.message, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Single model group restore trace failure:", err);
+                        Swal.fire('Error', 'Network interface broken or server endpoint context timed out.', 'error');
+                    });
+            }
+        });
+    }
+</script>
+</body>
+
+</html>

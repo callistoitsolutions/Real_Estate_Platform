@@ -167,15 +167,15 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Base Price <span style="color:red;">*</span></label>
-                <input type="number" class="form-control" id="plan_base_price" name="plan_base_price" placeholder="Enter Base Price" required>
+                <input type="number" class="form-control" id="plan_base_price" name="plan_base_price" placeholder="Enter Base Price" required oninput="calculateDiscount()">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Offer Price <span style="color:red;">*</span></label>
-                <input type="number" class="form-control" id="plan_offer_price" name="plan_offer_price" placeholder="Enter Offer Price" required>
+                <input type="number" class="form-control" id="plan_offer_price" name="plan_offer_price" placeholder="Enter Offer Price" required oninput="calculateDiscount()">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Discount Percentage <span style="color:red;">*</span></label>
-                <input type="number" class="form-control" id="plan_discount" name="plan_discount" placeholder="Enter Discount Percentage" required>
+                <input type="number" step="0.01" class="form-control" id="plan_discount" name="plan_discount" placeholder="Auto-calculated Discount" readonly required>
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Maxlistings / Enquiries <span style="color:red;">*</span></label>
@@ -192,19 +192,25 @@
           <div class="section-header"><i class="fas fa-calendar-alt"></i> Step 3: Duration & Details</div>
           <div class="section-body">
             <div class="row">
-              <div class="col-md-6 mt-2">
+              <div class="col-md-4 mt-2">
                 <label class="form-label">Offer Start Date <span style="color:red;">*</span></label>
-                <input type="date" class="form-control" id="plan_offer_start_date" name="plan_offer_start_date" required>
+                <input type="date" class="form-control" id="plan_offer_start_date" name="plan_offer_start_date" required onchange="calculateDays()">
               </div>
-              <div class="col-md-6 mt-2">
+              <div class="col-md-4 mt-2">
                 <label class="form-label">Offer End Date <span style="color:red;">*</span></label>
-                <input type="date" class="form-control" id="plan_offer_end_date" name="plan_offer_end_date" required>
+                <input type="date" class="form-control" id="plan_offer_end_date" name="plan_offer_end_date" required onchange="calculateDays()">
               </div>
-              <div class="col-md-12 mt-4">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">No. of Days <span style="color:red;">*</span></label>
+                <input type="number" class="form-control" id="offer_days" name="offer_days" placeholder="Auto-calculated Days" readonly required>
+              </div>
+
+              {% comment %} <div class="col-md-12 mt-4">
                 <label class="form-label">Plan Description <span style="color:red;">*</span></label>
                 <!-- Removed required attribute here if using CKEditor as it can conflict with standard validation -->
                 <textarea class="form-control" placeholder="Enter Plan Description" id="plan_desc" name="plan_desc" required></textarea>
-              </div>
+              </div> {% endcomment %}
+
             </div>
           </div>
         </div>
@@ -293,6 +299,45 @@
 
         return false;
     }
+
+  // Automatic Discount Calculation Logic
+  function calculateDiscount() {
+    let basePrice = parseFloat(document.getElementById('plan_base_price').value);
+    let offerPrice = parseFloat(document.getElementById('plan_offer_price').value);
+    let discountField = document.getElementById('plan_discount');
+
+    if (!isNaN(basePrice) && !isNaN(offerPrice) && basePrice > 0) {
+      if (offerPrice <= basePrice) {
+        let discount = ((basePrice - offerPrice) / basePrice) * 100;
+        discountField.value = discount.toFixed(2);
+      } else {
+        discountField.value = 0;
+      }
+    } else {
+      discountField.value = '';
+    }
+  }
+
+  // Automatic Days Calculation Logic
+  function calculateDays() {
+    let startDate = new Date(document.getElementById('plan_offer_start_date').value);
+    let endDate = new Date(document.getElementById('plan_offer_end_date').value);
+    let daysField = document.getElementById('offer_days');
+
+    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+      let timeDiff = endDate.getTime() - startDate.getTime();
+      let dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      if (dayDiff >= 0) {
+        daysField.value = dayDiff + 1; // Inclusive of start day, adjust if exclusive
+      } else {
+        daysField.value = 0;
+      }
+    } else {
+      daysField.value = '';
+    }
+  }
+
   let currentStep = 1;
 
   function showStep(step) {
@@ -353,9 +398,9 @@
     fd.append('id', '');
     
     // Grab CKEditor content if available
-    if (typeof CKEDITOR !== 'undefined') {
+    /*if (typeof CKEDITOR !== 'undefined') {
         fd.append('plan_desc', CKEDITOR.instances.plan_desc.getData());
-    }
+    }*/
 
     $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
 

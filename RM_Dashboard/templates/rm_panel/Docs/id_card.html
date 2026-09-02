@@ -1,0 +1,533 @@
+{% include "rm_panel/rm_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Barcode and QR Code Generation Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+  /* --- Original Layout Styles --- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+  .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 30px; min-height: calc(100vh - var(--topbar-height)); transition: all 0.3s ease; }
+  .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); max-width: 900px; margin: 0 auto; width: 100%; }
+  .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; flex-wrap: wrap; gap: 15px; }
+  
+  .btn-back {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+  .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+
+  .section-header { background: #0f172a; color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .section-body { background: #f8f9fa; padding: 35px 20px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; display: flex; justify-content: center; overflow-x: auto; gap: 30px; flex-wrap: wrap; }
+  
+  .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
+  .form-title i { width: 45px; height: 45px; background: #0f172a; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
+  /* --- ID CARD STYLING (FRONT & BACK) --- */
+  .id-card-wrapper {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .id-card-preview { 
+    background: #0d1b2a; 
+    border-radius: 16px; 
+    color: #fff; 
+    padding: 24px 18px; 
+    box-shadow: 0 12px 35px rgba(0,0,0,0.25); 
+    width: 270px; 
+    height: 420px;
+    position: relative; 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .id-card-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%);
+    border-bottom-left-radius: 50% 30%;
+    border-bottom-right-radius: 50% 30%;
+    z-index: 1;
+  }
+
+  .id-card-top, .id-card-content, .id-card-bottom {
+    position: relative;
+    z-index: 2;
+  }
+
+  .id-card-brand { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+    font-size: 0.65rem; 
+    font-weight: 700; 
+    color: #f59e0b; 
+    letter-spacing: 1px; 
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .id-card-avatar-box {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .id-card-avatar { 
+    width: 85px; 
+    height: 85px; 
+    border-radius: 50%; 
+    background: #1e293b; 
+    color: #fff; 
+    font-size: 1.8rem; 
+    font-weight: 700; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+    border: 3px solid #ffffff; 
+    overflow: hidden; 
+  }
+  .id-card-avatar img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+  }
+
+  .id-user-title {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .id-user-title h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .id-user-title span {
+    font-size: 0.7rem;
+    color: #f59e0b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .id-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 10px;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+  }
+  .detail-row label {
+    color: #94a3b8;
+    font-weight: 600;
+    width: 35%;
+  }
+  .detail-row span {
+    color: #f8fafc;
+    font-weight: 500;
+    width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Generated Barcode Container Styling */
+  .id-barcode {
+    text-align: center;
+    background: #ffffff;
+    padding: 4px 2px;
+    border-radius: 4px;
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .id-barcode canvas {
+    max-width: 100%;
+    height: 25px !important;
+  }
+
+  /* Back Side Specific Styles */
+  .id-card-back-content {
+    font-size: 0.7rem;
+    color: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .terms-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #f59e0b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .terms-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .terms-list li {
+    position: relative;
+    padding-left: 10px;
+    line-height: 1.3;
+    font-size: 0.65rem;
+    color: #94a3b8;
+  }
+  .terms-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #f59e0b;
+  }
+
+  .back-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 0.7rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 0;
+  }
+
+  .signature-area {
+    text-align: center;
+    margin-top: 8px;
+  }
+  .sig-line {
+    border-bottom: 1px dashed rgba(255,255,255,0.3);
+    width: 120px;
+    margin: 0 auto 3px auto;
+    height: 15px;
+  }
+  .sig-label {
+    font-size: 0.6rem;
+    color: #64748b;
+  }
+
+  /* Generated QR Code Container Styling */
+  .qr-code-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+  }
+  .qr-mock {
+    background: #fff;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-mock canvas, .qr-mock img {
+    display: block;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  /* Dropdown Button Styling */
+  .dropdown-download { position: relative; display: inline-block; }
+  .dropdown-download-content { display: none; position: absolute; right: 0; background-color: #fff; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 10; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .dropdown-download-content a { color: #2d3748; padding: 10px 16px; text-decoration: none; display: block; font-size: 0.85rem; font-weight: 600; transition: background 0.2s; }
+  .dropdown-download-content a:hover { background-color: #f1f5f9; color: #f59e0b; }
+  .dropdown-download.show .dropdown-download-content { display: block; }
+
+  @media(max-width: 768px) {
+    .main-content { margin-left: 0; padding: 15px; }
+    .form-container { padding: 20px; }
+  }
+</style>
+
+<div class="main-content">
+  <div class="form-container">
+    <div class="form-header">
+      <div class="form-title"><i class="fas fa-id-card"></i> Relationship Manager Identity Card</div>
+      <button class="btn-back" onclick="history.back();">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- ID CARD SECTION -->
+    <div class="form-section">
+      <div class="section-header">
+        <span><i class="fas fa-user-shield"></i> RM Official ID Card</span>
+        
+        <!-- Download Dropdown Button -->
+        <div class="dropdown-download" id="downloadDropdown">
+          <button type="button" class="btn btn-sm btn-light fw-bold px-3 py-1" onclick="toggleDownloadMenu(event)" style="border-radius:8px; font-size:0.8rem; color:#f59e0b;">
+            <i class="fas fa-download me-1"></i> Download Card <i class="fas fa-chevron-down ms-1" style="font-size:0.7rem;"></i>
+          </button>
+          <div class="dropdown-download-content" id="downloadMenu">
+            <a href="javascript:void(0);" onclick="downloadCardAsImage()"><i class="fas fa-file-image text-warning me-2"></i> Download as Image</a>
+            <a href="javascript:void(0);" onclick="downloadCardAsPDF()"><i class="fas fa-file-pdf text-danger me-2"></i> Download as PDF</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-body">
+        <div class="id-card-wrapper" id="rmIdentityCardContainer">
+          
+          <!-- FRONT SIDE OF ID CARD -->
+          <div class="id-card-preview" id="rmIdentityCardFront">
+            <div class="id-card-top">
+              <div class="id-card-brand">
+                <i class="fas fa-cube"></i> EstateFlow
+              </div>
+            </div>
+
+            <div class="id-card-content">
+              <div class="id-card-avatar-box">
+                <div class="id-card-avatar">
+                  {% if user_obj.user_profile %}
+                    <img src="{{ user_obj.user_profile.url }}" alt="{{ user_obj.user_name }}">
+                  {% else %}
+                    {{ user_obj.user_name|slice:":1"|upper|default:"RM" }}
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="id-user-title">
+                <h3>{{ user_obj.user_name|default:"NAME HERE" }}</h3>
+                <span>{{ user_obj.user_role|default:"Relationship Manager" }}</span>
+              </div>
+
+              <div class="id-card-details">
+                <div class="detail-row">
+                  <label>ID No</label>
+                  <span>: {{ user_obj.user_id|default:"000000" }}</span>
+                </div>
+                <div class="detail-row">
+                  <label>Email</label>
+                  <span>: {{ user_obj.user_email|default:"Email Address" }}</span>
+                </div>
+                <div class="detail-row">
+                  <label>Phone</label>
+                  <span>: {{ user_obj.user_phone|default:"000000" }}</span>
+                </div>
+                <div class="detail-row">
+                  <label>City</label>
+                  <span>: {{ user_obj.user_city|default:"Nagpur" }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Barcode Canvas Element -->
+            <div class="id-barcode">
+              <canvas id="rmBarcode"></canvas>
+            </div>
+          </div>
+
+          <!-- BACK SIDE OF ID CARD -->
+          <div class="id-card-preview" id="rmIdentityCardBack">
+            <div class="id-card-top">
+              <div class="terms-title">Terms & Conditions:</div>
+            </div>
+
+            <div class="id-card-back-content">
+              <ul class="terms-list">
+                <li style="color:white;">This card is property of EstateFlow . If found, please return to the head office.</li>
+                <li style="color:white;">Holder is authorized to act as an official representative.</li>
+                <li style="color:white;">Misuse of this id card will result in immediate termination.</li>
+              </ul>
+
+              <div class="back-dates">
+                <div class="detail-row">
+                  <label>JOIN</label>
+                  <span id="cardJoinDate">: {{user_obj.user_register_date}}</span>
+                </div>
+                <div class="detail-row">
+                  <label>EXPIRED</label>
+                  <span id="cardExpiryDate">: Calculated automatically...</span>
+                </div>
+              </div>
+
+              <div class="signature-area">
+                <div class="sig-line"></div>
+                <div class="sig-label">Authorized Signature</div>
+              </div>
+            </div>
+
+            <!-- Dynamic QR Code Container Element -->
+            <div class="qr-code-footer">
+              <div class="qr-mock" id="rmQRCode"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+  $("#Docs").addClass("active");
+
+  document.addEventListener("DOMContentLoaded", function() {
+    let joinDateText = "{{user_obj.user_register_date|default:'July 17, 2026'}}";
+    let joinDate = new Date(joinDateText);
+    
+    if (!isNaN(joinDate.getTime())) {
+      // Add exactly 1 year to the join date
+      joinDate.setFullYear(joinDate.getFullYear() + 1);
+      
+      // Format to Month DD, YYYY (e.g., July 17, 2027)
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      let formattedExpiry = joinDate.toLocaleDateString('en-US', options);
+      
+      document.getElementById('cardExpiryDate').textContent = `: ${formattedExpiry}`;
+    }
+  });
+
+  // Automatically Generate Barcode & QR Code on Page Load
+  document.addEventListener("DOMContentLoaded", function() {
+      // 1. Generate Barcode using JsBarcode based on user ID or a fallback string
+      let uniqueId = "{{ user_obj.user_id|default:'EF-ID-001' }}";
+      try {
+          JsBarcode("#rmBarcode", uniqueId, {
+              format: "CODE128",
+              lineColor: "#000",
+              width: 1.5,
+              height: 25,
+              displayValue: false,
+              margin: 0
+          });
+      } catch (e) {
+          console.error("Barcode generation error:", e);
+      }
+
+      // 2. Generate QR Code using qrcode.js containing profile verification link or user details
+      let qrContainer = document.getElementById("rmQRCode");
+      if (qrContainer) {
+          qrContainer.innerHTML = ""; // clear previous if any
+          try {
+              new QRCode(qrContainer, {
+                  text: "RM_ID: " + uniqueId + " | Name: {{ user_obj.user_name|default:'Associate' }}",
+                  width: 48,
+                  height: 48,
+                  colorDark: "#000000",
+                  colorLight: "#ffffff",
+                  correctLevel: QRCode.CorrectLevel.L
+              });
+          } catch (e) {
+              console.error("QR Code generation error:", e);
+          }
+      }
+  });
+
+  // Sidebar Toggle for Desktop and Mobile
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const windowWidth = window.innerWidth;
+
+    if (windowWidth <= 768) {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    } else {
+      sidebar.classList.toggle('collapsed');
+    }
+  }
+
+  function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function toggleSubmenu(event, element) {
+    event.preventDefault();
+    event.stopPropagation();
+    const submenu = element.nextElementSibling;
+    submenu.classList.toggle('active');
+    element.classList.toggle('dropdown-open');
+    return false;
+  }
+
+  function toggleDownloadMenu(e) {
+      e.stopPropagation();
+      document.getElementById('downloadDropdown').classList.toggle('show');
+  }
+
+  window.onclick = function(event) {
+      if (!event.target.matches('.btn-light') && !event.target.closest('.btn-light')) {
+          var dropdowns = document.getElementsByClassName("dropdown-download");
+          for (var i = 0; i < dropdowns.length; i++) {
+              var openDropdown = dropdowns[i];
+              if (openDropdown.classList.contains('show')) {
+                  openDropdown.classList.remove('show');
+              }
+          }
+      }
+  }
+
+  // Download ID Card Container as Image using html2canvas
+  function downloadCardAsImage() {
+      const cardContainer = document.getElementById('rmIdentityCardContainer');
+      html2canvas(cardContainer, { scale: 2, backgroundColor: null, useCORS: true }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = 'RM_Identity_Card_{{ user_obj.user_id|default:"card" }}.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+      });
+  }
+
+  // Download ID Card Container as PDF using jsPDF and html2canvas
+  function downloadCardAsPDF() {
+      const cardContainer = document.getElementById('rmIdentityCardContainer');
+      html2canvas(cardContainer, { scale: 2, useCORS: true }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [125, 80] });
+          pdf.addImage(imgData, 'PNG', 5, 5, 115, 70);
+          pdf.save('RM_Identity_Card_{{ user_obj.user_id|default:"card" }}.pdf');
+      });
+  }
+  
+</script>

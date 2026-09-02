@@ -9,7 +9,7 @@ urlpatterns = [
    
     path('rm_dashboard',views.rm_dashboard,name="rm_dashboard"),
 
-
+    
     ############# urls for user logout ######################
 
     path('User_Logout',views.User_Logout,name="User_Logout"),
@@ -17,6 +17,18 @@ urlpatterns = [
     ############ urls for update rm profile #######################
 
     path('Update_Profile_Rm',views.Update_Profile_Rm,name='Update_Profile_Rm'),
+
+    ########### urls for display Id cards for RM ########################
+
+    path('Id_Card_Rm',views.Id_Card_Rm,name='Id_Card_Rm'),
+
+    ########### urls for display joining letter for RM ########################
+
+    path('Joining_Letter_Rm',views.Joining_Letter_Rm,name='Joining_Letter_Rm'),
+
+    ########### urls for display validity letter for RM ########################
+
+    path('Validity_Letter_Rm',views.Validity_Letter_Rm,name='Validity_Letter_Rm'),
 
     ############## urls for assign enquiries to rm #########################
 
@@ -246,6 +258,14 @@ urlpatterns = [
     ############### urls for commercial plot list form #######################
 
     path('plot_resale_comm_rm',views.plot_resale_comm_rm,name="plot_resale_comm_rm"),
+
+    ############ urls for update commercial plot list form ################
+
+    path('plot_resale_comm_rm_update/<str:id>',views.plot_resale_comm_rm_update,name="plot_resale_comm_rm_update"),
+
+    ############ urls for view commercial plot list form ################
+    
+    path('plot_resale_comm_rm_view/<str:id>',views.plot_resale_comm_rm_view,name="plot_resale_comm_rm_view"),
 
     ########### urls for industrial plot list for rm #######################
 

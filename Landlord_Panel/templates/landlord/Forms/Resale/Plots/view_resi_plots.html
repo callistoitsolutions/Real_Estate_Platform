@@ -1,0 +1,1250 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #3b82f6;
+        --primary-light: #eff6ff;
+        --primary-dark: #1d4ed8;
+        --accent: #f97316;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body, .main-content {
+        font-family: 'DM Sans', sans-serif;
+        background: #f3f4f8;
+        color: var(--dark);
+    }
+
+    /* ============ TOP BREADCRUMB BAR ============ */
+    .prop-topbar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-topbar .prop-id-badge {
+        background: #eff6ff;
+        color: var(--primary);
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #bfdbfe;
+        font-family: monospace;
+    }
+    .prop-verified-badge {
+        background: #ecfdf5;
+        color: var(--success);
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #a7f3d0;
+    }
+    .badge-duplicate {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* ============ HERO TITLE SECTION ============ */
+    .prop-hero-header {
+        background: var(--white);
+        padding: 20px 0 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .prop-hero-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 6px;
+        line-height: 1.3;
+    }
+    .prop-hero-location {
+        color: var(--muted);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1;
+    }
+
+    /* ============ MEDIA GALLERY ============ */
+    .prop-gallery-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 6px;
+        height: 420px;
+        overflow: hidden;
+        background: var(--dark);
+        margin-bottom: 0;
+    }
+    .prop-gallery-main {
+        grid-row: 1 / 3;
+        position: relative;
+        overflow: hidden;
+        background: #0d1117;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb {
+        position: relative;
+        overflow: hidden;
+        background: #1e2733;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb img,
+    .prop-gallery-main .walkthrough-slide img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+
+    .walkthrough-slide {
+        position: absolute; inset: 0;
+        opacity: 0; transition: opacity 0.7s ease;
+        display: none;
+    }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+
+    .gallery-hud {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px 16px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        z-index: 10;
+    }
+    .gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+    .btn-play-pause {
+        width: 34px; height: 34px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.75rem;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .btn-play-pause:hover { background: rgba(255,255,255,0.25); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge-walkthrough {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 4px 9px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    .thumb-more-overlay {
+        position: absolute; inset: 0;
+        background: rgba(17,24,39,0.7);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .thumb-more-overlay:hover { background: rgba(17,24,39,0.85); }
+    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
+
+    /* ============ STICKY NAV ============ */
+    .prop-sticky-nav {
+        position: sticky;
+        top: 68px;
+        background: var(--white);
+        border-bottom: 2px solid var(--border);
+        z-index: 990;
+        padding: 0;
+    }
+    .prop-sticky-nav-inner {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        padding-bottom: 2px;
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar { height: 4px; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-track { background: #f1f1f1; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+    .prop-nav-button {
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 14px 18px;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex; align-items: center; gap: 6px;
+        cursor: pointer;
+    }
+    .prop-nav-button i { font-size: 0.75rem; }
+    .prop-nav-button:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-button.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+    /* ============ LAYOUT SPLIT ============ */
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1100px) {
+        .prop-layout-grid { grid-template-columns: 1fr; }
+        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+        .prop-gallery-thumb { display: none; }
+        .prop-gallery-main { grid-row: 1; }
+    }
+
+    /* ============ SECTION CARDS ============ */
+    .prop-section {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+        scroll-margin-top: 140px;
+        box-shadow: var(--shadow-sm);
+    }
+    .prop-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prop-section-title .section-icon {
+        width: 32px; height: 32px;
+        background: var(--primary-light);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary);
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    /* Spec rows */
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .spec-item { padding: 11px 12px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 3px; }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .spec-value { font-size: 0.88rem; font-weight: 600; color: var(--dark); }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+
+    /* Highlight pricing row */
+    .spec-item.highlight-price {
+        background: linear-gradient(135deg, #fdfaff, #f5edff);
+        border-radius: 8px;
+        border: 1px solid #e1d5f5 !important;
+        padding: 14px;
+    }
+    .spec-item.highlight-price .spec-label { color: var(--primary); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary); }
+
+    /* Badges / Pills */
+    .amenity-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: var(--mid); }
+    .amenity-pill i { color: var(--success); font-size: 0.68rem; }
+    .facility-pill { display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: #15803d; }
+    .facility-pill i { font-size: 0.68rem; }
+
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; width: fit-content; }
+    .badge-yes { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-no { background: #ecfdf5; color: #065f46; border: 1px solid #34d399; }
+
+    /* Address box */
+    .address-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem; color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary); }
+
+    /* FAQ accordion styling */
+    .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
+    .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
+    .prop-faq .accordion-button:not(.collapsed) { background: #f9f6ff; color: var(--primary); border-bottom: 1px solid #ebdfff; }
+    .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
+
+    /* Sidebar pricing & actions */
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+    .sidebar-price-header { background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 20px 20px 16px; color: white; }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+
+    /* Owner detail elements */
+    .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #b8860b); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .owner-name { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
+    .owner-email { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .owner-phone-masked { font-size: 0.82rem; color: var(--mid); font-weight: 500; font-family: monospace; }
+    
+    .btn-reveal-phone { font-size: 0.73rem; color: var(--primary); border: 1px solid #bfdbfe; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .btn-reveal-phone:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; font-weight: 700; width: 100%; cursor: pointer; text-decoration: none; margin-top: 14px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+    .btn-call-primary:hover { background: linear-gradient(135deg, #1d4ed8, #3b82f6); transform: translateY(-1px); color: white; }
+
+    .owner-info-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem; }
+    .owner-info-row:last-child { border: none; padding-bottom: 0; }
+    .owner-info-row i { color: var(--muted); width: 14px; text-align: center; flex-shrink: 0; }
+    .owner-info-row span { color: var(--mid); }
+    .sidebar-divider { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+
+    /* Media buttons */
+    .media-action-container { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn-media-outline { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .btn-blueprint { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .btn-blueprint:hover { background: #0369a1; color: white; }
+    .btn-video { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .btn-video:hover { background: #c2410c; color: white; }
+
+    .prop-image-strip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 0; scrollbar-width: thin; }
+    .prop-image-strip::-webkit-scrollbar { height: 4px; }
+    .strip-thumb { flex-shrink: 0; width: 72px; height: 54px; border-radius: 5px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+    .strip-thumb.active-thumb { border-color: var(--primary); }
+    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .prop-quick-stats { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+    .quick-stat-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; color: var(--mid); }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
+
+    .sub-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 12px; margin-top: 18px; }
+    .sub-section-label:first-child { margin-top: 0; }
+
+    .empty-state { text-align: center; padding: 24px; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border); }
+    .empty-state i { font-size: 1.5rem; color: #d1d5db; margin-bottom: 8px; display: block; }
+    .empty-state p { font-size: 0.8rem; color: var(--muted); margin: 0; }
+</style>
+
+<div class="main-content">
+
+    <!-- TOP BREADCRUMB BAR -->
+    <div class="prop-topbar">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="javascript:history.back()"><i class="fas fa-arrow-left me-1"></i> Resale Listings</a>
+                    <span class="text-muted">/</span>
+                    <span>{{ prop.property_title|default:prop.property_no|truncatechars:40 }}</span>
+                    <span class="prop-id-badge">ID: {{ prop.id }}</span>
+                    <span class="prop-verified-badge"><i class="fas fa-shield-check me-1"></i> Title Verified</span>
+                    {% if prop.is_duplicate %}
+                    <span class="badge-duplicate"><i class="fas fa-clone me-1"></i> Potential Duplicate ({{ prop.duplicate_count }})</span>
+                    {% endif %}
+                </div>
+                <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO HEADER WITH RESALE PRICE -->
+    <div class="prop-hero-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+                <div style="flex: 1; min-width: 260px;">
+                    <h1>{{ prop.property_title|default:"Resale Residential Plot Property" }}</h1>
+                    <div class="prop-hero-location">
+                        <i class="fas fa-location-dot"></i>
+                        {{ prop.locality }}, {{ prop.city }}, {{ prop.state|default:"India" }}
+                    </div>
+                    <div class="media-action-container">
+                        {% if prop.layout_plan %}
+                            <a href="{{ prop.layout_plan.url }}" target="_blank" class="btn-media-outline btn-blueprint">
+                                <i class="fas fa-map"></i> Layout Plan
+                            </a>
+                        {% endif %}
+                        {% if prop.encumbrance_cert %}
+                            <a href="{{ prop.encumbrance_cert.url }}" target="_blank" class="btn-media-outline btn-blueprint">
+                                <i class="fas fa-file-pdf"></i> Encumbrance Certificate
+                            </a>
+                        {% endif %}
+                        {% if prop.property_video %}
+                            <a href="{{ prop.property_video.url }}" target="_blank" class="btn-media-outline btn-video">
+                                <i class="fas fa-circle-play"></i> Property Video
+                            </a>
+                        {% elif prop.property_video_link %}
+                            <a href="{{ prop.property_video_link }}" target="_blank" class="btn-media-outline btn-video">
+                                <i class="fas fa-external-link-alt"></i> External Video Link
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="prop-hero-price-tag">₹{{ prop.selling_price|default:"—" }}</div>
+                    <div style="font-size:0.78rem; color: var(--muted); margin-top:4px;">
+                        ₹{{ prop.plot_price_per_sqft|default:"—" }} / sq.ft (Negotiable: {{ prop.price_negotiable|default:"no"|upper }})
+                    </div>
+                </div>
+            </div>
+            
+            <!-- QUICK STATS CHIPS -->
+            <div class="prop-quick-stats">
+                <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ prop.listing_type|default:"Resale" }} / {{ prop.category|default:"Plot" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-home"></i> {{ prop.sub_category|title|default:"Residential Plot" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.plot_area }} sq.ft Area</div>
+                <div class="quick-stat-chip"><i class="fas fa-shield-alt"></i> NA Status: {{ prop.na_status|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-compass"></i> {{ prop.plot_facing|default:"—" }} Facing</div>
+                <div class="quick-stat-chip"><i class="fas fa-vector-square"></i> Corner: {{ prop.corner_plot|default:"no"|upper }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPPER IMAGE GALLERY SECTION -->
+    <div style="background: #111827;">
+        <div class="container-fluid px-0">
+            <div class="prop-gallery-grid">
+                <!-- Main Slideshow Window -->
+                <div class="prop-gallery-main" id="galMain">
+                    {% if existing_images or images %}
+                        {% for img in existing_images|default:images %}
+                        <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                            <img src="{{ img.image.url }}" alt="Property view {{ forloop.counter }}">
+                        </div>
+                        {% endfor %}
+                        <div class="gallery-hud">
+                            <div class="gallery-hud-left">
+                                <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+                                <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                            </div>
+                            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Presentation Walkthrough</span>
+                        </div>
+                    {% else %}
+                        <div class="w-100 h-100 position-relative overflow-hidden">
+                            <div style="position:absolute; inset:0; background:linear-gradient(135deg,#3b82f6,#1d4ed8); filter:blur(12px); transform:scale(1.2);"></div>
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+                                <div class="text-center text-white">
+                                    <div style="width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; margin:auto; border:1px solid rgba(255,255,255,0.15)">
+                                        <i class="fas fa-map-marked-alt" style="font-size:60px;"></i>
+                                    </div>
+                                    <h2 style="margin-top:20px; font-weight:700;">EstateFlow</h2>
+                                    <p style="color:rgba(255,255,255,0.8);">No Property Images Uploaded</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Thumbnail Slot 1 -->
+                <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(1)">
+                    {% if existing_images.count > 1 or images.count > 1 %}
+                        {% with img_list=existing_images|default:images %}
+                        <img src="{{ img_list.1.image.url }}" alt="Thumbnail 2">
+                        {% endwith %}
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                            <i class="fas fa-image mb-1"></i><span style="font-size:10px;">EstateFlow</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Thumbnail Slot 2 -->
+                <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(2)">
+                    {% if existing_images.count > 2 or images.count > 2 %}
+                        {% with img_list=existing_images|default:images %}
+                        <img src="{{ img_list.2.image.url }}" alt="Thumbnail 3">
+                        {% if img_list.count > 3 %}
+                        <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                            <div class="text-center">
+                                <span>+{{ img_list.count|add:"-3" }}</span>
+                                <small>More Photos</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                            <i class="fas fa-image mb-1"></i><span style="font-size:10px;">EstateFlow</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Thumbnail Strip -->
+        {% if existing_images or images %}
+        <div style="background:#0d1117; padding:8px 16px 12px;">
+            <div class="prop-image-strip" id="imageStrip">
+                {% for img in existing_images|default:images %}
+                <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+                    <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- STICKY NAVIGATION TABS (BUTTON DRIVEN WITH FAQ) -->
+    <div class="prop-sticky-nav">
+        <div class="container-fluid px-4">
+            <div class="prop-sticky-nav-inner" id="propNavTabs">
+                <button type="button" data-target="sec-step1-listed" class="prop-nav-button active"><i class="fas fa-user-tag"></i> Step 1: Listed By & Plot Info</button>
+                <button type="button" data-target="sec-step1-zone" class="prop-nav-button"><i class="fas fa-file-shield"></i> Zone & Approvals</button>
+                <button type="button" data-target="sec-step1-specs" class="prop-nav-button"><i class="fas fa-ruler-combined"></i> Plot Specs & Physical</button>
+                <button type="button" data-target="sec-step2-pricing" class="prop-nav-button"><i class="fas fa-indian-rupee-sign"></i> Step 2: Pricing & Legal</button>
+                <button type="button" data-target="sec-step3-amenities" class="prop-nav-button"><i class="fas fa-star"></i> Step 3: Amenities & Location</button>
+                <button type="button" data-target="sec-step3-desc" class="prop-nav-button"><i class="fas fa-align-left"></i> Description & Summary</button>
+                <button type="button" data-target="sec-step4-uploaded" class="prop-nav-button"><i class="fas fa-user-check"></i> Step 4: Uploaded By & Meta</button>
+                <button type="button" data-target="sec-faqs" class="prop-nav-button"><i class="fas fa-comments"></i> Property FAQs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE BODY: FORM SEQUENCE DATA -->
+    <div class="prop-page-body">
+        <div class="container-fluid px-4">
+            <div class="prop-layout-grid">
+
+                <div>
+
+                    <!-- STEP 1: LISTED BY & BASIC PLOT INFORMATION -->
+                    <div class="prop-section" id="sec-step1-listed">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-user"></i></div> Listed By & Basic Plot Details
+                        </div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Type</div>
+                                <div class="spec-value">{{ prop.listed_by_type|title|default:"Self" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Assigned To</div>
+                                <div class="spec-value">{{ prop.assigned_to|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By ID</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ prop.listed_by_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Name</div>
+                                <div class="spec-value">{{ prop.listed_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Role</div>
+                                <div class="spec-value">{{ prop.listed_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Email</div>
+                                <div class="spec-value" style="font-size:0.82rem;">{{ prop.listed_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Listed By Contact</div>
+                                <div class="spec-value">{{ prop.listed_by_contact|default:"—" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-label">Basic Plot Information</div>
+                        <div class="spec-grid">
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Title</div>
+                                <div class="spec-value">{{ prop.property_title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Plot / Survey Number</div>
+                                <div class="spec-value">{{ prop.property_no|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Plot Area</div>
+                                <div class="spec-value">{{ prop.plot_area|default:"—" }} sq.ft</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Plot Sub-Category</div>
+                                <div class="spec-value">{{ prop.property_type|title|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ZONE CLASSIFICATION & TOWNSHIP APPROVALS -->
+                    <div class="prop-section" id="sec-step1-zone">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-file-shield"></i></div> Zone Classification & Approvals
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Residential Zone / Land Use</div>
+                                <div class="spec-value">{{ prop.land_use|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">NA (Non-Agricultural) Status</div>
+                                <div class="spec-value">{{ prop.na_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Layout Approval Status</div>
+                                <div class="spec-value">{{ prop.layout_approval_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Residential Zone Type</div>
+                                <div class="spec-value">{{ prop.residential_zone_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Gated Community / Layout?</div>
+                                <div class="spec-value">
+                                    <span class="status-badge {% if prop.gated_community|lower == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.gated_community|default:"no"|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Layout / Project Name</div>
+                                <div class="spec-value">{{ prop.layout_name|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PLOT SPECIFICATIONS & PHYSICAL DETAILS -->
+                    <div class="prop-section" id="sec-step1-specs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-ruler-combined"></i></div> Plot Specifications & Physical Details
+                        </div>
+                        <div class="sub-section-label">Dimensions & Road Access</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Frontage / Width</div>
+                                <div class="spec-value">{{ prop.plot_frontage|default:"—" }} ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Depth / Length</div>
+                                <div class="spec-value">{{ prop.plot_depth|default:"—" }} ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Plot Shape</div>
+                                <div class="spec-value">{{ prop.plot_shape|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Road Connectivity</div>
+                                <div class="spec-value">{{ prop.road_connectivity|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Road / Street Width</div>
+                                <div class="spec-value">{{ prop.road_width|default:"—" }} ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Corner Plot (Two Road Access)?</div>
+                                <div class="spec-value">
+                                    <span class="status-badge {% if prop.corner_plot|lower == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.corner_plot|default:"no"|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-label">Other Physical Details</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Plot Facing Direction</div>
+                                <div class="spec-value">{{ prop.plot_facing|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Boundary Wall / Fencing</div>
+                                <div class="spec-value">{{ prop.plot_fencing|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Possession / Occupancy Status</div>
+                                <div class="spec-value">{{ prop.current_possession_status|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: PRICING & LEGAL DETAILS -->
+                    <div class="prop-section" id="sec-step2-pricing">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div> Pricing, Legal & Tax Status
+                        </div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item highlight-price">
+                                <div class="spec-label">Selling Price</div>
+                                <div class="spec-value">₹ {{ prop.selling_price|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, #fffcf5, #fff8e7); border-color: #f5e6c1 !important;">
+                                <div class="spec-label" style="color:#b8860b;">Price Per Sq.Ft (Auto)</div>
+                                <div class="spec-value" style="color:#8b6508;">₹ {{ prop.plot_price_per_sqft|default:"—" }} / sq.ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Price Negotiable?</div>
+                                <div class="spec-value">{{ prop.price_negotiable|default:"no"|upper }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Additional Charges</div>
+                                <div class="spec-value">{{ prop.additional_charges|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Brokerage Fee Option</div>
+                                <div class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</div>
+                            </div>
+                            {% if prop.manual_brokerage %}
+                            <div class="spec-item">
+                                <div class="spec-label">Fixed Brokerage Amount</div>
+                                <div class="spec-value">₹ {{ prop.manual_brokerage }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sub-section-label">Legal, Title & Approvals</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Ownership / Tenure Type</div>
+                                <div class="spec-value">{{ prop.ownership_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Primary Ownership Document</div>
+                                <div class="spec-value">{{ prop.ownership_document_type|default:"—" }}</div>
+                            </div>
+                            {% if prop.other_document_type %}
+                            <div class="spec-item">
+                                <div class="spec-label">Other Document Type</div>
+                                <div class="spec-value">{{ prop.other_document_type }}</div>
+                            </div>
+                            {% endif %}
+                            <div class="spec-item">
+                                <div class="spec-label">RERA Registration Status</div>
+                                <div class="spec-value">{{ prop.rera_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Title Clarity / Marketability</div>
+                                <div class="spec-value">{{ prop.title_clearance|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Encumbrance / Charge Status</div>
+                                <div class="spec-value">{{ prop.property_encumbrance_status|default:"—" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-label">Tax & Loan Status</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Property Tax Status</div>
+                                <div class="spec-value">{{ prop.property_tax_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Outstanding Tax Amount</div>
+                                <div class="spec-value">{% if prop.outstanding_tax_amount %}₹ {{ prop.outstanding_tax_amount }}{% else %}—{% endif %}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Tax Pending Since</div>
+                                <div class="spec-value">{{ prop.pending_since|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Existing Loan / Mortgage</div>
+                                <div class="spec-value">{{ prop.property_loan_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Financing Bank / NBFC</div>
+                                <div class="spec-value">{{ prop.financing_bank|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Outstanding Loan Amount</div>
+                                <div class="spec-value">{% if prop.outstanding_loan_amount %}₹ {{ prop.outstanding_loan_amount }}{% else %}—{% endif %}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Sanctioning / Approving Authority</div>
+                                <div class="spec-value">{{ prop.sanctioning_authority|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: AMENITIES & LOCATION -->
+                    <div class="prop-section" id="sec-step3-amenities">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-star"></i></div> Amenities & Location Details
+                        </div>
+                        
+                        <div class="sub-section-label">Nearby Facilities</div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for fac in facilities_list %}
+                                <div class="facility-pill"><i class="fas fa-map-marker-alt"></i> {{ fac }}</div>
+                            {% empty %}
+                                <div class="text-muted" style="font-size:0.82rem;">No nearby facilities selected.</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="sub-section-label">Plot & Layout Amenities</div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for am in amenities_list %}
+                                <div class="amenity-pill"><i class="fas fa-check-circle"></i> {{ am }}</div>
+                            {% empty %}
+                                <div class="text-muted" style="font-size:0.82rem;">No amenities selected.</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="sub-section-label">Location Details</div>
+                        <div class="spec-grid mb-3">
+                            <div class="spec-item">
+                                <div class="spec-label">State</div>
+                                <div class="spec-value">{{ prop.state }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">City / District</div>
+                                <div class="spec-value">{{ prop.city }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Locality / Neighbourhood</div>
+                                <div class="spec-value">{{ prop.locality }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">PIN Code</div>
+                                <div class="spec-value">{{ prop.pincode }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Nearby Landmark</div>
+                                <div class="spec-value">{{ prop.property_landmark|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Google Maps Coordinates</div>
+                                <div class="spec-value">
+                                    {% if prop.latitude and prop.longitude %}
+                                        Lat: {{ prop.latitude }}, Long: {{ prop.longitude }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spec-label mb-2">Full Address</div>
+                        <div class="address-box mb-3">
+                            <i class="fas fa-map-pin text-primary me-2"></i> {{ prop.address }}
+                        </div>
+
+                        {% if prop.google_maps_link %}
+                            <div>
+                                <a href="{{ prop.google_maps_link }}" target="_blank" class="btn btn-sm btn-outline-primary" style="border-radius:20px; font-weight:600;">
+                                    <i class="fas fa-external-link-alt me-1"></i> Open Google Maps Link
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- DESCRIPTIONS, SYSTEM SUMMARY & SYSTEM DESCRIPTION SECTION -->
+                    <div class="prop-section" id="sec-step3-desc">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-align-left"></i></div> Description & System Summary
+                        </div>
+                        
+                        <div class="sub-section-label">User Description</div>
+                        <div style="font-size: 0.9rem; line-height: 1.8; color: var(--mid);" class="mb-4">
+                            {% if prop.user_description %}
+                                {{ prop.user_description|linebreaks }}
+                            {% else %}
+                                <div class="text-muted">No custom description provided.</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sub-section-label">Property Summary (System Generated)</div>
+                        <div style="font-size: 0.88rem; line-height: 1.7; color: var(--mid); background: var(--surface); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);" class="mb-4">
+                            {{ prop.property_summary|default:"No system summary cached." }}
+                        </div>
+
+                        <div class="sub-section-label">Full Property Description (System Description)</div>
+                        <div style="font-size: 0.88rem; line-height: 1.8; color: var(--mid);">
+                            {% if prop.property_description %}
+                                {{ prop.property_description|safe }}
+                            {% else %}
+                                <div class="text-muted">No full system description available.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: LISTING STATUS & UPLOAD META -->
+                    <div class="prop-section" id="sec-step4-uploaded">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-upload"></i></div> Listing Status & Uploaded By Meta
+                        </div>
+
+                        <div class="sub-section-label">Listed Elsewhere Status</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Property Listed Elsewhere?</div>
+                                <div class="spec-value">{{ prop.listed_elsewhere|default:"No" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Portal Name</div>
+                                <div class="spec-value">{{ prop.portal_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listing Status</div>
+                                <div class="spec-value"><span class="badge bg-secondary">{{ prop.listing_status|default:"Draft" }}</span></div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Approval Status</div>
+                                <div class="spec-value"><span class="badge bg-warning text-dark">{{ prop.approval_status|default:"Pending" }}</span></div>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-label">Property Uploaded By</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Name</div>
+                                <div class="spec-value">{{ prop.uploaded_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Email</div>
+                                <div class="spec-value">{{ prop.uploaded_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Contact</div>
+                                <div class="spec-value">{{ prop.uploaded_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Role</div>
+                                <div class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Source File Name</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ prop.upload_file_name|default:"Direct Form Input" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Created At</div>
+                                <div class="spec-value">{{ prop.created_at|date:"d M Y, h:i A" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-label">System Duplication Engine Meta</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Duplicate Flagged?</div>
+                                <div class="spec-value">
+                                    {% if prop.is_duplicate %}
+                                        <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Yes ({{ prop.duplicate_count }} Linked)</span>
+                                    {% else %}
+                                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Original</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Duplicate Group ID</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ prop.duplicate_group_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Unique Key (SHA-256 Fingerprint)</div>
+                                <div class="spec-value" style="font-family:monospace; font-size:0.75rem; color: var(--muted); word-break: break-all;">{{ prop.property_unique_key|default:"Not Generated" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROPERTY FAQS SECTION -->
+                    <div class="prop-section" id="sec-faqs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-comments"></i></div> Property Frequently Asked Questions
+                        </div>
+                        <div class="accordion prop-faq" id="faqAccordion">
+                            {% for faq in prop.faqs.all %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHead{{ faq.id }}">
+                                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                                            {{ faq.question }}
+                                        </button>
+                                    </h2>
+                                    <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">{{ faq.answer }}</div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-database"></i>
+                                    <p>No FAQ matrices cached for this entry ID.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SIDEBAR SUMMARY -->
+                <div class="prop-sidebar">
+                    <div class="sidebar-price-card">
+                        <div class="sidebar-price-header">
+                            <div class="sidebar-price-label">Selling Price Tag</div>
+                            <div class="sidebar-price-amount">₹ {{ prop.selling_price|default:"—" }}</div>
+                        </div>
+                        <div class="sidebar-price-body">
+                            <div class="row g-0">
+                                <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border)">
+                                    <div class="sidebar-mini-stat-label">Price / Sqft</div>
+                                    <div class="sidebar-mini-stat-val">₹ {{ prop.plot_price_per_sqft|default:"—" }}</div>
+                                </div>
+                                <div class="col-6 sidebar-mini-stat">
+                                    <div class="sidebar-mini-stat-label">Plot Area</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.plot_area }} sq.ft</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-owner-card">
+                        <div class="sidebar-divider">Listing Representative</div>
+                        <div class="d-flex align-items-center mb-3" style="gap:12px;">
+                            <div class="owner-avatar">{{ prop.listed_by_name|slice:":1"|upper|default:"U" }}</div>
+                            <div style="min-width:0;">
+                                <div class="owner-name">{{ prop.listed_by_name|default:"Direct Owner" }}</div>
+                                <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ prop.listed_by_email|default:"No email logged" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="owner-info-row">
+                            <i class="fas fa-phone"></i>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="owner-phone-masked" id="sidebarPhone">
+                                    {% if prop.listed_by_contact %}
+                                        {{ prop.listed_by_contact|slice:":2" }}XXXXXX{{ prop.listed_by_contact|slice:"-2:" }}
+                                    {% else %}
+                                        Not available
+                                    {% endif %}
+                                </span>
+                                {% if prop.listed_by_contact %}
+                                    <button type="button" class="btn-reveal-phone" onclick="revealPhone('sidebarPhone', '{{ prop.listed_by_contact }}')">Reveal</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="owner-info-row">
+                            <i class="fas fa-user-tag"></i>
+                            <span>Role: {{ prop.listed_by_role|default:"Seller" }}</span>
+                        </div>
+
+                        {% if prop.listed_by_contact %}
+                        <a href="tel:{{ prop.listed_by_contact }}" class="btn-call-primary">
+                            <i class="fas fa-phone-volume"></i> Connect with Lister
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX MODAL -->
+<div class="modal fade" id="photoLightboxStrip" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
+            <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
+                <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
+                    <i class="fas fa-images me-2 text-primary"></i> Widescreen Gallery — Property Images
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    {% for img in existing_images|default:images %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151;">
+                                <img src="{{ img.image.url }}" alt="Gallery view {{ forloop.counter }}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+$("#Resale_Plot").addClass("active");
+
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. WALKTHROUGH ENGINE FOR UPPER GALLERY
+    const slides = document.querySelectorAll('.walkthrough-slide');
+    const stripThumbs = document.querySelectorAll('.strip-thumb');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const galTimer = document.getElementById('galTimer');
+    const INTERVAL = 3500;
+
+    let currentSlide = 0;
+    let isPlaying = true;
+    let ticker = null;
+    let startTime = Date.now();
+    const totalDuration = slides.length * INTERVAL;
+
+    function fmt(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return `${String(m).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+    }
+
+    window.setSlide = function(idx) {
+        if(slides.length === 0) return;
+        slides.forEach(s => s.classList.remove('active'));
+        stripThumbs.forEach(t => t.classList.remove('active-thumb'));
+        currentSlide = (idx + slides.length) % slides.length;
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        const activeThumb = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
+        if (activeThumb) {
+            activeThumb.classList.add('active-thumb');
+            const stripContainer = activeThumb.closest('.prop-image-strip') || activeThumb.parentElement;
+            if (stripContainer) {
+                const targetLeft = activeThumb.offsetLeft - (stripContainer.clientWidth / 2) + (activeThumb.clientWidth / 2);
+                stripContainer.scrollTo({ left: targetLeft, behavior: 'smooth' });
+            }
+        }
+        startTime = Date.now();
+    };
+
+    function tickTimer() {
+        if (!isPlaying || !galTimer || slides.length === 0) return;
+        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
+        const capped = Math.min(elapsed, totalDuration);
+        galTimer.textContent = `${fmt(capped)} / ${fmt(totalDuration)}`;
+        requestAnimationFrame(tickTimer);
+    }
+
+    function autoAdvance() {
+        ticker = setInterval(() => { setSlide(currentSlide + 1); }, INTERVAL);
+    }
+
+    if (slides.length > 0) {
+        stripThumbs.forEach(t => {
+            t.addEventListener('click', function() { setSlide(parseInt(this.dataset.slide)); });
+        });
+
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    clearInterval(ticker);
+                    isPlaying = false;
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                } else {
+                    autoAdvance();
+                    isPlaying = true;
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                    requestAnimationFrame(tickTimer);
+                }
+            });
+        }
+        setSlide(0);
+        autoAdvance();
+        requestAnimationFrame(tickTimer);
+    }
+
+    // 2. STICKY NAV SCROLL SPY & ZERO JUMP-TO-TOP FIX
+    const navButtons = document.querySelectorAll('.prop-nav-button');
+    const sections = document.querySelectorAll('.prop-section[id]');
+
+    function updateActiveNav() {
+        let activeId = null;
+        const scrollY = window.scrollY;
+        sections.forEach(sec => {
+            const top = sec.getBoundingClientRect().top + window.scrollY - 160;
+            if (scrollY >= top) activeId = sec.id;
+        });
+        if (activeId) {
+            navButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-target') === activeId);
+            });
+        }
+    }
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetId = this.getAttribute('data-target');
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                const targetY = targetEl.getBoundingClientRect().top + window.scrollY - 130;
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
+            }
+        });
+    });
+    updateActiveNav();
+
+    // 3. HORIZONTAL WHEEL SCROLL FOR NAV TABS
+    const navTabs = document.getElementById('propNavTabs');
+    if (navTabs) {
+        navTabs.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault(); 
+                this.scrollLeft += e.deltaY; 
+            }
+        });
+    }
+});
+
+// 4. PHONE MASK REVEAL FUNCTION
+function revealPhone(elementId, phone) {
+    const el = document.getElementById(elementId);
+    if (el && phone) {
+        el.textContent = phone;
+        el.style.color = '#3b82f6';
+        el.style.fontWeight = '700';
+        const btn = el.nextElementSibling;
+        if (btn && btn.classList.contains('btn-reveal-phone')) {
+            btn.remove();
+        }
+    }
+}
+</script>
+
+<!-- FAQ JSON-LD SCHEMA -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in prop.faqs.all %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ faq.answer|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>

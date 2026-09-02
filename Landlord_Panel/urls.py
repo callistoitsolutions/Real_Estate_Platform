@@ -45,6 +45,17 @@ urlpatterns = [
 
     path('rental-residential-landlord/bulk-delete/', views.rental_bulk_delete_landlord, name='rental_bulk_delete_landlord'),
 
+    ############# urls for subsciption for boost property landlord ################
+
+    path('Boost_Property_Landlord', views.Boost_Property_Landlord, name='Boost_Property_Landlord'),
+
+    ########## urls for buy plan for landlord #######################
+
+    path('Buy_Plan_Landlord/<int:id>', views.Buy_Plan_Landlord, name='Buy_Plan_Landlord'),
+
+    ############ urls for ajax for buy subscription ######################
+
+    path('Buy_Subscription_Ajax', views.Buy_Subscription_Ajax, name='Buy_Subscription_Ajax'),
 
      ############ urls End for edit rental residential listing module for landlord #################
 
@@ -198,6 +209,14 @@ urlpatterns = [
 
     path('commercial_resale_landlord',views.commercial_resale_landlord,name="commercial_resale_landlord"),
 
+    ########## urls for update property form commercial ##################
+    
+    path('commercial_resale_landlord_update/<str:id>',views.commercial_resale_landlord_update,name="commercial_resale_landlord_update"),
+
+    ########## urls for view property form commercial ##################
+        
+    path('commercial_resale_landlord_view/<str:id>',views.commercial_resale_landlord_view,name="commercial_resale_landlord_view"),
+
     ######### urls for resale plot property list #######################
 
     path('plot_resale_landlord_list',views.plot_resale_landlord_list,name="plot_resale_landlord_list"),
@@ -210,6 +229,14 @@ urlpatterns = [
 
     path('plot_resale_res_landlord',views.plot_resale_res_landlord,name="plot_resale_res_landlord"),
 
+    ############ urls for update residential plot from landlord  #########################
+    
+    path('plot_resale_res_landlord_update/<str:id>',views.plot_resale_res_landlord_update,name="plot_resale_res_landlord_update"),
+
+    ############ urls for view residential plot from landlord  #########################
+        
+    path('plot_resale_res_landlord_view/<str:id>',views.plot_resale_res_landlord_view,name="plot_resale_res_landlord_view"),
+
     ############ urls for commercial plot list from landlord  #########################
 
     path('plot_resale_comm_landlord_list',views.plot_resale_comm_landlord_list,name="plot_resale_comm_landlord_list"),
@@ -217,6 +244,14 @@ urlpatterns = [
     ############ urls for commercial plot from landlord  #########################
 
     path('plot_resale_comm_landlord',views.plot_resale_comm_landlord,name="plot_resale_comm_landlord"),
+
+    ############ urls for update commercial plot from landlord  #########################
+    
+    path('plot_resale_comm_landlord_update/<str:id>',views.plot_resale_comm_landlord_update,name="plot_resale_comm_landlord_update"),
+
+    ############ urls for view commercial plot from landlord  #########################
+        
+    path('plot_resale_comm_landlord_view/<str:id>',views.plot_resale_comm_landlord_view,name="plot_resale_comm_landlord_view"),
 
     ############ urls for industrial plot list from landlord  #########################
 
@@ -242,9 +277,30 @@ urlpatterns = [
 
     path('industry_resale_landlord',views.industry_resale_landlord,name="industry_resale_landlord"),
 
+    ########## urls for update industrial resale property form ####################
+    
+    path('industry_resale_landlord_update/<str:id>',views.industry_resale_landlord_update,name="industry_resale_landlord_update"),
+
+    ########## urls for view industrial resale property form ####################
+        
+    path('industry_resale_landlord_view/<str:id>',views.industry_resale_landlord_view,name="industry_resale_landlord_view"),
+
+    ############ urls for resale agricultural property list ##########################
+    
+    path('agriculture_resale_landlord_list',views.agriculture_resale_landlord_list,name="agriculture_resale_landlord_list"),
+
    ######### urls for agricutural resale property form ######################
 
     path('agriculture_resale_landlord',views.agriculture_resale_landlord,name="agriculture_resale_landlord"),
+
+    ######### urls for update agricutural resale property form ######################
+     
+    path('agriculture_resale_landlord_update/<str:id>',views.agriculture_resale_landlord_update,name="agriculture_resale_landlord_update"),
+
+    ######### urls for view agricutural resale property form ######################
+         
+    path('agriculture_resale_landlord_view/<str:id>',views.agriculture_resale_landlord_view,name="agriculture_resale_landlord_view"),
+
 
 
 ]

@@ -1,0 +1,2809 @@
+{% include "agent/agent_header.html" %}
+{% load static %}
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+  :root {
+    --primary: #667eea;
+    --primary-dark: #5a67d8;
+    --primary-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --success: #10b981;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg-light: #f8f9fa;
+    --text-dark: #2d3748;
+    --text-mid: #4a5568;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.07);
+    --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.05);
+    --sidebar-width: 280px;
+    --topbar-height: 70px;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 28px; min-height: calc(100vh - var(--topbar-height)); }
+  .page-wrapper { display: grid; grid-template-columns: 1fr 300px; grid-template-rows: auto auto 1fr; gap: 22px; align-items: start; max-width: 1600px; margin: 0 auto; }
+
+  /* Page Header Styles */
+  .page-header {
+    grid-column: 1 / -1; grid-row: 1; background: var(--primary-gradient); border-radius: var(--radius-xl);
+    padding: 28px 35px; color: white; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35); position: relative; overflow: hidden;
+  }
+  .page-header::after { content: ''; position: absolute; right: -40px; top: -40px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; }
+
+  .page-header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+  }
+
+  .header-actions { display: flex; align-items: center; gap: 16px; }
+
+  .stepper-container { grid-column: 1 / -1; grid-row: 2; background: #fff; border-radius: var(--radius-xl); padding: 22px 30px; box-shadow: var(--shadow-card); }
+  .form-container { grid-column: 1 / 2; grid-row: 3; background: #fff; border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-card); min-width: 0; }
+  .preview-sidebar { grid-column: 2 / 3; grid-row: 3; display: flex; flex-direction: column; gap: 18px; position: sticky; top: calc(var(--topbar-height) + 20px); align-self: start; }
+
+  .page-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .page-subtitle { font-size: 0.95rem; opacity: 0.85; margin: 0; font-weight: 400; }
+
+  .stepper { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; }
+  .step-item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .step-circle { width: 46px; height: 46px; min-width: 46px; min-height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 3px solid var(--border); background: #fff; color: var(--muted); transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); flex-shrink: 0; }
+  .step-circle.active { background: var(--primary-gradient); color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45); }
+  .step-circle.done { background: var(--success-gradient); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+  .step-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color 0.3s; }
+  .step-label.active { color: var(--primary); }
+  .step-label.done { color: var(--success); }
+  .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background 0.4s; }
+  .step-line.done { background: var(--success-gradient); }
+
+  .step-content { display: none; }
+  .step-content.active { display: block; animation: fadeInUp 0.35s ease; }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 2px solid #f0f0f0; gap: 12px; flex-wrap: wrap; }
+  .form-title { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+  .form-title i { width: 42px; height: 42px; min-width: 42px; background: var(--primary-gradient); color: white; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; }
+  
+  .btn-back { background: #ffffff; color: #2c3e50; padding: 10px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); font-size: 0.88rem; white-space: nowrap; font-family: inherit; }
+  .btn-back:hover { background: #f8f9fa; transform: translateY(-2px); text-decoration: none; }
+
+  .form-section { margin-bottom: 26px; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-soft); border: 1px solid var(--border); }
+  .section-header { background: var(--primary-gradient); color: white; padding: 13px 20px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; letter-spacing: 0.01em; }
+  .section-header.info-theme { background: var(--info-gradient); }
+  .section-header.dark-theme { background: var(--dark-gradient); }
+  .form-section.facility-theme .section-header { background: var(--info-gradient); }
+  .section-body { background: var(--bg-light); padding: 22px 24px; border: 2px solid #e9ecef; border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+
+  .form-label { font-weight: 600; color: var(--text-dark); margin-bottom: 7px; font-size: 0.88rem; display: flex; align-items: center; gap: 5px; }
+  .required, .required-star { color: #e74c3c; font-size: 1rem; line-height: 1; }
+  .form-control, .form-select { border: 2px solid #e9ecef; border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.92rem; width: 100%; transition: border-color 0.25s, box-shadow 0.25s; background-color: #fff; color: var(--text-dark); font-family: inherit; }
+  .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); outline: none; }
+  .form-control[readonly], .form-control:disabled { background-color: #edf2f7; border-color: #cbd5e0; color: var(--text-mid); font-weight: 600; cursor: not-allowed; }
+  
+  select.form-control, .form-select { appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px; }
+  textarea.form-control { min-height: 100px; resize: vertical; line-height: 1.6; }
+
+  .radio-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+  .radio-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: #fff; border: 2px solid #e9ecef; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(--text-dark); transition: border-color 0.2s, background 0.2s; }
+  .radio-option:hover { border-color: var(--primary); background: #f0f3ff; }
+  .radio-option input[type="radio"] { accent-color: var(--primary); width: 16px; height: 16px; }
+
+  .step-nav, .form-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; gap: 12px; flex-wrap: wrap; padding-top: 20px; border-top: 2px solid #f0f0f0; }
+  .btn-step { padding: 12px 28px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all 0.3s ease; border: none; }
+  .btn-next, .btn-submit { background: var(--primary-gradient); color: white; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35); }
+  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5); }
+  .btn-prev { background: #f8f9fa; color: #2d3748; border: 2px solid var(--border) !important; }
+  .btn-prev:hover { background: #e9ecef; }
+  .btn-reset { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+
+  /* Validation Error Styles */
+  .input-error { border-color: #e74c3c !important; box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important; }
+  .radio-error-group { border: 1px solid #e74c3c !important; border-radius: 12px; padding: 10px; box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important; }
+
+  /* Selected Tag Display Styles */
+  .selected-items-display { display: flex; flex-wrap: wrap; gap: 8px; min-height: 45px; padding: 10px; background: #fff; border: 2px solid #e9ecef; border-radius: var(--radius-md); align-items: center; }
+  .item-tag { display: inline-flex; align-items: center; gap: 6px; background: #e0e7ff; color: #3730a3; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+  .item-tag .remove-btn { cursor: pointer; color: #4338ca; transition: color 0.2s; }
+  .item-tag .remove-btn:hover { color: #dc2626; }
+
+  /* Categorized Images & Video Options */
+  .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .img-cat-tab { border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap; }
+  .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+
+  .img-cat-panel { display: none; }
+  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  .img-cat-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
+  .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+  .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: grab; }
+  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .img-cat-preview-item .remove-image { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+  .img-total-summary { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; }
+
+  /* Modern Video Option Cards */
+  .video-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .video-option-card { position: relative; border: 2px solid #e2e8f0; border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; background: #fff; transition: all 0.3s; }
+  .video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
+  .video-option-card.active { border-color: #667eea; background: #f0f4ff; box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15); }
+  .video-option-card input[type="radio"] { position: absolute; opacity: 0; }
+  .vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
+  .video-option-card.active .vo-icon { color: #667eea; }
+  .vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .vo-desc { font-size: 0.8rem; color: #64748b; }
+  .vo-check { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; }
+  .video-option-card.active .vo-check { opacity: 1; }
+
+  /* Search Select Dropdown Custom Styling */
+  .form-group, .col-md-12, .section-body, .step-content, .row, .modal-body { overflow: visible !important; }
+  .search-select { position: relative; width: 100%; font-size: 0.95rem; }
+  .search-select-control { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; background: #fff; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.25s ease; min-height: 48px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02); }
+  .search-select-control:hover { border-color: #cbd5e1; background: #f8fafc; }
+  .search-select.open .search-select-control { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12); background: #fff; }
+  .search-select-value { color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 1.2em; display: inline-block; font-weight: 500; }
+  .search-select-value.ss-placeholder { color: #94a3b8; }
+  .search-select-arrow { color: #64748b; transition: transform 0.25s ease; font-size: 0.85rem; flex-shrink: 0; margin-left: 8px; }
+  .search-select.open .search-select-arrow { transform: rotate(180deg); color: #667eea; }
+  .search-select-panel { display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12); z-index: 99999; overflow: hidden; }
+  .search-select.open .search-select-panel { display: block; }
+  .search-select-input { width: 100%; border: none; border-bottom: 2px solid #f1f5f9; padding: 14px 18px; font-size: 0.9rem; outline: none; box-sizing: border-box; background: #fcfcfc; font-family: inherit; color: #1e293b; }
+  .search-select-options { max-height: 260px; overflow-y: auto; padding: 6px 0; }
+  .search-select-group-label { padding: 10px 18px 6px; font-size: 0.72rem; font-weight: 700; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; background: #f8fafc; border-bottom: 1px solid #f1f5f9; border-top: 1px solid #f1f5f9; }
+  .search-select-option { padding: 11px 18px; cursor: pointer; color: #334155; font-size: 0.88rem; font-weight: 500; transition: background 0.15s ease, color 0.15s ease; display: flex; align-items: center; gap: 8px; }
+  .search-select-option:hover, .search-select-option.highlighted { background-color: #f0f4ff; color: #4f46e5; font-weight: 600; }
+  .search-select-option.selected { background-color: #e0e7ff; color: #4338ca; font-weight: 700; }
+  .search-select-no-results { padding: 20px; text-align: center; color: #94a3b8; font-size: 0.85rem; }
+
+  /* Preview Sidebar */
+  .preview-card { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: var(--radius-lg); padding: 18px; color: white; }
+  .preview-mock { border-radius: var(--radius-md); overflow: hidden; }
+  .preview-image { height: 130px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+  .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; }
+  .preview-badge { font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: #0f172a; }
+  .preview-price { position: absolute; bottom: 9px; left: 9px; background: rgba(15, 23, 42, 0.88); color: white; font-size: 0.88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; }
+  .preview-body { background: white; padding: 14px; color: #0f172a; }
+  .preview-title { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+  .preview-location { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
+  .preview-specs { display: flex; gap: 14px; font-size: 0.75rem; color: #475569; font-weight: 600; }
+
+  .checklist-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; }
+  .checklist-title { font-size: 0.88rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
+  .checklist-item { display: flex; align-items: center; gap: 9px; padding: 8px 0; font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; }
+  .checklist-item.done { color: var(--success); }
+
+  @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } .form-container { grid-column: 1 / -1; } }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    padding: 13px 32px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.98rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45); background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+
+  /* ── Selected Tags Display Styling ── */
+  .selected-items-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 52px;
+      padding: 14px;
+      background: #ffffff;
+      border: 2px solid #e9ecef;
+      border-radius: var(--radius-md);
+      align-items: center;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .item-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
+      color: #3730a3;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(99, 102, 241, 0.15);
+      animation: fadeInScale 0.2s ease;
+  }
+  .item-tag i { color: #4f46e5; }
+  .item-tag .remove-btn {
+      cursor: pointer;
+      color: #6366f1;
+      transition: color 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+  }
+  .item-tag .remove-btn:hover { color: #dc2626; transform: scale(1.15); }
+
+  @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── Modern Modal Enhancements ── */
+  .modal-content {
+      border: none;
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+  }
+  .modal-header {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 20px 24px;
+      border-bottom: none;
+  }
+  .modal-header .modal-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+  .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+  }
+  .modal-header .btn-close:hover { opacity: 1; }
+  .modal-body {
+      padding: 24px;
+      background: #f8fafc;
+      max-height: 65vh;       
+      overflow-y: auto;       /* Enables vertical scrolling when content overflows */
+      overflow-x: hidden;     /* Prevents horizontal overflow */
+  }
+  .modal-footer {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+  }
+
+  /* Modal Checkbox Grid Cards */
+  .modal-item-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      height: 100%;
+  }
+  .modal-item-card:hover {
+      border-color: var(--primary);
+      background: #f0f4ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+  .modal-item-card input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+  }
+  .modal-item-card label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+  }
+  .modal-item-card label i { color: var(--primary); font-size: 1.1rem; }
+
+  /* ── Scrollable Modern Modal ── */
+  .modal-dialog {
+      max-height: 90vh;
+      margin: 1.75rem auto;
+  }
+  .modal-content {
+      border: none;
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      max-height: 85vh; /* Restricts total modal height to viewport */
+  }
+  .modal-header {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 20px 24px;
+      border-bottom: none;
+      flex-shrink: 0;
+  }
+  .modal-body {
+      padding: 24px;
+      background: #f8fafc;
+      overflow-y: auto !important; /* Forces vertical scrollbar when items overflow */
+      overflow-x: hidden;
+      flex: 1 1 auto;
+  }
+  .modal-footer {
+      background: #ffffff;
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+      flex-shrink: 0;
+  }
+
+
+</style>
+
+<div class="main-content">
+  <div class="page-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-header-content">
+        <div>
+          <h1 class="page-title"><i class="fas fa-industry" style="margin-right: 10px; opacity: 0.9;"></i>Update Industrial Property</h1>
+          <p class="page-subtitle">Modify your warehouse, factory, or industrial land listing details securely.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-back" type="button" onclick="history.back();">
+            <i class="fas fa-arrow-left"></i> Back to List
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEPPER -->
+    <div class="stepper-container">
+      <div class="stepper" id="stepper">
+        <div class="step-item">
+          <div class="step-circle active" id="sc1">1</div>
+          <div class="step-label active" id="sl1">Property Specs</div>
+          <div class="step-line" id="line1"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc2">2</div>
+          <div class="step-label" id="sl2">Pricing &amp; Legal</div>
+          <div class="step-line" id="line2"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc3">3</div>
+          <div class="step-label" id="sl3">Media</div>
+          <div class="step-line" id="line3"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc4">4</div>
+          <div class="step-label" id="sl4">Location &amp; Publish</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM CONTAINER -->
+    <div class="form-container">
+      <div class="form-header">
+        <div class="form-title">
+          <i class="fas fa-industry"></i> Update Industrial Property Listing
+        </div>
+      </div>
+
+      <form method="POST" action="" enctype="multipart/form-data" id="industrialForm" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="property_id" id="property_id" value="{{ prop.id }}">
+
+        <!-- ══════════════════ STEP 1 ══════════════════ -->
+        <div class="step-content active" id="step1">
+
+          <div class="form-section">
+            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <span><i class="fas fa-upload"></i> Listed By</span>
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="text-danger">*</span></label>
+                  </div>
+                </div>
+              </div>
+
+              <br>
+
+              <div class="row" id="user_data_div">
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>User Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_id }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>User Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_name }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i>User Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_email}}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i>User Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_contact }}"></div></div>
+
+                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i>User Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{ prop.listed_by_role }}"></div></div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Basic Property Details -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-industry"></i> Basic Property Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label class="form-label" style="color:#4facfe;"><i class="fas fa-wand-magic-sparkles"></i> Property Title</label>
+                  <input type="text" class="form-control" id="property_title" name="property_title" readonly placeholder="Property Title auto-generated by system" style="background-color:#e9ecef; font-weight:600; color:#495057;" value="{{ prop.property_title|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Property Type <span class="required">*</span></label>
+                  <select class="form-select form-control" name="property_type" id="property_type" required>
+                    <option value="">Select Type</option>
+                    <option value="industrial_land" {% if prop.property_type == "industrial_land" %}selected{% endif %}>Industrial Land</option>
+                    <option value="factory" {% if prop.property_type == "factory" %}selected{% endif %}>Factory</option>
+                    <option value="warehouse" {% if prop.property_type == "warehouse" %}selected{% endif %}>Warehouse</option>
+                    <option value="industrial_shed" {% if prop.property_type == "industrial_shed" %}selected{% endif %}>Industrial Shed</option>
+                    <option value="manufacturing_unit" {% if prop.property_type == "manufacturing_unit" %}selected{% endif %}>Manufacturing Unit</option>
+                    <option value="cold_storage" {% if prop.property_type == "cold_storage" %}selected{% endif %}>Cold Storage</option>
+                    <option value="logistics_park" {% if prop.property_type == "logistics_park" %}selected{% endif %}>Logistics Park</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Property No <span style="color:red;">*</span></label>
+                  <input type="text" class="form-control" name="property_no" id="property_no" placeholder="Enter Property No" required value="{{ prop.property_no|default_if_none:"" }}">
+                  <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
+                    <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                  </span>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Land Area (sq.ft) <span class="required">*</span></label>
+                  <input type="number" step="0.01" class="form-control" name="land_area" id="land_area" placeholder="e.g., 5000" required value="{{ prop.land_area|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Built-up Area (sq.ft)</label>
+                  <input type="number" step="0.01" class="form-control" name="builtup_area" id="builtup_area" placeholder="e.g., 3500" value="{{ prop.builtup_area|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Industrial Zone Classification</label>
+                  <select class="form-select form-control" name="industrial_zone_classification" id="industrial_zone_classification">
+                    <option value="">Select Zone</option>
+                    <option value="MIDC" {% if prop.industrial_zone_classification == "MIDC" %}selected{% endif %}>MIDC</option>
+                    <option value="GIDC" {% if prop.industrial_zone_classification == "GIDC" %}selected{% endif %}>GIDC</option>
+                    <option value="SEZ" {% if prop.industrial_zone_classification == "SEZ" %}selected{% endif %}>SEZ</option>
+                    <option value="Industrial Estate" {% if prop.industrial_zone_classification == "Industrial Estate" %}selected{% endif %}>Industrial Estate</option>
+                    <option value="Logistics Park" {% if prop.industrial_zone_classification == "Logistics Park" %}selected{% endif %}>Logistics Park</option>
+                    <option value="Private Industrial Park" {% if prop.industrial_zone_classification == "Private Industrial Park" %}selected{% endif %}>Private Industrial Park</option>
+                    <option value="Non-MIDC Private" {% if prop.industrial_zone_classification == "Non-MIDC Private" %}selected{% endif %}>Non-MIDC Private</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Main Road Connectivity</label>
+                  <select class="form-select form-control" name="main_road_connectivity" id="main_road_connectivity">
+                    <option value="">Select Connectivity</option>
+                    <option value="highway" {% if prop.main_road_connectivity == "highway" %}selected{% endif %}>Near Highway / NH</option>
+                    <option value="state_highway" {% if prop.main_road_connectivity == "state_highway" %}selected{% endif %}>State Highway</option>
+                    <option value="main" {% if prop.main_road_connectivity == "main" %}selected{% endif %}>Main Road</option>
+                    <option value="internal" {% if prop.main_road_connectivity == "internal" %}selected{% endif %}>Internal Road</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Utilities & Infrastructure -->
+          <div class="form-section">
+            <div class="section-header info-theme"><i class="fas fa-bolt"></i> Utilities & Infrastructure</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label"><i class="fas fa-plug"></i> Power Supply Available?</label>
+                  <select class="form-select form-control" name="power_supply" id="power_supply">
+                    <option value="True" {% if prop.power_supply %}selected{% endif %}>Yes</option>
+                    <option value="False" {% if not prop.power_supply %}selected{% endif %}>No</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label"><i class="fas fa-bolt"></i> KVA Sanctioned Load</label>
+                  <input type="number" class="form-control" name="kva_capacity" id="kva_capacity" placeholder="e.g., 500" value="{{ prop.kva_capacity|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label"><i class="fas fa-bolt"></i> Connected Power Load (KW)</label>
+                  <input type="number" class="form-control" name="connected_power_load" id="connected_power_load" placeholder="e.g., 100, 500" value="{{ prop.connected_power_load|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label"><i class="fas fa-tint"></i> Water Supply</label>
+                  <select class="form-select form-control" name="water_supply" id="water_supply">
+                    <option value="">Select Water Type</option>
+                    <option value="corporation" {% if prop.water_supply == "corporation" %}selected{% endif %}>Municipal / Corporation</option>
+                    <option value="borewell" {% if prop.water_supply == "borewell" %}selected{% endif %}>Borewell</option>
+                    <option value="both" {% if prop.water_supply == "both" %}selected{% endif %}>Both</option>
+                    <option value="none" {% if prop.water_supply == "none" %}selected{% endif %}>Not Available</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label"><i class="fas fa-truck"></i> Truck Accessibility</label>
+                  <select class="form-select form-control" name="truck_accessibility" id="truck_accessibility">
+                    <option value="">Select</option>
+                    <option value="Small Trucks" {% if prop.truck_accessibility == "Small Trucks" %}selected{% endif %}>Small Trucks</option>
+                    <option value="Medium Trucks" {% if prop.truck_accessibility == "Medium Trucks" %}selected{% endif %}>Medium Trucks</option>
+                    <option value="Heavy Trucks" {% if prop.truck_accessibility == "Heavy Trucks" %}selected{% endif %}>Heavy Trucks (HCV)</option>
+                    <option value="Container Access" {% if prop.truck_accessibility == "Container Access" %}selected{% endif %}>Container / Trailer Access</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label"><i class="fas fa-warehouse"></i> Loading Dock Available?</label>
+                  <select class="form-select form-control" name="loading_dock" id="loading_dock">
+                    <option value="">Select</option>
+                    <option value="Yes" {% if prop.loading_dock == "Yes" %}selected{% endif %}>Yes</option>
+                    <option value="No" {% if prop.loading_dock == "No" %}selected{% endif %}>No</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label"><i class="fas fa-weight-hanging"></i> Floor Load Capacity (Ton/Sq.M)</label>
+                  <input type="number" step="0.01" class="form-control" name="floor_load_capacity" id="floor_load_capacity" placeholder="e.g., 5, 10, 20" value="{{ prop.floor_load_capacity|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label"><i class="fas fa-crane"></i> Crane / Heavy Machinery?</label>
+                  <select class="form-select form-control" name="crane_heavy_machinery" id="crane_heavy_machinery">
+                    <option value="False" {% if not prop.crane_heavy_machinery %}selected{% endif %}>No</option>
+                    <option value="True" {% if prop.crane_heavy_machinery %}selected{% endif %}>Yes</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label"><i class="fas fa-home"></i> Worker Housing Nearby?</label>
+                  <select class="form-select form-control" name="worker_housing_nearby" id="worker_housing_nearby">
+                    <option value="False" {% if not prop.worker_housing_nearby %}selected{% endif %}>No</option>
+                    <option value="True" {% if prop.worker_housing_nearby %}selected{% endif %}>Yes</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
+              Move to Next Page <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════ STEP 2 ══════════════════ -->
+        <div class="step-content" id="step2">
+
+          <!-- Pricing -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Selling Price (₹) <span class="required">*</span></label>
+                  <input type="number" step="0.01" class="form-control" name="selling_price" id="selling_price" placeholder="e.g., 20000000" required value="{{ prop.selling_price|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Sq.Ft (Auto)</label>
+                  <input type="text" class="form-control" id="price_per_sqft_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                  <input type="hidden" id="price_per_sqft" name="price_per_sqft" value="{{ prop.price_per_sqft|default_if_none:"" }}">
+                </div>
+
+                <div class="col-md-4 mt-2" id="brokerageSection">
+                  <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                  <select class="form-select form-control" name="brokerage_percentage" id="brokerage_percentage" required>
+                    <option value="">Select</option>
+                    <option value="No Brokerage" {% if prop.brokerage_percentage == "No Brokerage" %}selected{% endif %}>No Brokerage</option>
+                    <option value="1% of amount" {% if prop.brokerage_percentage == "1% of amount" %}selected{% endif %}>1% of sale value</option>
+                    <option value="1.5% of amount" {% if prop.brokerage_percentage == "1.5% of amount" %}selected{% endif %}>1.5% of sale value</option>
+                    <option value="2% of amount" {% if prop.brokerage_percentage == "2% of amount" %}selected{% endif %}>2% of sale value</option>
+                    <option value="Fixed Amount" {% if prop.brokerage_percentage == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+                    <option value="Negotiable" {% if prop.brokerage_percentage == "Negotiable" %}selected{% endif %}>Negotiable</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-2" id="manualBrokerage" style="{% if prop.brokerage_percentage != 'Fixed Amount' %}display:none;{% endif %}">
+                  <label class="form-label">Enter Fixed Brokerage</label>
+                  <input type="text" class="form-control" name="manual_brokerage" id="manual_brokerage" placeholder="e.g. Fixed Amount" value="{{ prop.manual_brokerage|default_if_none:"" }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ownership & Legal Compliance -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-shield-halved"></i> Ownership & Legal Compliance</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Ownership Type</label>
+                  <select class="form-control form-select" name="ownership_type" id="ownership_type">
+                    <option value="">Select Ownership Type</option>
+                    <option value="freehold" {% if prop.ownership_type == "freehold" %}selected{% endif %}>Freehold</option>
+                    <option value="leasehold" {% if prop.ownership_type == "leasehold" %}selected{% endif %}>Leasehold</option>
+                    <option value="midc_lease" {% if prop.ownership_type == "midc_lease" %}selected{% endif %}>MIDC Leasehold</option>
+                    <option value="gidc_lease" {% if prop.ownership_type == "gidc_lease" %}selected{% endif %}>GIDC Leasehold</option>
+                    <option value="riico_lease" {% if prop.ownership_type == "riico_lease" %}selected{% endif %}>RIICO Leasehold</option>
+                    <option value="industrial_development_authority" {% if prop.ownership_type == "industrial_development_authority" %}selected{% endif %}>Industrial Development Authority Lease</option>
+                    <option value="cooperative_industrial_society" {% if prop.ownership_type == "cooperative_industrial_society" %}selected{% endif %}>Co-operative Industrial Society</option>
+                    <option value="company_owned" {% if prop.ownership_type == "company_owned" %}selected{% endif %}>Company Owned</option>
+                    <option value="partnership_owned" {% if prop.ownership_type == "partnership_owned" %}selected{% endif %}>Partnership Owned</option>
+                    <option value="individual_owned" {% if prop.ownership_type == "individual_owned" %}selected{% endif %}>Individual Owned</option>
+                    <option value="government_allotted" {% if prop.ownership_type == "government_allotted" %}selected{% endif %}>Government Allotted</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 mt-2">
+                  <label class="form-label"><i class="fas fa-file-signature"></i> Ownership Document Type</label>
+                  <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
+                    <option value="">Select Document Type</option>
+                    <option value="Registered Sale Deed" {% if prop.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
+                    <option value="Registered Agreement to Sale" {% if prop.ownership_document_type == "Registered Agreement to Sale" %}selected{% endif %}>Registered Agreement to Sale</option>
+                    <option value="Conveyance Deed" {% if prop.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed</option>
+                    <option value="Lease Deed" {% if prop.ownership_document_type == "Lease Deed" %}selected{% endif %}>Lease Deed (MIDC/GIDC)</option>
+                    <option value="Allotment Letter" {% if prop.ownership_document_type == "Allotment Letter" %}selected{% endif %}>Allotment Letter</option>
+                    <option value="Possession Letter / Kabja Patra" {% if prop.ownership_document_type == "Possession Letter / Kabja Patra" %}selected{% endif %}>Possession Letter / Kabja Patra</option>
+                    <option value="Irrevocable Power of Attorney" {% if prop.ownership_document_type == "Irrevocable Power of Attorney" %}selected{% endif %}>Irrevocable POA</option>
+                    <option value="Gift Deed" {% if prop.ownership_document_type == "Gift Deed" %}selected{% endif %}>Gift Deed</option>
+                    <option value="Inheritance / Partition Deed" {% if prop.ownership_document_type == "Inheritance / Partition Deed" %}selected{% endif %}>Inheritance / Partition Deed</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <label class="form-label"><i class="fas fa-scroll"></i> Title Status</label>
+                  <select class="form-select form-control" name="title_status" id="title_status">
+                    <option value="">Select Title Status</option>
+                    <option value="Clear & Marketable Title" {% if prop.title_status == "Clear & Marketable Title" %}selected{% endif %}>Clear & Marketable Title</option>
+                    <option value="Title Under Verification" {% if prop.title_status == "Title Under Verification" %}selected{% endif %}>Title Under Verification</option>
+                    <option value="Disputed Title" {% if prop.title_status == "Disputed Title" %}selected{% endif %}>Disputed Title</option>
+                    <option value="Title Documents Incomplete" {% if prop.title_status == "Title Documents Incomplete" %}selected{% endif %}>Title Documents Incomplete</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Sanctioning Authority</label>
+                  <input type="text" class="form-control" name="sanctioning_authority" id="sanctioning_authority" placeholder="e.g., MIDC, GIDC, SEZ Authority, CIDCO" value="{{ prop.sanctioning_authority|default_if_none:"" }}">
+                </div>
+
+                <!-- Loan on Property -->
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Loan on Property?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="property_loan" value="False" {% if not prop.property_loan %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="property_loan" value="True" {% if prop.property_loan %}checked{% endif %}> Yes</label>
+                  </div>
+                  <div id="loan_amount_section" style="{% if not prop.property_loan %}display:none;{% endif %}" class="mt-2">
+                    <input type="number" step="0.01" class="form-control" name="loan_amount" id="loan_amount" placeholder="Loan Amount (₹)" value="{{ prop.loan_amount|default_if_none:"" }}">
+                  </div>
+                </div>
+
+                <!-- Existing Tenants -->
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Existing Tenants?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="existing_tenants" value="False" {% if not prop.existing_tenants %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="existing_tenants" value="True" {% if prop.existing_tenants %}checked{% endif %}> Yes</label>
+                  </div>
+                  <div id="tenant_details_section" style="{% if not prop.existing_tenants %}display:none;{% endif %}" class="mt-2">
+                    <textarea class="form-control" name="tenant_details" id="tenant_details" placeholder="Brief details about current tenants">{{ prop.tenant_details|default_if_none:"" }}</textarea>
+                  </div>
+                </div>
+
+                <!-- Legal Dispute -->
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Legal Dispute?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="legal_dispute" value="False" {% if not prop.legal_dispute %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="legal_dispute" value="True" {% if prop.legal_dispute %}checked{% endif %}> Yes</label>
+                  </div>
+                  <div id="dispute_details_section" style="{% if not prop.legal_dispute %}display:none;{% endif %}" class="mt-2">
+                    <textarea class="form-control" name="dispute_details" id="dispute_details" placeholder="Describe the dispute briefly">{{ prop.dispute_details|default_if_none:"" }}</textarea>
+                  </div>
+                </div>
+
+                <!-- Govt Tax Dues -->
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Government Tax Dues?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="government_tax" value="False" {% if not prop.government_tax %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="government_tax" value="True" {% if prop.government_tax %}checked{% endif %}> Yes — Pending</label>
+                  </div>
+                  <div id="tax_amount_section" style="{% if not prop.government_tax %}display:none;{% endif %}" class="mt-2">
+                    <input type="number" step="0.01" class="form-control" name="tax_amount" id="tax_amount" placeholder="Pending Tax Amount (₹)" value="{{ prop.tax_amount|default_if_none:"" }}">
+                  </div>
+                </div>
+
+                <!-- Tax Clearance Cert -->
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Tax Clearance Certificate Available?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="tax_clearance_cert" value="False" {% if not prop.tax_clearance_cert %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="tax_clearance_cert" value="True" {% if prop.tax_clearance_cert %}checked{% endif %}> Yes</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Industrial Compliance Licences -->
+          <div class="form-section">
+            <div class="section-header dark-theme"><i class="fas fa-certificate"></i> Industrial Licences & Compliance Status</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label"><i class="fas fa-certificate"></i> Factory License Status</label>
+                  <select class="form-select form-control" name="factory_license_status" id="factory_license_status">
+                    <option value="">Select</option>
+                    <option value="Valid" {% if prop.factory_license_status == "Valid" %}selected{% endif %}>Valid</option>
+                    <option value="Renewal Due" {% if prop.factory_license_status == "Renewal Due" %}selected{% endif %}>Renewal Due</option>
+                    <option value="Expired" {% if prop.factory_license_status == "Expired" %}selected{% endif %}>Expired</option>
+                    <option value="Not Applicable" {% if prop.factory_license_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label"><i class="fas fa-fire-extinguisher"></i> Fire NOC Status</label>
+                  <select class="form-select form-control" name="fire_noc_status" id="fire_noc_status">
+                    <option value="">Select</option>
+                    <option value="Available" {% if prop.fire_noc_status == "Available" %}selected{% endif %}>Available</option>
+                    <option value="Pending" {% if prop.fire_noc_status == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="Expired" {% if prop.fire_noc_status == "Expired" %}selected{% endif %}>Expired</option>
+                    <option value="Not Applicable" {% if prop.fire_noc_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <label class="form-label"><i class="fas fa-leaf"></i> Pollution Control Approval</label>
+                  <select class="form-select form-control" name="pollution_control_approval" id="pollution_control_approval">
+                    <option value="">Select</option>
+                    <option value="Available" {% if prop.pollution_control_approval == "Available" %}selected{% endif %}>Available (Consent to Operate)</option>
+                    <option value="Applied" {% if prop.pollution_control_approval == "Applied" %}selected{% endif %}>Applied</option>
+                    <option value="Pending" {% if prop.pollution_control_approval == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="Not Applicable" {% if prop.pollution_control_approval == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Move to Next Page <i class="fas fa-arrow-right"></i></button>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════ STEP 3 ══════════════════ -->
+        <div class="step-content" id="step3">
+
+          <!-- Nearby Facilities -->
+          <div class="form-section facility-theme">
+            <div class="section-header" style="background: var(--info-gradient);"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+            <div class="section-body mt-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby Facilities</label>
+                <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
+              </div>
+
+              <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2" id="facilitiesBadge">0</span>
+              </button>
+
+              <div id="facilitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center">No facilities selected</p>
+              </div>
+
+              <div style="display:none;">
+                {% for fa in facilities_obj %}
+                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}" class="facilities-checkbox" data-icon="{{fa.facilities_icon}}" {% if fa.facilities_name in prop_facilities_list %}checked{% endif %}>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Amenities & Features -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-star"></i> Amenities &amp; Features</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Amenities</label>
+                <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
+              </div>
+
+              <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2" id="amenitiesBadge">0</span>
+              </button>
+
+              <div id="amenitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center">No amenities selected</p>
+              </div>
+
+              <div style="display:none;">
+                {% for am in ameneties_obj %}
+                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox" data-icon="{{am.amenties_icon}}" {% if am.amenties_name in prop_amenities_list %}checked{% endif %}>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-align-left"></i> Add Property Descriptions Details</div>
+            <div class="section-body">
+              <div class="form-group mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
+                </div>
+                <textarea class="form-control" name="user_description" id="user_description" rows="5" placeholder="Describe the industrial property — key highlights, industrial use suitability, infrastructure advantages...">{{ prop.user_description|default_if_none:"" }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Details -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-location-dot"></i> Address Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">City <span style="color:red;" class="required-star">*</span></label>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Pune" required value="{{ prop.city|default_if_none:"" }}">
+                    <script>
+                      document.getElementById('city').addEventListener('input', function () {
+                        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+                      });
+                    </script>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Locality / Area <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="locality" name="locality" placeholder="e.g., Bhosari MIDC" required value="{{ prop.locality|default_if_none:"" }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mt-2">
+                <label class="form-label">Property Address <span class="required">*</span></label>
+                <textarea class="form-control" name="address" id="address" placeholder="Full property address with plot number, sector, zone" required>{{ prop.address|default_if_none:"" }}</textarea>
+              </div>
+
+              <div class="form-group mt-2">
+                <label class="form-label">Nearby Landmark</label>
+                <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="e.g., Near NH-48, Bhosari Junction, MIDC Gate No. 3" value="{{ prop.property_landmark|default_if_none:"" }}">
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">State <span style="color:red;" class="required-star">*</span></label>
+                    <select class="form-select form-control" name="state" id="state" required>
+                      <option value="">Select State</option>
+                      <option value="Andhra Pradesh" {% if prop.state == "Andhra Pradesh" %}selected{% endif %}>Andhra Pradesh</option>
+                      <option value="Arunachal Pradesh" {% if prop.state == "Arunachal Pradesh" %}selected{% endif %}>Arunachal Pradesh</option>
+                      <option value="Assam" {% if prop.state == "Assam" %}selected{% endif %}>Assam</option>
+                      <option value="Bihar" {% if prop.state == "Bihar" %}selected{% endif %}>Bihar</option>
+                      <option value="Chhattisgarh" {% if prop.state == "Chhattisgarh" %}selected{% endif %}>Chhattisgarh</option>
+                      <option value="Goa" {% if prop.state == "Goa" %}selected{% endif %}>Goa</option>
+                      <option value="Gujarat" {% if prop.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                      <option value="Haryana" {% if prop.state == "Haryana" %}selected{% endif %}>Haryana</option>
+                      <option value="Himachal Pradesh" {% if prop.state == "Himachal Pradesh" %}selected{% endif %}>Himachal Pradesh</option>
+                      <option value="Jharkhand" {% if prop.state == "Jharkhand" %}selected{% endif %}>Jharkhand</option>
+                      <option value="Karnataka" {% if prop.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                      <option value="Kerala" {% if prop.state == "Kerala" %}selected{% endif %}>Kerala</option>
+                      <option value="Madhya Pradesh" {% if prop.state == "Madhya Pradesh" %}selected{% endif %}>Madhya Pradesh</option>
+                      <option value="Maharashtra" {% if prop.state == "Maharashtra" %}selected{% endif %}>Maharashtra</option>
+                      <option value="Manipur" {% if prop.state == "Manipur" %}selected{% endif %}>Manipur</option>
+                      <option value="Meghalaya" {% if prop.state == "Meghalaya" %}selected{% endif %}>Meghalaya</option>
+                      <option value="Mizoram" {% if prop.state == "Mizoram" %}selected{% endif %}>Mizoram</option>
+                      <option value="Nagaland" {% if prop.state == "Nagaland" %}selected{% endif %}>Nagaland</option>
+                      <option value="Odisha" {% if prop.state == "Odisha" %}selected{% endif %}>Odisha</option>
+                      <option value="Punjab" {% if prop.state == "Punjab" %}selected{% endif %}>Punjab</option>
+                      <option value="Rajasthan" {% if prop.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                      <option value="Sikkim" {% if prop.state == "Sikkim" %}selected{% endif %}>Sikkim</option>
+                      <option value="Tamil Nadu" {% if prop.state == "Tamil Nadu" %}selected{% endif %}>Tamil Nadu</option>
+                      <option value="Telangana" {% if prop.state == "Telangana" %}selected{% endif %}>Telangana</option>
+                      <option value="Tripura" {% if prop.state == "Tripura" %}selected{% endif %}>Tripura</option>
+                      <option value="Uttar Pradesh" {% if prop.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                      <option value="Uttarakhand" {% if prop.state == "Uttarakhand" %}selected{% endif %}>Uttarakhand</option>
+                      <option value="West Bengal" {% if prop.state == "West Bengal" %}selected{% endif %}>West Bengal</option>
+                      <option value="Andaman and Nicobar Islands" {% if prop.state == "Andaman and Nicobar Islands" %}selected{% endif %}>Andaman and Nicobar Islands</option>
+                      <option value="Chandigarh" {% if prop.state == "Chandigarh" %}selected{% endif %}>Chandigarh</option>
+                      <option value="Dadra and Nagar Haveli and Daman and Diu" {% if prop.state == "Dadra and Nagar Haveli and Daman and Diu" %}selected{% endif %}>Dadra and Nagar Haveli and Daman and Diu</option>
+                      <option value="Delhi" {% if prop.state == "Delhi" %}selected{% endif %}>Delhi</option>
+                      <option value="Jammu and Kashmir" {% if prop.state == "Jammu and Kashmir" %}selected{% endif %}>Jammu and Kashmir</option>
+                      <option value="Ladakh" {% if prop.state == "Ladakh" %}selected{% endif %}>Ladakh</option>
+                      <option value="Lakshadweep" {% if prop.state == "Lakshadweep" %}selected{% endif %}>Lakshadweep</option>
+                      <option value="Puducherry" {% if prop.state == "Puducherry" %}selected{% endif %}>Puducherry</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Residency Status <span class="required">*</span></label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="residency_status" value="resident" {% if prop.residency_status == 'resident' or not prop.residency_status %}checked{% endif %} required> Resident Indian</label>
+                    <label class="radio-option"><input type="radio" name="residency_status" value="nri" {% if prop.residency_status == 'nri' %}checked{% endif %}> NRI</label>
+                    <label class="radio-option"><input type="radio" name="residency_status" value="pio" {% if prop.residency_status == 'pio' %}checked{% endif %}> PIO</label>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+                  <input type="url" class="form-control" name="google_maps_link" placeholder="https://maps.google.com/?q=…" value="{{ prop.google_maps_link|default_if_none:"" }}">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Latitude</label>
+                  <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 20.9834" value="{{ prop.latitude|default_if_none:"" }}">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Longitude</label>
+                  <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.1567" value="{{ prop.longitude|default_if_none:"" }}">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Pincode <span style="color:red;">*</span></label>
+                  <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440024" required value="{{ prop.pincode|default_if_none:"" }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Move to Next Page <i class="fas fa-arrow-right"></i></button>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════ STEP 4 ══════════════════ -->
+        <div class="step-content" id="step4">
+
+          <!-- ADVANCED CATEGORIZED IMAGES -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
+            <div class="section-body">
+              <div class="img-total-summary">
+                <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/25</div>
+                <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images (across any areas) to publish</div>
+              </div>
+
+              <!-- Hidden input container for deleted image IDs & sorting -->
+              <div id="deletedImagesContainer"></div>
+
+              <div class="img-cat-tabs" id="imgCatTabs">
+                <div class="img-cat-tab active" data-cat="front_elevation"><i class="fas fa-building"></i> Front Elevation <span class="cat-count" id="count-front_elevation">0</span></div>
+                <div class="img-cat-tab" data-cat="main_entrance"><i class="fas fa-door-open"></i> Main Entrance <span class="cat-count" id="count-main_entrance">0</span></div>
+                <div class="img-cat-tab" data-cat="warehouse_interior"><i class="fas fa-warehouse"></i> Warehouse / Factory <span class="cat-count" id="count-warehouse_interior">0</span></div>
+                <div class="img-cat-tab" data-cat="loading_dock"><i class="fas fa-truck-loading"></i> Loading Dock <span class="cat-count" id="count-loading_dock">0</span></div>
+                <div class="img-cat-tab" data-cat="truck_yard"><i class="fas fa-truck"></i> Truck Yard <span class="cat-count" id="count-truck_yard">0</span></div>
+                <div class="img-cat-tab" data-cat="office_area"><i class="fas fa-desktop"></i> Office Area <span class="cat-count" id="count-office_area">0</span></div>
+                <div class="img-cat-tab" data-cat="machinery"><i class="fas fa-cogs"></i> Machinery <span class="cat-count" id="count-machinery">0</span></div>
+                <div class="img-cat-tab" data-cat="storage_area"><i class="fas fa-boxes"></i> Storage Area <span class="cat-count" id="count-storage_area">0</span></div>
+                <div class="img-cat-tab" data-cat="fire_safety"><i class="fas fa-fire-extinguisher"></i> Fire Safety <span class="cat-count" id="count-fire_safety">0</span></div>
+                <div class="img-cat-tab" data-cat="parking"><i class="fas fa-car"></i> Parking <span class="cat-count" id="count-parking">0</span></div>
+                <div class="img-cat-tab" data-cat="road_connectivity"><i class="fas fa-road"></i> Road Connectivity <span class="cat-count" id="count-road_connectivity">0</span></div>
+                <div class="img-cat-tab" data-cat="aerial_drone"><i class="fas fa-plane"></i> Aerial / Drone <span class="cat-count" id="count-aerial_drone">0</span></div>
+              </div>
+
+              <div class="img-cat-panels">
+                <div class="img-cat-panel active" data-cat-panel="front_elevation">
+                  <input type="file" class="img-cat-input" id="imgInput-front_elevation" name="property_images_front_elevation[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="front_elevation">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Front Elevation Photos Here</div>
+                    <div class="upload-subtext">Front view, building facade — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-front_elevation">
+                    {% for img in existing_images %}{% if img.category == 'front_elevation' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="front_elevation">
+                        <img src="{{ img.image.url }}" alt="Front Elevation">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'front_elevation', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="main_entrance">
+                  <input type="file" class="img-cat-input" id="imgInput-main_entrance" name="property_images_main_entrance[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="main_entrance">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Main Entrance Photos Here</div>
+                    <div class="upload-subtext">Gate, security cabin, entry point — up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-main_entrance">
+                    {% for img in existing_images %}{% if img.category == 'main_entrance' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="main_entrance">
+                        <img src="{{ img.image.url }}" alt="Main Entrance">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'main_entrance', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="warehouse_interior">
+                  <input type="file" class="img-cat-input" id="imgInput-warehouse_interior" name="property_images_warehouse_interior[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="warehouse_interior">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Warehouse / Factory Photos Here</div>
+                    <div class="upload-subtext">Shed interior, flooring, roofing — up to 8 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-warehouse_interior">
+                    {% for img in existing_images %}{% if img.category == 'warehouse_interior' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="warehouse_interior">
+                        <img src="{{ img.image.url }}" alt="Warehouse Interior">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'warehouse_interior', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="loading_dock">
+                  <input type="file" class="img-cat-input" id="imgInput-loading_dock" name="property_images_loading_dock[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="loading_dock">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Loading Dock Photos Here</div>
+                    <div class="upload-subtext">Bays, ramps, docking platforms — up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-loading_dock">
+                    {% for img in existing_images %}{% if img.category == 'loading_dock' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="loading_dock">
+                        <img src="{{ img.image.url }}" alt="Loading Dock">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'loading_dock', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="truck_yard">
+                  <input type="file" class="img-cat-input" id="imgInput-truck_yard" name="property_images_truck_yard[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="truck_yard">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Truck Yard Photos Here</div>
+                    <div class="upload-subtext">Turning radius, open yard space — up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-truck_yard">
+                    {% for img in existing_images %}{% if img.category == 'truck_yard' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="truck_yard">
+                        <img src="{{ img.image.url }}" alt="Truck Yard">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'truck_yard', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="office_area">
+                  <input type="file" class="img-cat-input" id="imgInput-office_area" name="property_images_office_area[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="office_area">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Office Area Photos Here</div>
+                    <div class="upload-subtext">Admin rooms, cabins, workstations — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-office_area">
+                    {% for img in existing_images %}{% if img.category == 'office_area' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="office_area">
+                        <img src="{{ img.image.url }}" alt="Office Area">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'office_area', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="machinery">
+                  <input type="file" class="img-cat-input" id="imgInput-machinery" name="property_images_machinery[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="machinery">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Machinery Photos Here</div>
+                    <div class="upload-subtext">Cranes, heavy equipment, power setup — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-machinery">
+                    {% for img in existing_images %}{% if img.category == 'machinery' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="machinery">
+                        <img src="{{ img.image.url }}" alt="Machinery">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'machinery', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="storage_area">
+                  <input type="file" class="img-cat-input" id="imgInput-storage_area" name="property_images_storage_area[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="storage_area">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Storage Area Photos Here</div>
+                    <div class="upload-subtext">Racks, mezzanine, inventory rooms — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-storage_area">
+                    {% for img in existing_images %}{% if img.category == 'storage_area' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="storage_area">
+                        <img src="{{ img.image.url }}" alt="Storage Area">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'storage_area', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="fire_safety">
+                  <input type="file" class="img-cat-input" id="imgInput-fire_safety" name="property_images_fire_safety[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="fire_safety">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Fire Safety Photos Here</div>
+                    <div class="upload-subtext">Hydrants, sprinklers, extinguishers — up to 3 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-fire_safety">
+                    {% for img in existing_images %}{% if img.category == 'fire_safety' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="fire_safety">
+                        <img src="{{ img.image.url }}" alt="Fire Safety">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'fire_safety', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="parking">
+                  <input type="file" class="img-cat-input" id="imgInput-parking" name="property_images_parking[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="parking">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Parking Photos Here</div>
+                    <div class="upload-subtext">Staff & visitor parking bays — up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-parking">
+                    {% for img in existing_images %}{% if img.category == 'parking' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="parking">
+                        <img src="{{ img.image.url }}" alt="Parking">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'parking', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="road_connectivity">
+                  <input type="file" class="img-cat-input" id="imgInput-road_connectivity" name="property_images_road_connectivity[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="road_connectivity">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Road Connectivity Photos Here</div>
+                    <div class="upload-subtext">Approach road, highway proximity — up to 3 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-road_connectivity">
+                    {% for img in existing_images %}{% if img.category == 'road_connectivity' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="road_connectivity">
+                        <img src="{{ img.image.url }}" alt="Road Connectivity">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'road_connectivity', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="aerial_drone">
+                  <input type="file" class="img-cat-input" id="imgInput-aerial_drone" name="property_images_aerial_drone[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="aerial_drone">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Aerial / Drone Photos Here</div>
+                    <div class="upload-subtext">Overall plot boundary, top view — up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-aerial_drone">
+                    {% for img in existing_images %}{% if img.category == 'aerial_drone' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="aerial_drone">
+                        <img src="{{ img.image.url }}" alt="Aerial Drone">
+                        <span class="img-index-badge">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'aerial_drone', event)">✖</button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size:0.8rem; color:#64748b; margin-top:12px;">
+                <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The very first image under <strong>Front Elevation</strong> or <strong>Warehouse / Factory</strong> is used as the cover photo.
+              </div>
+
+              <div class="row mt-4 pt-3 border-top">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label"><i class="fas fa-file-pdf"></i> Upload Floor Plan (Optional)</label>
+                    <input type="file" class="form-control" name="floor_plan" id="floor_plan">
+                    {% if prop.floor_plan %}
+                        <div class="mt-2"><a href="{{ prop.floor_plan.url }}" target="_blank" style="font-size:12px;"><i class="fas fa-file-alt"></i> View Current Floor Plan</a></div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADVANCED VIDEO SECTION -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+            <div class="section-body">
+              
+              <div class="video-options-grid">
+                <label class="video-option-card active" id="card_video_upload">
+                  <input type="radio" name="video_option" id="video_upload" value="upload" checked>
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="vo-title">Upload Video</div>
+                  <div class="vo-desc">Upload a pre-recorded walkthrough (Max 20MB)</div>
+                </label>
+
+                <label class="video-option-card" id="card_video_auto">
+                  <input type="radio" name="video_option" id="video_auto" value="auto">
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-magic"></i></div>
+                  <div class="vo-title">Auto-Generate</div>
+                  <div class="vo-desc">Create a dynamic slideshow from your uploaded photos</div>
+                </label>
+
+                <label class="video-option-card" id="card_video_rm">
+                  <input type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-link"></i></div>
+                  <div class="vo-title">Link / RM Assisted</div>
+                  <div class="vo-desc">Paste YouTube link or share a large video via RM</div>
+                </label>
+              </div>
+
+              <input type="hidden" name="video_source" id="video_source" value="upload">
+
+              <div id="videoUploadWrapper">
+                <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+                <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border-color: #cbd5e1;">
+                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#667eea;"></i></div>
+                  <div class="upload-text">Click to Select Property Video</div>
+                  <div class="upload-subtext">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
+                </div>
+                <video id="videoPreview" controls 
+                    {% if uploaded_video and uploaded_video.video %}
+                        src="{{ uploaded_video.video.url }}" style="display:block; width:100%; max-height:320px; border-radius:12px; margin-top:15px; border: 2px solid #e2e8f0;"
+                    {% else %}
+                        style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px; border: 2px solid #e2e8f0;"
+                    {% endif %}
+                ></video>
+              </div>
+
+              <div id="videoAutoWrapper" style="display:none;">
+                <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#667eea;"></i> AI Slideshow Generator</div>
+                  <div style="font-size: 0.85rem; color: #4b5563;">We will automatically generate a smooth walkthrough video using your photos.</div>
+                </div>
+                {% if auto_video and auto_video.video %}
+                <div style="margin-bottom:15px;">
+                    <label class="form-label d-block fw-bold text-start">Currently Saved Slideshow</label>
+                    <video controls style="width:100%; max-height:320px; border-radius:12px;" src="{{ auto_video.video.url }}"></video>
+                </div>
+                {% endif %}
+                <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                  <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                  <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:3px solid #1e293b; background:#000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></canvas>
+                </div>
+                <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:13px; font-weight:600; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #fecaca;">
+                  <i class="fas fa-exclamation-triangle me-1"></i> Please upload at least 3 property images in the section above to preview the auto-slideshow.
+                </div>
+              </div>
+
+              <div id="videoRMWrapper" style="display:none;">
+                <div class="alert alert-info" style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fab fa-youtube me-2" style="color:#ef4444;"></i> Public URL / RM Assist</div>
+                  <div style="font-size: 0.85rem; color: #4b5563;">If your video is on YouTube/Instagram, paste the link below.</div>
+                </div>
+                
+                <div class="form-group mb-0">
+                  <label class="form-label">Published Video Link</label>
+                  <div class="input-group">
+                    <span class="input-group-text" style="background: #f8fafc; border-color: #e9ecef;"><i class="fas fa-link text-muted"></i></span>
+                    <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." value="{{ rm_video.video_url|default_if_none:'' }}" style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                  </div>
+                </div>
+                <button type="button" class="btn-reset mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
+                
+                <div id="rmVideoFrame" style="display:none; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                  <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compliance Documents -->
+          <div class="form-section">
+            <div class="section-header dark-theme"><i class="fas fa-file-contract"></i> Compliance Documents (PDF)</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <label class="form-label"><i class="fas fa-file-pdf"></i> Upload Compliance Documents (PDF)</label>
+                  <input type="file" class="form-control" name="compliance_docs" id="compliance_docs" accept=".pdf">
+                  {% if prop.compliance_docs %}
+                      <div class="mt-2"><a href="{{ prop.compliance_docs.url }}" target="_blank" style="font-size:12px;"><i class="fas fa-file-pdf"></i> View Current Compliance Docs</a></div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" {% if prop.listed_elsewhere == "Yes" %}checked{% endif %}>
+                      <label class="form-check-label" for="listed_yes">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" {% if prop.listed_elsewhere == "No" or not prop.listed_elsewhere %}checked{% endif %}>
+                      <label class="form-check-label" for="listed_no">No</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6" id="portalField" style="display:none;">
+                  <div class="form-group">
+                    <label class="form-label">Portal Name</label>
+                    <input type="text" class="form-control" name="portal_name" id="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker" value="{{ prop.portal_name|default_if_none:"" }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="uploaded_by_name" name="uploaded_by_name" value="{{ prop.uploaded_by_name }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="uploaded_by_email" name="uploaded_by_email" value="{{ prop.uploaded_by_email }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Contact</label>
+                    <input type="text" class="form-control" id="uploaded_by_contact" name="uploaded_by_contact" value="{{ prop.uploaded_by_contact }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <input type="text" class="form-control" id="uploaded_by_role" name="uploaded_by_role" value="{{ prop.uploaded_by_role }}" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP BUTTONS -->
+          <div class="form-footer">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+            <button type="button" class="btn-submit" onclick="Update_Industrial(this)">
+              <i class="fas fa-check-circle"></i> Submit Property
+            </button>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+    <!-- PREVIEW SIDEBAR -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="preview-header"><i class="fas fa-eye"></i> Live Preview — Portal Card</div>
+        <div class="preview-mock">
+          <div class="preview-image">
+            🏭
+            <div class="preview-badges">
+              <span class="preview-badge">FOR SALE</span>
+              <span class="preview-badge" style="background:#3b82f6; color:white;">🆕 New</span>
+            </div>
+            <div class="preview-price" id="previewPrice">₹ —</div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-title" id="previewTitle">Your Property Title</div>
+            <div class="preview-location" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> Area, City</div>
+            <div class="preview-specs"><span id="prevArea">— sq.ft</span><span id="prevZone">Industrial</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-title">📋 Listing Checklist</div>
+        <div class="checklist-item" id="cl-type"><i class="fas fa-circle"></i> Property type selected</div>
+        <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Land area entered</div>
+        <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Selling price set</div>
+        <div class="checklist-item" id="cl-location"><i class="fas fa-circle"></i> Location details added</div>
+        <div class="checklist-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details filled</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+        <div id="modalItemsList" class="row"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span id="modalSelectedCount">0</span>)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $("#Resale").addClass("active");
+
+  window.initialFormState = {};
+  function captureInitialFormState() {
+      $('#industrialForm').find('input, select, textarea').each(function() {
+          var idOrName = $(this).attr('id') || $(this).attr('name');
+          if (!idOrName) return;
+          if ($(this).is(':checkbox')) {
+              if (!window.initialFormState[idOrName]) window.initialFormState[idOrName] = [];
+              if ($(this).is(':checked')) window.initialFormState[idOrName].push($(this).val());
+          } else if ($(this).is(':radio')) {
+              if ($(this).is(':checked')) window.initialFormState[idOrName] = $(this).val();
+          } else {
+              window.initialFormState[idOrName] = $(this).val() || '';
+          }
+      });
+  }
+
+  function getFormModifications() {
+      var changes = [];
+      var fieldLabels = {
+          'land_area': 'Land Area (sq.ft)',
+          'builtup_area': 'Built-up Area (sq.ft)',
+          'user_description': 'Property Description',
+          'selling_price': 'Selling Price',
+          'property_type': 'Property Type',
+          'property_no': 'Property No',
+          'industrial_zone_classification': 'Industrial Zone Classification',
+          'city': 'City',
+          'locality': 'Locality',
+          'address': 'Complete Address',
+          'pincode': 'Pincode'
+      };
+
+      $('#industrialForm').find('input, select, textarea').each(function() {
+          var idOrName = $(this).attr('id') || $(this).attr('name');
+          if (!idOrName) return;
+          if (['csrfmiddlewaretoken', 'property_id', 'id', 'existing_images_order', 'video_source'].includes(idOrName)) return;
+
+          var initialVal = window.initialFormState[idOrName] || '';
+          var currentVal = $(this).val() || '';
+
+          if ($(this).is(':radio')) {
+              if ($(this).is(':checked') && initialVal !== currentVal) {
+                  var label = fieldLabels[idOrName] || idOrName.replace(/_/g, ' ').toUpperCase();
+                  changes.push({ field: label, oldVal: initialVal ? initialVal : 'Blank', newVal: currentVal, isNew: !initialVal });
+              }
+              return;
+          }
+
+          if (typeof initialVal === 'string' && initialVal.trim() !== currentVal.trim()) {
+              var label = fieldLabels[idOrName] || idOrName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              changes.push({ field: label, oldVal: initialVal.trim() ? initialVal.trim() : 'Blank', newVal: currentVal.trim() ? currentVal.trim() : 'Cleared', isNew: !initialVal.trim() });
+          }
+      });
+      return changes;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+
+    function togglePortalField() {
+      if (portalField) {
+        portalField.style.display = yesRadio.checked ? 'block' : 'none';
+      }
+    }
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    togglePortalField();
+
+    setTimeout(captureInitialFormState, 600);
+  });
+
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "Brokerage";
+    switch (normalizedRole) {
+      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'relationship manager': labelText = "Buyer Service Fee"; break;
+      case 'landlord': labelText = "Buyer Service Fee"; break;
+      case 'agent': labelText = "Brokerage"; break;
+      case 'agency/builder':
+      case 'builder': labelText = "Brokerage/Service Fee"; break;
+    }
+    labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
+  }
+
+  function Change_Fields(isManualUserChange = false) {
+    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+    if (!checkedInput) return;
+    var selectedValue = checkedInput.value;
+
+    var admin_id = document.getElementById('selfUserId')?.value || "";
+    var admin_name = document.getElementById('selfUserName')?.value || "";
+    var admin_email = document.getElementById('selfUserEmail')?.value || "";
+    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+    var admin_role = document.getElementById('selfUserRole')?.value || "";
+
+    var targetId = document.getElementById('listed_by_id');
+    var targetName = document.getElementById('listed_by_name');
+    var targetEmail = document.getElementById('listed_by_email');
+    var targetContact = document.getElementById('listed_by_contact');
+    var targetRole = document.getElementById('listed_by_role');
+
+    if (selectedValue === "self") {
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "none";
+      var hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) { hiddenSelect.value = ""; hiddenSelect.required = false; }
+      var valueLabel = document.getElementById('assignedToValueLabel');
+      if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+      if (targetId) targetId.value = admin_id;
+      if (targetName) targetName.value = admin_name;
+      if (targetEmail) targetEmail.value = admin_email;
+      if (targetContact) targetContact.value = admin_phone;
+      if (targetRole) targetRole.value = admin_role;
+      updateBrokerageLabel(admin_role);
+    } else {
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "block";
+      var hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) { hiddenSelect.required = true; }
+
+      if (isManualUserChange) {
+        if (targetId) targetId.value = "";
+        if (targetName) targetName.value = "";
+        if (targetEmail) targetEmail.value = "";
+        if (targetContact) targetContact.value = "";
+        if (targetRole) targetRole.value = "";
+      }
+    }
+  }
+
+  // Search Select logic
+  (function () {
+    var wrapper = document.getElementById('assignedToSearchSelect');
+    var control = document.getElementById('assignedToControl');
+    var panel = document.getElementById('assignedToPanel');
+    var input = document.getElementById('searchTeamMember');
+    var optionsEl = document.getElementById('assignedToOptions');
+    var noResults = document.getElementById('assignedToNoResults');
+    var valueLabel = document.getElementById('assignedToValueLabel');
+    var hiddenSelect = document.getElementById('assigned_to');
+    var hiddenRole = document.getElementById('assigned_to_role');
+
+    if (!wrapper || !hiddenSelect) return;
+
+    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+    var highlightedIndex = -1;
+
+    function openPanel() { wrapper.classList.add('open'); input.value = ''; filterOptions(''); setTimeout(function () { input.focus(); }, 0); }
+    function closePanel() { wrapper.classList.remove('open'); highlightedIndex = -1; }
+    function togglePanel() { if (wrapper.classList.contains('open')) { closePanel(); } else { openPanel(); } }
+
+    function selectOption(opt) {
+      var value = opt.getAttribute('data-value');
+      var name = opt.getAttribute('data-name');
+      var role = opt.getAttribute('data-role');
+      var uid = opt.getAttribute('data-uid');
+      var phone = opt.getAttribute('data-phone');
+
+      hiddenSelect.value = value;
+      if (hiddenRole) hiddenRole.value = role;
+      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
+      valueLabel.classList.remove('ss-placeholder');
+      options.forEach(function (o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+      wrapper.classList.remove('validation-error');
+      closePanel();
+      var evt = new Event('change', { bubbles: true });
+      hiddenSelect.dispatchEvent(evt);
+    }
+
+    var initialAssignedVal = hiddenSelect.getAttribute('data-initial');
+    var selectedOpt = null;
+    if (initialAssignedVal) {
+        selectedOpt = options.find(function(o) { return o.getAttribute('data-value') === initialAssignedVal; });
+    }
+    if (!selectedOpt) {
+        selectedOpt = options.find(function(o) { return o.classList.contains('selected'); });
+    }
+    if (selectedOpt) {
+        selectOption(selectedOpt);
+    }
+
+    function filterOptions(query) {
+      query = query.trim().toLowerCase();
+      var anyVisible = false;
+      var groupHasVisible = {};
+      options.forEach(function (opt) {
+        var haystack = opt.getAttribute('data-search') || '';
+        var match = haystack.indexOf(query) !== -1;
+        opt.style.display = match ? '' : 'none';
+        if (match) {
+          anyVisible = true;
+          var prev = opt.previousElementSibling;
+          while (prev && !prev.classList.contains('search-select-group-label')) { prev = prev.previousElementSibling; }
+          if (prev) groupHasVisible[prev.textContent] = true;
+        }
+      });
+      groupLabels.forEach(function (label) { label.style.display = groupHasVisible[label.textContent] ? '' : 'none'; });
+      noResults.style.display = anyVisible ? 'none' : 'block';
+      highlightedIndex = -1;
+      options.forEach(function (o) { o.classList.remove('highlighted'); });
+    }
+
+    function visibleOptions() { return options.filter(function (o) { return o.style.display !== 'none'; }); }
+
+    function moveHighlight(step) {
+      var visible = visibleOptions();
+      if (!visible.length) return;
+      visible.forEach(function (o) { o.classList.remove('highlighted'); });
+      highlightedIndex += step;
+      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
+      if (highlightedIndex >= visible.length) highlightedIndex = 0;
+      var el = visible[highlightedIndex];
+      el.classList.add('highlighted');
+      el.scrollIntoView({ block: 'nearest' });
+    }
+
+    control.addEventListener('click', togglePanel);
+    control.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePanel(); } });
+    input.addEventListener('input', function () { filterOptions(input.value); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); var visible = visibleOptions(); if (highlightedIndex >= 0 && visible[highlightedIndex]) { selectOption(visible[highlightedIndex]); } else if (visible.length === 1) { selectOption(visible[0]); } }
+      else if (e.key === 'Escape') { closePanel(); }
+    });
+    options.forEach(function (opt) { opt.addEventListener('click', function () { selectOption(opt); }); });
+    document.addEventListener('click', function (e) { if (!wrapper.contains(e.target)) closePanel(); });
+
+    hiddenSelect.addEventListener('change', function () { if (typeof get_user_data === 'function') { get_user_data(this); } });
+    if (typeof Change_Fields === 'function') { Change_Fields(false); }
+  })();
+
+  function get_user_data() {
+    var assigned_to = $("#assigned_to").val();
+    if (!assigned_to) {
+      $('#listed_by_id, #listed_by_name, #listed_by_email, #listed_by_contact, #listed_by_role').val('');
+      return;
+    }
+    $.ajax({
+      method: "POST",
+      url: "{% url 'get_user_data' %}",
+      data: { 'assigned_to': assigned_to },
+      dataType: "json",
+      success: function (response) {
+        $('#listed_by_id').val(response.user_id || '');
+        $('#listed_by_name').val(response.name || '');
+        $('#listed_by_email').val(response.email || '');
+        $('#listed_by_contact').val(response.contact || '');
+        $('#listed_by_role').val(response.role || '');
+        updateBrokerageLabel(response.role);
+      },
+      error: function (xhr, status, error) { console.error('Failed to fetch user data:', error); }
+    });
+  }
+</script>
+
+<script>
+  $(document).ready(function () {
+    const sections = ['amenities', 'facilities'];
+    sections.forEach(section => { updateDisplay(section); });
+
+    window.openModal = function (section) {
+      currentSection = section;
+      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+      const container = $('#modalItemsList').empty();
+      
+      $(`.${section}-checkbox`).each(function () {
+        const isChecked = this.checked ? 'checked' : '';
+        const cardActive = this.checked ? 'border-color: var(--primary); background: #f0f4ff;' : '';
+        container.append(`
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="modal-item-card" style="${cardActive}">
+              <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                     value="${this.value}" data-icon="${$(this).data('icon')}"
+                     id="modal_${section}_${this.value}" ${isChecked}>
+              <label for="modal_${section}_${this.value}">
+                <i class="${$(this).data('icon')}"></i> <span>${this.value}</span>
+              </label>
+            </div>
+          </div>
+        `);
+      });
+      updateModalCount();
+      $('#itemsModal').modal('show');
+    };
+
+    // Toggle card highlight when clicked
+    $(document).on('click', '.modal-item-card', function(e) {
+        if (e.target.tagName !== 'INPUT') {
+            const checkbox = $(this).find('input[type="checkbox"]');
+            checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+        }
+    });
+
+    $(document).on('change', '.modal-item-checkbox', function() {
+        if (this.checked) {
+            $(this).closest('.modal-item-card').css({'border-color': 'var(--primary)', 'background': '#f0f4ff'});
+        } else {
+            $(this).closest('.modal-item-card').css({'border-color': '#e2e8f0', 'background': '#ffffff'});
+        }
+        updateModalCount();
+    });
+
+    function updateDisplay(section) {
+      const checked = $(`.${section}-checkbox:checked`);
+      const count = checked.length;
+      $(`#${section}Count`).text(`${count} selected`);
+      $(`#${section}Badge`).text(count);
+      const display = $(`#${section}Display`).empty();
+
+      if (count === 0) {
+        display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+      } else {
+        checked.each(function () {
+          display.append(`
+          <span class="item-tag">
+            <i class="${$(this).data('icon')}"></i> ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')"><i class="fas fa-times-circle"></i></span>
+          </span>
+        `);
+        });
+      }
+    }
+
+    function updateModalCount() { $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length); }
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+
+    $('#itemsModal .btn-primary').on('click', function () {
+      if (!currentSection) return;
+      const checked = $('.modal-item-checkbox:checked');
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      checked.each(function () { $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true); });
+      updateDisplay(currentSection);
+    });
+  });
+</script>
+
+<script>
+  let currentStep = 1;
+
+  function goToStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return false;
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.getElementById('step' + n).classList.add('active');
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc' + i);
+      const sl = document.getElementById('sl' + i);
+      const line = document.getElementById('line' + i);
+      sc.className = 'step-circle';
+      sl.className = 'step-label';
+      if (line) line.className = 'step-line';
+
+      if (i < n) {
+        sc.classList.add('done'); sl.classList.add('done');
+        sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
+        if (line) line.classList.add('done');
+      } else if (i === n) {
+        sc.classList.add('active'); sl.classList.add('active');
+        sc.textContent = i;
+      } else {
+        sc.textContent = i;
+      }
+    }
+    currentStep = n;
+
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    updatePreview();
+  }
+
+  function validateStep(step) {
+    const stepElement = document.getElementById('step' + step);
+    if (!stepElement) return true;
+    
+    const requiredFields = stepElement.querySelectorAll('[required]');
+    let isValid = true;
+    let missingFields = [];
+    let firstInvalidElement = null;
+
+    stepElement.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    stepElement.querySelectorAll('.radio-error-group').forEach(el => el.classList.remove('radio-error-group'));
+
+    const isListedBySelf = document.getElementById('listedBySelf')?.checked;
+
+    requiredFields.forEach(field => {
+        if (field.id === 'assigned_to' && isListedBySelf) {
+            return;
+        }
+
+        if (field.type === 'radio') {
+            const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
+            const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+
+            if (!isChecked) {
+                isValid = false;
+                const groupContainer = field.closest('.radio-group') || field.closest('.form-group') || field.closest('div');
+                if (groupContainer) {
+                    groupContainer.classList.add('radio-error-group');
+                    if (!firstInvalidElement) firstInvalidElement = groupContainer;
+                }
+                const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                if (label && !missingFields.includes(label)) missingFields.push(label);
+            }
+        } else if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add('input-error');
+
+            if (field.id === 'assigned_to') {
+                const control = document.getElementById('assignedToControl');
+                if (control) {
+                    control.classList.add('input-error');
+                    if (!firstInvalidElement) firstInvalidElement = control;
+                }
+            } else {
+                if (!firstInvalidElement) firstInvalidElement = field;
+            }
+            const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+            if (label && !missingFields.includes(label)) missingFields.push(label);
+        }
+    });
+
+    if (!isValid) {
+        if (firstInvalidElement) {
+            firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof firstInvalidElement.focus === 'function') firstInvalidElement.focus();
+        }
+        Swal.fire({
+            icon: 'warning',
+            title: 'Required Fields Missing',
+            html: `<p style="margin-bottom: 10px;">Please fill all required fields:</p>
+                   <ul style="text-align: left; display: inline-block;">
+                     ${missingFields.map(field => `<li>${field}</li>`).join('')}
+                   </ul>`,
+            confirmButtonColor: '#e74c3c',
+            confirmButtonText: 'Got it!'
+        });
+        return false;
+    }
+    return true;
+  }
+
+  function updatePreview() {
+    const typeEl = document.getElementById('property_type');
+    const typeTxt = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text : 'Industrial Property';
+    const areaVal = document.getElementById('land_area')?.value || '—';
+    const localityVal = document.getElementById('locality')?.value || 'Area';
+    const cityVal = document.getElementById('city')?.value || 'City';
+    const price = document.getElementById('selling_price')?.value;
+    const zoneVal = document.getElementById('industrial_zone_classification')?.value || '';
+
+    let title = `Industrial ${areaVal !== '—' ? parseInt(areaVal).toLocaleString('en-IN') + ' Sqft ' : ''}${typeTxt} at ${localityVal}, ${cityVal}`;
+
+    const titleBox = document.getElementById('property_title');
+    if (titleBox && (localityVal !== 'Area' || typeEl?.value)) {
+      titleBox.value = title;
+    }
+    const previewTitle = document.getElementById('previewTitle');
+    if (previewTitle) previewTitle.textContent = title;
+
+    if (price) {
+      document.getElementById('previewPrice').textContent = '₹' + parseInt(price, 10).toLocaleString('en-IN');
+    } else {
+      document.getElementById('previewPrice').textContent = '₹ —';
+    }
+    
+    document.getElementById('prevArea').textContent = (areaVal !== '—' ? parseInt(areaVal).toLocaleString('en-IN') : '—') + ' sq.ft';
+    document.getElementById('previewLoc').innerHTML = `<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ${localityVal}, ${cityVal}`;
+    document.getElementById('prevZone').textContent = zoneVal || 'Industrial';
+
+    const psf = document.getElementById('price_per_sqft');
+    const psfDisp = document.getElementById('price_per_sqft_display');
+    if (psf && psfDisp) {
+      if (price && areaVal !== '—' && parseFloat(areaVal) > 0) {
+        const calcRate = (parseFloat(price) / parseFloat(areaVal)).toFixed(2);
+        psfDisp.value = '₹ ' + parseFloat(calcRate).toLocaleString('en-IN') + ' / sqft';
+        psf.value = calcRate;
+      } else {
+        psfDisp.value = ''; psf.value = '';
+      }
+    }
+    updateChecklist();
+  }
+
+  function updateChecklist() {
+    setCheck('cl-type', !!document.getElementById('property_type')?.value);
+    setCheck('cl-area', !!document.getElementById('land_area')?.value);
+    setCheck('cl-price', !!document.getElementById('selling_price')?.value);
+    setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality')?.value);
+    setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
+  }
+
+  function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'checklist-item' + (done ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+  }
+
+  // ADVANCED IMAGE & VIDEO SCRIPTS WITH EDIT CAPABILITIES
+  document.addEventListener("DOMContentLoaded", function () {
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('change', updatePreview);
+        input.addEventListener('input', updatePreview);
+        input.addEventListener('input', function () { this.classList.remove('input-error'); });
+        input.addEventListener('change', function () {
+            this.classList.remove('input-error');
+            if (this.type === 'radio') {
+                const group = this.closest('.radio-error-group');
+                if (group) group.classList.remove('radio-error-group');
+            }
+        });
+    });
+
+    const brokeragePercentage = document.getElementById("brokerage_percentage");
+    const manualBrokerage = document.getElementById("manualBrokerage");
+    brokeragePercentage?.addEventListener("change", function () {
+        manualBrokerage.style.display = (this.value === "Fixed Amount") ? "block" : "none";
+    });
+
+    const setupToggle = (name, sectionId) => {
+      document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+        r.addEventListener('change', function () {
+          document.getElementById(sectionId).style.display = this.value === 'True' ? 'block' : 'none';
+        });
+      });
+    };
+    setupToggle('property_loan', 'loan_amount_section');
+    setupToggle('existing_tenants', 'tenant_details_section');
+    setupToggle('legal_dispute', 'dispute_details_section');
+    setupToggle('government_tax', 'tax_amount_section');
+
+    const IMG_CATEGORIES = [
+        'front_elevation', 'main_entrance', 'warehouse_interior', 
+        'loading_dock', 'truck_yard', 'office_area', 
+        'machinery', 'storage_area', 'fire_safety', 
+        'parking', 'road_connectivity', 'aerial_drone'
+    ];
+    const IMG_CATEGORY_LIMITS = { 
+        front_elevation: 5, main_entrance: 4, warehouse_interior: 8, 
+        loading_dock: 4, truck_yard: 4, office_area: 5, 
+        machinery: 5, storage_area: 5, fire_safety: 3, 
+        parking: 4, road_connectivity: 3, aerial_drone: 4 
+    };
+    const IMG_TOTAL_LIMIT = 25;
+    const IMG_MIN_REQUIRED = 3;
+
+    window.catFiles = {};
+    IMG_CATEGORIES.forEach(function (c) { window.catFiles[c] = []; });
+
+    window.totalImageCount = function () {
+        return IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
+    };
+
+    let draggedItem = null;
+    function handleDragStart(e) { draggedItem = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
+    function handleDrop(e) {
+        e.preventDefault();
+        if (draggedItem && draggedItem !== this) {
+            let container = this.parentNode;
+            let allItems = [...container.querySelectorAll('.img-cat-preview-item')];
+            let draggedIdx = allItems.indexOf(draggedItem);
+            let droppedIdx = allItems.indexOf(this);
+            if (draggedIdx < droppedIdx) { container.insertBefore(draggedItem, this.nextSibling); }
+            else { container.insertBefore(draggedItem, this); }
+            let cat = container.id.replace('imgPreview-', '');
+            syncCategoryInputFromDOM(cat);
+            updateCoverPhotoAndLabels();
+        }
+        return false;
+    }
+    function handleDragEnd() { this.classList.remove('dragging'); draggedItem = null; }
+
+    document.querySelectorAll('.existing-img-item').forEach(function(el) {
+        el.draggable = true;
+        el.addEventListener('dragstart', handleDragStart);
+        el.addEventListener('dragover', handleDragOver);
+        el.addEventListener('drop', handleDrop);
+        el.addEventListener('dragend', handleDragEnd);
+    });
+
+    function syncCategoryInputFromDOM(cat) {
+        var container = document.getElementById('imgPreview-' + cat);
+        if (!container || !window.catFiles[cat]) return;
+        var newOrderFiles = [];
+        container.querySelectorAll('.new-file-item').forEach(el => {
+            var fName = el.dataset.fileName;
+            var fileObj = window.catFiles[cat].find(f => f.name === fName);
+            if(fileObj) newOrderFiles.push(fileObj);
+        });
+        window.catFiles[cat] = newOrderFiles;
+        var dt = new DataTransfer();
+        window.catFiles[cat].forEach(f => dt.items.add(f));
+        var inputEl = document.getElementById('imgInput-' + cat);
+        if (inputEl) inputEl.files = dt.files;
+    }
+
+    function syncCategoryInput(cat) {
+        var dt = new DataTransfer();
+        window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
+        var inputEl = document.getElementById('imgInput-' + cat);
+        if (inputEl) inputEl.files = dt.files;
+    }
+
+    function updateCoverPhotoAndLabels() {
+        let hasCover = false;
+        let existingOrder = [];
+        IMG_CATEGORIES.forEach(cat => {
+            const container = document.getElementById('imgPreview-' + cat);
+            if (!container) return;
+            const items = container.querySelectorAll('.img-cat-preview-item');
+            items.forEach((item, index) => {
+                if (item.classList.contains('existing-img-item')) {
+                    existingOrder.push(item.id.replace('existing-img-', ''));
+                }
+                const oldCover = item.querySelector('.cover-badge');
+                if (oldCover) oldCover.remove();
+                const idxBadge = item.querySelector('.img-index-badge');
+                if (idxBadge) {
+                    idxBadge.innerHTML = (item.classList.contains('existing-img-item') ? 'Saved - ' : '') + 'Image ' + (index + 1);
+                }
+                if (!hasCover) {
+                    item.insertAdjacentHTML('beforeend', '<span class="cover-badge" style="position:absolute; bottom:8px; left:8px; background:linear-gradient(135deg,#f6d365,#fda085); color:#3b2a00; font-size:0.65rem; font-weight:800; padding:3px 9px; border-radius:20px; z-index:10;"><i class="fas fa-star"></i> Cover Photo</span>');
+                    hasCover = true;
+                }
+            });
+        });
+        let orderInput = document.getElementById('existing_images_order');
+        if (!orderInput) {
+            orderInput = document.createElement('input');
+            orderInput.type = 'hidden';
+            orderInput.name = 'existing_images_order';
+            orderInput.id = 'existing_images_order';
+            document.getElementById('deletedImagesContainer').appendChild(orderInput);
+        }
+        orderInput.value = existingOrder.join(',');
+    }
+
+    function renderCategory(cat) {
+        var preview = document.getElementById('imgPreview-' + cat);
+        if (!preview) return;
+        preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
+
+        window.catFiles[cat].forEach(function (file) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var div = document.createElement('div');
+                div.className = 'img-cat-preview-item new-file-item';
+                div.draggable = true;
+                div.dataset.fileName = file.name;
+                div.dataset.cat = cat;
+
+                div.innerHTML =
+                    '<img src="' + e.target.result + '">' +
+                    '<span class="img-index-badge"></span>' +
+                    '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)">✖</button>';
+
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+                preview.appendChild(div);
+                updateCoverPhotoAndLabels();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    window.markedDeletionsQueue = [];
+    window.removeExistingCatImage = function(imageId, cat, evt) {
+        if (evt) evt.stopPropagation();
+        const el = document.getElementById('existing-img-' + imageId);
+        const container = document.getElementById('deletedImagesContainer');
+        if (el) {
+            el.remove();
+            if (!window.markedDeletionsQueue.includes(imageId)) {
+                window.markedDeletionsQueue.push(imageId);
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type  = 'hidden';
+                hiddenInput.name  = 'deleted_images[]';
+                hiddenInput.value = imageId;
+                container.appendChild(hiddenInput);
+            }
+        }
+        renderAllCategories();
+        updateCoverPhotoAndLabels();
+    };
+
+    function renderAllCategories() {
+        let grandTotal = 0;
+        IMG_CATEGORIES.forEach(function (cat) {
+            const existingCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+            const newCount = (window.catFiles && window.catFiles[cat]) ? window.catFiles[cat].length : 0;
+            const catTotal = existingCount + newCount;
+            grandTotal += catTotal;
+
+            const countEl = document.getElementById('count-' + cat);
+            if (countEl) countEl.innerText = catTotal;
+            const tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+            if (tab) tab.classList.toggle('has-images', catTotal > 0);
+        });
+
+        const totalCountEl = document.getElementById('imgTotalCount');
+        if (totalCountEl) totalCountEl.innerText = grandTotal;
+
+        const notice = document.getElementById('imgMinNotice');
+        if (notice) {
+            if (grandTotal >= IMG_MIN_REQUIRED) {
+                notice.className = 'min-ok';
+                notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + grandTotal + ' images saved/selected.';
+            } else {
+                notice.className = 'min-warning';
+                notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' images to publish';
+            }
+        }
+    }
+
+    renderAllCategories();
+    updateCoverPhotoAndLabels();
+
+    function handleCatFiles(cat, files) {
+        var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+        var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+        var existingCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+
+        if (existingCount + window.catFiles[cat].length + incoming.length > limit) {
+            Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+            incoming = incoming.slice(0, Math.max(0, limit - (existingCount + window.catFiles[cat].length)));
+        }
+        var globalExisting = document.querySelectorAll('.existing-img-item').length;
+        if (globalExisting + window.totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+            Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
+            incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - (globalExisting + window.totalImageCount())));
+        }
+
+        window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+        syncCategoryInput(cat);
+        renderCategory(cat);
+        renderAllCategories();
+    }
+
+    window.removeCatImage = function (cat, fileName, evt) {
+        if (evt) evt.stopPropagation();
+        window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
+        syncCategoryInput(cat);
+        renderCategory(cat);
+        renderAllCategories();
+        updateCoverPhotoAndLabels();
+    };
+
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (activePanel) activePanel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (zone && input) {
+            zone.addEventListener('click', function () { input.click(); });
+            input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+            zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                handleCatFiles(cat, e.dataTransfer.files);
+            });
+        }
+    });
+
+    // Video Engine Setup
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    function getUploadedImages(callback) {
+        var sources = [];
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) sources.push({ type: 'file', data: file });
+                    });
+                }
+            });
+        }
+        var previewImgs = document.querySelectorAll('.img-cat-preview img, .existing-img-item img');
+        previewImgs.forEach(function (img) {
+            if (img.src && !sources.some(s => s.data === img.src)) { sources.push({ type: 'url', data: img.src }); }
+        });
+        if (sources.length === 0) { callback([]); return; }
+
+        var loadedImages = [];
+        var processed = 0;
+        sources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () { loadedImages.push(img); processed++; if (processed === sources.length) callback(loadedImages); };
+            img.onerror = function () { processed++; if (processed === sources.length) callback(loadedImages); };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+        var durationPerSlide = 3500;
+        var fadeDuration = 800;
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            ctx.drawImage(img, 0, 0, img.width, img.height, baseShiftX + panOffsetX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (videoSourceField) {
+            videoSourceField.value = uploadRadio && uploadRadio.checked ? 'upload' : (autoRadio && autoRadio.checked ? 'auto' : 'rm_assisted');
+        }
+
+        document.querySelectorAll('.video-option-card').forEach(card => card.classList.remove('active'));
+        if (uploadRadio && uploadRadio.checked) document.getElementById('card_video_upload')?.classList.add('active');
+        if (autoRadio && autoRadio.checked) document.getElementById('card_video_auto')?.classList.add('active');
+        if (rmRadio && rmRadio.checked) document.getElementById('card_video_rm')?.classList.add('active');
+
+        if (autoRadio && autoRadio.checked) { startAutoSlideshowPreview(); } else { stopAutoSlideshowPreview(); }
+        if (rmRadio && rmRadio.checked) { renderVideoPreview(); }
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) videoArea.addEventListener('click', function () { videoInput.click(); });
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var propCity     = document.getElementById('city')?.value.trim() || '';
+            var propLocality = document.getElementById('locality')?.value.trim() || '';
+            var locationInfo = (propLocality || propCity) ? ' (' + [propLocality, propCity].filter(Boolean).join(', ') + ')' : '';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+
+            var companyWhatsAppNumber = "917057205423";
+            var rawMessage = "Hello Team,\n\n" +
+                             "I am trying to upload a video for my industrial property listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + locationInfo + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share via WhatsApp',
+                    cancelButtonText: 'Okay'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+        
+        var url = linkInput.value.trim();
+        if (!url) { 
+            frame.style.display = 'none'; 
+            frame.innerHTML = '';
+            return; 
+        }
+        
+        if (url.includes('wa.me') || url.includes('whatsapp.com')) {
+            frame.innerHTML = '<div style="padding:20px; text-align:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">' +
+                              '  <i class="fab fa-whatsapp" style="font-size:2rem; color:#16a34a; margin-bottom:8px;"></i>' +
+                              '  <p style="margin:0; font-size:13px; font-weight:600; color:#15803d;">WhatsApp Link Detected</p>' +
+                              '  <p style="margin:4px 0 12px; font-size:11px; color:#4b5563;">WhatsApp chat links cannot be played inside an iframe.</p>' +
+                              '  <a href="' + url + '" target="_blank" class="btn btn-sm btn-success" style="font-size:12px;"><i class="fas fa-external-link-alt me-1"></i> Open in WhatsApp</a>' +
+                              '</div>';
+            frame.style.display = 'block';
+            return;
+        }
+
+        frame.style.display = 'block';
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) { 
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1'; 
+            return; 
+        }
+
+        var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) { 
+            embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/'; 
+            return; 
+        }
+
+        if (url.includes('facebook.com') || url.includes('fb.watch')) {
+            embedIframe.src = 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=false';
+            return;
+        }
+
+        embedIframe.src = url;
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+        linkInputEl.addEventListener('paste', function () { setTimeout(renderVideoPreview, 100); });
+    }
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', renderVideoPreview);
+    }
+
+    toggleVideoOption();
+    updatePreview();
+  });
+
+  // ── UPDATE INDUSTRIAL PROPERTY SUBMISSION ──
+  function Update_Industrial(_this) {
+    var modifications = getFormModifications();
+    var modificationsHtml = '';
+
+    if (modifications.length > 0) {
+        modificationsHtml = `
+            <div style="text-align: left; max-height: 220px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 12px;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px;">
+                    <i class="fas fa-edit" style="color: #667eea;"></i> Modified / Added Fields (${modifications.length}):
+                </p>
+                <ul style="padding-left: 18px; margin: 0; font-size: 0.82rem; color: #475569;">
+        `;
+        modifications.forEach(function(item) {
+            if (item.isNew) {
+                modificationsHtml += `<li style="margin-bottom: 6px;"><strong>${item.field}:</strong> Added <span style="color: #10b981; font-weight: 700;">"${item.newVal}"</span></li>`;
+            } else {
+                modificationsHtml += `<li style="margin-bottom: 6px;"><strong>${item.field}:</strong> Modified from <span style="color: #e74c3c; text-decoration: line-through;">"${item.oldVal}"</span> to <span style="color: #10b981; font-weight: 700;">"${item.newVal}"</span></li>`;
+            }
+        });
+        modificationsHtml += `</ul></div>`;
+    } else {
+        modificationsHtml = `<p style="font-size: 0.85rem; color: #64748b; margin-top: 10px;">No field values were modified.</p>`;
+    }
+
+    Swal.fire({
+        title: 'Confirm Submission',
+        html: `<p style="font-size:0.95rem; color:#475569;">Are you sure you want to submit these updates?</p>${modificationsHtml}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Yes, Submit Changes!',
+        cancelButtonText: 'Review Form',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            processIndustrialSubmission(_this);
+        }
+    });
+  }
+
+  function processIndustrialSubmission(_this) {
+    for (let i = 1; i <= 4; i++) {
+        if (!validateStep(i)) {
+            goToStep(i);
+            return;
+        }
+    }
+
+    var existingImagesCount = document.querySelectorAll('.existing-img-item').length;
+    var newImagesCount = window.totalImageCount ? window.totalImageCount() : 0;
+    var grandTotalImages = existingImagesCount + newImagesCount;
+
+    if (grandTotalImages < 3) {
+        goToStep(4);
+        Swal.fire({ icon: 'error', title: 'Missing Images', text: 'Please have at least 3 property images uploaded or saved.' });
+        return;
+    }
+
+    var progressValue = 0;
+    var loadingInterval;
+
+    Swal.fire({
+        title: 'Submitting Property...',
+        html: `
+            <div style="padding: 10px 0;">
+                <div style="margin-bottom: 15px;"><span id="progressText" style="font-size: 28px; font-weight: 700; color: #667eea;">0%</span></div>
+                <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px;">
+                    <div id="progressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease; border-radius: 10px;"></div>
+                </div>
+                <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
+                    <i class="fas fa-spinner fa-spin me-1"></i> <span id="progressStatus">Uploading updates...</span>
+                </div>
+            </div>
+        `,
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: function() {
+            loadingInterval = setInterval(function() {
+                progressValue += Math.floor(Math.random() * 5) + 1;
+                if (progressValue >= 95) { progressValue = 95; clearInterval(loadingInterval); }
+                updateProgress(progressValue);
+            }, 300);
+        }
+    });
+
+    function updateProgress(value) {
+        var progressText = document.getElementById('progressText');
+        var progressBar = document.getElementById('progressBar');
+        if (progressText) progressText.textContent = value + '%';
+        if (progressBar) progressBar.style.width = value + '%';
+    }
+
+    var fd = new FormData();
+    fd.append('property_id', $('#property_id').val());
+    fd.append('id', '{{prop.id}}');
+    fd.append('listing_type', 'Resale');
+    fd.append('category', 'Industrial');
+    
+    // Explicit appended values matching industrial view expectations
+    fd.append('property_title', $('#property_title').val());
+    fd.append('property_type', $('#property_type').val());
+    fd.append('property_no', $('#property_no').val());
+    fd.append('land_area', $('#land_area').val());
+    fd.append('builtup_area', $('#builtup_area').val());
+    fd.append('industrial_zone_classification', $('#industrial_zone_classification').val());
+    fd.append('main_road_connectivity', $('#main_road_connectivity').val());
+
+    fd.append('power_supply', $('#power_supply').val());
+    fd.append('kva_capacity', $('#kva_capacity').val());
+    fd.append('connected_power_load', $('#connected_power_load').val());
+    fd.append('water_supply', $('#water_supply').val());
+    fd.append('truck_accessibility', $('#truck_accessibility').val());
+    fd.append('loading_dock', $('#loading_dock').val());
+    fd.append('floor_load_capacity', $('#floor_load_capacity').val());
+    fd.append('crane_heavy_machinery', $('#crane_heavy_machinery').val());
+    fd.append('worker_housing_nearby', $('#worker_housing_nearby').val());
+
+    fd.append('selling_price', $('#selling_price').val());
+    fd.append('price_per_sqft', $('#price_per_sqft').val());
+    fd.append('brokerage_percentage', $('#brokerage_percentage').val());
+    fd.append('manual_brokerage', $('#manual_brokerage').val());
+
+    fd.append('ownership_type', $('#ownership_type').val());
+    fd.append('ownership_document_type', $('#ownership_document_type').val());
+    fd.append('title_status', $('#title_status').val());
+    fd.append('sanctioning_authority', $('#sanctioning_authority').val());
+    fd.append('property_loan', $('input[name="property_loan"]:checked').val() || 'False');
+    fd.append('loan_amount', $('#loan_amount').val());
+    fd.append('existing_tenants', $('input[name="existing_tenants"]:checked').val() || 'False');
+    fd.append('tenant_details', $('#tenant_details').val());
+    fd.append('legal_dispute', $('input[name="legal_dispute"]:checked').val() || 'False');
+    fd.append('dispute_details', $('#dispute_details').val());
+    fd.append('government_tax', $('input[name="government_tax"]:checked').val() || 'False');
+    fd.append('tax_amount', $('#tax_amount').val());
+    fd.append('tax_clearance_cert', $('input[name="tax_clearance_cert"]:checked').val() || 'False');
+
+    fd.append('factory_license_status', $('#factory_license_status').val());
+    fd.append('fire_noc_status', $('#fire_noc_status').val());
+    fd.append('pollution_control_approval', $('#pollution_control_approval').val());
+
+    // Location
+    fd.append('city', $('#city').val());
+    fd.append('locality', $('#locality').val());
+    fd.append('address', $('#address').val());
+    fd.append('property_landmark', $('#property_landmark').val());
+    fd.append('state', $('#state').val());
+    fd.append('residency_status', $('input[name="residency_status"]:checked').val() || 'resident');
+    fd.append('google_maps_link', $('input[name="google_maps_link"]').val() || '');
+    fd.append('latitude', $('#latitude').val() || '');
+    fd.append('longitude', $('#longitude').val() || '');
+    fd.append('pincode', $('#pincode').val());
+
+    fd.append('listed_by_type', '{{prop.listed_by_type}}');
+   
+        
+       
+    fd.append('listed_by_id', $('#listed_by_id').val());
+    fd.append('listed_by_name', $('#listed_by_name').val());
+    fd.append('listed_by_email', $('#listed_by_email').val());
+    fd.append('listed_by_contact', $('#listed_by_contact').val());
+    fd.append('listed_by_role', $('#listed_by_role').val());
+
+
+
+    // Amenities & Facilities
+    var amenities = [];
+    $('.amenities-checkbox:checked').each(function() { amenities.push($(this).val()); });
+    fd.append('amenities', JSON.stringify(amenities));
+
+    var facilities = [];
+    $('.facilities-checkbox:checked').each(function() { facilities.push($(this).val()); });
+    fd.append('nearby_facilities', JSON.stringify(facilities));
+
+    fd.append('user_description', $('#user_description').val());
+    fd.append('listed_elsewhere', $('input[name="listed_elsewhere"]:checked').val() || 'No');
+    fd.append('portal_name', $('#portal_name').val());
+    fd.append('uploaded_by_name', $('#uploaded_by_name').val());
+    fd.append('uploaded_by_email', $('#uploaded_by_email').val());
+    fd.append('uploaded_by_contact', $('#uploaded_by_contact').val());
+    fd.append('uploaded_by_role', $('#uploaded_by_role').val());
+    fd.append('listing_status', '{{prop.listing_status}}');
+    fd.append('approval_status', '{{prop.approval_status}}');
+
+    // Video options
+    const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
+    fd.append('video_option', selectedVideoOption);
+    fd.append('property_video_link', $('#property_video_link').val() || '');
+
+    // Deletions & Order queues
+    $('input[name="deleted_images[]"]').each(function() {
+        fd.append('deleted_images[]', $(this).val());
+    });
+    var orderInput = $('#existing_images_order').val();
+    if (orderInput) fd.append('existing_images_order', orderInput);
+
+    // Categorized Images Append
+    const cats = [
+        'front_elevation', 'main_entrance', 'warehouse_interior', 
+        'loading_dock', 'truck_yard', 'office_area', 
+        'machinery', 'storage_area', 'fire_safety', 
+        'parking', 'road_connectivity', 'aerial_drone'
+    ];
+    cats.forEach(function (cat) {
+        if (window.catFiles && window.catFiles[cat] && window.catFiles[cat].length > 0) {
+            window.catFiles[cat].forEach(function (file) {
+                fd.append('property_images_' + cat + '[]', file);
+                fd.append('property_images', file);
+            });
+        }
+    });
+
+    var videoInput = document.getElementById('videoInput');
+    if (videoInput && videoInput.files.length > 0) {
+        fd.append('property_video', videoInput.files[0]);
+    }
+    var floorPlanInput = document.getElementById('floor_plan');
+    if (floorPlanInput && floorPlanInput.files.length > 0) {
+        fd.append('floor_plan', floorPlanInput.files[0]);
+    }
+    var complianceDocsInput = document.getElementById('compliance_docs');
+    if (complianceDocsInput && complianceDocsInput.files.length > 0) {
+        fd.append('compliance_docs', complianceDocsInput.files[0]);
+    }
+
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm me-2"></span> Updating...`);
+
+    $.ajax({
+        method: "POST",
+        url: $(_this).closest('form').attr('action') || "{% url 'Resale_Industrial_Ajax' %}",
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            clearInterval(loadingInterval);
+            Swal.close();
+            $(_this).prop("disabled", false).html(`<i class="fas fa-check-circle"></i> Submit Property`);
+
+            if (response.status == '1' || response.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Property Updated Successfully!',
+                    text: response.msg || response.message || 'Industrial property changes saved.',
+                    confirmButtonColor: '#10b981'
+                }).then(() => {
+                    window.location.href = "{% url 'industrial_list_agent' %}";
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Update Failed', text: response.msg || response.message || 'Something went wrong!' });
+            }
+        },
+        error: function(xhr) {
+            clearInterval(loadingInterval);
+            Swal.close();
+            $(_this).prop("disabled", false).html(`<i class="fas fa-check-circle"></i> Submit Property`);
+            Swal.fire({ icon: 'error', title: 'Server Error', text: 'An error occurred while updating the industrial record.' });
+        }
+    });
+  }
+</script>
+
+</body>
+</html>

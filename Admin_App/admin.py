@@ -39,6 +39,10 @@ admin.site.register(User_Details)
 
 admin.site.register(Subscription_Details)
 
+############# Register Subscription Purchase Details Table/Modal #################
+
+admin.site.register(Subscription_Purchase_Details)
+
 ########### Register  RentalResidentialProperty Table/Modal ###############
 
 admin.site.register(RentalResidentialProperty)

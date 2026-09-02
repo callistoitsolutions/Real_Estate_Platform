@@ -1,0 +1,1277 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-light: #f0f3ff;
+        --primary-dark: #5a67d8;
+        --accent: #f97316;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body, .main-content {
+        font-family: 'DM Sans', sans-serif;
+        background: #f3f4f8;
+        color: var(--dark);
+    }
+
+    /* ============ TOP BREADCRUMB BAR ============ */
+    .prop-topbar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-topbar .prop-id-badge {
+        background: #f0f3ff;
+        color: var(--primary);
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #d1dcff;
+        font-family: monospace;
+    }
+    .prop-verified-badge {
+        background: #ecfdf5;
+        color: var(--success);
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #a7f3d0;
+    }
+    .badge-duplicate {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* ============ HERO TITLE SECTION ============ */
+    .prop-hero-header {
+        background: var(--white);
+        padding: 20px 0 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .prop-hero-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 6px;
+        line-height: 1.3;
+    }
+    .prop-hero-location {
+        color: var(--muted);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1;
+    }
+
+    /* ============ MEDIA GALLERY ============ */
+    .prop-gallery-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 6px;
+        height: 420px;
+        overflow: hidden;
+        background: var(--dark);
+        margin-bottom: 0;
+    }
+    .prop-gallery-main {
+        grid-row: 1 / 3;
+        position: relative;
+        overflow: hidden;
+        background: #0d1117;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb {
+        position: relative;
+        overflow: hidden;
+        background: #1e2733;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb img,
+    .prop-gallery-main .walkthrough-slide img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+
+    .walkthrough-slide {
+        position: absolute; inset: 0;
+        opacity: 0; transition: opacity 0.7s ease;
+        display: none;
+    }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+
+    .gallery-hud {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px 16px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        z-index: 10;
+    }
+    .gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+    .btn-play-pause {
+        width: 34px; height: 34px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.75rem;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .btn-play-pause:hover { background: rgba(255,255,255,0.25); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge-walkthrough {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 4px 9px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    .thumb-more-overlay {
+        position: absolute; inset: 0;
+        background: rgba(17,24,39,0.7);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .thumb-more-overlay:hover { background: rgba(17,24,39,0.85); }
+    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
+
+    /* ============ STICKY NAV ============ */
+    .prop-sticky-nav {
+        position: sticky;
+        top: 68px;
+        background: var(--white);
+        border-bottom: 2px solid var(--border);
+        z-index: 990;
+        padding: 0;
+    }
+    .prop-sticky-nav-inner {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        padding-bottom: 2px;
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar { height: 4px; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-track { background: #f1f1f1; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+    .prop-nav-button {
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 14px 18px;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex; align-items: center; gap: 6px;
+        cursor: pointer;
+    }
+    .prop-nav-button i { font-size: 0.75rem; }
+    .prop-nav-button:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-button.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+    /* ============ LAYOUT SPLIT ============ */
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1100px) {
+        .prop-layout-grid { grid-template-columns: 1fr; }
+        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+        .prop-gallery-thumb { display: none; }
+        .prop-gallery-main { grid-row: 1; }
+    }
+
+    /* ============ SECTION CARDS ============ */
+    .prop-section {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+        scroll-margin-top: 140px;
+        box-shadow: var(--shadow-sm);
+    }
+    .prop-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prop-section-title .section-icon {
+        width: 32px; height: 32px;
+        background: var(--primary-light);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary);
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .spec-item { padding: 11px 12px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 3px; }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .spec-value { font-size: 0.88rem; font-weight: 600; color: var(--dark); }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+
+    .spec-item.highlight-price {
+        background: linear-gradient(135deg, #f0f4ff, #e8eeff);
+        border-radius: 8px;
+        border: 1px solid #d1dcff !important;
+        padding: 14px;
+    }
+    .spec-item.highlight-price .spec-label { color: var(--primary); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary); }
+
+    .amenity-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: var(--mid); }
+    .amenity-pill i { color: var(--success); font-size: 0.68rem; }
+    .facility-pill { display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: #15803d; }
+    .facility-pill i { font-size: 0.68rem; }
+
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; width: fit-content; }
+    .badge-yes { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-no { background: #ecfdf5; color: #065f46; border: 1px solid #34d399; }
+
+    .address-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem; color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary); }
+
+    .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
+    .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
+    .prop-faq .accordion-button:not(.collapsed) { background: #f0f3ff; color: var(--primary); border-bottom: 1px solid #d1dcff; }
+    .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
+
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+    .sidebar-price-header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 20px 20px 16px; color: white; }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+
+    .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #5a67d8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .owner-name { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
+    .owner-email { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .owner-phone-masked { font-size: 0.82rem; color: var(--mid); font-weight: 500; font-family: monospace; }
+    
+    .btn-reveal-phone { font-size: 0.73rem; color: var(--primary); border: 1px solid #d1dcff; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .btn-reveal-phone:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; font-weight: 700; width: 100%; cursor: pointer; text-decoration: none; margin-top: 14px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+    .btn-call-primary:hover { background: linear-gradient(135deg, #5a67d8, #667eea); transform: translateY(-1px); color: white; }
+
+    .owner-info-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem; }
+    .owner-info-row:last-child { border: none; padding-bottom: 0; }
+    .owner-info-row i { color: var(--muted); width: 14px; text-align: center; flex-shrink: 0; }
+    .owner-info-row span { color: var(--mid); }
+    .sidebar-divider { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+
+    .media-action-container { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-media-outline { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .btn-blueprint { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .btn-blueprint:hover { background: #0369a1; color: white; }
+    .btn-video { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .btn-video:hover { background: #c2410c; color: white; }
+
+    .prop-image-strip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 0; scrollbar-width: thin; }
+    .prop-image-strip::-webkit-scrollbar { height: 4px; }
+    .strip-thumb { flex-shrink: 0; width: 72px; height: 54px; border-radius: 5px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+    .strip-thumb.active-thumb { border-color: var(--primary); }
+    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .prop-quick-stats { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+    .quick-stat-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; color: var(--mid); }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
+
+    .sub-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 12px; margin-top: 18px; }
+    .sub-section-label:first-child { margin-top: 0; }
+
+    .empty-state { text-align: center; padding: 24px; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border); }
+    .empty-state i { font-size: 1.5rem; color: #d1d5db; margin-bottom: 8px; display: block; }
+    .empty-state p { font-size: 0.8rem; color: var(--muted); margin: 0; }
+</style>
+
+<div class="main-content">
+
+    <!-- TOP BREADCRUMB BAR -->
+    <div class="prop-topbar">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="javascript:history.back()"><i class="fas fa-arrow-left me-1"></i> Commercial Resale Listings</a>
+                    <span class="text-muted">/</span>
+                    <span>{{ prop.property_title|default:prop.property_no|truncatechars:40 }}</span>
+                    <span class="prop-id-badge">ID: {{ prop.id }}</span>
+                    <span class="prop-verified-badge"><i class="fas fa-shield-check me-1"></i> System Verified</span>
+                    {% if prop.is_duplicate %}
+                    <span class="badge-duplicate"><i class="fas fa-clone me-1"></i> Potential Duplicate ({{ prop.duplicate_count }})</span>
+                    {% endif %}
+                </div>
+                <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO HEADER WITH SELLING PRICE -->
+    <div class="prop-hero-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+                <div style="flex: 1; min-width: 260px;">
+                    <h1>{{ prop.property_title|default:"Commercial Resale Property" }}</h1>
+                    <div class="prop-hero-location">
+                        <i class="fas fa-location-dot"></i>
+                        {{ prop.locality }}, {{ prop.city }}, {{ prop.state|default:"India" }}
+                    </div>
+                    <div class="media-action-container">
+                        {% if prop.floor_plan %}
+                            <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn-media-outline btn-blueprint">
+                                <i class="fas fa-map"></i> Floor Plan
+                            </a>
+                        {% endif %}
+                        {% if prop.property_video %}
+                            <a href="{{ prop.property_video.url }}" target="_blank" class="btn-media-outline btn-video">
+                                <i class="fas fa-circle-play"></i> Property Video
+                            </a>
+                        {% elif prop.property_video_link %}
+                            <a href="{{ prop.property_video_link }}" target="_blank" class="btn-media-outline btn-video">
+                                <i class="fas fa-external-link-alt"></i> External Video Link
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="prop-hero-price-tag">₹{{ prop.selling_price|default:"—" }}</div>
+                    <div style="font-size:0.78rem; color: var(--muted); margin-top:4px;">
+                        ₹{{ prop.price_per_sqft|default:"—" }} / sq.ft
+                    </div>
+                </div>
+            </div>
+            
+            <!-- QUICK STATS CHIPS -->
+            <div class="prop-quick-stats">
+                <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ prop.listing_type|default:"Resale" }} / {{ prop.category|default:"Commercial" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-building"></i> {{ prop.property_type|title|default:"Office Space" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-layer-group"></i> Category: {{ prop.property_category|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.builtup_area }} sq.ft Built-up</div>
+                <div class="quick-stat-chip"><i class="fas fa-compass"></i> Zone: {{ prop.zone_type|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ prop.furnishing_status|title|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-tools"></i> {{ prop.property_condition|title|default:"—" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPPER IMAGE GALLERY SECTION -->
+    <div style="background: #111827;">
+        <div class="container-fluid px-0">
+            <div class="prop-gallery-grid">
+                <!-- Main Slideshow Window -->
+                <div class="prop-gallery-main" id="galMain">
+                    {% if images %}
+                        {% for img in images %}
+                        <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                            <img src="{{ img.image.url }}" alt="Property view {{ forloop.counter }}">
+                        </div>
+                        {% endfor %}
+                        <div class="gallery-hud">
+                            <div class="gallery-hud-left">
+                                <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+                                <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                            </div>
+                            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Presentation Walkthrough</span>
+                        </div>
+                    {% else %}
+                        <div class="w-100 h-100 position-relative overflow-hidden">
+                            <div style="position:absolute; inset:0; background:linear-gradient(135deg,#667eea,#764ba2); filter:blur(12px); transform:scale(1.2);"></div>
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+                                <div class="text-center text-white">
+                                    <div style="width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; margin:auto; border:1px solid rgba(255,255,255,0.15)">
+                                        <i class="fas fa-building" style="font-size:60px;"></i>
+                                    </div>
+                                    <h2 style="margin-top:20px; font-weight:700;">EstateFlow</h2>
+                                    <p style="color:rgba(255,255,255,0.8);">No Property Images Uploaded</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Thumbnail Slot 1 -->
+                <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(1)">
+                    {% if images.count > 1 %}
+                        <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                            <i class="fas fa-building mb-1"></i><span style="font-size:10px;">EstateFlow</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Thumbnail Slot 2 -->
+                <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(2)">
+                    {% if images.count > 2 %}
+                        <img src="{{ images.2.image.url }}" alt="Thumbnail 3">
+                        {% if images.count > 3 %}
+                        <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                            <div class="text-center">
+                                <span>+{{ images.count|add:"-3" }}</span>
+                                <small>More Photos</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                            <i class="fas fa-building mb-1"></i><span style="font-size:10px;">EstateFlow</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Thumbnail Strip -->
+        {% if images %}
+        <div style="background:#0d1117; padding:8px 16px 12px;">
+            <div class="prop-image-strip" id="imageStrip">
+                {% for img in images %}
+                <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+                    <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- STICKY NAVIGATION TABS -->
+    <div class="prop-sticky-nav">
+        <div class="container-fluid px-4">
+            <div class="prop-sticky-nav-inner" id="propNavTabs">
+                <button type="button" data-target="sec-listed-by" class="prop-nav-button active"><i class="fas fa-user-tag"></i> Listed By</button>
+                <button type="button" data-target="sec-basic-info" class="prop-nav-button"><i class="fas fa-info-circle"></i> Basic Information</button>
+                <button type="button" data-target="sec-area-measurements" class="prop-nav-button"><i class="fas fa-ruler-combined"></i> Area Measurements</button>
+                <button type="button" data-target="sec-commercial-specs" class="prop-nav-button"><i class="fas fa-building"></i> Commercial Specs</button>
+                <button type="button" data-target="sec-ownership-legal" class="prop-nav-button"><i class="fas fa-shield-halved"></i> Ownership & Legal</button>
+                <button type="button" data-target="sec-pricing-details" class="prop-nav-button"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</button>
+                <button type="button" data-target="sec-amenities-facilities" class="prop-nav-button"><i class="fas fa-star"></i> Amenities & Nearby</button>
+                <button type="button" data-target="sec-address-details" class="prop-nav-button"><i class="fas fa-location-dot"></i> Address Details</button>
+                <button type="button" data-target="sec-media-portals" class="prop-nav-button"><i class="fas fa-images"></i> Media & Portals</button>
+                <button type="button" data-target="sec-listing-uploaded" class="prop-nav-button"><i class="fas fa-user-check"></i> Uploaded By & Meta</button>
+                <button type="button" data-target="sec-faqs" class="prop-nav-button"><i class="fas fa-comments"></i> Property FAQs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="prop-page-body">
+        <div class="container-fluid px-4">
+            <div class="prop-layout-grid">
+
+                <div>
+
+                    <!-- 1. LISTED BY SECTION -->
+                    <div class="prop-section" id="sec-listed-by">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-user"></i></div> Listed By
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Type (Self/Other)</div>
+                                <div class="spec-value">{{ prop.listed_by_type|title|default:"Self" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Assigned To (Team Member)</div>
+                                <div class="spec-value">{{ prop.assigned_to|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Id</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ prop.listed_by_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Name</div>
+                                <div class="spec-value">{{ prop.listed_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Role</div>
+                                <div class="spec-value">{{ prop.listed_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Email</div>
+                                <div class="spec-value" style="font-size:0.82rem;">{{ prop.listed_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Listed By Contact</div>
+                                <div class="spec-value">{{ prop.listed_by_contact|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. BASIC INFORMATION SECTION -->
+                    <div class="prop-section" id="sec-basic-info">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-info-circle"></i></div> Basic Information
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Title (Auto-generated)</div>
+                                <div class="spec-value">{{ prop.property_title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Type</div>
+                                <div class="spec-value">{{ prop.property_type|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Category</div>
+                                <div class="spec-value">{{ prop.property_category|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Shop/Godown No/Unit No</div>
+                                <div class="spec-value">{{ prop.property_no|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Occupancy Status</div>
+                                <div class="spec-value">{{ prop.occupancy_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Zone Type</div>
+                                <div class="spec-value">{{ prop.zone_type|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Location Hub</div>
+                                <div class="spec-value">{{ prop.location_hub|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Condition</div>
+                                <div class="spec-value">{{ prop.property_condition|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Age of Property</div>
+                                <div class="spec-value">{{ prop.property_age|default:"0" }} Years</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Furnishing Status</div>
+                                <div class="spec-value">{{ prop.furnishing_status|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Facing Direction</div>
+                                <div class="spec-value">{{ prop.facing_direction|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. AREA MEASUREMENTS SECTION -->
+                    <div class="prop-section" id="sec-area-measurements">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-ruler-combined"></i></div> Area Measurements
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Super Built-up Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.super_builtup_area|default:"—" }} sq.ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Built-up Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.builtup_area|default:"—" }} sq.ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Carpet Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.carpet_area|default:"—" }} sq.ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Plot Area (sq.ft)</div>
+                                <div class="spec-value">{{ prop.plot_area|default:"—" }} {% if prop.plot_area %}sq.ft{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. COMMERCIAL SPECIFICATIONS SECTION -->
+                    <div class="prop-section" id="sec-commercial-specs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-building"></i></div> Commercial Specifications
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">No. of Staircases</div>
+                                <div class="spec-value">{{ prop.no_staircases|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Passenger Lifts</div>
+                                <div class="spec-value">{{ prop.passenger_lifts|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Service Lifts</div>
+                                <div class="spec-value">{{ prop.service_lifts|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">No. of Cabins</div>
+                                <div class="spec-value">{{ prop.num_cabins|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Meeting Rooms</div>
+                                <div class="spec-value">{{ prop.meeting_rooms|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Min. Seats</div>
+                                <div class="spec-value">{{ prop.min_seats|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Max. Seats</div>
+                                <div class="spec-value">{{ prop.max_seats|default:"0" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Private Parking</div>
+                                <div class="spec-value">{{ prop.private_parking|default:"0" }} Slots</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Public Parking</div>
+                                <div class="spec-value">{{ prop.public_parking|default:"0" }} Slots</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. OWNERSHIP & LEGAL DETAILS SECTION -->
+                    <div class="prop-section" id="sec-ownership-legal">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-shield-halved"></i></div> Ownership & Legal Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">No. of Owners</div>
+                                <div class="spec-value">{{ prop.no_of_owners|default:"1" }} Owner(s)</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Ownership Status</div>
+                                <div class="spec-value">{{ prop.ownership_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Ownership Document Type</div>
+                                <div class="spec-value">{{ prop.ownership_document_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Title Clarity Status</div>
+                                <div class="spec-value">{{ prop.title_clarity_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Encumbrance Status</div>
+                                <div class="spec-value">{{ prop.encumbrance_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Loan on Property?</div>
+                                <div class="spec-value">
+                                    <span class="status-badge {% if prop.property_loan == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.property_loan|default:"no"|upper }}
+                                    </span>
+                                    {% if prop.property_loan == 'yes' %}
+                                        <div class="fw-bold mt-1 text-danger">Loan Amount: ₹ {{ prop.loan_amount }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Existing Tenants?</div>
+                                <div class="spec-value">
+                                    <span class="status-badge {% if prop.existing_tenants == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.existing_tenants|default:"no"|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% if prop.existing_tenants == 'yes' %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Tenant Details</div>
+                                <div class="spec-value text-muted">{{ prop.tenant_details }}</div>
+                            </div>
+                            {% endif %}
+
+                            <div class="spec-item">
+                                <div class="spec-label">Any Legal Dispute?</div>
+                                <div class="spec-value">
+                                    <span class="status-badge {% if prop.any_legal_dispute == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.any_legal_dispute|default:"no"|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% if prop.any_legal_dispute == 'yes' %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label text-danger">Dispute Details</div>
+                                <div class="spec-value text-muted">{{ prop.dispute_details }}</div>
+                            </div>
+                            {% endif %}
+
+                            <div class="spec-item">
+                                <div class="spec-label">Government Tax Dues?</div>
+                                <div class="spec-value">
+                                    <span class="status-badge {% if prop.government_tax == 'yes' %}badge-yes{% else %}badge-no{% endif %}">
+                                        {{ prop.government_tax|default:"no"|upper }}
+                                    </span>
+                                    {% if prop.government_tax == 'yes' %}
+                                        <div class="fw-bold mt-1 text-danger">Tax Due: ₹ {{ prop.pending_tax_amount }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Fire Safety NOC Available?</div>
+                                <div class="spec-value">{{ prop.fire_safety_noc|upper|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Sanctioning / Approving Authority</div>
+                                <div class="spec-value">{{ prop.sanctioning_authority|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. PRICING DETAILS SECTION -->
+                    <div class="prop-section" id="sec-pricing-details">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div> Pricing Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item highlight-price">
+                                <div class="spec-label">Selling Price</div>
+                                <div class="spec-value">₹ {{ prop.selling_price }}</div>
+                            </div>
+                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, #fffcf5, #fff8e7); border-color: #f5e6c1 !important;">
+                                <div class="spec-label" style="color:#b8860b;">Price Per Sqft (Auto)</div>
+                                <div class="spec-value" style="color:#8b6508;">₹ {{ prop.price_per_sqft|default:"—" }} / sqft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Brokerage %</div>
+                                <div class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Enter Fixed Brokerage</div>
+                                <div class="spec-value">{% if prop.manual_brokerage %}₹ {{ prop.manual_brokerage }}{% else %}—{% endif %}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. AMENITIES & NEARBY FACILITIES SECTION -->
+                    <div class="prop-section" id="sec-amenities-facilities">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-star"></i></div> Amenities & Nearby Facilities
+                        </div>
+                        
+                        <div class="sub-section-label">Nearby Facilities</div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for fac in prop.nearby_facilities_list %}
+                                <div class="facility-pill"><i class="fas fa-map-marker-alt"></i> {{ fac }}</div>
+                            {% empty %}
+                                <div class="text-muted" style="font-size:0.82rem;">No nearby facilities selected.</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="sub-section-label">Amenities & Features</div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for am in prop.amenities_list %}
+                                <div class="amenity-pill"><i class="fas fa-check-circle"></i> {{ am }}</div>
+                            {% empty %}
+                                <div class="text-muted" style="font-size:0.82rem;">No amenities selected.</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Restored Property Summary & Descriptions -->
+                        {% if prop.property_summary %}
+                        <div class="sub-section-label">Property Summary (Auto)</div>
+                        <div style="font-size: 0.88rem; line-height: 1.7; color: var(--mid);" class="mb-4">
+                            {{ prop.property_summary }}
+                        </div>
+                        {% endif %}
+
+                        {% if prop.property_description %}
+                        <div class="sub-section-label">Property Description (Auto)</div>
+                        <div style="font-size: 0.88rem; line-height: 1.8; color: var(--mid);" class="mb-4">
+                            {{ prop.property_description|safe }}
+                        </div>
+                        {% endif %}
+
+                        <div class="sub-section-label">Property Description</div>
+                        <div style="font-size: 0.9rem; line-height: 1.8; color: var(--mid);">
+                            {% if prop.user_description %}
+                                {{ prop.user_description|linebreaks }}
+                            {% else %}
+                                <div class="text-muted">No custom description provided.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 8. ADDRESS DETAILS SECTION -->
+                    <div class="prop-section" id="sec-address-details">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-location-dot"></i></div> Address Details
+                        </div>
+                        <div class="spec-grid mb-3">
+                            <div class="spec-item">
+                                <div class="spec-label">City</div>
+                                <div class="spec-value">{{ prop.city }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Area / Locality</div>
+                                <div class="spec-value">{{ prop.locality }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Building / Project / Society</div>
+                                <div class="spec-value">{{ prop.building_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Pincode</div>
+                                <div class="spec-value">{{ prop.pincode|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Landmark</div>
+                                <div class="spec-value">{{ prop.property_landmark|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">State</div>
+                                <div class="spec-value">{{ prop.state }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Google Maps Link</div>
+                                <div class="spec-value">
+                                    {% if prop.google_maps_link %}
+                                        <a href="{{ prop.google_maps_link }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;">Open Map</a>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Latitude / Longitude</div>
+                                <div class="spec-value">
+                                    {% if prop.latitude and prop.longitude %}
+                                        {{ prop.latitude }}, {{ prop.longitude }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spec-label mb-2">Property Address</div>
+                        <div class="address-box">
+                            <i class="fas fa-map-pin text-primary me-2"></i> {{ prop.address }}
+                        </div>
+                    </div>
+
+                    <!-- 9. MEDIA & PORTALS SECTION -->
+                    <div class="prop-section" id="sec-media-portals">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-images"></i></div> Media & Portals
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Upload Floor Plan (Optional)</div>
+                                <div class="spec-value">
+                                    {% if prop.floor_plan %}
+                                        <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View Plan</a>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            <div class="spec-item">
+                                <div class="spec-label">Is Property Already Listed Elsewhere?</div>
+                                <div class="spec-value">{{ prop.listed_elsewhere|default:"No" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Portal Name</div>
+                                <div class="spec-value">{{ prop.portal_name|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. LISTING UPLOADED BY SECTION -->
+                    <div class="prop-section" id="sec-listing-uploaded">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-user-check"></i></div> Listing Uploaded By & System Meta
+                        </div>
+
+                        <div class="sub-section-label">Property Uploaded By</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Name</div>
+                                <div class="spec-value">{{ prop.uploaded_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Email</div>
+                                <div class="spec-value">{{ prop.uploaded_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Contact</div>
+                                <div class="spec-value">{{ prop.uploaded_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Role</div>
+                                <div class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Source File Name</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ prop.upload_file_name|default:"Direct Form Input" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Created At</div>
+                                <div class="spec-value">{{ prop.created_at|date:"d M Y, h:i A" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-label">System Duplication & Audit Meta</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Duplicate Flagged?</div>
+                                <div class="spec-value">
+                                    {% if prop.is_duplicate %}
+                                        <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Yes ({{ prop.duplicate_count }} Linked)</span>
+                                    {% else %}
+                                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Original</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Duplicate Group ID</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ prop.duplicate_group_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Unique Key (SHA-256 Fingerprint)</div>
+                                <div class="spec-value" style="font-family:monospace; font-size:0.75rem; color: var(--muted); word-break: break-all;">{{ prop.property_unique_key|default:"Not Generated" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PROPERTY FAQS SECTION -->
+                    <div class="prop-section" id="sec-faqs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-comments"></i></div> Property Frequently Asked Questions
+                        </div>
+                        <div class="accordion prop-faq" id="faqAccordion">
+                            {% for faq in prop.faqs.all %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHead{{ faq.id }}">
+                                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                                            {{ faq.question }}
+                                        </button>
+                                    </h2>
+                                    <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">{{ faq.answer }}</div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-database"></i>
+                                    <p>No FAQ matrices cached for this entry ID.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SIDEBAR SUMMARY -->
+                <div class="prop-sidebar">
+                    <div class="sidebar-price-card">
+                        <div class="sidebar-price-header">
+                            <div class="sidebar-price-label">Selling Price Tag</div>
+                            <div class="sidebar-price-amount">₹ {{ prop.selling_price|default:"—" }}</div>
+                        </div>
+                        <div class="sidebar-price-body">
+                            <div class="row g-0">
+                                <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border)">
+                                    <div class="sidebar-mini-stat-label">Price / Sqft</div>
+                                    <div class="sidebar-mini-stat-val">₹ {{ prop.price_per_sqft|default:"—" }}</div>
+                                </div>
+                                <div class="col-6 sidebar-mini-stat">
+                                    <div class="sidebar-mini-stat-label">Property Type</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.property_type|title|default:"Commercial" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-owner-card">
+                        <div class="sidebar-divider">Listing Representative</div>
+                        <div class="d-flex align-items-center mb-3" style="gap:12px;">
+                            <div class="owner-avatar">{{ prop.listed_by_name|slice:":1"|upper|default:"U" }}</div>
+                            <div style="min-width:0;">
+                                <div class="owner-name">{{ prop.listed_by_name|default:"Direct Owner" }}</div>
+                                <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ prop.listed_by_email|default:"No email logged" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="owner-info-row">
+                            <i class="fas fa-phone"></i>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="owner-phone-masked" id="sidebarPhone">
+                                    {% if prop.listed_by_contact %}
+                                        {{ prop.listed_by_contact|slice:":2" }}XXXXXX{{ prop.listed_by_contact|slice:"-2:" }}
+                                    {% else %}
+                                        Not available
+                                    {% endif %}
+                                </span>
+                                {% if prop.listed_by_contact %}
+                                    <button type="button" class="btn-reveal-phone" onclick="revealPhone('sidebarPhone', '{{ prop.listed_by_contact }}')">Reveal</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="owner-info-row">
+                            <i class="fas fa-user-tag"></i>
+                            <span>Role: {{ prop.listed_by_role|default:"Seller" }}</span>
+                        </div>
+
+                        {% if prop.listed_by_contact %}
+                        <a href="tel:{{ prop.listed_by_contact }}" class="btn-call-primary">
+                            <i class="fas fa-phone-volume"></i> Connect with Lister
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX MODAL -->
+<div class="modal fade" id="photoLightboxStrip" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
+            <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
+                <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
+                    <i class="fas fa-images me-2 text-primary"></i> Widescreen Gallery — Property Images
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    {% for img in images %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151;">
+                                <img src="{{ img.image.url }}" alt="Gallery view {{ forloop.counter }}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$("#Resale").addClass("active");
+
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. WALKTHROUGH ENGINE FOR UPPER GALLERY
+    const slides = document.querySelectorAll('.walkthrough-slide');
+    const stripThumbs = document.querySelectorAll('.strip-thumb');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const galTimer = document.getElementById('galTimer');
+    const INTERVAL = 3500;
+
+    let currentSlide = 0;
+    let isPlaying = true;
+    let ticker = null;
+    let startTime = Date.now();
+    const totalDuration = slides.length * INTERVAL;
+
+    function fmt(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return `${String(m).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+    }
+
+    window.setSlide = function(idx) {
+        if(slides.length === 0) return;
+        slides.forEach(s => s.classList.remove('active'));
+        stripThumbs.forEach(t => t.classList.remove('active-thumb'));
+        currentSlide = (idx + slides.length) % slides.length;
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        const activeThumb = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
+        if (activeThumb) {
+            activeThumb.classList.add('active-thumb');
+            const stripContainer = activeThumb.closest('.prop-image-strip') || activeThumb.parentElement;
+            if (stripContainer) {
+                const targetLeft = activeThumb.offsetLeft - (stripContainer.clientWidth / 2) + (activeThumb.clientWidth / 2);
+                stripContainer.scrollTo({ left: targetLeft, behavior: 'smooth' });
+            }
+        }
+        startTime = Date.now();
+    };
+
+    function tickTimer() {
+        if (!isPlaying || !galTimer || slides.length === 0) return;
+        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
+        const capped = Math.min(elapsed, totalDuration);
+        galTimer.textContent = `${fmt(capped)} / ${fmt(totalDuration)}`;
+        requestAnimationFrame(tickTimer);
+    }
+
+    function autoAdvance() {
+        ticker = setInterval(() => { setSlide(currentSlide + 1); }, INTERVAL);
+    }
+
+    if (slides.length > 0) {
+        stripThumbs.forEach(t => {
+            t.addEventListener('click', function() { setSlide(parseInt(this.dataset.slide)); });
+        });
+
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    clearInterval(ticker);
+                    isPlaying = false;
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                } else {
+                    autoAdvance();
+                    isPlaying = true;
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                    requestAnimationFrame(tickTimer);
+                }
+            });
+        }
+        setSlide(0);
+        autoAdvance();
+        requestAnimationFrame(tickTimer);
+    }
+
+    // 2. STICKY NAV SCROLL SPY & BUTTON SCROLLING
+    const navButtons = document.querySelectorAll('.prop-nav-button');
+    const sections = document.querySelectorAll('.prop-section[id]');
+
+    function updateActiveNav() {
+        let activeId = null;
+        const scrollY = window.scrollY;
+        sections.forEach(sec => {
+            const top = sec.getBoundingClientRect().top + window.scrollY - 160;
+            if (scrollY >= top) activeId = sec.id;
+        });
+        if (activeId) {
+            navButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-target') === activeId);
+            });
+        }
+    }
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetId = this.getAttribute('data-target');
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                const targetY = targetEl.getBoundingClientRect().top + window.scrollY - 130;
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
+            }
+        });
+    });
+    updateActiveNav();
+
+    // 3. HORIZONTAL WHEEL SCROLL FOR NAV TABS
+    const navTabs = document.getElementById('propNavTabs');
+    if (navTabs) {
+        navTabs.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault(); 
+                this.scrollLeft += e.deltaY; 
+            }
+        });
+    }
+});
+
+// 4. PHONE MASK REVEAL FUNCTION
+function revealPhone(elementId, phone) {
+    const el = document.getElementById(elementId);
+    if (el && phone) {
+        el.textContent = phone;
+        el.style.color = '#667eea';
+        el.style.fontWeight = '700';
+        const btn = el.nextElementSibling;
+        if (btn && btn.classList.contains('btn-reveal-phone')) {
+            btn.remove();
+        }
+    }
+}
+</script>
+
+<!-- FAQ JSON-LD SCHEMA -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in prop.faqs.all %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ faq.answer|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>

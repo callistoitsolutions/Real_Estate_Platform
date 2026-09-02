@@ -1,0 +1,2402 @@
+{% include "agency_panel/agency_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+  :root {
+    --primary: #f59e0b;
+    --primary-dark: #ef4444;
+    --primary-grad: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    --success-grad: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --info-grad: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-grad: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --success: #10b981;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg-light: #f8f9fa;
+    --text-dark: #2d3748;
+    --sidebar-width: 280px;
+    --topbar-height: 70px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, .07);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    min-height: 100vh;
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--topbar-height);
+    padding: 28px;
+  }
+
+  .page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto auto 1fr;
+    gap: 22px;
+    align-items: start;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    grid-column: 1/-1;
+    background: var(--primary-grad);
+    border-radius: var(--radius-xl);
+    padding: 28px 35px;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, .35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, .08);
+    border-radius: 50%;
+  }
+
+  .page-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; }
+  .page-subtitle { font-size: .95rem; opacity: .85; margin: 0; }
+
+  /* STEPPER */
+  .stepper-container {
+    grid-column: 1/-1;
+    background: #fff;
+    border-radius: var(--radius-xl);
+    padding: 22px 30px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .stepper { display: flex; align-items: center; overflow-x: auto; }
+  .step-item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .step-circle {
+    width: 46px; height: 46px; min-width: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; font-weight: 700; border: 3px solid var(--border);
+    background: #fff; color: var(--muted); transition: all .3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+  }
+  .step-circle.active {
+    background: var(--primary-grad); color: #fff; border-color: transparent;
+    transform: scale(1.1); box-shadow: 0 4px 16px rgba(59, 130, 246, .45);
+  }
+  .step-circle.done { background: var(--success-grad); color: #fff; border-color: transparent; }
+  .step-label { font-size: .82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .3s; }
+  .step-label.active { color: #3b82f6; }
+  .step-label.done { color: var(--success); }
+  .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background .4s; }
+  .step-line.done { background: var(--success-grad); }
+
+  .form-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;
+  }
+  .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
+  .form-title i {
+    width: 45px; height: 45px; background: var(--primary-grad); color: white;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  }
+
+  .btn-back {
+    background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px;
+    border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+  }
+  .btn-back:hover { background: var(--dark-grad); color: white; transform: translateY(-2px); }
+
+  /* FORM + SIDEBAR */
+  .form-container {
+    grid-column: 1/2; grid-row: 3; background: #fff; border-radius: var(--radius-xl);
+    padding: 32px; box-shadow: var(--shadow-card); min-width: 0;
+  }
+  .preview-sidebar {
+    grid-column: 2/3; grid-row: 3; display: flex; flex-direction: column; gap: 18px;
+    position: sticky; top: calc(var(--topbar-height) + 20px); align-self: start;
+  }
+
+  .step-content { display: none; }
+  .step-content.active { display: block; animation: fadeInUp .35s ease; }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .form-section {
+    margin-bottom: 26px; border-radius: var(--radius-md); overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+  }
+  .section-header {
+    background: var(--primary-grad); color: #fff; padding: 13px 20px;
+    font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: 10px;
+  }
+  .section-header.info-theme { background: var(--info-grad); }
+  .section-header.dark-theme { background: var(--dark-grad); }
+  .section-body {
+    background: var(--bg-light); padding: 22px 24px; border: 2px solid #e9ecef;
+    border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  .form-label {
+    font-weight: 600; color: var(--text-dark); margin-bottom: 7px;
+    font-size: .88rem; display: flex; align-items: center; gap: 5px;
+  }
+  .required { color: #e74c3c; font-size: 1rem; }
+  .hint-text { font-size: .76rem; color: var(--muted); font-weight: 400; margin-top: 4px; }
+
+  .form-control, .form-select {
+    border: 2px solid #e9ecef; border-radius: var(--radius-md); padding: 10px 14px;
+    font-size: .92rem; width: 100%; transition: border-color .25s, box-shadow .25s;
+    background-color: #fff; color: var(--text-dark); font-family: inherit;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, .15); outline: none;
+  }
+  .form-control[readonly] { background: #edf2f7; border-color: #cbd5e0; color: #4a5568; font-weight: 600; cursor: not-allowed; }
+
+  .validation-error {
+    border-color: #e74c3c !important;
+    background-color: #fff5f5 !important;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
+  }
+
+  select.form-control, .form-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px;
+  }
+  textarea.form-control { min-height: 100px; resize: vertical; line-height: 1.6; }
+
+  .input-with-unit { position: relative; }
+  .input-unit {
+    position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center;
+    padding: 0 14px; background: #e9ecef; border: 2px solid #e9ecef; border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0; font-size: .82rem; font-weight: 700; color: var(--muted); white-space: nowrap;
+  }
+  .input-with-unit .form-control { border-radius: var(--radius-md) 0 0 var(--radius-md); padding-right: 10px; }
+
+  .radio-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .radio-option {
+    display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; background: #fff;
+    border: 2px solid #e9ecef; border-radius: var(--radius-md); cursor: pointer; font-weight: 600;
+    font-size: .85rem; color: var(--text-dark); transition: all .2s;
+  }
+  .radio-option:hover { border-color: #3b82f6; background: #eff6ff; }
+  .radio-option input { accent-color: #3b82f6; width: 16px; height: 16px; }
+
+  .sub-section-title {
+    font-size: .8rem; font-weight: 700; color: #3b82f6; text-transform: uppercase;
+    letter-spacing: .05em; margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e9ecef;
+  }
+
+  .step-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 26px; gap: 12px; padding-top: 20px; border-top: 2px solid #f0f0f0;
+  }
+  .btn-step {
+    padding: 12px 28px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;
+    font-size: .92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all .3s; border: none;
+  }
+  .btn-next, .btn-submit { background: var(--primary-grad); color: #fff; box-shadow: 0 4px 14px rgba(59, 130, 246, .35); }
+  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, .5); }
+  .btn-prev { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border) !important; }
+  .btn-prev:hover { background: #e9ecef; }
+
+  /* CATEGORIZED IMAGES SYSTEM */
+  .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .img-cat-tab {
+    border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px;
+    font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap;
+  }
+  .img-cat-tab.active { background: var(--primary-grad); border-color: transparent; color: #fff; }
+  .img-cat-panel { display: none; }
+  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+  .img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+  }
+  .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+  .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: grab; }
+  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+    background: #e74c3c; color: #fff; border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;
+  }
+  .img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;
+  }
+
+  /* MODERN VIDEO OPTION CARDS */
+  .video-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .video-option-card {
+    position: relative; border: 2px solid #e2e8f0; border-radius: 14px; padding: 24px 16px;
+    text-align: center; cursor: pointer; background: #fff; transition: all 0.3s;
+  }
+  .video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
+  .video-option-card.active { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15); }
+  .video-option-card input[type="radio"] { position: absolute; opacity: 0; }
+  .vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
+  .video-option-card.active .vo-icon { color: #3b82f6; }
+  .vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .vo-desc { font-size: 0.8rem; color: #64748b; }
+  .vo-check {
+    position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
+    background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0;
+  }
+  .video-option-card.active .vo-check { opacity: 1; }
+
+  /* SELECTED ITEMS */
+  .selected-items-display {
+    padding: 12px; background: #f8f9fa; border: 2px dashed #dee2e6;
+    border-radius: 10px; min-height: 52px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .item-tag {
+    background: #fff; border: 1px solid #dee2e6; border-radius: 20px;
+    padding: 4px 14px; font-size: .82rem; display: inline-flex; align-items: center; gap: 5px; font-weight: 600;
+  }
+  .item-tag .remove-btn { cursor: pointer; color: #dc3545; margin-left: 4px; font-size: .75rem; }
+
+  /* MODAL STYLING */
+  .modal-content { border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 25px 60px rgba(0,0,0,0.2); }
+  .modal-header { background: var(--primary-grad); color: #fff; border: none; padding: 20px 24px; }
+  .modal-title { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+  .btn-close { filter: invert(1); opacity: 0.8; }
+  .modal-body { padding: 24px; background: #f8fafc; }
+  .modal-footer { background: #fff; padding: 16px 24px; border-top: 1px solid var(--border); }
+
+  .modal-search-box { position: relative; margin-bottom: 20px; }
+  .modal-search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+  .modal-search-input {
+    width: 100%; padding: 12px 16px 12px 45px; border: 2px solid #e2e8f0;
+    border-radius: 12px; font-size: 0.92rem; background: #fff; transition: all 0.2s;
+  }
+  .modal-search-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); outline: none; }
+
+  .modal-grid-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 380px; overflow-y: auto; padding: 4px; }
+  .modal-option-card {
+    background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease; user-select: none;
+  }
+  .modal-option-card:hover { border-color: #3b82f6; background: #eff6ff; transform: translateY(-1px); }
+  .modal-option-card.checked { border-color: #3b82f6; background: #eef2ff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12); }
+  .modal-option-card input[type="checkbox"] { accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer; display: inline-block !important; flex-shrink: 0; }
+  .modal-option-card i { font-size: 1.1rem; color: #3b82f6; width: 24px; text-align: center; }
+  .modal-option-card label { font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer; margin: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* SEARCHABLE DROPDOWN */
+  .search-select { position: relative; width: 100%; font-size: .95rem; }
+  .search-select-control {
+    border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; background: #fff;
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color .3s; min-height: 48px;
+  }
+  .search-select.open .search-select-control { border-color: #3b82f6; }
+  .search-select-value { color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 1.2em; display: inline-block; }
+  .search-select-value.ss-placeholder { color: #94a3b8; }
+  .search-select-arrow { color: #64748b; transition: transform .2s; font-size: .8rem; flex-shrink: 0; margin-left: 8px; }
+  .search-select.open .search-select-arrow { transform: rotate(180deg); }
+  .search-select-panel {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff;
+    border: 1px solid #ced4da; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .15); z-index: 9999; overflow: hidden;
+  }
+  .search-select.open .search-select-panel { display: block; }
+  .search-select-input { width: 100%; border: none; border-bottom: 2px solid #e9ecef; padding: 12px 15px; font-size: .9rem; outline: none; }
+  .search-select-input:focus { border-bottom-color: #3b82f6; }
+  .search-select-options { max-height: 260px; overflow-y: auto; }
+  .search-select-group-label { padding: 8px 15px 4px; font-size: .72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; background: #f8f9fa; }
+  .search-select-option { padding: 10px 16px; cursor: pointer; color: #2d3748; font-size: .9rem; }
+  .search-select-option:hover, .search-select-option.highlighted { background: #eff6ff; color: #1d4ed8; }
+  .search-select-option.selected { background: #3b82f6; color: #fff; }
+  .search-select-no-results { padding: 14px 16px; color: #94a3b8; font-size: .88rem; text-align: center; }
+
+  /* PREVIEW CARD */
+  .preview-card {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af); border-radius: var(--radius-lg); padding: 18px; color: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
+  }
+  .preview-mock { background: #fff; border-radius: var(--radius-md); overflow: hidden; margin-top: 14px; }
+  .preview-image {
+    height: 130px; background: linear-gradient(135deg, #93c5fd, #60a5fa);
+    display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative;
+  }
+  .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; }
+  .preview-badge { font-size: .62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255, 255, 255, .95); color: #0f172a; }
+  .preview-price {
+    position: absolute; bottom: 9px; left: 9px; background: rgba(15, 23, 42, .88); color: #fff;
+    font-size: .88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px;
+  }
+  .preview-body { background: #fff; padding: 14px; color: #0f172a; }
+  .preview-title { font-size: .88rem; font-weight: 800; margin-bottom: 5px; line-height: 1.4; }
+  .preview-location { font-size: .75rem; color: var(--muted); margin-bottom: 8px; }
+  .preview-specs { display: flex; gap: 12px; font-size: .75rem; color: #475569; font-weight: 600; flex-wrap: wrap; }
+
+  /* CHECKLIST CARD */
+  .checklist-card {
+    background: #fff; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+  }
+  .checklist-title { font-size: .88rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
+  .checklist-item {
+    display: flex; align-items: center; gap: 9px; padding: 7px 0; font-size: .82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; transition: color .3s;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item i { font-size: .75rem; width: 14px; flex-shrink: 0; color: #cbd5e0; transition: color .3s; }
+  .checklist-item.done { color: var(--success); }
+  .checklist-item.done i { color: var(--success); }
+
+  .form-group, .col-md-12, .section-body, .step-content, .row { overflow: visible !important; }
+
+  @media(max-width:1200px) {
+    .page-wrapper { grid-template-columns: 1fr; }
+    .preview-sidebar { display: none; }
+    .form-container { grid-column: 1/-1; }
+  }
+  @media(max-width:992px) { .main-content { margin-left: 0; } }
+</style>
+
+<div class="main-content">
+  <div class="page-wrapper">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="page-title"><i class="fas fa-building" style="margin-right:12px;opacity:.9"></i>Update Commercial Plot #{{prop.id}}</h1>
+      <p class="page-subtitle">Modify your resale commercial plot listing details securely</p>
+    </div>
+
+    <!-- STEPPER -->
+    <div class="stepper-container">
+      <div class="stepper">
+        <div class="step-item">
+          <div class="step-circle active" id="sc1">1</div>
+          <div class="step-label active" id="sl1">Plot Details</div>
+          <div class="step-line" id="line1"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc2">2</div>
+          <div class="step-label" id="sl2">Pricing &amp; Legal</div>
+          <div class="step-line" id="line2"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc3">3</div>
+          <div class="step-label" id="sl3">Amenities &amp; Location</div>
+          <div class="step-line" id="line3"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc4">4</div>
+          <div class="step-label" id="sl4">Photos &amp; Publish</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM CONTAINER -->
+    <div class="form-container">
+      <form action="" method="POST" enctype="multipart/form-data" id="comPlotForm">
+        {% csrf_token %}
+        <input type="hidden" name="property_id" id="property_id" value="{{ prop.id }}">
+
+        <!-- ════ STEP 1 — PLOT DETAILS ════ -->
+        <div class="step-content active" id="step1">
+
+          <div class="form-header">
+            <div class="form-title">🏢 Commercial Plot</div>
+            <button class="btn-back" type="button" onclick="history.back();">
+              <i class="fas fa-arrow-left"></i> Back to List
+            </button>
+          </div>
+
+          <!-- LISTED BY -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
+            <div class="section-body">
+
+              <div class="row mt-3" id="user_data_div">
+                <div class="col-md-3 mt-2">
+                  <label class="form-label"><i class="fas fa-id-card"></i> ID</label>
+                  <input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly value="{{ prop.listed_by_id }}">
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                  <input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly value="{{ prop.listed_by_name|default:'' }}">
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                  <input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly value="{{ prop.listed_by_email|default:'' }}">
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
+                  <input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly value="{{ prop.listed_by_contact|default:'' }}">
+                </div>
+                <div class="col-md-3 mt-3">
+                  <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                  <input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly value="{{ prop.listed_by_role|default:'' }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BASIC INFO -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-store"></i> Basic Commercial Plot Information</div>
+            <div class="section-body">
+              <div class="mb-3">
+                <label class="form-label">Property Title</label>
+                <input type="text" class="form-control" id="property_title" name="property_title" readonly
+                  placeholder="Auto-generated by system" value="{{ prop.property_title|default_if_none:"" }}">
+                <p class="hint-text">This headline appears on search results and listing page</p>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Plot / CTS / Gat Number <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="property_no" id="property_no"
+                    placeholder="e.g., CTS No. 123, Plot No. 45" required value="{{ prop.property_no|default_if_none:"" }}">
+                  <span style="font-size:.75rem;color:red;margin-top:4px;display:block;font-weight:bold;">
+                    <i class="fas fa-info-circle"></i> Required for verification — not shown publicly.
+                  </span>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Plot Area <span class="required">*</span></label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" name="plot_area" id="plot_area" required min="1"
+                      placeholder="e.g., 3000" onkeyup="updatePreview()" value="{{ prop.plot_area|default_if_none:"" }}">
+                    <span class="input-unit">sq.ft</span>
+                  </div>
+                  <p class="hint-text">Total plot area — FSI determines max buildable area</p>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Commercial Plot Type <span class="required">*</span></label>
+                  <select class="form-select form-control" name="property_type" id="property_type" required onchange="updatePreview()">
+                    <option value="">— Select Commercial Plot Type —</option>
+                    <option value="retail_shop_plot" {% if prop.property_type == "retail_shop_plot" %}selected{% endif %}>Retail Shop / Showroom Plot</option>
+                    <option value="office_commercial_plot" {% if prop.property_type == "office_commercial_plot" %}selected{% endif %}>Office / IT / Corporate Building Plot</option>
+                    <option value="hotel_hospitality_plot" {% if prop.property_type == "hotel_hospitality_plot" %}selected{% endif %}>Hotel / Guest House / Hospitality Plot</option>
+                    <option value="petrol_pump_plot" {% if prop.property_type == "petrol_pump_plot" %}selected{% endif %}>Petrol Pump / CNG Station Plot</option>
+                    <option value="hospital_medical_plot" {% if prop.property_type == "hospital_medical_plot" %}selected{% endif %}>Hospital / Clinic / Medical Plot</option>
+                    <option value="multiplex_entertainment" {% if prop.property_type == "multiplex_entertainment" %}selected{% endif %}>Multiplex / Entertainment Centre Plot</option>
+                    <option value="mall_commercial_complex" {% if prop.property_type == "mall_commercial_complex" %}selected{% endif %}>Mall / Commercial Complex Plot</option>
+                    <option value="mixed_use_plot" {% if prop.property_type == "mixed_use_plot" %}selected{% endif %}>Mixed Use Plot (Commercial + Residential)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ZONE & APPROVALS -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-file-shield"></i> Zone Classification, FSI &amp; Commercial Approvals</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Commercial Zone / Land Use <span class="required">*</span></label>
+                  <select class="form-select form-control" name="land_use" id="land_use" required>
+                    <option value="">— Select Zone —</option>
+                    <option value="C1_Retail" {% if prop.land_use == "C1_Retail" %}selected{% endif %}>C1 — Retail / Local Commercial Zone</option>
+                    <option value="C2_Service" {% if prop.land_use == "C2_Service" %}selected{% endif %}>C2 — Service Commercial Zone</option>
+                    <option value="C3_Wholesale" {% if prop.land_use == "C3_Wholesale" %}selected{% endif %}>C3 — Wholesale / Bulk Trade Zone</option>
+                    <option value="CBD" {% if prop.land_use == "CBD" %}selected{% endif %}>Central Business District (CBD)</option>
+                    <option value="Mixed_Use" {% if prop.land_use == "Mixed_Use" %}selected{% endif %}>Mixed Use Zone (C + R)</option>
+                    <option value="IT_Park_Zone" {% if prop.land_use == "IT_Park_Zone" %}selected{% endif %}>IT Park / Technology Zone</option>
+                    <option value="Hospitality" {% if prop.land_use == "Hospitality" %}selected{% endif %}>Hotel / Hospitality Zone</option>
+                    <option value="DP_Road_Frontage" {% if prop.land_use == "DP_Road_Frontage" %}selected{% endif %}>DP Road Frontage Commercial</option>
+                  </select>
+                  <p class="hint-text">As per town planning / development plan</p>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Commercial Zone Type <span class="required">*</span></label>
+                  <select class="form-select form-control" name="commercial_zone_type" id="commercial_zone_type" required>
+                    <option value="">— Select —</option>
+                    <option value="C1_Retail" {% if prop.commercial_zone_type == "C1_Retail" %}selected{% endif %}>C1 — Retail / Local Commercial</option>
+                    <option value="C2_Service" {% if prop.commercial_zone_type == "C2_Service" %}selected{% endif %}>C2 — Service Commercial</option>
+                    <option value="C3_Wholesale" {% if prop.commercial_zone_type == "C3_Wholesale" %}selected{% endif %}>C3 — Wholesale / Bulk Trade</option>
+                    <option value="Mixed_Commercial" {% if prop.commercial_zone_type == "Mixed_Commercial" %}selected{% endif %}>Mixed Use Commercial Zone</option>
+                    <option value="CBD" {% if prop.commercial_zone_type == "CBD" %}selected{% endif %}>Central Business District (CBD)</option>
+                    <option value="IT_Park_Zone" {% if prop.commercial_zone_type == "IT_Park_Zone" %}selected{% endif %}>IT Park / Tech Zone</option>
+                    <option value="Hospitality_Zone" {% if prop.commercial_zone_type == "Hospitality_Zone" %}selected{% endif %}>Hotel / Hospitality Zone</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">NA Status <span class="required">*</span></label>
+                  <select class="form-select form-control" name="na_status" id="na_status" required>
+                    <option value="">— Select —</option>
+                    <option value="NA Converted" {% if prop.na_status == "NA Converted" %}selected{% endif %}>NA Converted for Commercial Use</option>
+                    <option value="NA Applied" {% if prop.na_status == "NA Applied" %}selected{% endif %}>NA Applied — Pending</option>
+                    <option value="Not Applicable" {% if prop.na_status == "Not Applicable" %}selected{% endif %}>Not Applicable (Urban Zone)</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Zoning / Building Sanction Status</label>
+                  <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
+                    <option value="">— Select —</option>
+                    <option value="Commercially_Sanctioned" {% if prop.layout_approval_status == "Commercially_Sanctioned" %}selected{% endif %}>Commercially Sanctioned Plot</option>
+                    <option value="DP_Approved" {% if prop.layout_approval_status == "DP_Approved" %}selected{% endif %}>Development Plan (DP) Approved Zone</option>
+                    <option value="Ready_for_Construction" {% if prop.layout_approval_status == "Ready_for_Construction" %}selected{% endif %}>Ready for Commercial Construction</option>
+                    <option value="Sanction_Pending" {% if prop.layout_approval_status == "Sanction_Pending" %}selected{% endif %}>Building Sanction Pending</option>
+                    <option value="Not Applicable" {% if prop.layout_approval_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Permissible FSI / FAR</label>
+                  <select class="form-select form-control" name="permissible_fsi" id="permissible_fsi">
+                    <option value="">— Select FSI —</option>
+                    <option value="1.0" {% if prop.permissible_fsi == "1.0" %}selected{% endif %}>1.0 (Basic)</option>
+                    <option value="1.5" {% if prop.permissible_fsi == "1.5" %}selected{% endif %}>1.5</option>
+                    <option value="2.0" {% if prop.permissible_fsi == "2.0" %}selected{% endif %}>2.0</option>
+                    <option value="2.5" {% if prop.permissible_fsi == "2.5" %}selected{% endif %}>2.5</option>
+                    <option value="3.0" {% if prop.permissible_fsi == "3.0" %}selected{% endif %}>3.0</option>
+                    <option value="3.5+" {% if prop.permissible_fsi == "3.5+" %}selected{% endif %}>3.5+ (Premium Zone)</option>
+                    <option value="Not Known" {% if prop.permissible_fsi == "Not Known" %}selected{% endif %}>Not Known / As per DP</option>
+                  </select>
+                  <p class="hint-text">Floor Space Index determines total buildable area</p>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Permissible Ground Coverage (%)</label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" name="ground_coverage" id="ground_coverage" placeholder="e.g., 60" min="1" max="100" value="{{ prop.ground_coverage|default_if_none:"" }}">
+                    <span class="input-unit">%</span>
+                  </div>
+                  <p class="hint-text">Max % of plot that can be built upon</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PLOT SPECIFICATIONS -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-ruler-combined"></i> Commercial Plot Specifications &amp; Site Analysis</div>
+            <div class="section-body">
+              <div class="sub-section-title">Dimensions &amp; Shape</div>
+              <div class="row">
+                <div class="col-md-4">
+                  <label class="form-label">Depth / Length (ft)</label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" name="plot_depth" id="plot_depth" placeholder="e.g., 100" min="1" value="{{ prop.plot_depth|default_if_none:"" }}">
+                    <span class="input-unit">ft</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Plot Shape</label>
+                  <select class="form-select form-control" name="plot_shape" id="plot_shape">
+                    <option value="">— Select Shape —</option>
+                    <option value="Rectangular" {% if prop.plot_shape == "Rectangular" %}selected{% endif %}>Rectangular</option>
+                    <option value="Square" {% if prop.plot_shape == "Square" %}selected{% endif %}>Square</option>
+                    <option value="L-Shaped" {% if prop.plot_shape == "L-Shaped" %}selected{% endif %}>L-Shaped</option>
+                    <option value="Triangular" {% if prop.plot_shape == "Triangular" %}selected{% endif %}>Triangular</option>
+                    <option value="Irregular" {% if prop.plot_shape == "Irregular" %}selected{% endif %}>Irregular / Odd</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Frontage / Width (ft)</label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" placeholder="e.g., 60" min="1" value="{{ prop.plot_frontage|default_if_none:"" }}">
+                    <span class="input-unit">ft</span>
+                  </div>
+                  <p class="hint-text">Road-facing width — critical for commercial visibility</p>
+                </div>
+              </div>
+
+              <div class="sub-section-title mt-3">Road Frontage &amp; Connectivity</div>
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Road Frontage &amp; Connectivity <span class="required">*</span></label>
+                  <select class="form-select form-control" name="road_connectivity" id="road_connectivity" required>
+                    <option value="">— Select —</option>
+                    <option value="main_highway" {% if prop.road_connectivity == "main_highway" %}selected{% endif %}>Main Road / State Highway Frontage (High Traffic)</option>
+                    <option value="dp_road" {% if prop.road_connectivity == "dp_road" %}selected{% endif %}>DP Road / 60ft+ Road Frontage</option>
+                    <option value="corner_high_vis" {% if prop.road_connectivity == "corner_high_vis" %}selected{% endif %}>Corner Plot — Double Road High Visibility</option>
+                    <option value="internal_commercial" {% if prop.road_connectivity == "internal_commercial" %}selected{% endif %}>Internal Commercial Lane</option>
+                    <option value="service_road" {% if prop.road_connectivity == "service_road" %}selected{% endif %}>Service Road Access</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Road Width in Front of Plot</label>
+                  <select class="form-select form-control" name="road_width" id="road_width">
+                    <option value="">— Select —</option>
+                    <option value="20" {% if prop.road_width == "20" %}selected{% endif %}>20 ft (Narrow — Low Footfall)</option>
+                    <option value="30" {% if prop.road_width == "30" %}selected{% endif %}>30 ft</option>
+                    <option value="40" {% if prop.road_width == "40" %}selected{% endif %}>40 ft</option>
+                    <option value="60" {% if prop.road_width == "60" %}selected{% endif %}>60 ft (Good Commercial Road)</option>
+                    <option value="80" {% if prop.road_width == "80" %}selected{% endif %}>80 ft</option>
+                    <option value="100+" {% if prop.road_width == "100+" %}selected{% endif %}>100 ft+ (Premium Commercial Road)</option>
+                  </select>
+                  <p class="hint-text">Width of the road abutting the plot</p>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Plot Visibility / Exposure</label>
+                  <select class="form-select form-control" name="plot_visibility" id="plot_visibility">
+                    <option value="">— Select —</option>
+                    <option value="High_Visibility" {% if prop.plot_visibility == "High_Visibility" %}selected{% endif %}>High Visibility (Main Road Frontage)</option>
+                    <option value="Medium_Visibility" {% if prop.plot_visibility == "Medium_Visibility" %}selected{% endif %}>Medium Visibility (Near Main Road)</option>
+                    <option value="Low_Visibility" {% if prop.plot_visibility == "Low_Visibility" %}selected{% endif %}>Low Visibility (Interior / Lane)</option>
+                    <option value="Corner_High_Visibility" {% if prop.plot_visibility == "Corner_High_Visibility" %}selected{% endif %}>Corner — Double Road High Visibility</option>
+                  </select>
+                  <p class="hint-text">Footfall and brand visibility from road</p>
+                </div>
+              </div>
+
+              <div class="sub-section-title mt-3">Commercial Site Characteristics</div>
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Proposed / Permissible Use</label>
+                  <select class="form-select form-control" name="proposed_use" id="proposed_use">
+                    <option value="">— Select Use —</option>
+                    <option value="Retail_Showroom" {% if prop.proposed_use == "Retail_Showroom" %}selected{% endif %}>Retail Shop / Showroom</option>
+                    <option value="Office_Building" {% if prop.proposed_use == "Office_Building" %}selected{% endif %}>Office / Corporate Building</option>
+                    <option value="Hotel_Guest_House" {% if prop.proposed_use == "Hotel_Guest_House" %}selected{% endif %}>Hotel / Guest House / Service Apt</option>
+                    <option value="Hospital_Clinic" {% if prop.proposed_use == "Hospital_Clinic" %}selected{% endif %}>Hospital / Clinic / Medical</option>
+                    <option value="Mall_Commercial_Complex" {% if prop.proposed_use == "Mall_Commercial_Complex" %}selected{% endif %}>Mall / Commercial Complex</option>
+                    <option value="Petrol_Pump" {% if prop.proposed_use == "Petrol_Pump" %}selected{% endif %}>Petrol Pump / CNG Station</option>
+                    <option value="Multiplex" {% if prop.proposed_use == "Multiplex" %}selected{% endif %}>Multiplex / Entertainment</option>
+                    <option value="Mixed_Use_Building" {% if prop.proposed_use == "Mixed_Use_Building" %}selected{% endif %}>Mixed Use Building (Retail + Office)</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Parking Availability</label>
+                  <select class="form-select form-control" name="parking_availability" id="parking_availability">
+                    <option value="">— Select —</option>
+                    <option value="Ample_Open" {% if prop.parking_availability == "Ample_Open" %}selected{% endif %}>Ample Open Parking (Within Plot)</option>
+                    <option value="Basement_Possible" {% if prop.parking_availability == "Basement_Possible" %}selected{% endif %}>Basement Parking Possible</option>
+                    <option value="Street_Parking" {% if prop.parking_availability == "Street_Parking" %}selected{% endif %}>Street Parking Only</option>
+                    <option value="No_Parking" {% if prop.parking_availability == "No_Parking" %}selected{% endif %}>No Dedicated Parking</option>
+                    <option value="Multi_Level" {% if prop.parking_availability == "Multi_Level" %}selected{% endif %}>Multi-Level Parking Permissible</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Site Boundary / Hoarding Rights</label>
+                  <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
+                    <option value="open" {% if prop.plot_fencing == "open" %}selected{% endif %}>Open Site (No Boundary — Full Construction Zone)</option>
+                    <option value="partial_wall" {% if prop.plot_fencing == "partial_wall" %}selected{% endif %}>Partial Compound Wall</option>
+                    <option value="full_compound" {% if prop.plot_fencing == "full_compound" %}selected{% endif %}>Full Compound Wall</option>
+                    <option value="hoarding_rights" {% if prop.plot_fencing == "hoarding_rights" %}selected{% endif %}>Hoarding / Signage Rights on Boundary</option>
+                    <option value="no_boundary" {% if prop.plot_fencing == "no_boundary" %}selected{% endif %}>No Existing Boundary</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Current Site Status</label>
+                  <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
+                    <option value="">— Select —</option>
+                    <option value="Vacant_Ready" {% if prop.current_possession_status == "Vacant_Ready" %}selected{% endif %}>Vacant — Ready for Commercial Construction</option>
+                    <option value="Demolished" {% if prop.current_possession_status == "Demolished" %}selected{% endif %}>Previous Structure Demolished — Clear Site</option>
+                    <option value="Old_Commercial" {% if prop.current_possession_status == "Old_Commercial" %}selected{% endif %}>Old Commercial Structure (Demolition Required)</option>
+                    <option value="Under_Construction" {% if prop.current_possession_status == "Under_Construction" %}selected{% endif %}>Commercial Construction in Progress</option>
+                    <option value="Tenanted" {% if prop.current_possession_status == "Tenanted" %}selected{% endif %}>Tenanted Commercial Site (Lease Running)</option>
+                  </select>
+                  <p class="hint-text">Indicates when buyer can take possession</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
+              Next: Pricing &amp; Legal <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div><!-- /step1 -->
+
+        <!-- ════ STEP 2 — PRICING & LEGAL ════ -->
+        <div class="step-content" id="step2">
+
+          <div class="form-header">
+            <div class="form-title">Commercial Plot</div>
+            <button class="btn-back" type="button" onclick="history.back();">
+              <i class="fas fa-arrow-left"></i> Back to List
+            </button>
+          </div>
+
+          <!-- PRICING -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Selling Price <span class="required">*</span></label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 8500000" onkeyup="updatePreview()" value="{{ prop.selling_price|default_if_none:"" }}">
+                    <span class="input-unit">₹</span>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Price per Sq.ft <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span></label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" id="plot_price_per_sqft" name="plot_price_per_sqft" placeholder="Auto-filled…" readonly value="{{ prop.plot_price_per_sqft|default_if_none:"" }}">
+                    <span class="input-unit">₹/sq.ft</span>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Is the Price Negotiable?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="price_negotiable" value="yes" {% if prop.price_negotiable == 'yes' %}checked{% endif %}> Yes, Negotiable</label>
+                    <label class="radio-option"><input type="radio" name="price_negotiable" value="no" {% if prop.price_negotiable == 'no' or not prop.price_negotiable %}checked{% endif %}> Fixed Price</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Additional Charges / Levies</label>
+                  <select class="form-select form-control" name="additional_charges" id="additional_charges">
+                    <option value="none" {% if prop.additional_charges == "none" %}selected{% endif %}>No Additional Charges</option>
+                    <option value="stamp_extra" {% if prop.additional_charges == "stamp_extra" %}selected{% endif %}>Stamp Duty &amp; Registration Extra</option>
+                    <option value="development_charges" {% if prop.additional_charges == "development_charges" %}selected{% endif %}>Development / Infrastructure Charges Extra</option>
+                    <option value="TDR_charges" {% if prop.additional_charges == "TDR_charges" %}selected{% endif %}>TDR / Premium FSI Charges Extra</option>
+                    <option value="all_inclusive" {% if prop.additional_charges == "all_inclusive" %}selected{% endif %}>All Inclusive — Final Commercial Price</option>
+                  </select>
+                </div>
+
+                <!-- BROKERAGE -->
+                <div class="col-md-6 mt-3" id="brokerageSection">
+                  <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                  <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                    <option value="">Select</option>
+                    <option value="No Brokerage" {% if prop.brokerage_percentage == "No Brokerage" %}selected{% endif %}>No Brokerage (Direct from Owner)</option>
+                    <option value="1% of amount" {% if prop.brokerage_percentage == "1% of amount" %}selected{% endif %}>1% of Sale Value</option>
+                    <option value="1.5% of amount" {% if prop.brokerage_percentage == "1.5% of amount" %}selected{% endif %}>1.5% of Sale Value</option>
+                    <option value="2% of amount" {% if prop.brokerage_percentage == "2% of amount" %}selected{% endif %}>2% of Sale Value</option>
+                    <option value="Fixed Amount" {% if prop.brokerage_percentage == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+                    <option value="Negotiable" {% if prop.brokerage_percentage == "Negotiable" %}selected{% endif %}>Negotiable</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mt-3" id="manualBrokerageSection" style="{% if prop.brokerage_percentage != 'Fixed Amount' %}display:none;{% endif %}">
+                  <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" name="manual_brokerage" placeholder="e.g., 50000" value="{{ prop.manual_brokerage|default_if_none:"" }}">
+                    <span class="input-unit">₹</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LEGAL -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &amp; Approval Details</div>
+            <div class="section-body">
+              <div class="sub-section-title">Ownership Details</div>
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Ownership / Tenure Type</label>
+                  <select class="form-select form-control" name="ownership_type" id="ownership_type">
+                    <option value="">— Select Ownership —</option>
+                    <option value="freehold" {% if prop.ownership_type == "freehold" %}selected{% endif %}>Freehold Commercial (Full Ownership)</option>
+                    <option value="leasehold" {% if prop.ownership_type == "leasehold" %}selected{% endif %}>Leasehold (Govt / Authority Land)</option>
+                    <option value="power_of_attorney" {% if prop.ownership_type == "power_of_attorney" %}selected{% endif %}>Power of Attorney (POA) Holder</option>
+                    <option value="joint_ownership" {% if prop.ownership_type == "joint_ownership" %}selected{% endif %}>Joint / Partnership Ownership</option>
+                    <option value="company_owned" {% if prop.ownership_type == "company_owned" %}selected{% endif %}>Company / Corporate Owned (Sale of Asset)</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Primary Title / Ownership Document</label>
+                  <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
+                    <option value="">— Select Document Type —</option>
+                    <option value="Registered Sale Deed" {% if prop.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
+                    <option value="Registered Agreement to Sale" {% if prop.ownership_document_type == "Registered Agreement to Sale" %}selected{% endif %}>Registered Agreement to Sale (ATS)</option>
+                    <option value="Conveyance Deed" {% if prop.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed / Final Deed</option>
+                    <option value="Gift Deed" {% if prop.ownership_document_type == "Gift Deed" %}selected{% endif %}>Gift Deed</option>
+                    <option value="Irrevocable Power of Attorney (POA)" {% if prop.ownership_document_type == "Irrevocable Power of Attorney (POA)" %}selected{% endif %}>Irrevocable POA</option>
+                    <option value="Lease Deed" {% if prop.ownership_document_type == "Lease Deed" %}selected{% endif %}>Lease Deed</option>
+                    <option value="Allotment Letter" {% if prop.ownership_document_type == "Allotment Letter" %}selected{% endif %}>Allotment Letter (Authority / Society)</option>
+                    <option value="Possession Letter" {% if prop.ownership_document_type == "Possession Letter" %}selected{% endif %}>Possession Letter</option>
+                    <option value="Court Decree" {% if prop.ownership_document_type == "Court Decree" %}selected{% endif %}>Court Decree (Legal Settlement)</option>
+                    <option value="Other" {% if prop.ownership_document_type == "Other" %}selected{% endif %}>Other (Specify below)</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mt-3" id="other_document_type_div" style="{% if prop.ownership_document_type != 'Other' %}display:none;{% endif %}">
+                  <label class="form-label">Specify Document Type</label>
+                  <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document" value="{{ prop.other_document_type|default_if_none:"" }}">
+                </div>
+              </div>
+
+              <div class="sub-section-title mt-3">Approvals & Compliance</div>
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">RERA Status (Commercial)</label>
+                  <select class="form-select form-control" name="rera_status" id="rera_status">
+                    <option value="">— Select —</option>
+                    <option value="Exempt" {% if prop.rera_status == "Exempt" %}selected{% endif %}>RERA Exempt (Individual Commercial Plot)</option>
+                    <option value="Registered" {% if prop.rera_status == "Registered" %}selected{% endif %}>RERA Registered Commercial Project</option>
+                    <option value="Not Applicable" {% if prop.rera_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                  </select>
+                  <p class="hint-text">Individual commercial plot resales are typically RERA exempt</p>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Title Clarity / Marketability</label>
+                  <select class="form-select form-control" name="title_clearance" id="title_clearance">
+                    <option value="">— Select —</option>
+                    <option value="Clear & Marketable Title" {% if prop.title_clearance == "Clear & Marketable Title" %}selected{% endif %}>Clear &amp; Marketable Title</option>
+                    <option value="Under Verification" {% if prop.title_clearance == "Under Verification" %}selected{% endif %}>Title Under Verification / Search</option>
+                    <option value="Legal Dispute" {% if prop.title_clearance == "Legal Dispute" %}selected{% endif %}>Title in Legal Dispute</option>
+                    <option value="Encumbrance Exists" {% if prop.title_clearance == "Encumbrance Exists" %}selected{% endif %}>Encumbrance / Charge Exists</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Encumbrance / Charge Status</label>
+                  <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
+                    <option value="">— Select —</option>
+                    <option value="No Encumbrance" {% if prop.property_encumbrance_status == "No Encumbrance" %}selected{% endif %}>No Encumbrance (Clear EC)</option>
+                    <option value="Mortgaged" {% if prop.property_encumbrance_status == "Mortgaged" %}selected{% endif %}>Mortgaged / Hypothecated (Bank / NBFC)</option>
+                    <option value="Under Litigation" {% if prop.property_encumbrance_status == "Under Litigation" %}selected{% endif %}>Under Court Litigation</option>
+                    <option value="Government Acquisition Notice" {% if prop.property_encumbrance_status == "Government Acquisition Notice" %}selected{% endif %}>Govt Acquisition Notice</option>
+                    <option value="Other Claim Exists" {% if prop.property_encumbrance_status == "Other Claim Exists" %}selected{% endif %}>Other Claim / Charge Exists</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="sub-section-title mt-3">Tax & Loan Status</div>
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Property / Commercial Tax Status</label>
+                  <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
+                    <option value="">— Select —</option>
+                    <option value="Fully Paid" {% if prop.property_tax_status == "Fully Paid" %}selected{% endif %}>Fully Paid (All Taxes Clear)</option>
+                    <option value="Partially Due" {% if prop.property_tax_status == "Partially Due" %}selected{% endif %}>Partially Due</option>
+                    <option value="Pending" {% if prop.property_tax_status == "Pending" %}selected{% endif %}>Pending — Tax Arrears Exist</option>
+                    <option value="Under_Assessment" {% if prop.property_tax_status == "Under_Assessment" %}selected{% endif %}>Under Assessment / Reassessment</option>
+                  </select>
+                </div>
+                <div id="tax_due_section" style="{% if prop.property_tax_status != 'Partially Due' and prop.property_tax_status != 'Pending' %}display:none;{% endif %}" class="col-md-12 mt-0">
+                  <div class="row">
+                    <div class="col-md-6 mt-3">
+                      <label class="form-label">Outstanding Tax Amount (₹)</label>
+                      <div class="input-with-unit">
+                        <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 25000" value="{{ prop.outstanding_tax_amount|default_if_none:"" }}">
+                        <span class="input-unit">₹</span>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mt-3" id="pending_since_div" style="{% if prop.property_tax_status != 'Pending' %}display:none;{% endif %}">
+                      <label class="form-label">Tax Pending Since</label>
+                      <input type="date" class="form-control" name="pending_since" id="pending_since" value="{{ prop.pending_since|date:'Y-m-d' }}">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Existing Loan / Mortgage on Property</label>
+                  <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
+                    <option value="">— Select Loan Status —</option>
+                    <option value="No Active Loan" {% if prop.property_loan_status == "No Active Loan" %}selected{% endif %}>No Active Loan (Loan-Free Property)</option>
+                    <option value="Loan Running" {% if prop.property_loan_status == "Loan Running" %}selected{% endif %}>Loan Running (To be closed before sale)</option>
+                    <option value="Loan Closed" {% if prop.property_loan_status == "Loan Closed" %}selected{% endif %}>Loan Closed (NOC Available)</option>
+                    <option value="Loan Status Not Available" {% if prop.property_loan_status == "Loan Status Not Available" %}selected{% endif %}>Not Disclosed</option>
+                  </select>
+                </div>
+                <div id="loan_running_section" style="{% if prop.property_loan_status != 'Loan Running' %}display:none;{% endif %}" class="col-md-12 mt-0">
+                  <div class="row">
+                    <div class="col-md-6 mt-3">
+                      <label class="form-label">Lender Bank / NBFC Name</label>
+                      <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI" value="{{ prop.financing_bank|default_if_none:"" }}">
+                    </div>
+                    <div class="col-md-6 mt-3">
+                      <label class="form-label">Outstanding Loan Amount (₹)</label>
+                      <div class="input-with-unit">
+                        <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 2500000" value="{{ prop.outstanding_loan_amount|default_if_none:"" }}">
+                        <span class="input-unit">₹</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mt-3">
+                <label class="form-label">Sanctioning / Planning Authority</label>
+                <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2" placeholder="e.g., Nagpur Municipal Corporation (NMC), NMRDA, Town Planning Authority, MHADA, CIDCO, Development Authority">{{ prop.sanctioning_authority|default_if_none:"" }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Amenities &amp; Location <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div><!-- /step2 -->
+
+        <!-- ════ STEP 3 — AMENITIES & LOCATION ════ -->
+        <div class="step-content" id="step3">
+
+          <div class="form-header">
+            <div class="form-title">Commercial Plot</div>
+            <button class="btn-back" type="button" onclick="history.back();">
+              <i class="fas fa-arrow-left"></i> Back to List
+            </button>
+          </div>
+
+          <!-- AMENITIES -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-star"></i> Commercial Site Amenities &amp; Utilities</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">Available Amenities</label>
+                <span class="badge bg-warning text-dark px-3 py-2" id="amenitiesCount" style="font-size:.82rem;">0 selected</span>
+              </div>
+              <button type="button" class="btn btn-warning w-100 mb-3" onclick="openModal('amenities')"
+                style="border-radius:10px;font-weight:700;padding:11px;color:#fff;border:none;background:var(--primary-grad);">
+                <i class="fas fa-plus-circle me-2"></i> Select Amenities &nbsp;<span class="badge bg-light text-dark" id="amenitiesBadge">0</span>
+              </button>
+              <div id="amenitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center m-0" style="font-size:.85rem;">No amenities selected</p>
+              </div>
+              <div style="display:none;">
+                {% for amenities in ameneties_obj %}
+                <input type="checkbox" name="amenities[]" value="{{ amenities.amenties_name }}" class="amenities-checkbox" data-icon="{{ amenities.amenties_icon }}" {% if amenities.amenties_name in prop_amenities_list %}checked{% endif %}>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- NEARBY FACILITIES -->
+          <div class="form-section">
+            <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Commercial Attractions &amp; Landmarks</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">Nearby Facilities</label>
+                <span class="badge bg-info text-dark px-3 py-2" id="facilitiesCount" style="font-size:.82rem;">0 selected</span>
+              </div>
+              <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')" style="border-radius:10px;font-weight:700;padding:11px;">
+                <i class="fas fa-plus-circle me-2"></i> Select Nearby Facilities &nbsp;<span class="badge bg-light text-dark" id="facilitiesBadge">0</span>
+              </button>
+              <div id="facilitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center m-0" style="font-size:.85rem;">No facilities selected</p>
+              </div>
+              <div style="display:none;">
+                {% for facilities in facilities_obj %}
+                <input type="checkbox" name="facilities[]" value="{{ facilities.facilities_name }}" class="facilities-checkbox" data-icon="{{ facilities.facilities_icon }}" {% if facilities.facilities_name in prop_facilities_list %}checked{% endif %}>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- DESCRIPTION -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-align-left"></i> Add Property Description</div>
+            <div class="section-body">
+              <div class="form-group">
+                <label class="form-label">Property Description</label>
+                <textarea class="form-control" name="user_description" rows="5" id="user_description" placeholder="Describe the commercial plot — road frontage, visibility, nearby businesses, footfall, development potential, FSI available, infrastructure…">{{ prop.user_description|default_if_none:"" }}</textarea>
+                <p class="hint-text">A good description significantly increases buyer inquiries.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- LOCATION -->
+          <div class="form-section">
+            <div class="section-header dark-theme"><i class="fas fa-location-dot"></i> Location Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">State <span class="required">*</span></label>
+                  <select class="form-select form-control" name="state" id="state" required>
+                    <option value="">Select State</option>
+                    <option value="Andhra Pradesh" {% if prop.state == "Andhra Pradesh" %}selected{% endif %}>Andhra Pradesh</option>
+                    <option value="Arunachal Pradesh" {% if prop.state == "Arunachal Pradesh" %}selected{% endif %}>Arunachal Pradesh</option>
+                    <option value="Assam" {% if prop.state == "Assam" %}selected{% endif %}>Assam</option>
+                    <option value="Bihar" {% if prop.state == "Bihar" %}selected{% endif %}>Bihar</option>
+                    <option value="Chhattisgarh" {% if prop.state == "Chhattisgarh" %}selected{% endif %}>Chhattisgarh</option>
+                    <option value="Goa" {% if prop.state == "Goa" %}selected{% endif %}>Goa</option>
+                    <option value="Gujarat" {% if prop.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                    <option value="Haryana" {% if prop.state == "Haryana" %}selected{% endif %}>Haryana</option>
+                    <option value="Himachal Pradesh" {% if prop.state == "Himachal Pradesh" %}selected{% endif %}>Himachal Pradesh</option>
+                    <option value="Jharkhand" {% if prop.state == "Jharkhand" %}selected{% endif %}>Jharkhand</option>
+                    <option value="Karnataka" {% if prop.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                    <option value="Kerala" {% if prop.state == "Kerala" %}selected{% endif %}>Kerala</option>
+                    <option value="Madhya Pradesh" {% if prop.state == "Madhya Pradesh" %}selected{% endif %}>Madhya Pradesh</option>
+                    <option value="Maharashtra" {% if prop.state == "Maharashtra" or not prop.state %}selected{% endif %}>Maharashtra</option>
+                    <option value="Manipur" {% if prop.state == "Manipur" %}selected{% endif %}>Manipur</option>
+                    <option value="Meghalaya" {% if prop.state == "Meghalaya" %}selected{% endif %}>Meghalaya</option>
+                    <option value="Mizoram" {% if prop.state == "Mizoram" %}selected{% endif %}>Mizoram</option>
+                    <option value="Nagaland" {% if prop.state == "Nagaland" %}selected{% endif %}>Nagaland</option>
+                    <option value="Odisha" {% if prop.state == "Odisha" %}selected{% endif %}>Odisha</option>
+                    <option value="Punjab" {% if prop.state == "Punjab" %}selected{% endif %}>Punjab</option>
+                    <option value="Rajasthan" {% if prop.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                    <option value="Sikkim" {% if prop.state == "Sikkim" %}selected{% endif %}>Sikkim</option>
+                    <option value="Tamil Nadu" {% if prop.state == "Tamil Nadu" %}selected{% endif %}>Tamil Nadu</option>
+                    <option value="Telangana" {% if prop.state == "Telangana" %}selected{% endif %}>Telangana</option>
+                    <option value="Tripura" {% if prop.state == "Tripura" %}selected{% endif %}>Tripura</option>
+                    <option value="Uttar Pradesh" {% if prop.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                    <option value="Uttarakhand" {% if prop.state == "Uttarakhand" %}selected{% endif %}>Uttarakhand</option>
+                    <option value="West Bengal" {% if prop.state == "West Bengal" %}selected{% endif %}>West Bengal</option>
+                    <option value="Andaman and Nicobar Islands" {% if prop.state == "Andaman and Nicobar Islands" %}selected{% endif %}>Andaman and Nicobar Islands</option>
+                    <option value="Chandigarh" {% if prop.state == "Chandigarh" %}selected{% endif %}>Chandigarh</option>
+                    <option value="Delhi" {% if prop.state == "Delhi" %}selected{% endif %}>Delhi</option>
+                    <option value="Jammu and Kashmir" {% if prop.state == "Jammu and Kashmir" %}selected{% endif %}>Jammu and Kashmir</option>
+                    <option value="Ladakh" {% if prop.state == "Ladakh" %}selected{% endif %}>Ladakh</option>
+                    <option value="Puducherry" {% if prop.state == "Puducherry" %}selected{% endif %}>Puducherry</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">City / District <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required onkeyup="updatePreview()" value="{{ prop.city|default_if_none:"" }}">
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Commercial Area / Market Name <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="locality" id="locality" required placeholder="e.g., Sitabuldi, Dharampeth, Wardha Road" onkeyup="updatePreview()" value="{{ prop.locality|default_if_none:"" }}">
+                  <p class="hint-text">Primary location filter used by buyers</p>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Nearest Commercial Landmark</label>
+                  <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="e.g., Near Empress Mall, Opp. SBI Branch" value="{{ prop.property_landmark|default_if_none:"" }}">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">PIN Code <span style="color:red;">*</span></label>
+                  <input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440010" maxlength="6" required value="{{ prop.pincode|default_if_none:"" }}">
+                </div>
+                <div class="col-md-12 mt-3">
+                  <label class="form-label">Full Address <span class="required">*</span></label>
+                  <textarea class="form-control" name="address" id="address" rows="3" required placeholder="e.g., Plot No. 5, DP Road, Dharampeth, Nagpur – 440010">{{ prop.address|default_if_none:"" }}</textarea>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+                  <input type="url" class="form-control" name="google_maps_link" id="google_maps_link" placeholder="https://maps.google.com/?q=…" value="{{ prop.google_maps_link|default_if_none:"" }}">
+                </div>
+                <div class="col-md-3 mt-3">
+                  <label class="form-label">Latitude</label>
+                  <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 21.1458" value="{{ prop.latitude|default_if_none:"" }}">
+                </div>
+                <div class="col-md-3 mt-3">
+                  <label class="form-label">Longitude</label>
+                  <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.0882" value="{{ prop.longitude|default_if_none:"" }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div><!-- /step3 -->
+
+        <!-- ════ STEP 4 — PHOTOS & PUBLISH ════ -->
+        <div class="step-content" id="step4">
+
+          <div class="form-header">
+            <div class="form-title">Commercial Plot</div>
+            <button class="btn-back" type="button" onclick="history.back();">
+              <i class="fas fa-arrow-left"></i> Back to List
+            </button>
+          </div>
+
+          <!-- CATEGORIZED IMAGES -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-images"></i> Categorized Photos &amp; Media</div>
+            <div class="section-body">
+              <div class="img-total-summary">
+                <div class="total-count" style="font-weight:600;">Total Uploaded: <span id="imgTotalCount">0</span> / 25</div>
+                <div id="imgMinNotice" style="color:#b45309;font-weight:600;font-size:0.85rem;"><i class="fas fa-exclamation-circle"></i> Add at least 3 images across any categories to publish</div>
+              </div>
+
+              <!-- Hidden container for deleted existing images -->
+              <div id="deletedImagesContainer"></div>
+
+              <!-- Categorization Tabs -->
+              <div class="img-cat-tabs" id="imgCatTabs">
+                <div class="img-cat-tab active" data-cat="front_view"><i class="fas fa-image"></i> Front Elevation <span class="cat-count" id="count-front_view">0</span></div>
+                <div class="img-cat-tab" data-cat="full_plot"><i class="fas fa-expand"></i> Full Plot View <span class="cat-count" id="count-full_plot">0</span></div>
+                <div class="img-cat-tab" data-cat="road_facing"><i class="fas fa-road"></i> Road / Highway <span class="cat-count" id="count-road_facing">0</span></div>
+                <div class="img-cat-tab" data-cat="entrance_access"><i class="fas fa-door-open"></i> Approach Access <span class="cat-count" id="count-entrance_access">0</span></div>
+                <div class="img-cat-tab" data-cat="boundary"><i class="fas fa-border-all"></i> Boundary <span class="cat-count" id="count-boundary">0</span></div>
+                <div class="img-cat-tab" data-cat="layout_plan"><i class="fas fa-map"></i> Master Plan <span class="cat-count" id="count-layout_plan">0</span></div>
+                <div class="img-cat-tab" data-cat="surroundings"><i class="fas fa-city"></i> Surroundings <span class="cat-count" id="count-surroundings">0</span></div>
+                <div class="img-cat-tab" data-cat="amenities_infra"><i class="fas fa-tools"></i> Utilities / Infra <span class="cat-count" id="count-amenities_infra">0</span></div>
+              </div>
+
+              <!-- Panels -->
+              <div class="img-cat-panels">
+                <div class="img-cat-panel active" data-cat-panel="front_view">
+                  <input type="file" class="img-cat-input" id="imgInput-front_view" name="property_images_front_view[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="front_view">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Front Elevation Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-front_view">
+                    {% for img in existing_images %}{% if img.category == 'front_view' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="front_view">
+                        <img src="{{ img.image.url }}" alt="Front Elevation">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'front_view', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="full_plot">
+                  <input type="file" class="img-cat-input" id="imgInput-full_plot" name="property_images_full_plot[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="full_plot">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Full Plot View Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-full_plot">
+                    {% for img in existing_images %}{% if img.category == 'full_plot' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="full_plot">
+                        <img src="{{ img.image.url }}" alt="Full Plot">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'full_plot', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="road_facing">
+                  <input type="file" class="img-cat-input" id="imgInput-road_facing" name="property_images_road_facing[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="road_facing">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Road / Highway Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-road_facing">
+                    {% for img in existing_images %}{% if img.category == 'road_facing' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="road_facing">
+                        <img src="{{ img.image.url }}" alt="Road Facing">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'road_facing', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="entrance_access">
+                  <input type="file" class="img-cat-input" id="imgInput-entrance_access" name="property_images_entrance_access[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="entrance_access">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Approach Access Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-entrance_access">
+                    {% for img in existing_images %}{% if img.category == 'entrance_access' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="entrance_access">
+                        <img src="{{ img.image.url }}" alt="Entrance Access">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'entrance_access', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="boundary">
+                  <input type="file" class="img-cat-input" id="imgInput-boundary" name="property_images_boundary[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="boundary">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Boundary Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-boundary">
+                    {% for img in existing_images %}{% if img.category == 'boundary' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="boundary">
+                        <img src="{{ img.image.url }}" alt="Boundary">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'boundary', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="layout_plan">
+                  <input type="file" class="img-cat-input" id="imgInput-layout_plan" name="property_images_layout_plan[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="layout_plan">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Master Plan Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-layout_plan">
+                    {% for img in existing_images %}{% if img.category == 'layout_plan' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="layout_plan">
+                        <img src="{{ img.image.url }}" alt="Master Plan">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'layout_plan', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="surroundings">
+                  <input type="file" class="img-cat-input" id="imgInput-surroundings" name="property_images_surroundings[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="surroundings">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Surroundings Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-surroundings">
+                    {% for img in existing_images %}{% if img.category == 'surroundings' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="surroundings">
+                        <img src="{{ img.image.url }}" alt="Surroundings">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'surroundings', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="amenities_infra">
+                  <input type="file" class="img-cat-input" id="imgInput-amenities_infra" name="property_images_amenities_infra[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="amenities_infra">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#f59e0b;"></i></div>
+                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Utilities / Infra Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-amenities_infra">
+                    {% for img in existing_images %}{% if img.category == 'amenities_infra' %}
+                    <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="amenities_infra">
+                        <img src="{{ img.image.url }}" alt="Amenities Infra">
+                        <span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Saved</span>
+                        <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'amenities_infra', event)"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endif %}{% endfor %}
+                  </div>
+                </div>
+              </div>
+              <p class="hint-text mt-2"><i class="fas fa-info-circle"></i> Drag thumbnails within a category to reorder. The first image uploaded under Front Elevation or Full Plot View will serve as the primary cover photo.</p>
+
+              <div class="row mt-4 pt-3 border-top">
+                <div class="col-md-6">
+                  <label class="form-label">Encumbrance Certificate (EC)</label>
+                  <input type="file" class="form-control" name="encumbrance_cert" id="encumbrance_cert" accept=".pdf,image/*">
+                  {% if prop.encumbrance_cert %}
+                      <div class="mt-2"><a href="{{ prop.encumbrance_cert.url }}" target="_blank" style="font-size:12px;"><i class="fas fa-file-pdf"></i> View Current Certificate</a></div>
+                  {% endif %}
+                  <p class="hint-text">Upload EC confirming clear title (PDF/Image)</p>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">DP / Zoning Map / Sanction Plan</label>
+                  <input type="file" class="form-control" name="layout_plan" id="layout_plan" accept=".pdf,image/*">
+                  {% if prop.layout_plan %}
+                      <div class="mt-2"><a href="{{ prop.layout_plan.url }}" target="_blank" style="font-size:12px;"><i class="fas fa-file-image"></i> View Current Zoning Map / Plan</a></div>
+                  {% endif %}
+                  <p class="hint-text">Development plan zoning map or building sanction</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADVANCED VIDEO SECTION -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+            <div class="section-body">
+              <div class="video-options-grid">
+                <label class="video-option-card {% if not prop.video_option or prop.video_option == 'upload' %}active{% endif %}" id="card_video_upload">
+                  <input type="radio" name="video_option" id="video_upload" value="upload" {% if not prop.video_option or prop.video_option == 'upload' %}checked{% endif %}>
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="vo-title">Upload Video</div>
+                  <div class="vo-desc">Upload a pre-recorded walkthrough (Max 20MB)</div>
+                </label>
+
+                <label class="video-option-card {% if prop.video_option == 'auto' %}active{% endif %}" id="card_video_auto">
+                  <input type="radio" name="video_option" id="video_auto" value="auto" {% if prop.video_option == 'auto' %}checked{% endif %}>
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-magic"></i></div>
+                  <div class="vo-title">Auto-Generate</div>
+                  <div class="vo-desc">Create a dynamic slideshow from your uploaded photos</div>
+                </label>
+
+                <label class="video-option-card {% if prop.video_option == 'rm_assisted' %}active{% endif %}" id="card_video_rm">
+                  <input type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if prop.video_option == 'rm_assisted' %}checked{% endif %}>
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-link"></i></div>
+                  <div class="vo-title">Link / RM Assisted</div>
+                  <div class="vo-desc">Paste YouTube link or share a large video via RM</div>
+                </label>
+              </div>
+
+              <input type="hidden" name="video_source" id="video_source" value="{{ prop.video_option|default:'upload' }}">
+
+              <!-- Direct Video Upload -->
+              <div id="videoUploadWrapper" style="{% if prop.video_option and prop.video_option != 'upload' %}display:none;{% endif %}">
+                <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+                <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#3b82f6;margin-bottom:8px;"></i></div>
+                  <div class="upload-text" style="font-weight:600;color:#1e293b;">Click to Select Property Video</div>
+                  <div class="upload-subtext" style="font-size:0.8rem;color:#64748b;margin-top:4px;">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
+                </div>
+                {% if uploaded_video and uploaded_video.video %}
+                <div class="mt-3" id="existingVideoContainer">
+                    <label class="form-label d-block fw-bold text-start">Currently Saved Video</label>
+                    <video controls style="width:100%; max-height:320px; border-radius:12px; border: 2px solid #e2e8f0;" src="{{ uploaded_video.video.url }}"></video>
+                </div>
+                {% endif %}
+                <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px; border: 2px solid #e2e8f0;"></video>
+              </div>
+
+              <!-- Auto Slideshow Preview -->
+              <div id="videoAutoWrapper" style="{% if prop.video_option != 'auto' %}display:none;{% endif %}">
+                <div class="alert alert-info" style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
+                  <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#3b82f6;"></i> AI Slideshow Generator</div>
+                  <div style="font-size: 0.85rem; color: #475569;">We will automatically generate a smooth, professional walkthrough video using the images you've uploaded above (minimum 3 required).</div>
+                </div>
+                {% if auto_video and auto_video.video %}
+                <div style="margin-bottom:15px;">
+                    <label class="form-label d-block fw-bold text-start">Currently Saved Slideshow</label>
+                    <video controls style="width:100%; max-height:320px; border-radius:12px;" src="{{ auto_video.video.url }}"></video>
+                </div>
+                {% endif %}
+                <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                  <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                  <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:3px solid #1e293b; background:#000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></canvas>
+                </div>
+                <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:13px; font-weight:600; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #fecaca;">
+                  <i class="fas fa-exclamation-triangle me-1"></i> Please upload at least 3 property images in the section above to preview the auto-slideshow.
+                </div>
+              </div>
+
+              <!-- RM Assisted / Link -->
+              <div id="videoRMWrapper" style="{% if prop.video_option != 'rm_assisted' %}display:none;{% endif %}">
+                <div class="alert alert-info" style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fab fa-youtube me-2" style="color:#ef4444;"></i> Public URL / RM Assist</div>
+                  <div style="font-size: 0.85rem; color: #64748b;">If your video is already on YouTube/Instagram, paste the link below. If your video file is larger than 20MB, contact our RM via WhatsApp to upload it for you.</div>
+                </div>
+                
+                <div class="form-group mb-0">
+                  <label class="form-label">Published Video Link</label>
+                  <div class="input-group">
+                    <span class="input-group-text" style="background: #f8fafc; border-color: #e9ecef;"><i class="fas fa-link text-muted"></i></span>
+                    <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." value="{{ rm_video.video_url|default_if_none:'' }}" style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                  </div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
+                
+                <div id="rmVideoFrame" style="display:{% if rm_video.video_url %}block{% else %}none{% endif %}; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                  <iframe id="rmVideoEmbed" src="{{ rm_video.video_url|default_if_none:'' }}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- LISTED ELSEWHERE -->
+          <div class="form-section">
+            <div class="section-body" style="border-radius:12px;border:2px solid #e9ecef;">
+              <div class="row">
+                <div class="col-md-6">
+                  <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" {% if prop.listed_elsewhere == 'Yes' %}checked{% endif %}>
+                    <label class="form-check-label" for="listed_yes">Yes</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" {% if prop.listed_elsewhere == 'No' or not prop.listed_elsewhere %}checked{% endif %}>
+                    <label class="form-check-label" for="listed_no">No</label>
+                  </div>
+                </div>
+                <div class="col-md-6" id="portalField" style="{% if prop.listed_elsewhere != 'Yes' %}display:none;{% endif %}">
+                  <label class="form-label">Portal Name</label>
+                  <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker" value="{{ prop.portal_name|default_if_none:"" }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          
+
+          <!-- PROPERTY UPLOADED BY -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                  <input type="text" class="form-control" name="uploaded_by_name" value="{{ prop.uploaded_by_name }}" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                  <input type="email" class="form-control" name="uploaded_by_email" value="{{ prop.uploaded_by_email }}" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
+                  <input type="text" class="form-control" name="uploaded_by_contact" value="{{ prop.uploaded_by_contact }}" readonly>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                  <input type="text" class="form-control" name="uploaded_by_role" value="{{ prop.uploaded_by_role }}" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-submit" id="submitBtn" onclick="Update_Commercial_Plot(this)"><i class="fas fa-save"></i> Submit Property Updates</button>
+          </div>
+
+        </div>
+
+      </form>
+    </div><!-- /form-container -->
+
+    <!-- PREVIEW SIDEBAR -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div style="font-size:.82rem;font-weight:600;opacity:.8;margin-bottom:4px;display:flex;align-items:center;gap:7px;">
+          <i class="fas fa-eye"></i> Live Preview
+        </div>
+        <div class="preview-mock">
+          <div class="preview-image" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">
+            🏢
+            <div class="preview-badges">
+              <span class="preview-badge">FOR SALE</span>
+              <span class="preview-badge" style="background:#f59e0b;color:white;">COMMERCIAL</span>
+            </div>
+            <div class="preview-price" id="p_price">₹ 0</div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-title" id="p_title">Commercial Plot Headline</div>
+            <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#f59e0b"></i> <span id="p_loc">City, Area</span></div>
+            <div class="preview-specs">
+              <span id="p_area">0 sq.ft</span>
+              <span id="p_cat">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="checklist-card">
+        <div class="checklist-title">📋 Listing Checklist</div>
+        <div class="checklist-item" id="cl-listedby"><i class="fas fa-circle"></i> Listed by filled</div>
+        <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Plot area filled</div>
+        <div class="checklist-item" id="cl-category"><i class="fas fa-circle"></i> Plot type selected</div>
+        <div class="checklist-item" id="cl-zone"><i class="fas fa-circle"></i> Zone / land use set</div>
+        <div class="checklist-item" id="cl-road"><i class="fas fa-circle"></i> Road frontage set</div>
+        <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Selling price set</div>
+        <div class="checklist-item" id="cl-amenities"><i class="fas fa-circle"></i> Amenities selected</div>
+        <div class="checklist-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities selected</div>
+        <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> City &amp; area filled</div>
+        <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> At least 3 photos uploaded</div>
+      </div>
+    </div>
+
+  </div><!-- /page-wrapper -->
+</div><!-- /main-content -->
+
+
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list-check"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" class="modal-search-input" id="modalSearch" placeholder="Search items by name...">
+        </div>
+        <div id="modalItemsList" class="modal-grid-options"></div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-600" onclick="clearAll()"><i class="fas fa-trash-alt me-1"></i> Clear All</button>
+        <div class="d-flex align-items-center gap-3">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;"><span id="modalSelectedCount">0</span> selected</span>
+          <button type="button" class="btn btn-primary px-4 rounded-pill fw-600" style="background: var(--primary-grad); border:none;" data-bs-dismiss="modal">Apply Selections</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  $("#Resale_Plot").addClass("active");
+
+  window.initialFormState = {};
+  function captureInitialFormState() {
+      $('#comPlotForm').find('input, select, textarea').each(function() {
+          var idOrName = $(this).attr('id') || $(this).attr('name');
+          if (!idOrName) return;
+          if ($(this).is(':checkbox')) {
+              if (!window.initialFormState[idOrName]) window.initialFormState[idOrName] = [];
+              if ($(this).is(':checked')) window.initialFormState[idOrName].push($(this).val());
+          } else if ($(this).is(':radio')) {
+              if ($(this).is(':checked')) window.initialFormState[idOrName] = $(this).val();
+          } else {
+              window.initialFormState[idOrName] = $(this).val() || '';
+          }
+      });
+  }
+
+  function getFormModifications() {
+      var changes = [];
+      var fieldLabels = {
+          'plot_area': 'Plot Area (sq.ft)',
+          'selling_price': 'Selling Price',
+          'property_type': 'Commercial Plot Type',
+          'property_no': 'Plot / CTS No',
+          'city': 'City',
+          'locality': 'Commercial Area',
+          'pincode': 'Pincode',
+          'address': 'Complete Address',
+          'user_description': 'Property Description'
+      };
+
+      $('#comPlotForm').find('input, select, textarea').each(function() {
+          var idOrName = $(this).attr('id') || $(this).attr('name');
+          if (!idOrName) return;
+          if (['csrfmiddlewaretoken', 'property_id', 'id', 'existing_images_order', 'video_source'].includes(idOrName)) return;
+
+          var initialVal = window.initialFormState[idOrName] || '';
+          var currentVal = $(this).val() || '';
+
+          if ($(this).is(':radio')) {
+              if ($(this).is(':checked') && initialVal !== currentVal) {
+                  var label = fieldLabels[idOrName] || idOrName.replace(/_/g, ' ').toUpperCase();
+                  changes.push({ field: label, oldVal: initialVal ? initialVal : 'Blank', newVal: currentVal, isNew: !initialVal });
+              }
+              return;
+          }
+
+          if (typeof initialVal === 'string' && initialVal.trim() !== currentVal.trim()) {
+              var label = fieldLabels[idOrName] || idOrName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              changes.push({ field: label, oldVal: initialVal.trim() ? initialVal.trim() : 'Blank', newVal: currentVal.trim() ? currentVal.trim() : 'Cleared', isNew: !initialVal.trim() });
+          }
+      });
+      return changes;
+  }
+
+  const PLOT_IMG_CATEGORIES = ['front_view', 'full_plot', 'road_facing', 'entrance_access', 'boundary', 'layout_plan', 'surroundings', 'amenities_infra'];
+  const PLOT_IMG_LIMITS = { front_view: 4, full_plot: 5, road_facing: 3, entrance_access: 3, boundary: 3, layout_plan: 3, surroundings: 4, amenities_infra: 3 };
+  const PLOT_TOTAL_LIMIT = 25;
+  const PLOT_MIN_REQUIRED = 3;
+
+  window.catFiles = {};
+  PLOT_IMG_CATEGORIES.forEach(function (c) { window.catFiles[c] = []; });
+
+  var slideshowInterval = null;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(captureInitialFormState, 600);
+
+    const uploadRadio = document.getElementById('video_upload');
+    const autoRadio = document.getElementById('video_auto');
+    const rmRadio = document.getElementById('video_rm');
+    
+    const uploadWrapper = document.getElementById('videoUploadWrapper');
+    const autoWrapper = document.getElementById('videoAutoWrapper');
+    const rmWrapper = document.getElementById('videoRMWrapper');
+    const videoSourceField = document.getElementById('video_source');
+
+    function toggleVideoOption() {
+      if (uploadWrapper) uploadWrapper.style.display = (uploadRadio && uploadRadio.checked) ? 'block' : 'none';
+      if (autoWrapper)   autoWrapper.style.display   = (autoRadio && autoRadio.checked)   ? 'block' : 'none';
+      if (rmWrapper)     rmWrapper.style.display     = (rmRadio && rmRadio.checked)     ? 'block' : 'none';
+
+      if (videoSourceField) {
+        videoSourceField.value = uploadRadio && uploadRadio.checked ? 'upload' : (autoRadio && autoRadio.checked ? 'auto' : 'rm_assisted');
+      }
+
+      document.querySelectorAll('.video-option-card').forEach(card => card.classList.remove('active'));
+      if (uploadRadio && uploadRadio.checked) document.getElementById('card_video_upload')?.classList.add('active');
+      if (autoRadio && autoRadio.checked) document.getElementById('card_video_auto')?.classList.add('active');
+      if (rmRadio && rmRadio.checked) document.getElementById('card_video_rm')?.classList.add('active');
+    }
+
+    document.querySelectorAll('.video-option-card').forEach(card => {
+      card.addEventListener('click', function () {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = true;
+          toggleVideoOption();
+        }
+      });
+    });
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    toggleVideoOption();
+
+    var videoInput = document.getElementById('videoInput');
+    var videoArea = document.getElementById('videoUploadArea');
+    var videoPreview = document.getElementById('videoPreview');
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function (e) {
+            e.preventDefault();
+            videoInput.click();
+        });
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+                Swal.fire('Warning', 'Video file exceeds the maximum 20MB allowed size.', 'warning');
+                return;
+            }
+
+            var existingVid = document.getElementById('existingVideoContainer');
+            if (existingVid) existingVid.style.display = 'none';
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+        linkInputEl.addEventListener('paste', function () { setTimeout(renderVideoPreview, 100); });
+    }
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', renderVideoPreview);
+    }
+  });
+
+  function renderVideoPreview() {
+      var linkInput = document.getElementById('property_video_link');
+      var frame = document.getElementById('rmVideoFrame');
+      if (!linkInput || !frame) return;
+      var url = linkInput.value.trim();
+      if (!url) { frame.style.display = 'none'; frame.innerHTML = ''; return; }
+      
+      frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+      var embedIframe = document.getElementById('rmVideoEmbed');
+
+      var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      if (ytMatch) { embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1'; frame.style.display = 'block'; return; }
+
+      var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+      if (instaMatch) { embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/'; frame.style.display = 'block'; return; }
+
+      embedIframe.src = url;
+      frame.style.display = 'block';
+  }
+
+  window.totalImageCount = function () {
+      var newTotal = PLOT_IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
+      var existingTotal = document.querySelectorAll('.existing-img-item').length;
+      return newTotal + existingTotal;
+  };
+
+  function syncCategoryInput(cat) {
+      var dt = new DataTransfer();
+      window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
+      var inputEl = document.getElementById('imgInput-' + cat);
+      if (inputEl) inputEl.files = dt.files;
+  }
+
+  function renderCategory(cat) {
+      var preview = document.getElementById('imgPreview-' + cat);
+      if (!preview) return;
+
+      preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
+
+      window.catFiles[cat].forEach(function (file) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+              var div = document.createElement('div');
+              div.className = 'img-cat-preview-item new-file-item';
+              div.dataset.fileName = file.name;
+              div.dataset.cat = cat;
+
+              div.innerHTML =
+                  '<img src="' + e.target.result + '">' +
+                  '<span style="position:absolute;top:6px;left:6px;background:rgba(245,158,11,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">New</span>' +
+                  '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)"><i class="fas fa-times"></i></button>';
+
+              preview.appendChild(div);
+              updateCategoryCount(cat);
+          };
+          reader.readAsDataURL(file);
+      });
+
+      updateCategoryCount(cat);
+  }
+
+  function updateCategoryCount(cat) {
+      var countEl = document.getElementById('count-' + cat);
+      var existingInCat = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+      var newInCat = window.catFiles[cat] ? window.catFiles[cat].length : 0;
+      if (countEl) {
+          countEl.innerText = existingInCat + newInCat;
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+
+    function togglePortalField() {
+      if (portalField) {
+        portalField.style.display = yesRadio.checked ? 'block' : 'none';
+      }
+    }
+
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    togglePortalField();
+  });
+
+  function renderAllCategories() {
+      PLOT_IMG_CATEGORIES.forEach(renderCategory);
+      PLOT_IMG_CATEGORIES.forEach(updateCategoryCount);
+      
+      var total = window.totalImageCount();
+      var totalCountEl = document.getElementById('imgTotalCount');
+      if (totalCountEl) totalCountEl.innerText = total;
+
+      var notice = document.getElementById('imgMinNotice');
+      if (notice) {
+          if (total >= PLOT_MIN_REQUIRED) {
+              notice.style.color = '#10b981';
+              notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images added.';
+          } else {
+              notice.style.color = '#b45309';
+              notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + PLOT_MIN_REQUIRED + ' images to publish';
+          }
+      }
+
+      if (typeof updatePreview === 'function') updatePreview();
+  }
+
+  window.removeExistingCatImage = function(imageId, cat, evt) {
+      if (evt) evt.stopPropagation();
+      const el = document.getElementById('existing-img-' + imageId);
+      const container = document.getElementById('deletedImagesContainer');
+      if (el) {
+          el.remove();
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'deleted_images[]';
+          hiddenInput.value = imageId;
+          container.appendChild(hiddenInput);
+      }
+      renderAllCategories();
+  };
+
+  function handleCatFiles(cat, files) {
+      var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+      var limit = PLOT_IMG_LIMITS[cat] || 5;
+      var existingInCat = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+
+      if (existingInCat + window.catFiles[cat].length + incoming.length > limit) {
+          Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+          incoming = incoming.slice(0, Math.max(0, limit - (existingInCat + window.catFiles[cat].length)));
+      }
+      if (window.totalImageCount() + incoming.length > PLOT_TOTAL_LIMIT) {
+          Swal.fire('Total Limit Reached', 'Maximum ' + PLOT_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
+          incoming = incoming.slice(0, Math.max(0, PLOT_TOTAL_LIMIT - window.totalImageCount()));
+      }
+
+      window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+      syncCategoryInput(cat);
+      renderAllCategories();
+  }
+
+  window.removeCatImage = function (cat, fileName, evt) {
+      if (evt) evt.stopPropagation();
+      window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
+      syncCategoryInput(cat);
+      renderAllCategories();
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const sections = ['amenities', 'facilities'];
+    sections.forEach(section => { updateDisplay(section); });
+
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (activePanel) activePanel.classList.add('active');
+        });
+    });
+
+    PLOT_IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (zone && input) {
+            zone.addEventListener('click', function (e) { e.preventDefault(); input.click(); });
+            input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+        }
+    });
+
+    renderAllCategories();
+    updatePreview();
+  });
+
+  window.openModal = function (section) {
+    currentSection = section;
+    const titleName = section.charAt(0).toUpperCase() + section.slice(1);
+    $('#modalTitle').text(`Select ${titleName}`);
+    
+    const container = $('#modalItemsList').empty();
+    
+    $(`.${section}-checkbox`).each(function () {
+      const isChecked = this.checked ? 'checked' : '';
+      const cardClass = this.checked ? 'modal-option-card checked' : 'modal-option-card';
+      const iconClass = $(this).data('icon') || 'fas fa-check';
+      
+      container.append(`
+        <div class="${cardClass}" onclick="toggleCardCheckbox(this, event)">
+          <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                 value="${this.value}" data-icon="${iconClass}" ${isChecked}>
+          <i class="${iconClass}"></i>
+          <label>${this.value}</label>
+        </div>
+      `);
+    });
+
+    updateModalCount();
+    $('#modalSearch').val('');
+    $('#itemsModal').modal('show');
+  };
+
+  window.toggleCardCheckbox = function(cardElement, event) {
+    const checkbox = $(cardElement).find('.modal-item-checkbox');
+    if (event.target.tagName !== 'INPUT') {
+      const newState = !checkbox.prop('checked');
+      checkbox.prop('checked', newState);
+    }
+    if (checkbox.prop('checked')) {
+      $(cardElement).addClass('checked');
+    } else {
+      $(cardElement).removeClass('checked');
+    }
+    updateModalCount();
+  };
+
+  $('#modalSearch').on('input', function() {
+    const query = $(this).val().toLowerCase();
+    $('#modalItemsList .modal-option-card').each(function() {
+      const text = $(this).text().toLowerCase();
+      if (text.includes(query)) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  });
+
+  window.clearAll = function () {
+    if (!currentSection) return;
+    $(`.${currentSection}-checkbox`).prop('checked', false);
+    $('.modal-item-checkbox').prop('checked', false);
+    $('.modal-option-card').removeClass('checked');
+    updateDisplay(currentSection);
+    updateModalCount();
+  };
+
+  function updateDisplay(section) {
+    const checked = $(`.${section}-checkbox:checked`);
+    const count = checked.length;
+
+    $(`#${section}Count`).text(`${count} selected`);
+    $(`#${section}Badge`).text(count);
+
+    const display = $(`#${section}Display`).empty();
+
+    if (count === 0) {
+      display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+    } else {
+      checked.each(function () {
+        display.append(`
+          <span class="item-tag">
+            <i class="${$(this).data('icon') || 'fas fa-check'}"></i>
+            ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
+              <i class="fas fa-times-circle"></i>
+            </span>
+          </span>
+        `);
+      });
+    }
+  }
+
+  function updateModalCount() {
+    $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
+  }
+
+  $('#itemsModal .btn-primary').on('click', function () {
+    if (!currentSection) return;
+
+    const checked = $('.modal-item-checkbox:checked');
+    $(`.${currentSection}-checkbox`).prop('checked', false);
+    checked.each(function () {
+      $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
+    });
+
+    updateDisplay(currentSection);
+  });
+
+  window.removeItem = function (section, name) {
+    const items = $(`.${section}-checkbox`).filter(function () { return this.value === name; });
+    items.prop('checked', false);
+    updateDisplay(section);
+  };
+
+  let currentStep = 1;
+  const totalSteps = 4;
+
+  function goToStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return false;
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.getElementById('step' + n).classList.add('active');
+
+    for (let i = 1; i <= totalSteps; i++) {
+      const sc = document.getElementById('sc' + i);
+      const sl = document.getElementById('sl' + i);
+      const line = document.getElementById('line' + i);
+      if (!sc || !sl) continue;
+      sc.className = 'step-circle';
+      sl.className = 'step-label';
+      if (line) line.className = 'step-line';
+
+      if (i < n) {
+        sc.classList.add('done'); sl.classList.add('done');
+        sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
+        if (line) line.classList.add('done');
+      } else if (i === n) {
+        sc.classList.add('active'); sl.classList.add('active');
+        sc.textContent = i;
+      } else {
+        sc.textContent = i;
+      }
+    }
+    currentStep = n;
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    updatePreview();
+  }
+
+  function validateStep(step) {
+    const stepEl = document.getElementById('step' + step);
+    if (!stepEl) return true;
+    const required = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true, missing = [];
+    let firstInvalidElement = null;
+
+    stepEl.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
+
+    required.forEach(field => {
+      field.classList.remove('validation-error');
+      if (field.type === 'radio') {
+        const checked = Array.from(stepEl.querySelectorAll(`[name="${field.name}"]`)).some(r => r.checked);
+        if (!checked) { 
+          isValid = false; 
+          const lbl = getLabel(field); 
+          if (lbl && !missing.includes(lbl)) missing.push(lbl); 
+          if (!firstInvalidElement) firstInvalidElement = field;
+        }
+      } else if (!field.value?.trim()) {
+        isValid = false; 
+        field.classList.add('validation-error');
+        if (field.id === 'assigned_to') {
+          const control = document.getElementById('assignedToControl');
+          if (control) control.classList.add('validation-error');
+        }
+        const lbl = getLabel(field); 
+        if (lbl && !missing.includes(lbl)) missing.push(lbl);
+        if (!firstInvalidElement) firstInvalidElement = field;
+      }
+    });
+
+    if (!isValid) {
+      if (firstInvalidElement) {
+        firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof firstInvalidElement.focus === 'function') firstInvalidElement.focus();
+      }
+      Swal.fire({
+        icon: 'warning', title: 'Required Fields Missing',
+        html: `<p>Please fill the following fields:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
+        confirmButtonColor: '#f59e0b'
+      });
+      return false;
+    }
+    return true;
+  }
+
+  function getLabel(field) {
+    return field.closest('.form-group, .col-md-3, .col-md-4, .col-md-6, .col-md-12, .mb-3')
+      ?.querySelector('.form-label')?.textContent?.replace('*', '').trim() || '';
+  }
+
+  function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'checklist-item' + (done ? ' done' : '');
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+  }
+
+  function generateTitle() {
+    const area = document.getElementById('plot_area')?.value?.trim();
+    const typeEl = document.getElementById('property_type');
+    const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text.split('(')[0].trim() : 'Commercial Plot';
+    const loc = document.getElementById('locality')?.value?.trim();
+    const city = document.getElementById('city')?.value?.trim();
+    
+    if (!area) return '';
+    let autoTitle = Number(area).toLocaleString('en-IN') + ' sq.ft ' + typeText;
+    if (loc || city) autoTitle += ` in ${[loc, city].filter(Boolean).join(', ')}`;
+    return autoTitle;
+  }
+
+  function updatePreview() {
+    const area = document.getElementById('plot_area')?.value || '';
+    const price = document.getElementById('selling_price')?.value || '';
+    const city = document.getElementById('city')?.value || '';
+    const loc = document.getElementById('locality')?.value || '';
+    const amenitiesChecked = $('.amenities-checkbox:checked').length > 0;
+    const facilitiesChecked = $('.facilities-checkbox:checked').length > 0;
+
+    const title = generateTitle();
+    const titleInput = document.getElementById('property_title');
+    if (titleInput && title) {
+      titleInput.value = title;
+    }
+
+    const pTitle = document.getElementById('p_title');
+    const pArea = document.getElementById('p_area');
+    const pCat = document.getElementById('p_cat');
+    const pPrice = document.getElementById('p_price');
+    const pLoc = document.getElementById('p_loc');
+
+    if (pTitle) pTitle.textContent = title || 'Commercial Plot Headline';
+    if (pArea) pArea.textContent = area ? Number(area).toLocaleString('en-IN') + ' sq.ft' : '0 sq.ft';
+    if (pCat) pCat.textContent = document.getElementById('property_type')?.options[document.getElementById('property_type')?.selectedIndex]?.text.split('(')[0].trim() || '—';
+    if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ 0';
+    if (pLoc) pLoc.textContent = [city, loc].filter(Boolean).join(', ') || 'City, Area';
+
+    const psf = document.getElementById('plot_price_per_sqft');
+    if (psf) {
+      if (price && area && parseFloat(area) > 0) {
+        psf.value = Math.round(parseFloat(price) / parseFloat(area));
+      } else {
+        psf.value = '';
+      }
+    }
+
+    setCheck('cl-listedby', true);
+    setCheck('cl-area', !!area && parseFloat(area) > 0);
+    setCheck('cl-price', !!price && parseFloat(price) > 0);
+    setCheck('cl-amenities', amenitiesChecked);
+    setCheck('cl-facilities', facilitiesChecked);
+    setCheck('cl-loc', !!city.trim() && !!loc.trim());
+    setCheck('cl-images', window.totalImageCount() >= PLOT_MIN_REQUIRED);
+  }
+
+  // ── SUBMISSION FOR UPDATES ──
+  function Update_Commercial_Plot(_this) {
+    var modifications = getFormModifications();
+    var modificationsHtml = '';
+
+    if (modifications.length > 0) {
+        modificationsHtml = `
+            <div style="text-align: left; max-height: 220px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 12px;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px;">
+                    <i class="fas fa-edit" style="color: #f59e0b;"></i> Modified / Added Fields (${modifications.length}):
+                </p>
+                <ul style="padding-left: 18px; margin: 0; font-size: 0.82rem; color: #475569;">
+        `;
+        modifications.forEach(function(item) {
+            if (item.isNew) {
+                modificationsHtml += `<li style="margin-bottom: 6px;"><strong>${item.field}:</strong> Added <span style="color: #10b981; font-weight: 700;">"${item.newVal}"</span></li>`;
+            } else {
+                modificationsHtml += `<li style="margin-bottom: 6px;"><strong>${item.field}:</strong> Modified from <span style="color: #e74c3c; text-decoration: line-through;">"${item.oldVal}"</span> to <span style="color: #10b981; font-weight: 700;">"${item.newVal}"</span></li>`;
+            }
+        });
+        modificationsHtml += `</ul></div>`;
+    } else {
+        modificationsHtml = `<p style="font-size: 0.85rem; color: #64748b; margin-top: 10px;">No field values were modified.</p>`;
+    }
+
+    Swal.fire({
+        title: 'Confirm Update',
+        html: `<p style="font-size:0.95rem; color:#475569;">Are you sure you want to submit updates for this commercial plot property?</p>${modificationsHtml}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Update!',
+        cancelButtonText: 'Review Form',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            processPlotSubmission(_this);
+        }
+    });
+  }
+
+  function processPlotSubmission(_this) {
+    for (let i = 1; i <= totalSteps; i++) {
+        if (!validateStep(i)) {
+            goToStep(i);
+            return;
+        }
+    }
+
+    if (window.totalImageCount && window.totalImageCount() < 3) {
+        goToStep(4);
+        Swal.fire({
+            title: 'Missing Images',
+            text: 'Please have at least 3 property images uploaded or saved.',
+            icon: 'error',
+            confirmButtonColor: '#f59e0b'
+        });
+        return;
+    }
+
+    function updateProgress(value, statusText) {
+        var progressText = document.getElementById('swalProgressText');
+        var progressBar = document.getElementById('swalProgressBar');
+        var progressStatus = document.getElementById('swalProgressStatus');
+        if (progressText) progressText.textContent = value + '%';
+        if (progressBar) progressBar.style.width = value + '%';
+        if (progressStatus && statusText) progressStatus.textContent = statusText;
+    }
+
+    var progressContainer = document.createElement('div');
+    progressContainer.innerHTML = `
+        <div style="padding: 10px 0;">
+            <div style="margin-bottom: 12px;">
+                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #f59e0b;">0%</span>
+            </div>
+            <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+            </div>
+            <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
+                <i class="fas fa-spinner fa-spin me-1"></i> 
+                <span id="swalProgressStatus">Updating property record...</span>
+            </div>
+        </div>
+    `;
+
+    Swal.fire({
+        title: 'Updating Commercial Plot...',
+        html: progressContainer,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    var formEl = document.getElementById('comPlotForm');
+    var fd = new FormData(formEl);
+
+    fd.append('listing_type', 'Resale');
+    fd.append('category', 'Commercial Plot');
+    fd.append('sub_category', 'Commercial');
+
+    fd.append('property_title', $('#property_title').val());
+    fd.append('property_type', $('#property_type').val());
+    fd.append('property_no', $('#property_no').val());
+    fd.append('plot_area', $('#plot_area').val());
+    fd.append('land_use', $('#land_use').val());
+    fd.append('commercial_zone_type', $('#commercial_zone_type').val());
+    fd.append('na_status', $('#na_status').val());
+    fd.append('layout_approval_status', $('#layout_approval_status').val());
+    fd.append('permissible_fsi', $('#permissible_fsi').val());
+    fd.append('ground_coverage', $('#ground_coverage').val());
+
+    fd.append('plot_frontage', $('#plot_frontage').val());
+    fd.append('plot_depth', $('#plot_depth').val());
+    fd.append('plot_shape', $('#plot_shape').val());
+    fd.append('road_connectivity', $('#road_connectivity').val());
+    fd.append('road_width', $('#road_width').val());
+    fd.append('plot_visibility', $('#plot_visibility').val());
+    fd.append('proposed_use', $('#proposed_use').val());
+    fd.append('parking_availability', $('#parking_availability').val());
+    fd.append('plot_fencing', $('#plot_fencing').val());
+    fd.append('current_possession_status', $('#current_possession_status').val());
+
+    fd.append('selling_price', $('#selling_price').val());
+    fd.append('plot_price_per_sqft', $('#plot_price_per_sqft').val());
+    fd.append('price_negotiable', $('input[name="price_negotiable"]:checked').val() || 'no');
+    fd.append('additional_charges', $('#additional_charges').val());
+    fd.append('brokerage_percentage', $('#brokeragePercentage').val());
+    fd.append('manual_brokerage', $('[name="manual_brokerage"]').val());
+
+    fd.append('ownership_type', $('#ownership_type').val());
+    fd.append('ownership_document_type', $('#ownership_document_type').val());
+    fd.append('other_document_type', $('#other_document_type').val());
+    fd.append('rera_status', $('#rera_status').val());
+    fd.append('title_clearance', $('#title_clearance').val());
+    fd.append('property_encumbrance_status', $('#property_encumbrance_status').val());
+    fd.append('property_tax_status', $('#property_tax_status').val());
+    fd.append('outstanding_tax_amount', $('#outstanding_tax_amount').val());
+    fd.append('pending_since', $('#pending_since').val());
+    
+    fd.append('property_loan_status', $('#property_loan_status').val());
+    fd.append('financing_bank', $('#financing_bank').val());
+    fd.append('outstanding_loan_amount', $('#outstanding_loan_amount').val());
+    fd.append('sanctioning_authority', $('#sanctioning_authority').val());
+
+    fd.append('state', $('#state').val());
+    fd.append('city', $('#city').val());
+    fd.append('locality', $('#locality').val());
+    fd.append('property_landmark', $('#property_landmark').val());
+    fd.append('pincode', $('#pincode').val());
+    fd.append('address', $('#address').val());
+    fd.append('google_maps_link', $('[name="google_maps_link"]').val() || '');
+    fd.append('latitude', $('#latitude').val() || '');
+    fd.append('longitude', $('#longitude').val() || '');
+
+    fd.append('listed_by_type', '{{prop.listed_by_type}}');
+
+        
+    fd.append('listed_by_id', $('#listed_by_id').val());
+    fd.append('listed_by_name', $('#listed_by_name').val());
+    fd.append('listed_by_email', $('#listed_by_email').val());
+    fd.append('listed_by_contact', $('#listed_by_contact').val());
+    fd.append('listed_by_role', $('#listed_by_role').val());
+
+
+    var amenities = [];
+    $('.amenities-checkbox:checked').each(function() { amenities.push($(this).val()); });
+    fd.append('amenities', JSON.stringify(amenities));
+
+    var facilities = [];
+    $('.facilities-checkbox:checked').each(function() { facilities.push($(this).val()); });
+    fd.append('nearby_facilities', JSON.stringify(facilities));
+
+    fd.append('user_description', $('#user_description').val());
+    fd.append('listed_elsewhere', $('input[name="listed_elsewhere"]:checked').val() || 'No');
+    fd.append('portal_name', $('[name="portal_name"]').val());
+    fd.append('uploaded_by_name', $('[name="uploaded_by_name"]').val());
+    fd.append('uploaded_by_email', $('[name="uploaded_by_email"]').val());
+    fd.append('uploaded_by_contact', $('[name="uploaded_by_contact"]').val());
+    fd.append('uploaded_by_role', $('[name="uploaded_by_role"]').val());
+    fd.append('listing_status', '{{prop.listing_status}}');
+    fd.append('approval_status', '{{prop.approval_status}}');
+
+    const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
+    fd.append('video_option', selectedVideoOption);
+    fd.append('property_video_link', $('#property_video_link').val() || '');
+
+    fd.delete('property_images[]');
+    fd.delete('property_images');
+
+    PLOT_IMG_CATEGORIES.forEach(function (cat) {
+        if (window.catFiles && window.catFiles[cat] && window.catFiles[cat].length > 0) {
+            window.catFiles[cat].forEach(function (file) {
+                fd.append('property_images_' + cat + '[]', file);
+            });
+        }
+    });
+
+    var videoInput = document.getElementById('videoInput');
+    if (videoInput && videoInput.files.length > 0) {
+        fd.append('property_video', videoInput.files[0]);
+    }
+    var certInput = document.getElementById('encumbrance_cert');
+    if (certInput && certInput.files.length > 0) {
+        fd.append('encumbrance_cert', certInput.files[0]);
+    }
+    var layoutInput = document.getElementById('layout_plan');
+    if (layoutInput && layoutInput.files.length > 0) {
+        fd.append('layout_plan', layoutInput.files[0]);
+    }
+
+    $(_this).prop("disabled", true);
+
+    $.ajax({
+        method: "POST",
+        url: "{% url 'Resale_Commercial_Plot_Ajax' %}",
+        data: fd,
+        processData: false,
+        contentType: false,
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                    var status = "Uploading media & details...";
+                    if (percentComplete >= 95) {
+                        status = "Saving to database...";
+                    }
+                    updateProgress(percentComplete, status);
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            updateProgress(100, "Completed!");
+
+            setTimeout(function() {
+                Swal.close();
+                $(_this).prop("disabled", false);
+
+                if (response.status_code === 'duplicate_hard_block') {
+                    Swal.fire({
+                        title: 'Duplicate Blocked',
+                        text: response.msg || response.message || 'This property is already listed in the system.',
+                        icon: 'error',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                    return;
+                }
+
+                if (response.status === '1' || response.status === 'success') {
+                    var propertyIdText = response.property_id ? '\nProperty ID: ' + response.property_id : '';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Listing Updated!',
+                        text: (response.msg || response.message || 'Commercial plot updated successfully.') + propertyIdText,
+                        confirmButtonColor: '#f59e0b'
+                    }).then(() => {
+                        window.location.href = "{% url 'commercial_plot_resale_list_agency' %}";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: response.msg || response.message || "Something went wrong!",
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            }, 500);
+        },
+        error: function(xhr) {
+            Swal.close();
+            $(_this).prop("disabled", false);
+
+            var errorMsg = "An error occurred while updating the form.";
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.errors) {
+                    var errors = xhr.responseJSON.errors;
+                    var errorList = [];
+                    for (var key in errors) {
+                        errorList.push(key + ': ' + errors[key].join(', '));
+                    }
+                    errorMsg = errorList.join('\n');
+                } else if (xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                } else if (xhr.responseJSON.msg) {
+                    errorMsg = xhr.responseJSON.msg;
+                }
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: errorMsg,
+                confirmButtonColor: '#e74c3c'
+            });
+        }
+    });
+  }
+</script>

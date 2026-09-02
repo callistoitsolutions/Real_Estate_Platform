@@ -26,150 +26,777 @@
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 20px;
-    --shadow-card: 0 4px 24px rgba(0,0,0,0.07);
-    --shadow-soft: 0 2px 10px rgba(0,0,0,0.05);
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.07);
+    --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.05);
     --sidebar-width: 280px;
     --topbar-height: 70px;
   }
 
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { font-family: 'Poppins', 'Segoe UI', sans-serif; background: linear-gradient(135deg, #f0f4e8 0%, #c8d5b9 100%); min-height: 100vh; overflow-x: hidden; }
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f0f4e8 0%, #c8d5b9 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
   /* ── LAYOUT ── */
-  .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 28px; min-height: calc(100vh - var(--topbar-height)); }
-  .page-wrapper { display: grid; grid-template-columns: 1fr 300px; grid-template-rows: auto auto 1fr; gap: 22px; align-items: start; }
+  .main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--topbar-height);
+    padding: 28px;
+    min-height: calc(100vh - var(--topbar-height));
+  }
 
-  .page-header { grid-column: 1 / -1; grid-row: 1; background: var(--earth-gradient); border-radius: var(--radius-xl); padding: 28px 35px; color: white; box-shadow: 0 8px 32px rgba(86,171,47,0.35); position: relative; overflow: hidden; }
-  .page-header::after { content: ''; position: absolute; right: -40px; top: -40px; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; }
-  .page-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
-  .page-subtitle { font-size: 0.95rem; opacity: 0.85; margin: 0; font-weight: 400; }
+  .page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto auto 1fr;
+    gap: 22px;
+    align-items: start;
+  }
 
-  .stepper-container { grid-column: 1 / -1; grid-row: 2; background: #fff; border-radius: var(--radius-xl); padding: 22px 30px; box-shadow: var(--shadow-card); }
+  .page-header {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    background: var(--earth-gradient);
+    border-radius: var(--radius-xl);
+    padding: 28px 35px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(86, 171, 47, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
 
-  .form-container { grid-column: 1 / 2; grid-row: 3; background: #fff; border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-card); min-width: 0; }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
 
-  .preview-sidebar { grid-column: 2 / 3; grid-row: 3; display: flex; flex-direction: column; gap: 18px; position: sticky; top: calc(var(--topbar-height) + 20px); align-self: start; }
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .page-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .stepper-container {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    background: #fff;
+    border-radius: var(--radius-xl);
+    padding: 22px 30px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-container {
+    grid-column: 1 / 2;
+    grid-row: 3;
+    background: #fff;
+    border-radius: var(--radius-xl);
+    padding: 32px;
+    box-shadow: var(--shadow-card);
+    min-width: 0;
+  }
+
+  .preview-sidebar {
+    grid-column: 2 / 3;
+    grid-row: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: sticky;
+    top: calc(var(--topbar-height) + 20px);
+    align-self: start;
+  }
 
   /* ── STEPPER ── */
-  .stepper { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; }
-  .step-item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .step-circle { width: 46px; height: 46px; min-width: 46px; min-height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 3px solid var(--border); background: #fff; color: var(--muted); transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex-shrink: 0; }
-  .step-circle.active { background: var(--earth-gradient); color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 4px 16px rgba(86,171,47,0.45); }
-  .step-circle.done { background: var(--success-gradient); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(16,185,129,0.35); }
-  .step-circle i { font-size: 0.85rem; }
-  .step-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color 0.3s; }
-  .step-label.active { color: #56ab2f; }
-  .step-label.done { color: var(--success); }
-  .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background 0.4s; }
-  .step-line.done { background: var(--success-gradient); }
+  .stepper {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .step-circle {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 3px solid var(--border);
+    background: #fff;
+    color: var(--muted);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+  }
+
+  .step-circle.active {
+    background: var(--earth-gradient);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(86, 171, 47, 0.45);
+  }
+
+  .step-circle.done {
+    background: var(--success-gradient);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  }
+
+  .step-circle i {
+    font-size: 0.85rem;
+  }
+
+  .step-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.3s;
+  }
+
+  .step-label.active {
+    color: #56ab2f;
+  }
+
+  .step-label.done {
+    color: var(--success);
+  }
+
+  .step-line {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    margin: 0 14px;
+    border-radius: 2px;
+    min-width: 24px;
+    transition: background 0.4s;
+  }
+
+  .step-line.done {
+    background: var(--success-gradient);
+  }
 
   /* ── STEP CONTENT ── */
-  .step-content { display: none; }
-  .step-content.active { display: block; animation: fadeInUp 0.35s ease; }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .step-content {
+    display: none;
+  }
 
-  .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 2px solid #f0f0f0; gap: 12px; flex-wrap: wrap; }
-  .form-title { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
-  .form-title i { width: 42px; height: 42px; min-width: 42px; background: var(--earth-gradient); color: white; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; }
-  .btn-back { background: var(--bg-light); color: var(--text-dark); padding: 10px 20px; border-radius: var(--radius-md); border: 2px solid var(--border); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 0.88rem; white-space: nowrap; font-family: inherit; }
-  .btn-back:hover { background: var(--dark-gradient); color: white; border-color: transparent; transform: translateY(-2px); text-decoration: none; }
+  .step-content.active {
+    display: block;
+    animation: fadeInUp 0.35s ease;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid #f0f0f0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-title i {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    background: var(--earth-gradient);
+    color: white;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .btn-back {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+
+  .btn-back:hover {
+    background: var(--dark-gradient);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
 
   /* ── SECTIONS ── */
-  .form-section { margin-bottom: 26px; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-soft); }
-  .section-header { background: var(--primary-gradient); color: white; padding: 13px 20px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; letter-spacing: 0.01em; }
-  .form-section.earth-theme .section-header { background: var(--earth-gradient); }
-  .form-section.water-theme .section-header { background: var(--water-gradient); color: #0f172a; }
-  .form-section.facility-theme .section-header { background: var(--info-gradient); color: #0f172a; }
-  .form-section.legal-theme .section-header { background: var(--dark-gradient); }
-  .section-body { background: var(--bg-light); padding: 22px 24px; border: 2px solid #e9ecef; border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+  .form-section {
+    margin-bottom: 26px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .section-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 13px 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.01em;
+  }
+
+  .form-section.earth-theme .section-header {
+    background: var(--earth-gradient);
+  }
+
+  .form-section.water-theme .section-header {
+    background: var(--water-gradient);
+    color: #0f172a;
+  }
+
+  .form-section.facility-theme .section-header {
+    background: var(--info-gradient);
+    color: #0f172a;
+  }
+
+  .form-section.legal-theme .section-header {
+    background: var(--dark-gradient);
+  }
+
+  .section-body {
+    background: var(--bg-light);
+    padding: 22px 24px;
+    border: 2px solid #e9ecef;
+    border-top: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
 
   /* ── CONTROLS ── */
-  .form-label { font-weight: 600; color: var(--text-dark); margin-bottom: 7px; font-size: 0.88rem; display: flex; align-items: center; gap: 5px; }
-  .required { color: #e74c3c; font-size: 1rem; line-height: 1; }
-  .form-control, .form-select { border: 2px solid #e9ecef; border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.92rem; width: 100%; transition: border-color 0.25s, box-shadow 0.25s; background-color: #fff; color: var(--text-dark); font-family: inherit; }
-  .form-control:focus, .form-select:focus { border-color: #56ab2f; box-shadow: 0 0 0 3px rgba(86,171,47,0.15); outline: none; }
-  .form-control[readonly], .form-control:disabled { background-color: #edf2f7; border-color: #cbd5e0; color: var(--text-mid); font-weight: 600; cursor: not-allowed; }
-  select.form-control, .form-select { appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px; }
-  textarea.form-control { min-height: 100px; resize: vertical; line-height: 1.6; }
-  .radio-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
-  .radio-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: #fff; border: 2px solid #e9ecef; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(--text-dark); transition: border-color 0.2s, background 0.2s; }
-  .radio-option:hover { border-color: #56ab2f; background: #f0f9e8; }
-  .radio-option input[type="radio"] { accent-color: #56ab2f; width: 16px; height: 16px; }
+  .form-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 7px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .required {
+    color: #e74c3c;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .form-control,
+  .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    width: 100%;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    background-color: #fff;
+    color: var(--text-dark);
+    font-family: inherit;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #56ab2f;
+    box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.15);
+    outline: none;
+  }
+
+  .form-control[readonly],
+  .form-control:disabled {
+    background-color: #edf2f7;
+    border-color: #cbd5e0;
+    color: var(--text-mid);
+    font-weight: 600;
+    cursor: not-allowed;
+  }
+
+  select.form-control,
+  .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    padding-right: 36px;
+  }
+
+  textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .radio-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-dark);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .radio-option:hover {
+    border-color: #56ab2f;
+    background: #f0f9e8;
+  }
+
+  .radio-option input[type="radio"] {
+    accent-color: #56ab2f;
+    width: 16px;
+    height: 16px;
+  }
 
   /* ── CHECKBOX GRID ── */
-  .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; }
-  .checkbox-item { flex: 1; min-width: 145px; }
-  .form-check { padding: 12px 14px; background: #fff; border-radius: var(--radius-md); border: 2px solid #e9ecef; transition: border-color 0.2s; height: 100%; }
-  .form-check:hover { border-color: #56ab2f; }
-  .form-check-input { width: 17px; height: 17px; border: 2px solid #cbd5e0; border-radius: 5px; cursor: pointer; accent-color: #56ab2f; vertical-align: middle; margin-top: 0; flex-shrink: 0; }
-  .form-check-label { font-weight: 600; color: var(--text-dark); margin-left: 8px; cursor: pointer; font-size: 0.85rem; vertical-align: middle; }
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 
-  .conditional-section { animation: slideDown 0.3s ease; }
-  @keyframes slideDown { from { opacity: 0; max-height: 0; overflow: hidden; } to { opacity: 1; max-height: 600px; } }
+  .checkbox-item {
+    flex: 1;
+    min-width: 145px;
+  }
+
+  .form-check {
+    padding: 12px 14px;
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 2px solid #e9ecef;
+    transition: border-color 0.2s;
+    height: 100%;
+  }
+
+  .form-check:hover {
+    border-color: #56ab2f;
+  }
+
+  .form-check-input {
+    width: 17px;
+    height: 17px;
+    border: 2px solid #cbd5e0;
+    border-radius: 5px;
+    cursor: pointer;
+    accent-color: #56ab2f;
+    vertical-align: middle;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .form-check-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    vertical-align: middle;
+  }
+
+  .conditional-section {
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+    }
+
+    to {
+      opacity: 1;
+      max-height: 600px;
+    }
+  }
 
   /* ── NAV BUTTONS ── */
-  .step-nav, .form-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; gap: 12px; flex-wrap: wrap; padding-top: 20px; border-top: 2px solid #f0f0f0; }
-  .btn-step { padding: 12px 28px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all 0.3s ease; border: none; }
-  .btn-next, .btn-submit { background: var(--earth-gradient); color: white; box-shadow: 0 4px 14px rgba(86,171,47,0.35); }
-  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(86,171,47,0.5); }
-  .btn-prev { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border) !important; }
-  .btn-prev:hover { background: #e9ecef; }
-  .btn-reset { background: var(--warning-gradient); color: white; box-shadow: 0 4px 14px rgba(245,87,108,0.3); }
+  .step-nav,
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 26px;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 2px solid #f0f0f0;
+  }
 
-  /* ── IMAGE UPLOAD ── */
+  .btn-step {
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.92rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    border: none;
+  }
 
-  /* ── IMAGE UPLOAD & DRAG/DROP ── */
-    .image-upload-area { border: 2px dashed #cbd5e0; cursor: pointer; border-radius: 12px; padding: 30px; text-align: center; background: #fff; transition: all 0.3s; }
-    .image-upload-area:hover { border-color: #56ab2f; background: #f4fdf0; }
-    
-    /* The large grid preview */
-    .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; min-height: 120px; padding: 15px; border: 2px dashed #cbd5e0; border-radius: 12px; background: #f8f9fa; }
-    
-    /* The draggable wrapper */
-    .preview-item-wrapper { position: relative; cursor: move; transition: transform 0.2s ease; }
-    .preview-item-wrapper:active { transform: scale(0.95); }
-    
-    /* The image item itself */
-    .preview-item { width: 100%; height: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #fff; margin: 0; }
-    .preview-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-    
-    /* The remove button */
-    .remove-image { position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
-    .remove-image:hover { transform: scale(1.15); background: #dc2626; }
+  .btn-next,
+  .btn-submit {
+    background: var(--earth-gradient);
+    color: white;
+    box-shadow: 0 4px 14px rgba(86, 171, 47, 0.35);
+  }
+
+  .btn-next:hover,
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(86, 171, 47, 0.5);
+  }
+
+  .btn-prev {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border: 2px solid var(--border) !important;
+  }
+
+  .btn-prev:hover {
+    background: #e9ecef;
+  }
+
+  .btn-reset {
+    background: var(--warning-gradient);
+    color: white;
+    box-shadow: 0 4px 14px rgba(245, 87, 108, 0.3);
+  }
+
+  /* ── CATEGORIZED IMAGES & VIDEO STYLING ── */
+  .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .img-cat-tab { border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap; }
+  .img-cat-tab.active { background: var(--earth-gradient); border-color: transparent; color: #fff; }
+  .img-cat-panel { display: none; }
+  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+  .img-cat-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
+  .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+  .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: grab; }
+  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .img-cat-preview-item .remove-image { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+  .img-total-summary { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; }
+
+  /* Video Options Grid */
+  .video-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .video-option-card { position: relative; border: 2px solid #e2e8f0; border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; background: #fff; transition: all 0.3s; }
+  .video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
+  .video-option-card.active { border-color: #56ab2f; background: #f4fdf0; box-shadow: 0 8px 16px rgba(86, 171, 47, 0.15); }
+  .video-option-card input[type="radio"] { position: absolute; opacity: 0; }
+  .vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
+  .video-option-card.active .vo-icon { color: #56ab2f; }
+  .vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .vo-desc { font-size: 0.8rem; color: #64748b; }
+  .vo-check { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: #56ab2f; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; }
+  .video-option-card.active .vo-check { opacity: 1; }
 
   /* ── COUNTER ── */
-  .counter-box { width: 50px; text-align: center; border-radius: var(--radius-sm); border: 1px solid var(--border); font-weight: 700; background: #f8faff; color: var(--text-dark); padding: 4px 0; }
-  .counter-box.green-theme { border-color: #bbf7d0; background: #f0fdf4; color: #15803d; }
-  .validation-error { border-color: #e74c3c !important; background: #fff5f5 !important; box-shadow: 0 0 0 3px rgba(231,76,60,0.12) !important; }
+  .counter-box {
+    width: 50px;
+    text-align: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    font-weight: 700;
+    background: #f8faff;
+    color: var(--text-dark);
+    padding: 4px 0;
+  }
+
+  .counter-box.green-theme {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #15803d;
+  }
+
+  .validation-error {
+    border-color: #e74c3c !important;
+    background: #fff5f5 !important;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.12) !important;
+  }
 
   /* ── PREVIEW SIDEBAR ── */
-  .preview-card { background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 100%); border-radius: var(--radius-lg); padding: 18px; color: white; box-shadow: 0 6px 24px rgba(0,0,0,0.2); }
-  .preview-header { font-size: 0.82rem; font-weight: 600; opacity: 0.8; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
-  .preview-mock { border-radius: var(--radius-md); overflow: hidden; }
-  .preview-image { height: 130px; background: linear-gradient(135deg, #d4edda, #a8e063); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
-  .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; flex-wrap: wrap; }
-  .preview-badge { font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255,255,255,0.95); color: #0f172a; letter-spacing: 0.03em; }
-  .preview-price { position: absolute; bottom: 9px; left: 9px; background: rgba(15,23,42,0.88); color: white; font-size: 0.88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; }
-  .preview-body { background: white; padding: 14px; color: #0f172a; }
-  .preview-title { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .preview-location { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
-  .preview-specs { display: flex; gap: 14px; font-size: 0.75rem; color: #475569; font-weight: 600; }
-  .checklist-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; box-shadow: var(--shadow-soft); }
-  .checklist-title { font-size: 0.88rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
-  .checklist-item { display: flex; align-items: center; gap: 9px; padding: 8px 0; font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; transition: color 0.3s; }
-  .checklist-item:last-child { border-bottom: none; }
-  .checklist-item i { font-size: 0.75rem; width: 14px; flex-shrink: 0; color: #cbd5e0; transition: color 0.3s; }
-  .checklist-item.done { color: var(--success); }
-  .checklist-item.done i { color: var(--success); }
+  .preview-card {
+    background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 100%);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    color: white;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  }
 
-  @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } .form-container { grid-column: 1 / -1; } }
-  @media (max-width: 992px) { .main-content { margin-left: 0; } }
-  @media (max-width: 768px) { .main-content { padding: 16px; } .form-container { padding: 20px; } .stepper-container { padding: 16px; } .step-label { display: none; } .step-line { min-width: 12px; margin: 0 6px; } }
+  .preview-header {
+    font-size: 0.82rem;
+    font-weight: 600;
+    opacity: 0.8;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
 
-   /* ============================================================
-   DROPDOWN PANEL OVERFLOW FIX
-   ============================================================ */
-  /* Fix parent containers that might hide the dropdown panel */
+  .preview-mock {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .preview-image {
+    height: 130px;
+    background: linear-gradient(135deg, #d4edda, #a8e063);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    position: relative;
+  }
+
+  .preview-badges {
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .preview-badge {
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a;
+    letter-spacing: 0.03em;
+  }
+
+  .preview-price {
+    position: absolute;
+    bottom: 9px;
+    left: 9px;
+    background: rgba(15, 23, 42, 0.88);
+    color: white;
+    font-size: 0.88rem;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 8px;
+  }
+
+  .preview-body {
+    background: white;
+    padding: 14px;
+    color: #0f172a;
+  }
+
+  .preview-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 5px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .preview-location {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .preview-specs {
+    display: flex;
+    gap: 14px;
+    font-size: 0.75rem;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .checklist-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border);
+    padding: 18px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .checklist-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 14px;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-bottom: 1px solid #f0f4f8;
+    transition: color 0.3s;
+  }
+
+  .checklist-item:last-child {
+    border-bottom: none;
+  }
+
+  .checklist-item i {
+    font-size: 0.75rem;
+    width: 14px;
+    flex-shrink: 0;
+    color: #cbd5e0;
+    transition: color 0.3s;
+  }
+
+  .checklist-item.done {
+    color: var(--success);
+  }
+
+  .checklist-item.done i {
+    color: var(--success);
+  }
+
+  @media (max-width: 1200px) {
+    .page-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-sidebar {
+      display: none;
+    }
+
+    .form-container {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .main-content {
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      padding: 16px;
+    }
+
+    .form-container {
+      padding: 20px;
+    }
+
+    .stepper-container {
+      padding: 16px;
+    }
+
+    .step-label {
+      display: none;
+    }
+
+    .step-line {
+      min-width: 12px;
+      margin: 0 6px;
+    }
+  }
+
+  /* DROPDOWN PANEL OVERFLOW FIX */
   .form-group,
   .col-md-12,
   .section-body,
@@ -179,14 +806,11 @@
     overflow: visible !important;
   }
 
-  /* Specifically fix Step 4 */
   #step4 .section-body {
     overflow: visible !important;
   }
 
-  /* ============================================================
-   CUSTOM SEARCHABLE DROPDOWN (no jQuery / Select2 dependency)
-   ============================================================ */
+  /* CUSTOM SEARCHABLE DROPDOWN */
   .search-select {
     position: relative;
     width: 100%;
@@ -363,7 +987,121 @@
     font-size: 12px;
   }
 
+  /* MODAL STYLING */
+  .modal-content {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+  .modal-header {
+    background: var(--earth-gradient);
+    color: white;
+    padding: 20px 24px;
+    border-bottom: none;
+  }
+  .modal-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+  }
+  .modal-body {
+    padding: 24px;
+    background: #f8fafc;
+  }
+  .modal-footer {
+    background: #fff;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+  }
 
+  .modal-search-box {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .modal-search-box i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+  }
+  .modal-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 45px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    background: #fff;
+    transition: all 0.2s;
+  }
+  .modal-search-input:focus {
+    border-color: #56ab2f;
+    box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.15);
+    outline: none;
+  }
+
+  .modal-grid-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .modal-option-card {
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .modal-option-card:hover {
+    border-color: #56ab2f;
+    background: #f4fdf0;
+    transform: translateY(-1px);
+  }
+  .modal-option-card.checked {
+    border-color: #56ab2f;
+    background: #eefbee;
+    box-shadow: 0 4px 12px rgba(86, 171, 47, 0.12);
+  }
+  .modal-option-card input[type="checkbox"] {
+    accent-color: #56ab2f;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    display: inline-block !important;
+    flex-shrink: 0;
+  }
+  .modal-option-card i {
+    font-size: 1.1rem;
+    color: #56ab2f;
+    width: 24px;
+    text-align: center;
+  }
+  .modal-option-card label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    margin: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 </style>
 
 <div class="main-content">
@@ -415,56 +1153,53 @@
         </button>
       </div>
 
-      <form action="{% url 'add_agricultural_property' %}" method="POST" enctype="multipart/form-data" id="agriculturalForm" novalidate>
+      <form action="{% url 'add_agricultural_property' %}" method="POST" enctype="multipart/form-data"
+        id="agriculturalForm" novalidate>
         {% csrf_token %}
 
         <!-- ════════════ STEP 1 — LAND DETAILS ════════════ -->
         <div class="step-content active" id="step1">
 
           <div class="form-section earth-theme">
-              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                  <span><i class="fas fa-upload"></i> Listed By</span>
-                            
+            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <span><i class="fas fa-upload"></i> Listed By</span>
+            </div>
+            <div class="section-body">
+
+              <div class="row" id="user_data_div">
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-user"></i>
+                      User Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly
+                      style="background-color:#e9ecef;" value="{{user_obj.user_id}}"></div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-user"></i>
+                      Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name"
+                      readonly style="background-color:#e9ecef;" value="{{user_obj.user_name}}"></div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i>
+                      Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email"
+                      readonly style="background-color:#e9ecef;" value="{{user_obj.user_email}}"></div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i>
+                      Contact</label><input type="text" class="form-control" name="listed_by_contact"
+                      id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i>
+                      Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role"
+                      readonly style="background-color:#e9ecef;" value="{{user_obj.user_role}}"></div>
+                </div>
+
+
               </div>
-
-              <div class="section-body">
-                <div class="row">
-                  <div class="col-md-12">
-                      <div class="form-group">
-                        <label class="form-label">
-                          <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
-                        </label>
-
-                    
-
-                    
-
-                    
-
-                              
-
-                             
-                                </div>
-                            </div>
-                            </div>
-
-                            <br>
-
-                            <div class="row" id="user_data_div">
-
-                           <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" value="{{ user_obj.user_id }}" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" value="{{ user_obj.user_name }}" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-5"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" value="{{ user_obj.user_email }}" id="listed_by_email" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" value="{{ user_obj.user_phone }}" id="listed_by_contact" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" value="{{ user_obj.user_role }}" id="listed_by_role" readonly style="background-color:#e9ecef;"></div></div>
-         
-                            </div>
-                        </div>
-                    </div>
+            </div>
+          </div>
 
           <div class="form-section earth-theme">
             <div class="section-header"><i class="fas fa-seedling"></i> Basic Land Information</div>
@@ -473,12 +1208,13 @@
 
                 <div class="col-md-12 mb-3">
                   <label class="form-label"> Property Title </label>
-                  <input type="text" class="form-control" id="agri_title" name="property_title" placeholder="Property Title auto-generated by system"  readonly>
+                  <input type="text" class="form-control" id="property_title" name="property_title"
+                    placeholder="Property Title auto-generated by system" readonly>
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Agricultural Land Category <span class="required">*</span></label>
-                  <select class="form-select" id="agriculture_property_type" name="agriculture_property_type" required>
+                  <select class="form-select" id="property_type" name="property_type" required>
                     <option value="">Select Category</option>
                     <option value="farmland">Farmland</option>
                     <option value="orchard_land">Orchard Land</option>
@@ -491,25 +1227,23 @@
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Property No <span style="color:red;">*</span></label>
-                  <input type="text" class="form-control" id="property_no" name="property_no" placeholder="Enter Property No" required>
+                  <input type="text" class="form-control" id="property_no" name="property_no"
+                    placeholder="Enter Property No" required>
                   <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
                     <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
                   </span>
                 </div>
 
-                {% comment %} <div class="col-md-6 mb-3">
-                  <label class="form-label">Property Registration No</label>
-                  <input type="text" class="form-control" name="property_regi_no" placeholder="Enter Property Registration No">
-                </div> {% endcomment %}
-
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Land Area (Acres) <span class="required">*</span></label>
-                  <input type="number" step="0.01" class="form-control" id="land_area" name="land_area" placeholder="e.g. 4.5" required>
+                  <input type="number" step="0.01" class="form-control" id="land_area" name="land_area"
+                    placeholder="e.g. 4.5" required>
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Village <span class="required">*</span></label>
-                  <input type="text" class="form-control" id="village" name="village" placeholder="Enter Village" required>
+                  <input type="text" class="form-control" id="village" name="village" placeholder="Enter Village"
+                    required>
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Taluka <span class="required">*</span></label>
@@ -517,82 +1251,72 @@
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">District <span class="required">*</span></label>
-                  <input type="text" class="form-control" id="district" name="district" placeholder="Enter District" required>
+                  <input type="text" class="form-control" id="district" name="district" placeholder="Enter District"
+                    required>
                 </div>
 
+                <div class="col-md-4 mb-2">
+                  <div class="form-group">
+                    <label class="form-label">
+                      State <span class="required-star" style="color:red;">*</span>
+                    </label>
 
+                    <select class="form-select form-control" name="state" id="state" required>
+                      <option value="">Select State</option>
+                      <option value="Andhra Pradesh">Andhra Pradesh</option>
+                      <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                      <option value="Assam">Assam</option>
+                      <option value="Bihar">Bihar</option>
+                      <option value="Chhattisgarh">Chhattisgarh</option>
+                      <option value="Goa">Goa</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Haryana">Haryana</option>
+                      <option value="Himachal Pradesh">Himachal Pradesh</option>
+                      <option value="Jharkhand">Jharkhand</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Manipur">Manipur</option>
+                      <option value="Meghalaya">Meghalaya</option>
+                      <option value="Mizoram">Mizoram</option>
+                      <option value="Nagaland">Nagaland</option>
+                      <option value="Odisha">Odisha</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Sikkim">Sikkim</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="Tripura">Tripura</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Uttarakhand">Uttarakhand</option>
+                      <option value="West Bengal">West Bengal</option>
+                      <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                      <option value="Chandigarh">Chandigarh</option>
+                      <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                      <option value="Ladakh">Ladakh</option>
+                      <option value="Lakshadweep">Lakshadweep</option>
+                      <option value="Puducherry">Puducherry</option>
+                    </select>
+                  </div>
+                </div>
 
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+                  <input type="url" class="form-control" name="google_maps_link" placeholder="https://maps.google.com/?q=…">
+                </div>
 
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Latitude</label>
+                  <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 20.9834">
+                </div>
                 
-                            <div class="col-md-4 mb-2">
-    <div class="form-group">
-        <label class="form-label">
-            State <span class="required-star" style="color:red;">*</span>
-        </label>
-
-        <select class="form-select form-control" name="state" required>
-            <option value="">Select State</option>
-
-            <!-- States -->
-            <option value="Andhra Pradesh">Andhra Pradesh</option>
-            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-            <option value="Assam">Assam</option>
-            <option value="Bihar">Bihar</option>
-            <option value="Chhattisgarh">Chhattisgarh</option>
-            <option value="Goa">Goa</option>
-            <option value="Gujarat">Gujarat</option>
-            <option value="Haryana">Haryana</option>
-            <option value="Himachal Pradesh">Himachal Pradesh</option>
-            <option value="Jharkhand">Jharkhand</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Kerala">Kerala</option>
-            <option value="Madhya Pradesh">Madhya Pradesh</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Manipur">Manipur</option>
-            <option value="Meghalaya">Meghalaya</option>
-            <option value="Mizoram">Mizoram</option>
-            <option value="Nagaland">Nagaland</option>
-            <option value="Odisha">Odisha</option>
-            <option value="Punjab">Punjab</option>
-            <option value="Rajasthan">Rajasthan</option>
-            <option value="Sikkim">Sikkim</option>
-            <option value="Tamil Nadu">Tamil Nadu</option>
-            <option value="Telangana">Telangana</option>
-            <option value="Tripura">Tripura</option>
-            <option value="Uttar Pradesh">Uttar Pradesh</option>
-            <option value="Uttarakhand">Uttarakhand</option>
-            <option value="West Bengal">West Bengal</option>
-
-            <!-- Union Territories -->
-            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-            <option value="Chandigarh">Chandigarh</option>
-            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-            <option value="Ladakh">Ladakh</option>
-            <option value="Lakshadweep">Lakshadweep</option>
-            <option value="Puducherry">Puducherry</option>
-        </select>
-    </div>
-</div>
-
-               <div class="col-md-4 mb-3">
-  <label class="form-label " id="brokerageLabel"> Brokerage<span class="required">*</span></label>
-      <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
-        <option value="">Select</option>
-        <option value="No Brokerage">No Brokerage</option>
-        <option value="1% of amount">1% of sale value</option>
-        <option value="1.5% of amount">1.5% of sale value</option>
-        <option value="2% of amount">2% of sale value</option>
-        <option value="Fixed Amount">Fixed Amount</option>
-        <option value="Negotiable">Negotiable</option>
-      </select>
-</div>
-
-<div class="col-md-4 mb-3" id="manualBrokerage" style="display:none;">
-  <label class="form-label">Enter Fixed Brokerage</label>
-  <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
-</div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Longitude</label>
+                  <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.1567">
+                </div>
 
               </div>
             </div>
@@ -605,7 +1329,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Soil Type</label>
-                  <select class="form-select" name="soil_type">
+                  <select class="form-select" name="soil_type" id="soil_type">
                     <option value="">Select Soil</option>
                     <option value="black">Black Soil</option>
                     <option value="red">Red Soil</option>
@@ -618,7 +1342,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Cultivation Status</label>
-                  <select class="form-select" name="cultivation_status">
+                  <select class="form-select" name="cultivation_status" id="cultivation_status">
                     <option value="">Select Status</option>
                     <option value="currently_cultivated">Currently Cultivated</option>
                     <option value="partially_cultivated">Partially Cultivated</option>
@@ -629,7 +1353,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Fertility Status</label>
-                  <select class="form-select" name="fertility_status">
+                  <select class="form-select" name="fertility_status" id="fertility_status">
                     <option value="high">High Yield</option>
                     <option value="medium">Medium Yield</option>
                     <option value="low">Low Yield</option>
@@ -638,12 +1362,13 @@
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Previously Grown Crops</label>
-                  <input type="text" class="form-control" name="previous_crops" placeholder="e.g. Cotton, Sugar Cane, Rice">
+                  <input type="text" class="form-control" name="previous_crops" id="previous_crops"
+                    placeholder="e.g. Cotton, Sugar Cane, Rice">
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Property Age</label>
-                  <input type="number" class="form-control" name="land_usage_history" placeholder="e.g. 10">
+                  <input type="number" class="form-control" name="property_age" id="property_age" placeholder="e.g. 10">
                 </div>
 
               </div>
@@ -666,7 +1391,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Water Source</label>
-                  <select class="form-select" name="water_source">
+                  <select class="form-select" name="water_source" id="water_source">
                     <option value="none">No Water Source</option>
                     <option value="borewell">Borewell</option>
                     <option value="open_well">Open Well</option>
@@ -679,7 +1404,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Irrigation Facility</label>
-                  <select class="form-select" name="irrigation_facility">
+                  <select class="form-select" name="irrigation_facility" id="irrigation_facility">
                     <option value="no_irrigation">No Irrigation</option>
                     <option value="drip">Drip Irrigation</option>
                     <option value="sprinkler">Sprinkler Irrigation</option>
@@ -689,7 +1414,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Irrigation Facility Active?</label>
-                  <select class="form-select" name="irrigation_facility_active">
+                  <select class="form-select" name="irrigation_facility_active" id="irrigation_facility_active">
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
@@ -697,12 +1422,12 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Number of Borewells</label>
-                  <input type="number" class="form-control" name="num_borewells" min="0" placeholder="e.g. 2">
+                  <input type="number" class="form-control" name="nos_borewells" id="nos_borewells" min="0" placeholder="e.g. 2">
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Water Source Infrastructure</label>
-                  <select class="form-select" name="water_source_infrastructure">
+                  <select class="form-select" name="water_source_infrastructure" id="water_source_infrastructure">
                     <option value="none">None</option>
                     <option value="well">Well</option>
                     <option value="borewell">Borewell</option>
@@ -722,7 +1447,7 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Road Access</label>
-                  <select class="form-select" name="road_access">
+                  <select class="form-select" name="road_access" id="road_access">
                     <option value="">Select Road Type</option>
                     <option value="tar_road">Tar Road</option>
                     <option value="concrete_road">Concrete Road</option>
@@ -734,27 +1459,27 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Road Frontage</label>
-                  <input type="text" class="form-control" name="road_frontage" placeholder="e.g. 100 Ft">
+                  <input type="text" class="form-control" name="road_frontage" id="road_frontage" placeholder="e.g. 100 Ft">
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Distance from Nearest Village</label>
-                  <input type="text" class="form-control" name="dist_nearest_village" placeholder="e.g. 2 km">
+                  <input type="text" class="form-control" name="dist_nearest_village" id="dist_nearest_village" placeholder="e.g. 2 km">
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Distance from Main Road</label>
-                  <input type="text" class="form-control" name="dist_main_road" placeholder="e.g. 500 m">
+                  <input type="text" class="form-control" name="dist_main_road" id="dist_main_road" placeholder="e.g. 500 m">
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Distance from Highway</label>
-                  <input type="text" class="form-control" name="dist_highway" placeholder="e.g. 5 km">
+                  <input type="text" class="form-control" name="dist_highway" id="dist_highway" placeholder="e.g. 5 km">
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Fencing Status</label>
-                  <select class="form-select" name="fencing_status">
+                  <select class="form-select" name="fencing_status" id="fencing_status">
                     <option value="">Select</option>
                     <option value="fully_fenced">Fully Fenced</option>
                     <option value="partially_fenced">Partially Fenced</option>
@@ -782,13 +1507,34 @@
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Selling Price <span class="required">*</span></label>
-                  <input type="number" class="form-control" id="expected_price" name="expected_price" placeholder="Enter Total Price (₹)" required>
+                  <input type="number" class="form-control" id="selling_price" name="selling_price"
+                    placeholder="Enter Total Price (₹)" required>
                 </div>
 
                 <div class="col-md-4 mb-3">
                   <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price Per Acre</label>
-                  <input type="text" class="form-control" id="price_per_acre_display" readonly placeholder="Calculated automatically…" style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                  <input type="text" class="form-control" id="price_per_acre_display" readonly
+                    placeholder="Calculated automatically…"
+                    style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
                   <input type="hidden" name="price_per_acre" id="price_per_acre_hidden">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label class="form-label " id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                  <select class="form-select" name="brokerage_percentage" id="brokeragePercentage" required>
+                    <option value="">Select</option>
+                    <option value="No Brokerage">No Brokerage</option>
+                    <option value="1% of amount">1% of sale value</option>
+                    <option value="1.5% of amount">1.5% of sale value</option>
+                    <option value="2% of amount">2% of sale value</option>
+                    <option value="Fixed Amount">Fixed Amount</option>
+                    <option value="Negotiable">Negotiable</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mb-3" id="manualBrokerage" style="display:none;">
+                  <label class="form-label">Enter Fixed Brokerage</label>
+                  <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
                 </div>
 
               </div>
@@ -802,19 +1548,19 @@
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Ownership Status <span class="required">*</span></label>
-                  <select class="form-select" name="ownership_type" required>
+                  <select class="form-select" name="ownership_type" id="ownership_type" required>
                     <option value="Freehold">Freehold</option>
-        <option value="Leasehold">Leasehold</option>
-        <option value="Single Ownership">Single Ownership</option>
-        <option value="Joint Ownership">Joint Ownership</option>
-        <option value="Inherited Property">Inherited Property</option>
-        <option value="Power of Attorney Holder">Power of Attorney Holder</option>
+                    <option value="Leasehold">Leasehold</option>
+                    <option value="Single Ownership">Single Ownership</option>
+                    <option value="Joint Ownership">Joint Ownership</option>
+                    <option value="Inherited Property">Inherited Property</option>
+                    <option value="Power of Attorney Holder">Power of Attorney Holder</option>
                   </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Land Conversion Status</label>
-                  <select class="form-select" name="land_conversion_status">
+                  <select class="form-select" name="land_conversion_status" id="land_conversion_status">
                     <option value="agricultural">Agricultural</option>
                     <option value="na_applied">NA Applied</option>
                     <option value="na_converted">NA Converted</option>
@@ -824,45 +1570,44 @@
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Ownership Document Type</label>
-                  <select class="form-select" name="ownership_document_type">
+                  <select class="form-select" name="ownership_document_type" id="ownership_document_type">
                     <option value="">Select Document Type</option>
                     <option value="7_12_extract">7/12 Extract</option>
-               
-        <option value="Registered Sale Deed">Registered Sale Deed</option>
-        <option value="Registered Agreement to Sale">Registered Agreement to Sale</option>
-        <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
-        <option value="Gift Deed">Gift Deed</option>
-        <option value="Possession Letter / Kabja Patra">Possession Letter / Kabja Patra</option>
-        <option value="Irrevocable Power of Attorney (POA)">Irrevocable Power of Attorney (POA)</option>
-        <option value="Lease Deed">Lease Deed</option>
+                    <option value="Registered Sale Deed">Registered Sale Deed</option>
+                    <option value="Registered Agreement to Sale">Registered Agreement to Sale</option>
+                    <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
+                    <option value="Gift Deed">Gift Deed</option>
+                    <option value="Possession Letter / Kabja Patra">Possession Letter / Kabja Patra</option>
+                    <option value="Irrevocable Power of Attorney (POA)">Irrevocable Power of Attorney (POA)</option>
+                    <option value="Lease Deed">Lease Deed</option>
                   </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Title Status</label>
-                  <select class="form-select" name="title_status">
-                   <option value="Clear & Marketable Title">Clear & Marketable Title</option>
-        <option value="Title Under Verification">Title Under Verification</option>
-        <option value="Disputed Title">Disputed Title</option>
-        <option value="Title Documents Incomplete">Title Documents Incomplete</option>
+                  <select class="form-select" name="title_status" id="title_status">
+                    <option value="Clear & Marketable Title">Clear & Marketable Title</option>
+                    <option value="Title Under Verification">Title Under Verification</option>
+                    <option value="Disputed Title">Disputed Title</option>
+                    <option value="Title Documents Incomplete">Title Documents Incomplete</option>
                   </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Property Encumbrance Status</label>
-                  <select class="form-select" name="encumbrance_status">
-                     <option value="">Select Encumbrance Status</option>
-        <option value="No Encumbrance">No Encumbrance</option>
-        <option value="Mortgaged">Mortgaged</option>
-        <option value="Under Litigation">Under Litigation</option>
-        <option value="Government Acquisition Notice">Government Acquisition Notice</option>
-        <option value="Other Claim Exists">Other Claim Exists</option>
+                  <select class="form-select" name="encumbrance_status" id="encumbrance_status">
+                    <option value="">Select Encumbrance Status</option>
+                    <option value="No Encumbrance">No Encumbrance</option>
+                    <option value="Mortgaged">Mortgaged</option>
+                    <option value="Under Litigation">Under Litigation</option>
+                    <option value="Government Acquisition Notice">Government Acquisition Notice</option>
+                    <option value="Other Claim Exists">Other Claim Exists</option>
                   </select>
                 </div>
 
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Current Possession Status <span class="required">*</span></label>
-                  <select class="form-select" name="possession_status" required>
+                  <select class="form-select" name="possession_status" id="possession_status" required>
                     <option value="">Select Status</option>
                     <option value="vacant">Vacant Possession</option>
                     <option value="with_owner">With Owner</option>
@@ -891,8 +1636,8 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Property Loan Status <span class="required">*</span></label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="loan_on_property" value="no" checked> No</label>
-                    <label class="radio-option"><input type="radio" name="loan_on_property" value="yes"> Yes</label>
+                    <label class="radio-option"><input type="radio" name="property_loan" value="no" checked> No</label>
+                    <label class="radio-option"><input type="radio" name="property_loan" value="yes"> Yes</label>
                   </div>
                   <div class="conditional-section mt-2" id="loan_amt_section" style="display:none;">
                     <input type="number" class="form-control" name="loan_amount" placeholder="Loan Amount (₹)">
@@ -936,7 +1681,6 @@
                 </div>
 
               </div>
-
             </div>
           </div>
 
@@ -949,7 +1693,6 @@
         <!-- ════════════ STEP 4 — AMENITIES & LOCATION ════════════ -->
         <div class="step-content" id="step4">
 
-
           <div class="form-section earth-theme">
             <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
             <div class="section-body">
@@ -959,19 +1702,16 @@
               </div>
 
               <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
-                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2"
-                id="amenitiesBadge">0</span>
+                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2" id="amenitiesBadge">0</span>
               </button>
 
               <div id="amenitiesDisplay" class="selected-items-display">
                 <p class="text-muted text-center">No amenities selected</p>
               </div>
 
-              <!-- Hidden checkboxes for form submission -->
               <div style="display:none;">
                 {% for am in ameneties_obj %}
-                  <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox"
-                  data-icon="{{am.amenties_icon}}">
+                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox" data-icon="{{am.amenties_icon}}">
                 {% endfor %}
               </div>
             </div>
@@ -986,22 +1726,19 @@
               </div>
 
               <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
-                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2"
-                id="facilitiesBadge">0</span>
+                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2" id="facilitiesBadge">0</span>
               </button>
 
               <div id="facilitiesDisplay" class="selected-items-display">
                 <p class="text-muted text-center">No facilities selected</p>
               </div>
 
-              <!-- Hidden checkboxes for form submission -->
               <div style="display:none;">
                 {% for fa in facilities_obj %}
-                  <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
-                  class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
+                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}" class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
                 {% endfor %}
-                </div>
               </div>
+            </div>
           </div>
 
           <div class="form-section earth-theme">
@@ -1009,11 +1746,10 @@
             <div class="section-body">
               <div class="form-group">
                 <label class="form-label">User Description</label>
-                <textarea class="form-control" name="user_description"
-                  id="user_description" rows="5"
-                  placeholder="Describe the property — key highlights, industrial use suitability, infrastructure advantages..."></textarea>
+                <textarea class="form-control" name="user_description" id="user_description" rows="5"
+                  placeholder="Describe the property — key highlights, agricultural use suitability, water sources, infrastructure advantages..."></textarea>
               </div>
-            </div><!-- /section-body -->
+            </div>
           </div>
 
           <div class="step-nav">
@@ -1025,29 +1761,232 @@
         <!-- ════════════ STEP 5 — PHOTOS & PUBLISH ════════════ -->
         <div class="step-content" id="step5">
 
+          <!-- ADVANCED CATEGORIZED IMAGES -->
           <div class="form-section earth-theme">
-            <div class="section-header"><i class="fas fa-images"></i> Farm Portfolio Images</div>
+            <div class="section-header"><i class="fas fa-images"></i> Farm Portfolio Images & Categories</div>
             <div class="section-body">
-              <p class="text-muted small mb-3"><strong>Drag &amp; Drop to Re-order:</strong> Move thumbnails to set your display order on the portal.</p>
-              <div class="image-upload-area" id="uploadArea">
-                <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-                <i class="fas fa-images fa-3x mb-2" style="color:#56ab2f;"></i>
-                <div class="upload-text">Click or Drop High-Res Farm Images</div>
-                <div class="upload-subtext">
-                  <span class="badge bg-dark p-2 mt-2 d-inline-block" id="uploadCounterBadge">Uploaded: 0 / 10 Images</span>
+              <div class="img-total-summary">
+                <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/25</div>
+                <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+              </div>
+
+              <div class="img-cat-tabs" id="imgCatTabs">
+                <div class="img-cat-tab active" data-cat="land_overview"><i class="fas fa-image"></i> Land Overview <span class="cat-count" id="count-land_overview">0</span></div>
+                <div class="img-cat-tab" data-cat="soil_quality"><i class="fas fa-seedling"></i> Soil Quality <span class="cat-count" id="count-soil_quality">0</span></div>
+                <div class="img-cat-tab" data-cat="water_source"><i class="fas fa-tint"></i> Water Source <span class="cat-count" id="count-water_source">0</span></div>
+                <div class="img-cat-tab" data-cat="irrigation_system"><i class="fas fa-shower"></i> Irrigation <span class="cat-count" id="count-irrigation_system">0</span></div>
+                <div class="img-cat-tab" data-cat="crop_cultivation"><i class="fas fa-leaf"></i> Crops / Cultivation <span class="cat-count" id="count-crop_cultivation">0</span></div>
+                <div class="img-cat-tab" data-cat="farm_house"><i class="fas fa-home"></i> Farm House <span class="cat-count" id="count-farm_house">0</span></div>
+                <div class="img-cat-tab" data-cat="electricity_setup"><i class="fas fa-bolt"></i> Electricity Setup <span class="cat-count" id="count-electricity_setup">0</span></div>
+                <div class="img-cat-tab" data-cat="storage_shed"><span class="cat-count" id="count-storage_shed">0</span><i class="fas fa-warehouse"></i> Storage Shed</div>
+                <div class="img-cat-tab" data-cat="boundary_fencing"><i class="fas fa-bars"></i> Boundary & Fencing <span class="cat-count" id="count-boundary_fencing">0</span></div>
+                <div class="img-cat-tab" data-cat="approach_road"><i class="fas fa-road"></i> Approach Road <span class="cat-count" id="count-approach_road">0</span></div>
+                <div class="img-cat-tab" data-cat="tubewell_pump"><i class="fas fa-water"></i> Tubewell & Pump <span class="cat-count" id="count-tubewell_pump">0</span></div>
+                <div class="img-cat-tab" data-cat="aerial_drone"><i class="fas fa-plane"></i> Aerial / Drone <span class="cat-count" id="count-aerial_drone">0</span></div>
+              </div>
+
+              <div class="img-cat-panels">
+                <div class="img-cat-panel active" data-cat-panel="land_overview">
+                  <input type="file" class="img-cat-input" id="imgInput-land_overview" name="property_images_land_overview[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="land_overview">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Land Overview Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-land_overview"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="soil_quality">
+                  <input type="file" class="img-cat-input" id="imgInput-soil_quality" name="property_images_soil_quality[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="soil_quality">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Soil Quality Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-soil_quality"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="water_source">
+                  <input type="file" class="img-cat-input" id="imgInput-water_source" name="property_images_water_source[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="water_source">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Water Source Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-water_source"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="irrigation_system">
+                  <input type="file" class="img-cat-input" id="imgInput-irrigation_system" name="property_images_irrigation_system[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="irrigation_system">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Irrigation System Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-irrigation_system"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="crop_cultivation">
+                  <input type="file" class="img-cat-input" id="imgInput-crop_cultivation" name="property_images_crop_cultivation[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="crop_cultivation">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Crop Cultivation Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-crop_cultivation"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="farm_house">
+                  <input type="file" class="img-cat-input" id="imgInput-farm_house" name="property_images_farm_house[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="farm_house">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Farmhouse Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-farm_house"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="electricity_setup">
+                  <input type="file" class="img-cat-input" id="imgInput-electricity_setup" name="property_images_electricity_setup[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="electricity_setup">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Electricity Setup Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-electricity_setup"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="storage_shed">
+                  <input type="file" class="img-cat-input" id="imgInput-storage_shed" name="property_images_storage_shed[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="storage_shed">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Storage Shed Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-storage_shed"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="boundary_fencing">
+                  <input type="file" class="img-cat-input" id="imgInput-boundary_fencing" name="property_images_boundary_fencing[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="boundary_fencing">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Boundary & Fencing Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-boundary_fencing"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="approach_road">
+                  <input type="file" class="img-cat-input" id="imgInput-approach_road" name="property_images_approach_road[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="approach_road">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Approach Road Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-approach_road"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="tubewell_pump">
+                  <input type="file" class="img-cat-input" id="imgInput-tubewell_pump" name="property_images_tubewell_pump[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="tubewell_pump">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Tubewell & Pump Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-tubewell_pump"></div>
+                </div>
+
+                <div class="img-cat-panel" data-cat-panel="aerial_drone">
+                  <input type="file" class="img-cat-input" id="imgInput-aerial_drone" name="property_images_aerial_drone[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="aerial_drone">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
+                    <div class="upload-text">Click or Drag Aerial / Drone View Photos Here</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-aerial_drone"></div>
                 </div>
               </div>
-              <div class="image-preview" id="imagePreview"></div>
+            </div>
+          </div>
 
-              <div class="row mt-4 pt-3 border-top">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">7/12 Extract / Encumbrance Certificate (PDF) </label>
-                  <input type="file" class="form-control" name="encumbrance_cert" accept=".pdf">
-                  <small class="text-muted">Attach scanned land registry / ownership document.</small>
+          <!-- ADVANCED VIDEO SECTION -->
+          <div class="form-section earth-theme">
+            <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+            <div class="section-body">
+              <div class="video-options-grid">
+                <label class="video-option-card active" id="card_video_upload">
+                  <input type="radio" name="video_option" id="video_upload" value="upload" checked>
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="vo-title">Upload Video</div>
+                  <div class="vo-desc">Upload a pre-recorded walkthrough (Max 20MB)</div>
+                </label>
+
+                <label class="video-option-card" id="card_video_auto">
+                  <input type="radio" name="video_option" id="video_auto" value="auto">
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-magic"></i></div>
+                  <div class="vo-title">Auto-Generate</div>
+                  <div class="vo-desc">Create a dynamic slideshow from your uploaded photos</div>
+                </label>
+
+                <label class="video-option-card" id="card_video_rm">
+                  <input type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-link"></i></div>
+                  <div class="vo-title">Link / RM Assisted</div>
+                  <div class="vo-desc">Paste YouTube link or share a large video via RM</div>
+                </label>
+              </div>
+
+              <input type="hidden" name="video_source" id="video_source" value="upload">
+
+              <!-- Direct Video Upload -->
+              <div id="videoUploadWrapper">
+                <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+                <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border-color: #cbd5e1;">
+                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#56ab2f;"></i></div>
+                  <div class="upload-text">Click to Select Property Video</div>
+                  <div class="upload-subtext">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Walkthrough Video (MP4)</label>
-                  <input type="file" class="form-control" name="property_video" accept="video/*">
+                <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px; border: 2px solid #e2e8f0;"></video>
+              </div>
+
+              <!-- Auto Slideshow Preview -->
+              <div id="videoAutoWrapper" style="display:none;">
+                <div class="alert alert-info" style="background:#f4fdf0; border-left:4px solid #56ab2f; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#56ab2f;"></i> AI Slideshow Generator</div>
+                  <div style="font-size: 0.85rem; color: #4b5563;">We will automatically generate a smooth, professional walkthrough video using the images you've uploaded above (minimum 3 required).</div>
+                </div>
+                <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                  <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                  <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:3px solid #1e293b; background:#000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></canvas>
+                </div>
+                <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:13px; font-weight:600; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #fecaca;">
+                  <i class="fas fa-exclamation-triangle me-1"></i> Please upload at least 3 property images in the section above to preview the auto-slideshow.
+                </div>
+              </div>
+
+              <!-- RM Assisted / Link -->
+              <div id="videoRMWrapper" style="display:none;">
+                <div class="alert alert-info" style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fab fa-youtube me-2" style="color:#ef4444;"></i> Public URL / RM Assist</div>
+                  <div style="font-size: 0.85rem; color: #4b5563;">If your video is already on YouTube/Instagram, paste the link below. If your video file is larger than 20MB, contact our RM via WhatsApp to upload it for you.</div>
+                </div>
+                
+                <div class="form-group mb-0">
+                  <label class="form-label">Published Video Link</label>
+                  <div class="input-group">
+                    <span class="input-group-text" style="background: #f8fafc; border-color: #e9ecef;"><i class="fas fa-link text-muted"></i></span>
+                    <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                  </div>
+                </div>
+                <button type="button" class="btn-reset mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
+                
+                <div id="rmVideoFrame" style="display:none; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                  <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="form-section earth-theme">
+            <div class="section-header"><i class="fas fa-file-pdf"></i> Legal & Verification Documents</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label class="form-label">7/12 Extract / Encumbrance Certificate (PDF) </label>
+                  <input type="file" class="form-control" name="encumbrance_cert" id="encumbrance_cert" accept=".pdf">
+                  <small class="text-muted">Attach scanned land registry / ownership document.</small>
                 </div>
               </div>
             </div>
@@ -1059,48 +1998,60 @@
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
-                        <label class="form-check-label" for="listed_yes">Yes</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
-                        <label class="form-check-label" for="listed_no">No</label>
-                      </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                      <label class="form-check-label" for="listed_yes">Yes</label>
                     </div>
-                  </div>
-                  <div class="col-md-6" id="portalField" style="display:none;">
-                    <div class="form-group">
-                      <label class="form-label">Portal Name</label>
-                        <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No"
+                        checked>
+                      <label class="form-check-label" for="listed_no">No</label>
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6" id="portalField" style="display:none;">
+                  <div class="form-group">
+                    <label class="form-label">Portal Name</label>
+                    <input type="text" class="form-control" name="portal_name"
+                      placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                  </div>
+                </div>
               </div>
+            </div>
           </div>
 
-         <!-- LISTED BY -->
-    
-          
-
           <!-- UPLOADED BY -->
-         
-           <div class="form-section" hidden>
-                        <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
-                        <div class="section-body">
-                            <div class="row">
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text" class="form-control" name="uploaded_by_name" value="{{ user_obj.user_name }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" value="{{ user_obj.user_email }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div></div>
-                            </div>
-                        </div>
-                    </div>
+          <div class="form-section earth-theme">
+            <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="uploaded_by_name" value="{{ user_obj.user_name }}" readonly>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Role</label>
+                  <input type="text" class="form-control" name="uploaded_by_role" value="{{ user_obj.user_role }}" readonly>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" name="uploaded_by_email" value="{{ user_obj.user_email }}"
+                    readonly>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Contact</label>
+                  <input type="text" class="form-control" name="uploaded_by_contact" value="{{ user_obj.user_phone }}"
+                    readonly>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="form-footer">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(4)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="reset" class="btn-step btn-reset"><i class="fas fa-redo"></i> Reset</button>
-            <button type="submit" class="btn-step btn-submit" id="submitBtn"><i class="fas fa-save"></i> Submit Property</button>
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(4)"><i class="fas fa-arrow-left"></i>
+              Back</button>
+            <button type="button" class="btn-step btn-submit" id="submitBtn" onclick="Submit_Agricultural_Property(this)"><i class="fas fa-save"></i> Submit
+              Property</button>
           </div>
 
         </div>
@@ -1123,7 +2074,8 @@
           </div>
           <div class="preview-body">
             <div class="preview-title" id="p_title">Your Agricultural Property</div>
-            <div class="preview-location" id="p_loc"><i class="fas fa-map-marker-alt" style="color:#56ab2f;"></i> Village, District</div>
+            <div class="preview-location" id="p_loc"><i class="fas fa-map-marker-alt" style="color:#56ab2f;"></i>
+              Village, District</div>
             <div class="preview-specs">
               <span id="p_area">— Acres</span>
               <span id="p_soil">Soil: —</span>
@@ -1148,21 +2100,26 @@
 
 
 <!-- Common Modal -->
-<div class="modal fade" id="itemsModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
+<div class="modal fade" id="itemsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title"><i class="fas fa-list-check"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
-        <div id="modalItemsList" class="row"></div>
+        <div class="modal-search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" class="modal-search-input" id="modalSearch" placeholder="Search items by name...">
+        </div>
+        <div id="modalItemsList" class="modal-grid-options"></div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span
-            id="modalSelectedCount">0</span>)</button>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-600" onclick="clearAll()"><i class="fas fa-trash-alt me-1"></i> Clear All</button>
+        <div class="d-flex align-items-center gap-3">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;"><span id="modalSelectedCount">0</span> selected</span>
+          <button type="button" class="btn btn-primary px-4 rounded-pill fw-600" style="background: var(--earth-gradient); border:none;" data-bs-dismiss="modal">Apply Selections</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1173,110 +2130,109 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+  $("#Resale").addClass("active");
 
-    $("#Resale").addClass("active");
-
-    document.addEventListener('DOMContentLoaded', function() {
-    // 1. Get the radio buttons and the hidden portal input field
+  document.addEventListener('DOMContentLoaded', function () {
     var yesRadio = document.getElementById('listed_yes');
     var noRadio = document.getElementById('listed_no');
     var portalField = document.getElementById('portalField');
-    
-    // 2. Create a function that checks if "Yes" is selected
+
     function togglePortalField() {
-        if (portalField) {
-            // If yes is checked, show it ('block'). If not, hide it ('none').
-            portalField.style.display = yesRadio.checked ? 'block' : 'none';
-        }
+      if (portalField) {
+        portalField.style.display = yesRadio.checked ? 'block' : 'none';
+      }
     }
-    
-    // 3. Attach the function to run whenever the user clicks either radio button
+
     if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
     if (noRadio) noRadio.addEventListener('change', togglePortalField);
-    
-    // 4. Run it once immediately when the page loads to set the initial state
     togglePortalField();
-});
+  });
 
-
-</script>
-
-<script>
   function updateBrokerageLabel(role) {
     var labelElement = document.getElementById('brokerageLabel');
     if (!labelElement) return;
 
-    // Simply set the label to Brokerage without any conditional checks
-    var labelText = "Brokerage";
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
 
-    // Inject the text along with a red styled asterisk span
+    switch (normalizedRole) {
+      case 'admin':
+        labelText = "EstateFlow Service Fee";
+        break;
+      case 'relationship manager':
+        labelText = "Buyer Service Fee";
+        break;
+      case 'landlord':
+        labelText = "Buyer Service Fee";
+        break;
+      case 'agent':
+        labelText = "Brokerage";
+        break;
+      case 'agency/builder':
+      case 'builder':
+        labelText = "Brokerage/Service Fee";
+        break;
+      default:
+        labelText = "Brokerage";
+        break;
+    }
     labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
   }
-</script>
 
-<script>
-  function Change_Fields(){
+  function Change_Fields() {
     var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
     if (!checkedInput) return;
-    
     var selectedValue = checkedInput.value;
-    
-    var admin_id    = document.getElementById('selfUserId')?.value || "";
-    var admin_name  = document.getElementById('selfUserName')?.value || "";
+
+    var admin_id = document.getElementById('selfUserId')?.value || "";
+    var admin_name = document.getElementById('selfUserName')?.value || "";
     var admin_email = document.getElementById('selfUserEmail')?.value || "";
     var admin_phone = document.getElementById('selfUserPhone')?.value || "";
-    var admin_role  = document.getElementById('selfUserRole')?.value || "";
+    var admin_role = document.getElementById('selfUserRole')?.value || "";
 
-    var targetId      = document.getElementById('uploaded_by_id')      || document.querySelector('#user_data_div [id$="id"]');
-    var targetName    = document.getElementById('uploaded_by_name')    || document.querySelector('#user_data_div [id$="name"]');
-    var targetEmail   = document.getElementById('uploaded_by_email')   || document.querySelector('#user_data_div [id$="email"]');
-    var targetContact = document.getElementById('uploaded_by_contact') || document.querySelector('#user_data_div [id$="contact"]');
-    var targetRole    = document.getElementById('uploaded_by_role')    || document.querySelector('#user_data_div [id$="role"]');
-    var hiddenSelect  = document.getElementById('assigned_to');
+    var targetId = document.getElementById('listed_by_id');
+    var targetName = document.getElementById('listed_by_name');
+    var targetEmail = document.getElementById('listed_by_email');
+    var targetContact = document.getElementById('listed_by_contact');
+    var targetRole = document.getElementById('listed_by_role');
 
-    if(selectedValue == "self"){
-        var otherWrapper = document.getElementById('listedByOtherWrapper');
-        if (otherWrapper) otherWrapper.style.display = "none";
-        
-        if (hiddenSelect) {
-            hiddenSelect.value = "";
-            hiddenSelect.required = false; 
-            hiddenSelect.classList.remove('is-invalid');
-        }
-        var valueLabel = document.getElementById('assignedToValueLabel');
-        if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+    if (selectedValue === "self") {
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "none";
 
-        if (targetId)      targetId.value = admin_id;
-        if (targetName)    targetName.value = admin_name;
-        if (targetEmail)   targetEmail.value = admin_email;
-        if (targetContact) targetContact.value = admin_phone;
-        if (targetRole)    targetRole.value = admin_role;
+      var hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) {
+        hiddenSelect.value = "";
+        hiddenSelect.required = false;
+      }
 
-        updateBrokerageLabel(admin_role);
+      var valueLabel = document.getElementById('assignedToValueLabel');
+      if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+      if (targetId) targetId.value = admin_id;
+      if (targetName) targetName.value = admin_name;
+      if (targetEmail) targetEmail.value = admin_email;
+      if (targetContact) targetContact.value = admin_phone;
+      if (targetRole) targetRole.value = admin_role;
+
+      updateBrokerageLabel(admin_role);
+    } else {
+      if (targetId) targetId.value = "";
+      if (targetName) targetName.value = "";
+      if (targetEmail) targetEmail.value = "";
+      if (targetContact) targetContact.value = "";
+      if (targetRole) targetRole.value = "";
+
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "block";
+
+      var hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) {
+        hiddenSelect.required = true;
+      }
     }
-    else {
-        if (hiddenSelect) {
-            hiddenSelect.required = true;
-        }
-        
-        if (targetId)      targetId.value = "";
-        if (targetName)    targetName.value = "";
-        if (targetEmail)   targetEmail.value = "";
-        if (targetContact) targetContact.value = "";
-        if (targetRole)    targetRole.value = "";
-        
-        var otherWrapper = document.getElementById('listedByOtherWrapper');
-        if (otherWrapper) otherWrapper.style.display = "block";
-    }
-}
-</script>
+  }
 
-<script>
-
-  // ============================================================
-  // Custom searchable dropdown for "Listed By (User)"
-  // Pure vanilla JS — no Select2 dependency.
-  // ============================================================
   (function () {
     var wrapper = document.getElementById('assignedToSearchSelect');
     var control = document.getElementById('assignedToControl');
@@ -1332,7 +2288,6 @@
       wrapper.classList.remove('validation-error');
       closePanel();
 
-      // Fire native change event so existing listeners (get_user_data etc.) still run
       var evt = new Event('change', { bubbles: true });
       hiddenSelect.dispatchEvent(evt);
     }
@@ -1340,8 +2295,6 @@
     function filterOptions(query) {
       query = query.trim().toLowerCase();
       var anyVisible = false;
-
-      // Track which groups have at least one visible option
       var groupHasVisible = {};
 
       options.forEach(function (opt) {
@@ -1350,8 +2303,6 @@
         opt.style.display = match ? '' : 'none';
         if (match) {
           anyVisible = true;
-          var group = opt.closest('.search-select-options');
-          // find the preceding group label for this option
           var prev = opt.previousElementSibling;
           while (prev && !prev.classList.contains('search-select-group-label')) {
             prev = prev.previousElementSibling;
@@ -1421,172 +2372,161 @@
       if (!wrapper.contains(e.target)) closePanel();
     });
 
-    // ============================================================
-    // FIXED/ADDED: Trigger get_user_data execution on selection change
-    // ============================================================
     hiddenSelect.addEventListener('change', function () {
       if (typeof get_user_data === 'function') {
         get_user_data(this);
       }
     });
 
-    // ============================================================
-    // ADDED HERE: Run your field configuration safely on load
-    // ============================================================
     if (typeof Change_Fields === 'function') {
       Change_Fields();
     }
-
-
   })();
 
-
-</script>
-
-{% comment %} Javascript to get user details according to listing by {% endcomment %}
-
-<script>
   function get_user_data() {
-
     var assigned_to = $("#assigned_to").val();
-
     if (!assigned_to) {
-      $('#uploaded_by_id, #uploaded_by_name, #uploaded_by_email, #uploaded_by_contact, #uploaded_by_role').val('');
+      $('#listed_by_id, #listed_by_name, #listed_by_email, #listed_by_contact, #listed_by_role').val('');
       return;
     }
-
     $.ajax({
       method: "POST",
       url: "{% url 'get_user_data' %}",
-      data: {
-        'assigned_to': assigned_to,
-      },
-      dataType: "json", // Tells jQuery to parse incoming data as an object
+      data: { 'assigned_to': assigned_to },
+      dataType: "json",
       success: function (response) {
-
-        // Map JSON object values directly to permanent textboxes
-        $('#uploaded_by_id').val(response.user_id || '');
-        $('#uploaded_by_name').val(response.name || '');
-        $('#uploaded_by_email').val(response.email || '');
-        $('#uploaded_by_contact').val(response.contact || '');
-        $('#uploaded_by_role').val(response.role || '');
-
-        // Call the update script immediately with the new role
+        $('#listed_by_id').val(response.user_id || '');
+        $('#listed_by_name').val(response.name || '');
+        $('#listed_by_email').val(response.email || '');
+        $('#listed_by_contact').val(response.contact || '');
+        $('#listed_by_role').val(response.role || '');
         updateBrokerageLabel(response.role);
       },
-      error: function (xhr, status, error) {
-        console.error('Failed to fetch user data:', error);
-      }
+      error: function (xhr, status, error) { console.error('Failed to fetch user data:', error); }
     });
   }
 </script>
 
-
 <script>
+  let currentSection = null;
 
-  // jQuery Version
-  $(document).ready(function () {
-    const sections = ['amenities', 'facilities'];
-
-    sections.forEach(section => {
-      updateDisplay(section);
-    });
-
-    window.openModal = function (section) {
-      currentSection = section;
-      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
-
-      const container = $('#modalItemsList').empty();
-      $(`.${section}-checkbox`).each(function () {
-        container.append(`
-        <div class="col-md-4 col-sm-6 mb-2">
-          <div class="form-check">
-            <input class="form-check-input modal-item-checkbox" type="checkbox" 
-                   value="${this.value}" data-icon="${$(this).data('icon')}"
-                   ${this.checked ? 'checked' : ''}>
-            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
-          </div>
+  window.openModal = function (section) {
+    currentSection = section;
+    const titleName = section.charAt(0).toUpperCase() + section.slice(1);
+    $('#modalTitle').text(`Select ${titleName}`);
+    
+    const container = $('#modalItemsList').empty();
+    
+    $(`.${section}-checkbox`).each(function () {
+      const isChecked = this.checked ? 'checked' : '';
+      const cardClass = this.checked ? 'modal-option-card checked' : 'modal-option-card';
+      const iconClass = $(this).data('icon') || 'fas fa-check';
+      
+      container.append(`
+        <div class="${cardClass}" onclick="toggleCardCheckbox(this, event)">
+          <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                 value="${this.value}" data-icon="${iconClass}" ${isChecked}>
+          <i class="${iconClass}"></i>
+          <label>${this.value}</label>
         </div>
       `);
-      });
+    });
 
-      updateModalCount();
-      $('#itemsModal').modal('show');
-    };
+    updateModalCount();
+    $('#modalSearch').val('');
+    $('#itemsModal').modal('show');
+  };
 
-    window.removeItem = function (section, name) {
-      const items = $(`.${section}-checkbox`).filter(function () {
-        return this.value === name;
-      });
-      items.prop('checked', false);
-      updateDisplay(section);
-    };
+  window.toggleCardCheckbox = function(cardElement, event) {
+    const checkbox = $(cardElement).find('.modal-item-checkbox');
+    if (event.target.tagName !== 'INPUT') {
+      const newState = !checkbox.prop('checked');
+      checkbox.prop('checked', newState);
+    }
+    if (checkbox.prop('checked')) {
+      $(cardElement).addClass('checked');
+    } else {
+      $(cardElement).removeClass('checked');
+    }
+    updateModalCount();
+  };
 
-    window.clearAll = function () {
-      if (!currentSection) return;
-      $(`.${currentSection}-checkbox`).prop('checked', false);
-      $('.modal-item-checkbox').prop('checked', false);
-      updateDisplay(currentSection);
-      updateModalCount();
-    };
-
-    function updateDisplay(section) {
-      const checked = $(`.${section}-checkbox:checked`);
-      const count = checked.length;
-
-      $(`#${section}Count`).text(`${count} selected`);
-      $(`#${section}Badge`).text(count);
-
-      const display = $(`#${section}Display`).empty();
-
-      if (count === 0) {
-        display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+  $('#modalSearch').on('input', function() {
+    const query = $(this).val().toLowerCase();
+    $('#modalItemsList .modal-option-card').each(function() {
+      const text = $(this).text().toLowerCase();
+      if (text.includes(query)) {
+        $(this).show();
       } else {
-        checked.each(function () {
-          display.append(`
+        $(this).hide();
+      }
+    });
+  });
+
+  window.clearAll = function () {
+    if (!currentSection) return;
+    $(`.${currentSection}-checkbox`).prop('checked', false);
+    $('.modal-item-checkbox').prop('checked', false);
+    $('.modal-option-card').removeClass('checked');
+    updateDisplay(currentSection);
+    updateModalCount();
+  };
+
+  function updateDisplay(section) {
+    const checked = $(`.${section}-checkbox:checked`);
+    const count = checked.length;
+
+    $(`#${section}Count`).text(`${count} selected`);
+    $(`#${section}Badge`).text(count);
+
+    const display = $(`#${section}Display`).empty();
+
+    if (count === 0) {
+      display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+    } else {
+      checked.each(function () {
+        display.append(`
           <span class="item-tag">
-            <i class="${$(this).data('icon')}"></i>
+            <i class="${$(this).data('icon') || 'fas fa-check'}"></i>
             ${this.value}
             <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
               <i class="fas fa-times-circle"></i>
             </span>
           </span>
         `);
-        });
-      }
-    }
-
-    function updateModalCount() {
-      $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
-    }
-
-    $(document).on('change', '.modal-item-checkbox', updateModalCount);
-
-    $('#itemsModal .btn-primary').on('click', function () {
-      if (!currentSection) return;
-
-      const checked = $('.modal-item-checkbox:checked');
-      $(`.${currentSection}-checkbox`).prop('checked', false);
-      checked.each(function () {
-        $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
       });
+    }
+  }
 
-      updateDisplay(currentSection);
+  function updateModalCount() {
+    $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
+  }
+
+  $('#itemsModal .btn-primary').on('click', function () {
+    if (!currentSection) return;
+
+    const checked = $('.modal-item-checkbox:checked');
+    $(`.${currentSection}-checkbox`).prop('checked', false);
+    checked.each(function () {
+      $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
     });
+
+    updateDisplay(currentSection);
   });
 
-
+  window.removeItem = function (section, name) {
+    const items = $(`.${section}-checkbox`).filter(function () { return this.value === name; });
+    items.prop('checked', false);
+    updateDisplay(section);
+  };
 </script>
 
 <script>
   let currentStep = 1;
   const totalSteps = 5;
-  let selectedFiles = [];
-  const maxImages = 10;
 
-  // ── STEPPER ──
   function goToStep(n) {
-    if (n > currentStep && !validateStep(currentStep)) return;
+    if (n > currentStep && !validateStep(currentStep)) return false;
     document.getElementById('step' + currentStep).classList.remove('active');
     document.getElementById('step' + n).classList.add('active');
 
@@ -1611,109 +2551,144 @@
       }
     }
     currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     updatePreview();
   }
 
-  // ── VALIDATION ──
   function validateStep(step) {
     const stepEl = document.getElementById('step' + step);
     if (!stepEl) return true;
     const required = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
     let isValid = true, missing = [];
+    let firstInvalidElement = null;
+
+    stepEl.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
 
     required.forEach(field => {
       field.classList.remove('validation-error');
       if (field.type === 'radio') {
         const checked = Array.from(stepEl.querySelectorAll(`[name="${field.name}"]`)).some(r => r.checked);
-        if (!checked) { isValid = false; const lbl = getLabel(field); if (lbl && !missing.includes(lbl)) missing.push(lbl); }
+        if (!checked) { 
+          isValid = false; 
+          const lbl = getLabel(field); 
+          if (lbl && !missing.includes(lbl)) missing.push(lbl); 
+          if (!firstInvalidElement) firstInvalidElement = field;
+        }
       } else if (!field.value?.trim()) {
-        isValid = false; field.classList.add('validation-error');
-        const lbl = getLabel(field); if (lbl && !missing.includes(lbl)) missing.push(lbl);
+        isValid = false; 
+        field.classList.add('validation-error');
+        if (field.id === 'assigned_to') {
+          const control = document.getElementById('assignedToControl');
+          if (control) control.classList.add('validation-error');
+        }
+        const lbl = getLabel(field); 
+        if (lbl && !missing.includes(lbl)) missing.push(lbl);
+        if (!firstInvalidElement) firstInvalidElement = field;
       }
     });
 
     if (!isValid) {
+      if (firstInvalidElement) {
+        firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof firstInvalidElement.focus === 'function') firstInvalidElement.focus();
+      }
       Swal.fire({
         icon: 'warning', title: 'Required Fields Missing',
         html: `<p>Please fill the following fields:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
         confirmButtonColor: '#56ab2f'
       });
+      return false;
     }
-    return isValid;
+    return true;
   }
 
   function getLabel(field) {
     return field.closest('.form-group, .col-md-3, .col-md-4, .col-md-6, .col-md-12, .mb-3')
-      ?.querySelector('.form-label')?.textContent?.replace('*','').trim() || '';
+      ?.querySelector('.form-label')?.textContent?.replace('*', '').trim() || '';
   }
 
-  // ── PREVIEW ──
   function generateTitle() {
-    const typeEl = document.getElementById('agriculture_property_type');
-    const typeText = typeEl?.options[typeEl.selectedIndex]?.text || '';
+    const typeEl = document.getElementById('property_type');
+    const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text : '';
     const area = document.getElementById('land_area')?.value?.trim();
     const vil = document.getElementById('village')?.value?.trim();
     const tal = document.getElementById('taluka')?.value?.trim();
+    const dist = document.getElementById('district')?.value?.trim();
+    
     if (!typeText || !area || !vil) return '';
     const areaLabel = parseFloat(area).toLocaleString('en-IN') + ' Acres';
-    const loc = tal ? `in ${vil}, ${tal}` : `in ${vil}`;
-    return `${areaLabel} ${typeText} ${loc}`;
+    const locParts = [vil, tal, dist].filter(Boolean).join(', ');
+    return `${areaLabel} ${typeText} in ${locParts}`;
   }
 
   function updatePreview() {
     const area = document.getElementById('land_area')?.value || '';
-    const price = document.getElementById('expected_price')?.value || '';
-    const city = document.getElementById('city')?.value || '';
-    const loc = document.getElementById('locality_area')?.value || '';
-    const soilEl = document.querySelector('select[name="soil_type"]');
-    const soilText = soilEl?.options[soilEl?.selectedIndex]?.text || '—';
-    const waterEl = document.querySelector('select[name="water_source"]');
+    const price = document.getElementById('selling_price')?.value || '';
+    const village = document.getElementById('village')?.value || '';
+    const taluka = document.getElementById('taluka')?.value || '';
+    const district = document.getElementById('district')?.value || '';
+    const soilEl = document.getElementById('soil_type');
+    const soilText = soilEl && soilEl.value ? soilEl.options[soilEl.selectedIndex].text : '—';
+    const waterEl = document.getElementById('water_source');
 
     const title = generateTitle();
-    const titleInput = document.getElementById('agri_title');
-    if (titleInput) titleInput.value = title;
+    const titleInput = document.getElementById('property_title');
+    if (titleInput && (title || area || village)) {
+      titleInput.value = title;
+    }
 
-    const el = id => document.getElementById(id);
-    if (el('p_title')) el('p_title').textContent = title || 'Your Agricultural Property';
-    if (el('p_area')) el('p_area').textContent = area ? parseFloat(area).toLocaleString('en-IN') + ' Acres' : '— Acres';
-    if (el('p_soil')) el('p_soil').textContent = soilEl?.value ? 'Soil: ' + soilText : 'Soil: —';
-    if (el('p_price')) el('p_price').textContent = price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ —';
-    if (el('p_loc')) el('p_loc').innerHTML = `<i class="fas fa-map-marker-alt" style="color:#56ab2f;"></i> ${loc || 'Locality'}, ${city || 'City'}`;
+    const pTitle = document.getElementById('p_title');
+    const pArea = document.getElementById('p_area');
+    const pSoil = document.getElementById('p_soil');
+    const pPrice = document.getElementById('p_price');
+    const pLoc = document.getElementById('p_loc');
 
-    // Auto price per acre
+    if (pTitle) pTitle.textContent = title || 'Your Agricultural Property';
+    if (pArea) pArea.textContent = area ? parseFloat(area).toLocaleString('en-IN') + ' Acres' : '— Acres';
+    if (pSoil) pSoil.textContent = soilEl && soilEl.value ? 'Soil: ' + soilText : 'Soil: —';
+    if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ —';
+    
+    if (pLoc) {
+      const locationString = [village, taluka, district].filter(Boolean).join(', ') || 'Village, District';
+      pLoc.innerHTML = `<i class="fas fa-map-marker-alt" style="color:#56ab2f;"></i> ${locationString}`;
+    }
+
     const ppa = document.getElementById('price_per_acre_display');
     const ppaHidden = document.getElementById('price_per_acre_hidden');
     if (price && area && parseFloat(area) > 0) {
-      const val = (parseFloat(price) / parseFloat(area)).toFixed(0);
-      if (ppa) ppa.value = '₹' + parseInt(val).toLocaleString('en-IN') + ' / Acre';
+      const val = Math.round(parseFloat(price) / parseFloat(area));
+      if (ppa) ppa.value = '₹ ' + parseInt(val, 10).toLocaleString('en-IN') + ' / Acre';
       if (ppaHidden) ppaHidden.value = val;
     } else {
       if (ppa) ppa.value = '';
       if (ppaHidden) ppaHidden.value = '';
     }
 
-    // Checklist
-    setCheck('cl-type', !!document.getElementById('agriculture_property_type')?.value);
+    setCheck('cl-type', !!document.getElementById('property_type')?.value);
     setCheck('cl-area', !!area);
-    setCheck('cl-village', !!document.getElementById('village')?.value && !!document.getElementById('district')?.value);
+    setCheck('cl-village', !!village && !!district);
     setCheck('cl-price', !!price);
     setCheck('cl-water', !!waterEl?.value && waterEl.value !== 'none');
-    setCheck('cl-loc', !!city && !!loc);
+    setCheck('cl-loc', !!village || !!taluka || !!district);
 
-    // Upload counter
+    const total = window.totalImageCount ? window.totalImageCount() : 0;
     const badge = document.getElementById('uploadCounterBadge');
-    if (badge) badge.textContent = `Uploaded: ${selectedFiles.length} / ${maxImages} Images`;
+    if (badge) badge.textContent = `Uploaded: ${total} / 25 Images`;
   }
 
   function setCheck(id, done) {
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'checklist-item' + (done ? ' done' : '');
-    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  // ── CONDITIONALS ──
   function setupToggle(name, sectionId) {
     document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
       r.addEventListener('change', function () {
@@ -1723,21 +2698,12 @@
     });
   }
 
-  // ── INIT ──
   document.addEventListener('DOMContentLoaded', function () {
-
-    setupToggle('loan_on_property', 'loan_amt_section');
+    setupToggle('property_loan', 'loan_amt_section');
     setupToggle('existing_tenants', 'tenant_section');
     setupToggle('agri_dispute', 'dispute_section');
     setupToggle('pending_tax_due', 'tax_section');
 
-    const brokerageSelect = document.getElementById('brokerageSelect');
-    if (brokerageSelect) {
-      brokerageSelect.addEventListener('change', function () {
-        document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
-        if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
-      });
-    }
     const brokeragePercentage = document.getElementById('brokeragePercentage');
     if (brokeragePercentage) {
       brokeragePercentage.addEventListener('change', function () {
@@ -1745,198 +2711,711 @@
       });
     }
 
-    // Live update hooks
     document.querySelectorAll('input, select, textarea').forEach(el => {
       el.addEventListener('input', updatePreview);
       el.addEventListener('change', updatePreview);
     });
 
-    // Checkbox counters
-    const hookCounter = (chkName, counterId) => {
-      document.querySelectorAll(`input[name="${chkName}"]`).forEach(c => {
-        c.addEventListener('change', () => {
-          const ctr = document.getElementById(counterId);
-          if (ctr) ctr.value = document.querySelectorAll(`input[name="${chkName}"]:checked`).length;
-        });
-      });
+    // ADVANCED CATEGORIZED IMAGES SETUP
+    const IMG_CATEGORIES = [
+        'land_overview', 'soil_quality', 'water_source', 'irrigation_system', 
+        'crop_cultivation', 'farm_house', 'electricity_setup', 'storage_shed', 
+        'boundary_fencing', 'approach_road', 'tubewell_pump', 'aerial_drone'
+    ];
+    
+    const IMG_CATEGORY_LIMITS = { 
+        land_overview: 5, soil_quality: 3, water_source: 4, irrigation_system: 4, 
+        crop_cultivation: 6, farm_house: 5, electricity_setup: 3, storage_shed: 4, 
+        boundary_fencing: 4, approach_road: 4, tubewell_pump: 4, aerial_drone: 5 
     };
-    hookCounter('amenities', 'amenityCounter');
-    hookCounter('nearby_facilities', 'facilityCounter');
+    
+    const IMG_TOTAL_LIMIT = 25;
+    const IMG_MIN_REQUIRED = 3;
 
-    // Image upload
-  // ── IMAGE UPLOAD & DRAG-AND-DROP SEQUENCING ────────────────────────
-  const uploadArea   = document.getElementById('uploadArea');
-  const imageInput   = document.getElementById('imageInput');
-  const imagePreview = document.getElementById('imagePreview');
-  const maxAllowedImages = 10;
+    window.catFiles = {};
+    IMG_CATEGORIES.forEach(function (c) { window.catFiles[c] = []; });
 
-  uploadArea.addEventListener('click',     ()  => imageInput.click());
-  uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.style.borderColor = '#56ab2f'; });
-  uploadArea.addEventListener('dragleave', ()  => uploadArea.style.borderColor = '#cbd5e0');
-  uploadArea.addEventListener('drop',      (e) => { e.preventDefault(); uploadArea.style.borderColor = '#cbd5e0'; handleFiles(e.dataTransfer.files); });
-  imageInput.addEventListener('change',    (e) => handleFiles(e.target.files));
+    window.totalImageCount = function () {
+        return IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
+    };
 
-  function handleFiles(files) {
-    const arr = Array.from(files).filter(file => file.type.startsWith('image/'));
-    if (selectedFiles.length + arr.length > maxAllowedImages) {
-      Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: `Max ${maxAllowedImages} images allowed`, confirmButtonColor: '#56ab2f' });
-      return;
-    }
-
-    arr.forEach(file => {
-      // Assign unique ID for drag tracking
-      file.uniqueId = 'img_' + Date.now() + Math.random().toString(36).substr(2, 9);
-      selectedFiles.push(file);
-    });
-    renderPreviews();
-  }
-
-  function renderPreviews() {
-    if (!imagePreview) return;
-    imagePreview.innerHTML = '';
-
-    selectedFiles.forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'preview-item-wrapper';
-        wrapper.setAttribute('draggable', 'true');
-        wrapper.setAttribute('data-id', file.uniqueId);
-
-        wrapper.innerHTML = `
-          <div class="preview-item">
-            <span class="img-sequence-badge" style="position:absolute;top:6px;left:6px;background:rgba(86,171,47,.95);color:white;font-size:0.75rem;font-weight:bold;padding:2px 8px;border-radius:6px;z-index:5;">#${index + 1}</span>
-            <img src="${e.target.result}" alt="preview">
-            <button type="button" class="remove-image" onclick="removeImage('${file.uniqueId}')"><i class="fas fa-times"></i></button>
-          </div>`;
-
-        wrapper.addEventListener('dragstart', handleDragStart);
-        wrapper.addEventListener('dragover', handleDragOver);
-        wrapper.addEventListener('drop', handleDrop);
-
-        imagePreview.appendChild(wrapper);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    updatePreview(); 
-  }
-
-  // --- Native Drag & Drop Handlers ---
-  let dragSrcEl = null;
-
-  function handleDragStart(e) {
-    dragSrcEl = this;
-    e.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => this.style.opacity = '0.4', 0); 
-  }
-
-  function handleDragOver(e) {
-    if (e.preventDefault) e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-  }
-
-  function handleDrop(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    dragSrcEl.style.opacity = '1';
-
-    if (dragSrcEl !== this) {
-      const sourceId = dragSrcEl.getAttribute('data-id');
-      const targetId = this.getAttribute('data-id');
-
-      const sourceIndex = selectedFiles.findIndex(f => f.uniqueId === sourceId);
-      const targetIndex = selectedFiles.findIndex(f => f.uniqueId === targetId);
-
-      const [movedFile] = selectedFiles.splice(sourceIndex, 1);
-      selectedFiles.splice(targetIndex, 0, movedFile);
-
-      renderPreviews();
-    }
-    return false;
-  }
-
-  document.addEventListener('dragend', e => {
-    if(e.target.classList && e.target.classList.contains('preview-item-wrapper')) {
-      e.target.style.opacity = '1';
-    }
-  });
-
-  window.removeImage = function(uniqueId) {
-    selectedFiles = selectedFiles.filter(f => f.uniqueId !== uniqueId);
-    renderPreviews();
-  };
-
-    function renderSeqBadges() {
-      imagePreview.querySelectorAll('.preview-item').forEach((item, i) => {
-        const b = item.querySelector('.img-seq');
-        if (b) b.textContent = `#${i + 1}`;
-      });
-      updatePreview();
-    }
-
-    // Form submit
-    document.getElementById('agriculturalForm')?.addEventListener('submit', function (e) {
-      e.preventDefault();
-      for (let i = 1; i <= totalSteps; i++) {
-        if (!validateStep(i)) { goToStep(i); return; }
-      }
-      if (selectedFiles.length < 1) {
-        Swal.fire({ icon: 'warning', title: 'Images Required', text: 'Upload at least one farm property image.', confirmButtonColor: '#56ab2f' });
-        goToStep(5); return;
-      }
-      Swal.fire({
-        title: 'Confirm Submission?',
-        text: 'Publish this agricultural land listing to the portal?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#56ab2f',
-        cancelButtonColor: '#2c3e50',
-        confirmButtonText: 'Yes, Publish Listing!',
-        cancelButtonText: 'Review Form'
-      }).then(result => {
-        if (result.isConfirmed) executeSubmit(this);
-      });
-    });
-
-    function executeSubmit(formElement) {
-      const submitBtn = document.getElementById('submitBtn');
-      const origText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
-      submitBtn.disabled = true;
-
-      Swal.fire({ title: 'Uploading…', text: 'Please wait.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-      const formData = new FormData(formElement);
-      formData.delete('property_images[]');
-      selectedFiles.forEach(f => formData.append('property_images[]', f));
-
-      fetch(formElement.getAttribute('action'), {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(async res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        if (data.status === 'success') {
-          Swal.fire({ icon: 'success', title: 'Listing Active!', text: data.message || 'Agricultural property published successfully.', confirmButtonColor: '#56ab2f' })
-            .then(() => window.location.reload());
-        } else {
-          Swal.fire({ icon: 'error', title: 'Submission Failed', text: data.message, confirmButtonColor: '#e74c3c' });
-          submitBtn.innerHTML = origText; submitBtn.disabled = false;
+    function findCoverCategory() {
+        for (var i = 0; i < IMG_CATEGORIES.length; i++) {
+            if (window.catFiles[IMG_CATEGORIES[i]].length > 0) return IMG_CATEGORIES[i];
         }
-      })
-      .catch(err => {
-        console.error(err);
-        Swal.fire({ icon: 'error', title: 'Connection Error', text: 'Please try again.', confirmButtonColor: '#e74c3c' });
-        submitBtn.innerHTML = origText; submitBtn.disabled = false;
-      });
+        return null;
     }
+
+    function syncCategoryInput(cat) {
+        var dt = new DataTransfer();
+        window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
+        var inputEl = document.getElementById('imgInput-' + cat);
+        if (inputEl) inputEl.files = dt.files;
+    }
+
+    function renderCategory(cat) {
+        var preview = document.getElementById('imgPreview-' + cat);
+        if (!preview) return;
+
+        preview.innerHTML = '';
+        var coverCat = findCoverCategory();
+
+        window.catFiles[cat].forEach(function (file, idx) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var div = document.createElement('div');
+                div.className = 'img-cat-preview-item';
+                div.draggable = true;
+                div.dataset.fileName = file.name;
+                div.dataset.cat = cat;
+
+                var isCover = (cat === coverCat && idx === 0);
+                div.innerHTML =
+                    '<img src="' + e.target.result + '">' +
+                    '<span style="position:absolute;top:6px;left:6px;background:rgba(86,171,47,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Image ' + (idx + 1) + '</span>' +
+                    (isCover ? '<span style="position:absolute;bottom:6px;left:6px;background:#f59e0b;color:white;font-size:0.6rem;font-weight:bold;padding:2px 6px;border-radius:4px;z-index:5;"><i class="fas fa-star"></i> Cover</span>' : '') +
+                    '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)"><i class="fas fa-times"></i></button>';
+
+                div.addEventListener('dragstart', handleCatDragStart);
+                div.addEventListener('dragover', handleCatDragOver);
+                div.addEventListener('drop', handleCatDrop);
+                div.addEventListener('dragend', function () { div.classList.remove('dragging'); });
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        var countEl = document.getElementById('count-' + cat);
+        if (countEl) countEl.innerText = window.catFiles[cat].length;
+        var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+        if (tab) tab.classList.toggle('has-images', window.catFiles[cat].length > 0);
+    }
+
+    function renderAllCategories() {
+        IMG_CATEGORIES.forEach(renderCategory);
+        var total = window.totalImageCount();
+        var totalCountEl = document.getElementById('imgTotalCount');
+        if (totalCountEl) totalCountEl.innerText = total;
+
+        var notice = document.getElementById('imgMinNotice');
+        if (notice) {
+            if (total >= IMG_MIN_REQUIRED) {
+                notice.className = 'min-ok';
+                notice.innerHTML = '<i class="fas fa-check-circle text-success"></i> Great! ' + total + ' images added.';
+            } else {
+                notice.className = 'min-warning';
+                notice.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> Add at least ' + IMG_MIN_REQUIRED + ' images to publish';
+            }
+        }
+        if (typeof updatePreview === 'function') updatePreview();
+    }
+
+    function handleCatFiles(cat, files) {
+        var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+        var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+
+        if (window.catFiles[cat].length + incoming.length > limit) {
+            Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+            incoming = incoming.slice(0, Math.max(0, limit - window.catFiles[cat].length));
+        }
+        if (window.totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+            Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
+            incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - window.totalImageCount()));
+        }
+
+        window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+        syncCategoryInput(cat);
+        renderAllCategories();
+    }
+
+    window.removeCatImage = function (cat, fileName, evt) {
+        if (evt) evt.stopPropagation();
+        window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
+        syncCategoryInput(cat);
+        renderAllCategories();
+    };
+
+    var draggedCatFileName = null, draggedCatName = null;
+    function handleCatDragStart(e) { draggedCatFileName = this.dataset.fileName; draggedCatName = this.dataset.cat; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+    function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function handleCatDrop(e) {
+        e.preventDefault();
+        var targetCat = this.dataset.cat;
+        var targetFileName = this.dataset.fileName;
+        if (targetCat !== draggedCatName || targetFileName === draggedCatFileName) return;
+
+        var arr = window.catFiles[targetCat];
+        var fromIdx = arr.findIndex(function (f) { return f.name === draggedCatFileName; });
+        var toIdx = arr.findIndex(function (f) { return f.name === targetFileName; });
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        var moved = arr.splice(fromIdx, 1)[0];
+        arr.splice(toIdx, 0, moved);
+        syncCategoryInput(targetCat);
+        renderAllCategories();
+    }
+
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+
+            this.classList.add('active');
+            var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (activePanel) activePanel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (zone && input) {
+            zone.addEventListener('click', function (e) {
+                e.preventDefault();
+                input.click();
+            });
+            input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+            zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                handleCatFiles(cat, e.dataTransfer.files);
+            });
+        }
+    });
+
+    renderAllCategories();
+
+    // ── VIDEO SCRIPTS ──
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    function getUploadedImages(callback) {
+        var sources = [];
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) sources.push({ type: 'file', data: file });
+                    });
+                }
+            });
+        }
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) { seen.add(key); uniqueSources.push(s); }
+        });
+
+        if (uniqueSources.length === 0) { callback([]); return; }
+
+        var loadedImages = [];
+        var processed = 0;
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () { loadedImages.push(img); processed++; if (processed === uniqueSources.length) callback(loadedImages); };
+            img.onerror = function () { processed++; if (processed === uniqueSources.length) callback(loadedImages); };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+        var durationPerSlide = 3500;
+        var fadeDuration = 800;
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (videoSourceField) {
+            videoSourceField.value = uploadRadio && uploadRadio.checked ? 'upload' : (autoRadio && autoRadio.checked ? 'auto' : 'rm_assisted');
+        }
+
+        document.querySelectorAll('.video-option-card').forEach(card => card.classList.remove('active'));
+        if (uploadRadio && uploadRadio.checked) document.getElementById('card_video_upload')?.classList.add('active');
+        if (autoRadio && autoRadio.checked) document.getElementById('card_video_auto')?.classList.add('active');
+        if (rmRadio && rmRadio.checked) document.getElementById('card_video_rm')?.classList.add('active');
+
+        if (autoRadio && autoRadio.checked) { startAutoSlideshowPreview(); } else { stopAutoSlideshowPreview(); }
+        if (rmRadio && rmRadio.checked) { renderVideoPreview(); }
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) videoArea.addEventListener('click', function () { videoInput.click(); });
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var propCity     = document.getElementById('district')?.value.trim() || '';
+            var propLocality = document.getElementById('village')?.value.trim() || '';
+            var locationInfo = (propLocality || propCity) ? ' (' + [propLocality, propCity].filter(Boolean).join(', ') + ')' : '';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+
+            var companyWhatsAppNumber = "917057205423";
+            var rawMessage = "Hello Team,\n\n" +
+                             "I am trying to upload a video for my property listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + locationInfo + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Share via WhatsApp',
+                    cancelButtonText: 'Okay',
+                    confirmButtonColor: '#10b981'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                        var linkField = document.getElementById('property_video_link');
+                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+        
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowtransparency="true" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) { embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1'; frame.style.display = 'block'; return; }
+
+        var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) { embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/'; frame.style.display = 'block'; return; }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+    }
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
 
     updatePreview();
   });
+
+  // ── AGRICULTURAL FORM SUBMISSION VIA SWAL WITH PERCENTAGE PROGRESS ──
+  function Submit_Agricultural_Property(_this) {
+    Swal.fire({
+        title: 'Confirm Submission',
+        text: 'Are you sure you want to submit this agricultural property?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#56ab2f',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Submit!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            processAgriSubmission(_this);
+        }
+    });
+  }
+
+  function processAgriSubmission(_this) {
+    for (let i = 1; i <= totalSteps; i++) {
+        if (!validateStep(i)) {
+            goToStep(i);
+            return;
+        }
+    }
+
+    if (window.totalImageCount && window.totalImageCount() < 3) {
+        goToStep(5);
+        $('.img-total-summary').addClass('input-error');
+        var imgSummaryEl = document.querySelector('.img-total-summary');
+        if (imgSummaryEl) imgSummaryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        Swal.fire({
+            title: 'Missing Images',
+            text: 'Please upload at least 3 property images.',
+            icon: 'error',
+            confirmButtonColor: '#56ab2f'
+        });
+        return;
+    } else {
+        $('.img-total-summary').removeClass('input-error');
+    }
+
+    function updateProgress(value, statusText) {
+        var progressText = document.getElementById('swalProgressText');
+        var progressBar = document.getElementById('swalProgressBar');
+        var progressStatus = document.getElementById('swalProgressStatus');
+
+        if (progressText) progressText.textContent = value + '%';
+        if (progressBar) progressBar.style.width = value + '%';
+        if (progressStatus && statusText) progressStatus.textContent = statusText;
+    }
+
+    var progressContainer = document.createElement('div');
+    progressContainer.innerHTML = `
+        <div style="padding: 10px 0;">
+            <div style="margin-bottom: 12px;">
+                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #56ab2f;">0%</span>
+            </div>
+            <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+            </div>
+            <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
+                <i class="fas fa-spinner fa-spin me-1"></i> 
+                <span id="swalProgressStatus">Preparing data...</span>
+            </div>
+        </div>
+    `;
+
+    Swal.fire({
+        title: 'Submitting Property...',
+        html: progressContainer,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    var formEl = document.getElementById('agriculturalForm');
+    var fd = new FormData(formEl);
+
+    fd.append('listing_type', 'Resale');
+    fd.append('category', 'Agricultural');
+
+    // Explicit appended values matching agricultural view expectations
+    fd.append('property_title', $('#property_title').val());
+    fd.append('property_type', $('#property_type').val());
+    fd.append('property_no', $('#property_no').val());
+    fd.append('land_area', $('#land_area').val());
+    fd.append('village', $('[name="village"]').val());
+    fd.append('taluka', $('[name="taluka"]').val());
+    fd.append('district', $('[name="district"]').val());
+    fd.append('soil_type', $('[name="soil_type"]').val());
+    fd.append('cultivation_status', $('[name="cultivation_status"]').val());
+    fd.append('fertility_status', $('[name="fertility_status"]').val());
+    fd.append('previous_crops', $('[name="previous_crops"]').val());
+    fd.append('property_age', $('[name="property_age"]').val());
+
+    fd.append('water_source', $('[name="water_source"]').val());
+    fd.append('irrigation_facility', $('[name="irrigation_facility"]').val());
+    fd.append('irrigation_facility_active', $('[name="irrigation_facility_active"]').val());
+    fd.append('nos_borewells', $('[name="nos_borewells"]').val());
+    fd.append('water_source_infrastructure', $('[name="water_source_infrastructure"]').val());
+    fd.append('road_access', $('[name="road_access"]').val());
+    fd.append('road_frontage', $('[name="road_frontage"]').val());
+    fd.append('dist_nearest_village', $('[name="dist_nearest_village"]').val());
+    fd.append('dist_main_road', $('[name="dist_main_road"]').val());
+    fd.append('dist_highway', $('[name="dist_highway"]').val());
+    fd.append('fencing_status', $('[name="fencing_status"]').val());
+
+    fd.append('selling_price', $('#selling_price').val());
+    fd.append('price_per_acre', $('#price_per_acre_hidden').val());
+    fd.append('brokerage_percentage', $('#brokeragePercentage').val());
+    fd.append('manual_brokerage', $('[name="manual_brokerage"]').val());
+
+    fd.append('ownership_type', $('[name="ownership_type"]').val());
+    fd.append('land_conversion_status', $('[name="land_conversion_status"]').val());
+    fd.append('ownership_document_type', $('[name="ownership_document_type"]').val());
+    fd.append('title_status', $('[name="title_status"]').val());
+    fd.append('encumbrance_status', $('[name="encumbrance_status"]').val());
+    fd.append('possession_status', $('[name="possession_status"]').val());
+    fd.append('seven_twelve_available', $('input[name="seven_twelve_available"]:checked').val() || 'yes');
+    fd.append('mutation_entry_updated', $('input[name="mutation_entry_updated"]:checked').val() || 'yes');
+    fd.append('property_loan', $('input[name="property_loan"]:checked').val() || 'no');
+    fd.append('loan_amount', $('[name="loan_amount"]').val());
+    fd.append('existing_tenants', $('input[name="existing_tenants"]:checked').val() || 'no');
+    fd.append('tenant_details', $('[name="tenant_details"]').val());
+    fd.append('agri_dispute', $('input[name="agri_dispute"]:checked').val() || 'no');
+    fd.append('dispute_details', $('[name="dispute_details"]').val());
+    fd.append('pending_tax_due', $('input[name="pending_tax_due"]:checked').val() || 'no');
+    fd.append('pending_tax_amount', $('[name="pending_tax_amount"]').val());
+
+    // Location
+    fd.append('state', $('#state').val());
+    fd.append('google_maps_link', $('[name="google_maps_link"]').val() || '');
+    fd.append('latitude', $('#latitude').val() || '');
+    fd.append('longitude', $('#longitude').val() || '');
+
+    fd.append('listed_by_type', 'other');
+   
+       
+    fd.append('listed_by_id', $('#listed_by_id').val());
+    fd.append('listed_by_name', $('#listed_by_name').val());
+    fd.append('listed_by_email', $('#listed_by_email').val());
+    fd.append('listed_by_contact', $('#listed_by_contact').val());
+    fd.append('listed_by_role', $('#listed_by_role').val());
+
+
+
+    // Amenities & Facilities
+    var amenities = [];
+    $('.amenities-checkbox:checked').each(function() { amenities.push($(this).val()); });
+    fd.append('amenities', JSON.stringify(amenities));
+
+    var facilities = [];
+    $('.facilities-checkbox:checked').each(function() { facilities.push($(this).val()); });
+    fd.append('nearby_facilities', JSON.stringify(facilities));
+
+    fd.append('user_description', $('#user_description').val());
+    fd.append('listed_elsewhere', $('input[name="listed_elsewhere"]:checked').val() || 'No');
+    fd.append('portal_name', $('[name="portal_name"]').val());
+    fd.append('uploaded_by_name', $('[name="uploaded_by_name"]').val());
+    fd.append('uploaded_by_email', $('[name="uploaded_by_email"]').val());
+    fd.append('uploaded_by_contact', $('[name="uploaded_by_contact"]').val());
+    fd.append('uploaded_by_role', $('[name="uploaded_by_role"]').val());
+    fd.append('listing_status', 'Draft');
+    fd.append('approval_status', 'Pending');
+
+    // Video options
+    const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
+    fd.append('video_option', selectedVideoOption);
+    fd.append('property_video_link', $('#property_video_link').val() || '');
+
+    // Categorized Images Append (Fixed to prevent duplication)
+    fd.delete('property_images[]');
+    fd.delete('property_images');
+
+    const cats = [
+        'land_overview', 'soil_quality', 'water_source', 'irrigation_system', 
+        'crop_cultivation', 'farm_house', 'electricity_setup', 'storage_shed', 
+        'boundary_fencing', 'approach_road', 'tubewell_pump', 'aerial_drone'
+    ];
+
+    cats.forEach(function (cat) {
+        if (window.catFiles && window.catFiles[cat] && window.catFiles[cat].length > 0) {
+            window.catFiles[cat].forEach(function (file) {
+                fd.append('property_images_' + cat + '[]', file);
+            });
+        }
+    });
+
+    var videoInput = document.getElementById('videoInput');
+    if (videoInput && videoInput.files.length > 0) {
+        fd.append('property_video', videoInput.files[0]);
+    }
+    var certInput = document.getElementById('encumbrance_cert');
+    if (certInput && certInput.files.length > 0) {
+        fd.append('encumbrance_cert', certInput.files[0]);
+    }
+
+    $(_this).prop("disabled", true);
+
+    $.ajax({
+        method: "POST",
+        url: "{% url 'Resale_Agricultural_Ajax' %}",
+        data: fd,
+        processData: false,
+        contentType: false,
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                    var status = "Uploading media & details...";
+                    if (percentComplete >= 95) {
+                        status = "Saving to database...";
+                    }
+                    updateProgress(percentComplete, status);
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            updateProgress(100, "Completed!");
+
+            setTimeout(function() {
+                Swal.close();
+                $(_this).prop("disabled", false);
+
+                if (response.status_code === 'duplicate_hard_block') {
+                    Swal.fire({
+                        title: 'Duplicate Blocked',
+                        text: response.msg || response.message || 'This property is already listed in the system.',
+                        icon: 'error',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                    return;
+                }
+
+                if (response.status === '1' || response.status === 'success') {
+                    var propertyIdText = response.property_id ? '\nProperty ID: ' + response.property_id : '';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Listing Active!',
+                        text: (response.msg || response.message || 'Agricultural property published successfully.') + propertyIdText,
+                        confirmButtonColor: '#56ab2f'
+                    }).then(() => {
+                        window.location.href = "{% url 'agricultural_list_agent' %}";
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Submission Failed',
+                        text: response.msg || response.message || "Something went wrong!",
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            }, 500);
+        },
+        error: function(xhr) {
+            Swal.close();
+            $(_this).prop("disabled", false);
+
+            if (xhr.status === 409 && xhr.responseJSON) {
+                var dupResponse = xhr.responseJSON;
+                Swal.fire({
+                    title: 'Duplicate Blocked',
+                    text: dupResponse.msg || dupResponse.message || 'Property already exists.',
+                    icon: 'error',
+                    confirmButtonColor: '#e74c3c'
+                });
+                return;
+            }
+
+            var errorMsg = "An error occurred while submitting the form.";
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.errors) {
+                    var errors = xhr.responseJSON.errors;
+                    var errorList = [];
+                    for (var key in errors) {
+                        errorList.push(key + ': ' + errors[key].join(', '));
+                    }
+                    errorMsg = errorList.join('\n');
+                } else if (xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                } else if (xhr.responseJSON.msg) {
+                    errorMsg = xhr.responseJSON.msg;
+                }
+            }
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: errorMsg,
+                confirmButtonColor: '#e74c3c'
+            });
+        }
+    });
+  }
 </script>

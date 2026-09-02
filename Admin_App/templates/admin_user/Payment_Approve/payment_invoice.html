@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subscription Invoice - INV-2026-{{ payment.id|default:"001" }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+    
+    .invoice-actions { width: 100%; max-width: 750px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .btn-action { background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: background 0.2s; }
+    .btn-action:hover { background: #4f46e5; }
+    
+    .invoice-card { background: #ffffff; padding: 50px; width: 100%; max-width: 750px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); color: #1e293b; position: relative; }
+    
+    .invoice-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; }
+    .company-title { color: #4f46e5; margin-bottom: 5px; font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; gap: 8px; }
+    .invoice-meta { text-align: right; }
+    
+    .invoice-details { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 0.9rem; }
+    .invoice-details h5 { color: #0f172a; margin-bottom: 6px; font-weight: 600; font-size: 0.95rem; }
+    
+    .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 0.9rem; }
+    .invoice-table th { background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; padding: 12px; color: #0f172a; }
+    .invoice-table td { padding: 15px 12px; border-bottom: 1px solid #e2e8f0; }
+    
+    .invoice-summary { display: flex; justify-content: flex-end; margin-bottom: 40px; }
+    .summary-box { width: 260px; font-size: 0.9rem; }
+    .summary-row { display: flex; justify-content: space-between; padding: 6px 0; color: #64748b; }
+    .summary-total { display: flex; justify-content: space-between; padding: 10px 0; font-weight: 700; color: #0f172a; font-size: 1.1rem; border-top: 1px solid #e2e8f0; }
+    
+    .invoice-footer { border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center; color: #94a3b8; font-size: 0.75rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Action Buttons -->
+  <div class="invoice-actions">
+    <button class="btn-action" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back</button>
+    <button class="btn-action" style="background: #4f46e5;" onclick="downloadInvoicePDF()"><i class="fas fa-download"></i> Download PDF</button>
+  </div>
+
+  <!-- Renderable Invoice Card -->
+  <div class="invoice-card" id="invoicePrintContainer">
+    <div class="invoice-header">
+      <div>
+        <h2 class="company-title"><i class="fas fa-building"></i> EstateFlow</h2>
+        <p style="font-size: 0.85rem; color: #64748b;">Official Subscription Tax Invoice</p>
+      </div>
+      <div class="invoice-meta">
+        <h4 style="color: #0f172a; margin-bottom: 4px;">INVOICE</h4>
+        <p style="font-size: 0.85rem; color: #64748b;"><strong>Invoice #:</strong> INV-2026-{{ payment.id|default:"001" }}</p>
+        <p style="font-size: 0.85rem; color: #64748b;"><strong>Date:</strong> {{payment.purchase_date}}</p>
+      </div>
+    </div>
+
+    <div class="invoice-details">
+      <div>
+        <h5>Billed To:</h5>
+        <p><strong>Name:</strong> {{ payment.fk_user.user_name }}</p>
+        <p><strong>User ID:</strong> {{ payment.fk_user.user_id }}</p>
+        <p><strong>Email:</strong> {{ payment.fk_user.user_email }}</p>
+        <p><strong>Phone:</strong> {{ payment.fk_user.user_phone }}</p>
+      </div>
+      <div style="text-align: right;">
+        <h5>Subscription Period:</h5>
+        <p><strong>Start Date:</strong> {{ payment.plan_start_date|date:"F d, Y" }}</p>
+        <p><strong>End Date:</strong> {{ payment.plan_end_date|date:"F d, Y" }}</p>
+        <p><strong>Status:</strong> <span style="color: #10b981; font-weight: 600;">{{ payment.plan_status|default:"Done" }}</span></p>
+      </div>
+    </div>
+
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Package & Plan Details</th>
+          <th>Duration</th>
+          <th>Listings</th>
+          <th style="text-align: right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>{{ payment.fk_subscription.package_name }}</strong><br>
+            <span style="font-size: 0.8rem; color:black;">Plan Type: {{ payment.fk_subscription.plan_type }}</span>
+          </td>
+          <td>{{ payment.fk_subscription.plan_duration }}</td>
+          <td>{{ payment.fk_subscription.plan_max_listings }}</td>
+          <td style="text-align: right; font-weight: 600;">₹{{ payment.fk_subscription.plan_offer_price }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="invoice-summary">
+      <div class="summary-box">
+        <div class="summary-row">
+          <span style="color:black;">Subtotal:</span>
+          <span style="color:black;">₹{{ payment.fk_subscription.plan_offer_price }}</span>
+        </div>
+        <div class="summary-row" style="border-bottom: 1px solid #e2e8f0;">
+          <span style="color:black;">Tax (0%):</span>
+          <span style="color:black;">₹0.00</span>
+        </div>
+        <div class="summary-total">
+          <span style="color:black;">Total Paid:</span>
+          <span style="color: #4f46e5;">₹{{ payment.fk_subscription.plan_offer_price }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="invoice-footer">
+      <p style="color:black;">This is a computer-generated official invoice and does not require a physical signature.</p>
+      <p style="color:black;">EstateFlow CRM Systems &copy; 2026. All rights reserved.</p>
+    </div>
+  </div>
+
+  <script>
+    function downloadInvoicePDF() {
+      const invoiceElement = document.getElementById('invoicePrintContainer');
+
+      html2canvas(invoiceElement, { scale: 2, useCORS: true }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        
+        const imgWidth = 210; 
+        const pageHeight = 295; 
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 10, imgWidth, imgHeight);
+        pdf.save('Subscription_Invoice_{{ payment.fk_user.user_id|default:"Invoice" }}.pdf');
+      });
+    }
+  </script>
+</body>
+</html>

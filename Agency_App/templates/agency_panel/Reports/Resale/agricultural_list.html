@@ -1,11 +1,13 @@
 {% include "agency_panel/agency_header.html" %}
 {% load static %}
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <style>
 :root{--primary:#667eea;--primary-dark:#5a67d8;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--surface:#fff;--surface-2:#f8fafc;--border:#e2e8f0;--text:#1e293b;--text-muted:#64748b;--shadow:0 4px 20px rgba(0,0,0,.06);--radius:12px}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--surface);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;transition:.2s}
-.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.1)}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
 .stat-card.success::before{background:#10b981}.stat-card.warning::before{background:#f59e0b}.stat-card.danger::before{background:#ef4444}.stat-card.info::before{background:#3b82f6}
 .stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff}
@@ -17,12 +19,11 @@
 .filter-bar .filter-title{font-weight:700;color:var(--text);font-size:14px;margin-bottom:14px}
 .filter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;align-items:end}
 .filter-group label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.4px}
-.filter-group input,.filter-group select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--surface-2);transition:.15s;outline:none}
-.filter-group input:focus,.filter-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(102,126,234,.12)}
+.filter-group input,.filter-group select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--surface-2);outline:none}
 .filter-actions{display:flex;gap:8px;align-items:flex-end}
-.btn-filter{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s}
-.btn-filter.apply{background:var(--primary);color:#fff}.btn-filter.apply:hover{background:var(--primary-dark)}
-.btn-filter.reset{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}.btn-filter.reset:hover{background:var(--border)}
+.btn-filter{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+.btn-filter.apply{background:var(--primary);color:#fff}
+.btn-filter.reset{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}
 
 .properties-section{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
 .section-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
@@ -34,20 +35,51 @@
 .badge-no{background:#f1f5f9;color:#64748b;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
 .price-tag{font-weight:700;color:#1e293b}
 .thumb{width:46px;height:46px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer}
-.action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none}
 .action-btn.view{background:#eff6ff;color:#3b82f6}.action-btn.edit{background:#f0fdf4;color:#16a34a}.action-btn.del{background:#fff1f2;color:#e11d48}
-.action-btn:hover{opacity:.8;transform:scale(.97)}
 
 .page-header{margin-bottom:24px}
 .page-header-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .page-title{font-size:20px;font-weight:700;color:var(--text);margin:0}
 .page-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn-primary-custom{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--primary);color:#fff;display:inline-flex;align-items:center;gap:6px;transition:.15s;text-decoration:none}
-.btn-primary-custom:hover{background:var(--primary-dark);color:#fff}
+.btn-primary-custom{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--primary);color:#fff;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
 
 .dataTables_wrapper .dataTables_filter input{border:1px solid var(--border);border-radius:8px;padding:6px 12px;margin-left:8px}
 .dataTables_wrapper .dt-buttons .dt-button{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:7px 14px;margin-right:6px;margin-bottom:14px;font-size:12px;font-weight:600}
-.dataTables_wrapper .dt-buttons .dt-button:hover{background:var(--primary-dark)}
+
+/* Fix DataTables scroll clipping and layout constraints */
+.dataTables_wrapper { overflow: visible !important; }
+.dataTables_wrapper .dataTables_scroll { overflow: visible !important; }
+.dataTables_wrapper .dataTables_scrollBody { overflow-x: auto !important; overflow-y: visible !important; }
+.table-responsive { overflow-x: visible !important; }
+
+/* Static Actions column without transforms or scaling on hover */
+.properties-table td:last-child, 
+.properties-table th:last-child {
+    position: sticky !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    z-index: 10 !important;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
 </style>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -59,11 +91,8 @@
     <div class="page-header-content">
       <h1 class="page-title"><i class="fas fa-tractor"></i> Agricultural Resale Listings</h1>
       <div class="page-actions">
-        <a href="{% url 'agricultural_resale_agency' %}" class="btn-primary-custom"><i class="fas fa-plus-circle"></i> Add Property</a>
-
-      
-
-        <button class="btn-primary-custom" style="background:#0ea5e9" data-toggle="modal" data-target="#importModal"><i class="fas fa-file-import"></i> Import Excel</button>
+        <a href="{% url 'agricultural_resale_agency' %}" class="btn-primary-custom"><i class="fas fa-plus-circle"></i> Add Resale Agricultural Property</a>
+        {% comment %} <button class="btn-primary-custom" style="background:#0ea5e9" data-toggle="modal" data-target="#importModal"><i class="fas fa-file-import"></i> Import Excel</button> {% endcomment %}
         <button class="btn-primary-custom" style="background:#ef4444" data-toggle="modal" data-target="#bulkDeleteModal"><i class="fas fa-trash-alt"></i> Bulk Delete</button>
       </div>
     </div>
@@ -78,21 +107,21 @@
     </div>
     <div class="stat-card success">
       <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-seedling"></i></div>
-      <div class="stat-value">{{ stats.agri_land }}</div>
-      <div class="stat-label">Agriculture Land</div>
+      <div class="stat-value">{{ stats.farmland }}</div>
+      <div class="stat-label">Farmland</div>
       <span class="stat-change"><i class="fas fa-leaf"></i> Farming Ready</span>
     </div>
     <div class="stat-card warning">
-      <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-tractor"></i></div>
-      <div class="stat-value">{{ stats.farm_land }}</div>
-      <div class="stat-label">Farm Land</div>
-      <span class="stat-change"><i class="fas fa-sun"></i> Cultivable</span>
+      <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-apple-alt"></i></div>
+      <div class="stat-value">{{ stats.orchard_land }}</div>
+      <div class="stat-label">Orchard Land</div>
+      <span class="stat-change"><i class="fas fa-sun"></i> Yielding</span>
     </div>
     <div class="stat-card info">
-      <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><i class="fas fa-apple-alt"></i></div>
-      <div class="stat-value">{{ stats.orchard }}</div>
-      <div class="stat-label">Orchard Land</div>
-      <span class="stat-change"><i class="fas fa-tree"></i> Yielding</span>
+      <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><i class="fas fa-tree"></i></div>
+      <div class="stat-value">{{ stats.plantation_land }}</div>
+      <div class="stat-label">Plantation Land</div>
+      <span class="stat-change"><i class="fas fa-seedling"></i> Cultivated</span>
     </div>
     <div class="stat-card danger">
       <div class="stat-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fas fa-rupee-sign"></i></div>
@@ -102,264 +131,588 @@
     </div>
     <div class="stat-card">
       <div class="stat-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><i class="fas fa-water"></i></div>
-      <div class="stat-value">--</div>
+      <div class="stat-value">{{ stats.irrigated_count|default:"--" }}</div>
       <div class="stat-label">With Irrigation</div>
       <span class="stat-change"><i class="fas fa-tint"></i> Water Ready</span>
     </div>
   </div>
 
-<div class="filter-bar">
-  <div class="filter-title"><i class="fas fa-filter" style="color:var(--primary);margin-right:6px"></i>Search & Filter Listings</div>
-  <form method="GET" action="" id="backendFilterForm">
-    <div class="filter-grid">
-      <div class="filter-group">
-        <label>Global Search Text</label>
-        <input type="text" name="search" id="f_backend_search" value="{{ search_query }}" placeholder="Village, Owner, City, Type...">
+  <div class="filter-bar">
+    <div class="filter-title"><i class="fas fa-filter" style="color:var(--primary);margin-right:6px"></i>Search & Filter Listings</div>
+    <form method="GET" action="" id="backendFilterForm">
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Global Search Text</label>
+          <input type="text" name="search" id="f_backend_search" value="{{ search_query }}" placeholder="Village, Owner, City, Type...">
+        </div>
+        <div class="filter-group"><label>Village / District</label><input type="text" id="f_village" placeholder="e.g. Warud"></div>
+        <div class="filter-group"><label>Taluka</label><input type="text" id="f_taluka" placeholder="e.g. Warud"></div>
+        <div class="filter-group"><label>Land Category</label>
+          <select id="f_type">
+            <option value="">All Categories</option>
+            <option value="farmland">Farmland</option>
+            <option value="orchard_land">Orchard Land</option>
+            <option value="plantation_land">Plantation Land</option>
+            <option value="farm_house_land">Farm House Land</option>
+            <option value="agricultural_plot">Agricultural Plot</option>
+            <option value="mixed_agriculture_land">Mixed Agriculture Land</option>
+          </select>
+        </div>
+        <div class="filter-group"><label>Ownership</label>
+          <select id="f_ownership">
+            <option value="">All</option>
+            <option value="Freehold">Freehold</option>
+            <option value="Leasehold">Leasehold</option>
+            <option value="Single Ownership">Single Ownership</option>
+            <option value="Joint Ownership">Joint Ownership</option>
+          </select>
+        </div>
+        <div class="filter-group"><label>Water Source</label>
+          <select id="f_water">
+            <option value="">All Sources</option>
+            <option value="borewell">Borewell</option>
+            <option value="open_well">Open Well</option>
+            <option value="canal">Canal Water</option>
+            <option value="river">River Water</option>
+            <option value="farm_pond">Farm Pond</option>
+          </select>
+        </div>
+        <div class="filter-group"><label>Loan Available</label>
+          <select id="f_loan">
+            <option value="">All</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="filter-group"><label>Min Price (₹)</label><input type="number" id="f_price_min" placeholder="0"></div>
+        <div class="filter-group"><label>Max Price (₹)</label><input type="number" id="f_price_max" placeholder="Any"></div>
+        <div class="filter-group"><label>Date Added – From</label><input type="date" id="f_date_from"></div>
+        <div class="filter-group"><label>Date Added – To</label><input type="date" id="f_date_to"></div>
+        <div class="filter-actions">
+          <button type="submit" class="btn-filter apply" style="background:var(--success)"><i class="fas fa-database"></i> Search</button>
+          <button type="button" class="btn-filter apply" onclick="applyDateFilter()"><i class="fas fa-filter"></i> Apply Date</button>
+          <button type="button" class="btn-filter reset" onclick="resetAllFilters()"><i class="fas fa-undo"></i> Reset All</button>
+        </div>
       </div>
-      <div class="filter-group"><label>Village / District</label><input type="text" id="f_village" placeholder="e.g. Warud"></div>
-      <div class="filter-group"><label>City</label><input type="text" id="f_city" placeholder="e.g. Nagpur"></div>
-      <div class="filter-group"><label>Taluka</label><input type="text" id="f_taluka" placeholder="e.g. Warud"></div>
-      <div class="filter-group"><label>Property Type</label>
-        <select id="f_type">
-          <option value="">All Types</option>
-          <option value="agriculture_land">Agriculture Land</option>
-          <option value="farm_land">Farm Land</option>
-          <option value="orchard_land">Orchard Land</option>
-        </select>
-      </div>
-      <div class="filter-group"><label>Ownership</label>
-        <select id="f_ownership">
-          <option value="">All</option>
-          <option value="freehold">Freehold</option>
-          <option value="leasehold">Leasehold</option>
-        </select>
-      </div>
-      <div class="filter-group"><label>Irrigation</label>
-        <select id="f_irrigation">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group"><label>Loan Available</label>
-        <select id="f_loan">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group"><label>Min Price (₹)</label><input type="number" id="f_price_min" placeholder="0"></div>
-      <div class="filter-group"><label>Max Price (₹)</label><input type="number" id="f_price_max" placeholder="Any"></div>
-      <div class="filter-group"><label>Date Added – From</label><input type="date" id="f_date_from"></div>
-      <div class="filter-group"><label>Date Added – To</label><input type="date" id="f_date_to"></div>
-      <div class="filter-actions">
-        <button type="submit" class="btn-filter apply" style="background:var(--success)"><i class="fas fa-database"></i> Search</button>
-        <button type="button" class="btn-filter apply" onclick="applyDateFilter()"><i class="fas fa-filter"></i> Apply Date</button>
-        <button type="button" class="btn-filter reset" onclick="resetAllFilters()"><i class="fas fa-undo"></i> Reset All</button>
-      </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
 
   <div class="properties-section">
     <div class="section-header">
       <h3 class="section-title"><i class="fas fa-list-ul" style="color:var(--primary);margin-right:6px"></i> Agricultural Resale Listings Reports</h3>
-      <span style="font-size:12px;color:var(--text-muted)">{{ stats.total }} record(s)</span>
+      <span style="font-size:15px;color:var(--text-muted);font-weight:bold;">{{ stats.total }} record(s)</span>
     </div>
    
-     <a href="#" id="btnExportExcel" class="btn-primary-custom" style="background:#1e293b"><i class="fas fa-file-excel"></i> Export Excel</a>
+    {% comment %} <div style="padding: 16px 20px 0 20px; display: flex; gap: 10px;">
+      <a href="{% url 'export_agricultural_resale_excel' %}" id="btnExportExcel" class="btn-primary-custom" style="background:#1e293b"><i class="fas fa-file-excel"></i> Export To Excel</a>
+    </div> {% endcomment %}
 
     <div class="table-wrap">
-  <div class="table-responsive">
-    <table id="agriTable" class="properties-table display nowrap" style="width:100%">
-      <thead>
-        <tr>
-          <th>Sr.No</th>
-          <th>Property ID</th>
-          <th>Property Title</th>
-          <th>Image</th>
+      <div class="table-responsive">
+        <table class="properties-table" id="agriTable">
+          <thead>
+            <tr>
+              <th>Sr.No</th>
+              <th>Listing Status</th>
+              <th>Approval Status</th>
+              <th>Images</th>
+              
+              <th>Manual Upload Video</th>
+              <th>Auto Video</th>
+              <th>RM Link Video</th>
+              
+              <th>Property ID</th>
+              <th>Property Unique Key</th>
+              <th>Listing Type</th>
+              <th>Category</th>
 
-          <th>Agriculture Property Type</th>
-          <th>Land Area (Acres)</th>
-          <th>Village</th>
-          <th>Taluka</th>
-          <th>District</th>
-          <th>Soil Type</th>
-          <th>Irrigation Facility Active</th>
-          <th> water_source_infrastructure/th>
-          <th>Fertility Status</th>
-          <th>Previous Crops</th>
+              <th>Listed By Type</th>
+              <th>Assigned To</th>
+              <th>Listed By ID</th>
+              <th>Listed By Name</th>
+              <th>Listed By Email</th>
+              <th>Listed By Contact</th>
+              <th>Listed By Role</th>
 
-          <th>Expected Price (₹)</th>
-          <th>Price Per Acre (₹)</th>
-          <th>Brokerage</th>
-          <th>Brokerage %</th>
-          <th>Manual Brokerage</th>
-          <th>Ownership Type</th>
-          <th>Loan on Property?</th>
-          <th>Loan Amount</th>
-          <th>Existing Tenants?</th>
-          <th>Tenant Details</th>
-          <th>Agri Dispute?</th>
-          <th>Dispute Details</th>
-          <th>Pending Tax Due?</th>
-          <th>Pending Tax Amount</th>
-          <th>Property Description</th>
+              <th>Property Title</th>
+              <th>Agricultural Land Category</th>
+              <th>Property No</th>
+              <th>Land Area (Acres)</th>
+              <th>Village</th>
+              <th>Taluka</th>
+              <th>District</th>
+              <th>State</th>
+              <th>Locality/Area</th>
+              <th>Pincode</th>
+              <th>Complete Address</th>
+              <th>Google Maps Link</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
 
-          <th>City</th>
-          <th>State</th>
-          <th>Locality Area</th>
-          <th>Property Address</th>
-          <th>Owner Name</th>
-          <th>Owner Contact</th>
-          <th>Owner Email</th>
-          <th>Owner Role</th>
-          <th>Residency Status</th>
+              <th>Soil Type</th>
+              <th>Cultivation Status</th>
+              <th>Fertility Status</th>
+              <th>Previously Grown Crops</th>
+              <th>Property Age</th>
 
-          <th>Encumbrance Cert</th>
-          <th>Video</th>
-          <th>Uploaded By</th>
-          <th>Uploader Email</th>
-          <th>Uploader Contact</th>
-          <th>Uploader Role</th>
-             <th>Uploader File Name</th>
-          <th>Date Added</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in page_obj %}
-        <tr id="row-{{ p.id }}"
-            data-id="{{ p.id }}"
-            data-type="{{ p.agriculture_property_type|lower }}"
-            data-village="{{ p.village|lower }}"
-            data-taluka="{{ p.taluka|lower }}"
-            data-ownership="{{ p.ownership_type|lower }}"
-            data-irrigation="{{ p.irrigation_facility_active|lower }}"
-            data-loan="{{ p.loan_on_property|lower }}"
-            data-price="{{ p.expected_price|default:0 }}"
-            data-city="{{ p.city|lower }}"
-            data-date="{{ p.created_at|date:'Y-m-d' }}">
-            
-          <td>{{ forloop.counter }}</td>
-          <td><strong>{{ p.id }}</strong></td>
-          <td><span title="{{ p.property_title }}">{{ p.property_title|truncatechars:25|default:"-" }}</span></td>
-          <td>
-            {% if p.images.first %}
-              <img src="{{ p.images.first.image.url }}" class="thumb" alt="img"
-                   onclick="viewImages([{% for img in p.images.all %}'{{ img.image.url }}'{% if not forloop.last %},{% endif %}{% endfor %}])" style="cursor:pointer; max-width:50px; border-radius:4px;">
-            {% else %}
-              <div class="ef-fallback-thumb" style="display:inline-flex; flex-direction:column; align-items:center; justify-content:center; width:65px; padding:4px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; text-align:center;">
-                <i class="fas fa-seedling" style="color:#16a34a; font-size:16px; margin-bottom:2px;"></i>
-                <span style="font-size:9px; font-weight:700; color:#15803d; letter-spacing:0.5px; text-transform:uppercase;">EstateFlow</span>
-              </div>
+              <th>Water Source</th>
+              <th>Irrigation Facility</th>
+              <th>Irrigation Facility Active?</th>
+              <th>Number of Borewells</th>
+              <th>Water Source Infrastructure</th>
+
+              <th>Road Access</th>
+              <th>Road Frontage</th>
+              <th>Distance from Nearest Village</th>
+              <th>Distance from Main Road</th>
+              <th>Distance from Highway</th>
+              <th>Fencing Status</th>
+
+              <th>Selling Price (₹)</th>
+              <th>Price Per Acre (₹)</th>
+              <th>Brokerage</th>
+              <th>Enter Fixed Brokerage</th>
+
+              <th>Ownership Status</th>
+              <th>Land Conversion Status</th>
+              <th>Ownership Document Type</th>
+              <th>Title Status</th>
+              <th>Property Encumbrance Status</th>
+              <th>Current Possession Status</th>
+              <th>7/12 Extract Available?</th>
+              <th>Mutation Entry Updated?</th>
+              <th>Property Loan Status</th>
+              <th>Loan Amount (₹)</th>
+              <th>Existing Tenants?</th>
+              <th>Tenant Details</th>
+              <th>Legal Dispute?</th>
+              <th>Dispute Details</th>
+              <th>Pending Tax Due?</th>
+              <th>Pending Tax Amount (₹)</th>
+
+              <th>Amenities</th>
+              <th>Nearby Facilities</th>
+              <th>Property Summary</th>
+              <th>Property Description</th>
+              <th>User Description</th>
+
+              <th>7/12 Extract / Encumbrance Certificate</th>
+              <th>Is Property Already Listed Elsewhere?</th>
+              <th>Portal Name</th>
+
+              <th>Uploaded By Name</th>
+              <th>Uploaded By Role</th>
+              <th>Uploaded By Email</th>
+              <th>Uploaded By Contact</th>
+              <th>Upload File Name</th>
+
+              <th>Is Duplicate?</th>
+              <th>Duplicate Count</th>
+              <th>Duplicate Group ID</th>
+              
+              <th>Created At</th>
+              <th>Is Deleted?</th>
+              <th>Deleted At</th>
+              <th>Deleted By</th>
+
+              <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for prop in properties %}
+            <tr id="row-{{ prop.pk }}" 
+                data-village="{{ prop.village|lower }}" 
+                data-taluka="{{ prop.taluka|lower }}" 
+                data-type="{{ prop.property_type|lower }}" 
+                data-ownership="{{ prop.ownership_type|lower }}" 
+                data-water="{{ prop.water_source|lower }}" 
+                data-loan="{{ prop.property_loan|lower }}" 
+                data-price="{{ prop.selling_price|default:0 }}" 
+                data-date="{{ prop.created_at|date:'Y-m-d' }}">
+                
+              <td style="font-weight:700;color:#1e293b;">{{ forloop.counter }}</td>
+
+              <td>
+                {% if prop.listing_status == 'Active' %}<span class="badge bg-warning">Active</span>
+                {% elif prop.listing_status == 'Draft' %}<span class="badge bg-secondary">Draft</span>
+                {% elif prop.listing_status == 'Sold' %}<span class="badge bg-success">Sold</span>
+                {% else %}<span class="badge bg-info">{{ prop.listing_status|default:"—" }}</span>{% endif %}
+              </td>
+              <td>
+                {% if prop.approval_status == 'Approved' %}<span class="badge bg-success">Approved</span>
+                {% elif prop.approval_status == 'Pending' %}<span class="badge bg-warning text-dark">Pending</span>
+                {% else %}<span class="badge bg-danger">{{ prop.approval_status|default:"—" }}</span>{% endif %}
+              </td>
+
+              <!-- Images Trigger -->
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="openModal('modal-images-{{ prop.id }}')">
+                  {% if prop.thumbnail %}
+                    <div style="position:relative;width:50px;height:50px;min-width:50px;">
+                      <img src="{{ prop.thumbnail.image.url }}" alt="Property Image" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+                      {% if prop.image_count > 1 %}
+                      <div style="position:absolute;bottom:-4px;right:-4px;background:#000;color:#fff;padding:2px 6px;border-radius:10px;font-size:11px;font-weight:600;">
+                        +{{ prop.image_count|add:"-1" }}
+                      </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <div style="width:50px;height:50px;border-radius:8px;background:linear-gradient(135deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+                      <i class="fas fa-seedling" style="font-size:18px;color:#56ab2f;"></i>
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+              
+              <!-- Manual Upload Video Column -->
+              <td>
+                {% for vid in prop.video.all %}
+                  {% if vid.source == 'uploaded' and vid.video %}
+                    <button onclick="openModal('modal-video-upload-{{ prop.id }}')" class="btn btn-sm btn-outline-success" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-video"></i> Watch</button>
+                  {% endif %}
+                {% endfor %}
+              </td>
+
+              <!-- Auto Video Column -->
+              <td>
+                {% for vid in prop.video.all %}
+                  {% if vid.source == 'auto' and vid.video %}
+                    <button onclick="openModal('modal-video-auto-{{ prop.id }}')" class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-magic"></i> Watch</button>
+                  {% endif %}
+                {% endfor %}
+              </td>
+
+              <!-- RM Link Video Column -->
+              <td>
+                {% for vid in prop.video.all %}
+                  {% if vid.source == 'rm_assisted' and vid.video_url %}
+                    <button onclick="openModal('modal-video-rm-{{ prop.id }}')" class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-play-circle"></i> Play</button>
+                  {% endif %}
+                {% endfor %}
+              </td>
+              
+              <!-- Identifiers & Category -->
+              <td style="font-weight:bold;">{{ prop.id|default:"—" }}</td>
+              <td>{{ prop.property_unique_key|default:"—" }}</td>
+              <td>{{ prop.listing_type|default:"Resale" }}</td>
+              <td>{{ prop.category|default:"Agricultural" }}</td>
+
+              <!-- Listed By Info -->
+              <td>{{ prop.listed_by_type|default:"—" }}</td>
+              <td>{{ prop.assigned_to|default:"—" }}</td>
+              <td>{{ prop.listed_by_id|default:"—" }}</td>
+              <td>{{ prop.listed_by_name|default:"—" }}</td>
+              <td>{{ prop.listed_by_email|default:"—" }}</td>
+              <td>{{ prop.listed_by_contact|default:"—" }}</td>
+              <td>{{ prop.listed_by_role|default:"—" }}</td>
+
+              <!-- Basic Information -->
+              <td style="font-weight:600;color:#0f172a;">{{ prop.property_title|default:"—" }}</td>
+              <td>{{ prop.property_type|default:"—" }}</td>
+              <td>{{ prop.property_no|default:"—" }}</td>
+              <td>{{ prop.land_area|default:"—" }}</td>
+              <td>{{ prop.village|default:"—" }}</td>
+              <td>{{ prop.taluka|default:"—" }}</td>
+              <td>{{ prop.district|default:"—" }}</td>
+              <td>{{ prop.state|default:"—" }}</td>
+              <td>{{ prop.locality|default:"—" }}</td>
+              <td>{{ prop.pincode|default:"—" }}</td>
+              <td>
+                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.address }}">{{ prop.address|default:"—" }}</div>
+              </td>
+              <td>
+                {% if prop.google_maps_link %}
+                  <a href="{{ prop.google_maps_link }}" target="_blank" class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-map-marker-alt"></i> Map</a>
+                {% else %}—{% endif %}
+              </td>
+              <td>{{ prop.latitude|default:"—" }}</td>
+              <td>{{ prop.longitude|default:"—" }}</td>
+
+              <!-- Soil & Cultivation -->
+              <td>{{ prop.soil_type|default:"—" }}</td>
+              <td>{{ prop.cultivation_status|default:"—" }}</td>
+              <td>{{ prop.fertility_status|default:"—" }}</td>
+              <td>{{ prop.previous_crops|default:"—" }}</td>
+              <td>{{ prop.property_age|default:"—" }}</td>
+
+              <!-- Water & Irrigation -->
+              <td>{{ prop.water_source|default:"—" }}</td>
+              <td>{{ prop.irrigation_facility|default:"—" }}</td>
+              <td>{{ prop.irrigation_facility_active|default:"—" }}</td>
+              <td>{{ prop.nos_borewells|default:"—" }}</td>
+              <td>{{ prop.water_source_infrastructure|default:"—" }}</td>
+
+              <!-- Accessibility & Road -->
+              <td>{{ prop.road_access|default:"—" }}</td>
+              <td>{{ prop.road_frontage|default:"—" }}</td>
+              <td>{{ prop.dist_nearest_village|default:"—" }}</td>
+              <td>{{ prop.dist_main_road|default:"—" }}</td>
+              <td>{{ prop.dist_highway|default:"—" }}</td>
+              <td>{{ prop.fencing_status|default:"—" }}</td>
+
+              <!-- Pricing -->
+              <td style="font-weight:700;color:#16a34a;">₹{{ prop.selling_price|floatformat:0|default:"0" }}</td>
+              <td>{% if prop.price_per_acre %}₹{{ prop.price_per_acre }}{% else %}—{% endif %}</td>
+              <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+              <td>{% if prop.manual_brokerage %}₹{{ prop.manual_brokerage }}{% else %}—{% endif %}</td>
+
+              <!-- Ownership & Legal -->
+              <td>{{ prop.ownership_type|default:"—" }}</td>
+              <td>{{ prop.land_conversion_status|default:"—" }}</td>
+              <td>{{ prop.ownership_document_type|default:"—" }}</td>
+              <td>{{ prop.title_status|default:"—" }}</td>
+              <td>{{ prop.encumbrance_status|default:"—" }}</td>
+              <td>{{ prop.possession_status|default:"—" }}</td>
+              <td>{{ prop.seven_twelve_available|default:"—" }}</td>
+              <td>{{ prop.mutation_entry_updated|default:"—" }}</td>
+              <td>{% if prop.property_loan == 'yes' %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+              <td>{% if prop.loan_amount %}₹{{ prop.loan_amount }}{% else %}—{% endif %}</td>
+              <td>{% if prop.existing_tenants == 'yes' %}Yes{% else %}No{% endif %}</td>
+              <td>
+                <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.tenant_details }}">{{ prop.tenant_details|default:"—" }}</div>
+              </td>
+              <td>{% if prop.agri_dispute == 'yes' %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+              <td>
+                <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.dispute_details }}">{{ prop.dispute_details|default:"—" }}</div>
+              </td>
+              <td>{% if prop.pending_tax_due == 'yes' %}<span class="badge bg-warning text-dark">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+              <td>{% if prop.pending_tax_amount %}₹{{ prop.pending_tax_amount }}{% else %}—{% endif %}</td>
+
+              <!-- Amenities & Descriptions -->
+              <td>
+                {% if prop.amenities_list %}
+                  {% for a in prop.amenities_list %}
+                    <span class="badge bg-success" style="margin: 1px;">{{ a }}</span>
+                  {% endfor %}
+                {% elif prop.amenities %}
+                  <span class="badge bg-success">{{ prop.amenities }}</span>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                {% if prop.nearby_facilities_list %}
+                  {% for f in prop.nearby_facilities_list %}
+                    <span class="badge bg-primary" style="margin: 1px;">{{ f }}</span>
+                  {% endfor %}
+                {% elif prop.nearby_facilities %}
+                  <span class="badge bg-primary">{{ prop.nearby_facilities }}</span>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                <div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.property_summary|striptags }}">{{ prop.property_summary|striptags|default:"—" }}</div>
+              </td>
+              <td>
+                <div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.property_description|striptags }}">{{ prop.property_description|striptags|default:"—" }}</div>
+              </td>
+              <td>
+                <div style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.user_description|striptags }}">{{ prop.user_description|striptags|default:"—" }}</div>
+              </td>
+
+              <!-- Documents & Portals -->
+              <td>
+                {% if prop.encumbrance_cert %}
+                <a href="{{ prop.encumbrance_cert.url }}" target="_blank" class="btn btn-sm btn-outline-secondary" style="padding: 2px 8px; font-size: 11px;">View Doc</a>
+                {% else %}—{% endif %}
+              </td>
+              <td>{% if prop.listed_elsewhere == 'Yes' %}<span class="badge bg-info">Yes</span>{% else %}No{% endif %}</td>
+              <td>{{ prop.portal_name|default:"—" }}</td>
+
+              <!-- Uploaded By Info -->
+              <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+              <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+              <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+              <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+              <td>{{ prop.upload_file_name|default:"Web UI Listing Form" }}</td>
+
+              <!-- Status & Audit -->
+              <td>{% if prop.is_duplicate %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+              <td>{{ prop.duplicate_count|default:"0" }}</td>
+              <td>{{ prop.duplicate_group_id|default:"—" }}</td>
+              
+              <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+              <td>{% if prop.is_deleted %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>
+              <td>{{ prop.deleted_at|date:"d M Y H:i"|default:"—" }}</td>
+              <td>{{ prop.deleted_by|default:"—" }}</td>
+
+              <!-- Actions -->
+              <td style="position:sticky;right:0;background:white;z-index:1;">
+                <div class="action-buttons" style="display:flex; gap:6px;">
+                  <a href="{% url "agricultural_resale_agency_view" prop.id %}" class="action-btn view" title="View Property">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="{% url "agricultural_resale_agency_update" prop.id %}" class="action-btn edit" title="Edit Property">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  
+                  <button class="action-btn del" title="Delete Property" onclick="confirmDelete('{{ prop.id }}')">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="85">
+                <div class="empty-state" style="text-align:center; padding: 40px;">
+                  <i class="fas fa-seedling" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 10px;"></i>
+                  <p style="color: #64748b; font-size: 1.1rem;">No resale agricultural properties found matching your criteria.</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── PAGINATION CONTROLS ── -->
+      {% if properties.has_other_pages %}
+        <nav aria-label="Page navigation" style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="font-size: 13px; color: #64748b; font-weight: 500;">
+            Showing page <strong>{{ properties.number }}</strong> of <strong>{{ properties.paginator.num_pages }}</strong> 
+            (Total {{ properties.paginator.count }} records)
+          </div>
+
+          <ul class="pagination" style="display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; align-items: center;">
+            {% if properties.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                  <i class="fas fa-angle-double-left"></i> First
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ properties.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                  <i class="fas fa-angle-left"></i> Prev
+                </a>
+              </li>
             {% endif %}
-          </td>
 
-          <td style="text-transform:capitalize">{{ p.get_agriculture_property_type_display|default:p.agriculture_property_type|default:"-" }}</td>
-          <td>{{ p.land_area|default:"0.00" }}</td>
-          <td>{{ p.village|default:"-" }}</td>
-          <td>{{ p.taluka|default:"-" }}</td>
-          <td>{{ p.district|default:"-" }}</td>
-          <td style="text-transform:capitalize">{{ p.get_soil_type_display|default:p.soil_type|default:"-" }}</td>
-          <td>
-            {% if p.irrigation_facility_active == 'yes' %}
-              <span class="badge-yes">Yes</span>
-            {% else %}
-              <span class="badge-no">No</span>
-            {% endif %}
-          </td>
-          <td>{{ p.get_water_source_infrastructure_display|default:p.water_source_infrastructure|default:"-" }}</td>
-          <td style="text-transform:capitalize">{{ p.get_fertility_status_display|default:p.fertility_status|default:"-" }}</td>
-          <td>{{ p.previous_crops|default:"-" }}</td>
+            {% for num in properties.paginator.page_range %}
+              {% if properties.number == num %}
+                <li class="page-item active">
+                  <span class="page-link" style="padding: 8px 14px; border-radius: 6px; border: 1px solid var(--primary); background: var(--earth-gradient); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 2px 5px rgba(86,171,47,0.3);">
+                    {{ num }}
+                  </span>
+                </li>
+              {% elif num > properties.number|add:'-3' and num < properties.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                    {{ num }}
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
 
-          <td><span class="price-tag">₹{{ p.expected_price|floatformat:0 }}</span></td>
-          <td><span class="price-tag">₹{{ p.price_per_acre|floatformat:0|default:"0" }}</span></td>
-          <td>{{ p.brokerage|default:"-" }}</td>
-          <td>{{ p.brokerage_percentage|default:"-" }}</td>
-          <td>{{ p.manual_brokerage|default:"-" }}</td>
-          <td style="text-transform:capitalize">{{ p.get_ownership_type_display|default:p.ownership_type|default:"-" }}</td>
-          <td>
-            {% if p.loan_on_property == 'yes' %}
-              <span class="badge-yes">Yes</span>
-            {% else %}
-              <span class="badge-no">No</span>
+            {% if properties.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ properties.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                  Next <i class="fas fa-angle-right"></i>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ properties.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #334155; text-decoration: none; font-size: 13px; font-weight: 600;">
+                  Last <i class="fas fa-angle-double-right"></i>
+                </a>
+              </li>
             {% endif %}
-          </td>
-          <td>{% if p.loan_on_property == 'yes' %}₹{{ p.loan_amount|default:"0" }}{% else %}-{% endif %}</td>
-          <td>
-            {% if p.existing_tenants == 'yes' %}
-              <span class="badge-yes">Yes</span>
-            {% else %}
-              <span class="badge-no">No</span>
-            {% endif %}
-          </td>
-          <td>{% if p.existing_tenants == 'yes' %}{{ p.tenant_details|default:"-" }}{% else %}-{% endif %}</td>
-          <td>
-            {% if p.agri_dispute == 'yes' %}
-              <span class="badge-yes" style="background:#fee2e2;color:#991b1b">Yes</span>
-            {% else %}
-              <span class="badge-no">No</span>
-            {% endif %}
-          </td>
-          <td>{% if p.agri_dispute == 'yes' %}{{ p.dispute_details|default:"-" }}{% else %}-{% endif %}</td>
-          <td>
-            {% if p.pending_tax_due == 'yes' %}
-              <span class="badge-yes" style="background:#fef3c7;color:#92400e">Yes</span>
-            {% else %}
-              <span class="badge-no">No</span>
-            {% endif %}
-          </td>
-          <td>{% if p.pending_tax_due == 'yes' %}₹{{ p.pending_tax_amount|default:"0" }}{% else %}-{% endif %}</td>
-          <td><span title="{{ p.resale_agricultural_desc }}">{{ p.resale_agricultural_desc|truncatechars:30|default:"-" }}</span></td>
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
 
-          <td>{{ p.city|default:"-" }}</td>
-          <td>{{ p.state|default:"-" }}</td>
-          <td>{{ p.locality_area|default:"-" }}</td>
-          <td><span title="{{ p.property_address }}">{{ p.property_address|truncatechars:22|default:"-" }}</span></td>
-          <td>{{ p.owner_name|default:"-" }}</td>
-          <td>{{ p.owner_contact|default:"-" }}</td>
-          <td>{{ p.owner_email|default:"-" }}</td>
-          <td>{{ p.owner_role|default:"-" }}</td>
-          <td style="text-transform:capitalize">{{ p.get_residency_status_display|default:p.residency_status|default:"-" }}</td>
-
-          <td>
-            {% if p.encumbrance_cert %}
-              <a href="{{ p.encumbrance_cert.url }}" target="_blank" class="action-btn view"><i class="fas fa-file-pdf"></i></a>
-            {% else %}-{% endif %}
-          </td>
-          <td>
-            {% if p.property_video %}
-              <a href="{{ p.property_video.url }}" target="_blank" class="action-btn view"><i class="fas fa-play"></i></a>
-            {% else %}-{% endif %}
-          </td>
-          <td>{{ p.uploaded_by_name|default:"-" }}</td>
-          <td>{{ p.uploaded_by_email|default:"-" }}</td>
-          <td>{{ p.uploaded_by_contact|default:"-" }}</td>
-          <td>{{ p.uploaded_by_role|default:"-" }}</td>
-            <td>{{ p.upload_file_name|default:"web_listing_ui_form" }}</td>
-          <td>{{ p.created_at|date:"Y-m-d H:i" }}</td>
-          <td>
-            <div style="display:flex;gap:5px">
-              <a href="{% url 'view_agricultural_property' p.id %}" class="action-btn view"><i class="fas fa-eye"></i></a>
-              <a href="{% url 'edit_agricultural_property' p.id %}" class="action-btn edit"><i class="fas fa-edit"></i></a>
-              <button class="action-btn del" onclick="confirmDelete('{{ p.id }}')"><i class="fas fa-trash"></i></button>
+<!-- IMAGE AND VIDEO MODALS FOR EACH PROPERTY -->
+{% for prop in properties %}
+<!-- Images Modal for Property {{ prop.id }} -->
+<div class="modal fade" id="modal-images-{{ prop.id }}" tabindex="-1" aria-hidden="true" style="z-index:99999;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+      <div class="modal-header" style="background:var(--earth-gradient); color:#fff;">
+        <h5 class="modal-title"><i class="fas fa-images me-2"></i> Farm Portfolio Gallery — ID: {{ prop.id }}</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="background:none; border:none; font-size:1.4rem;">&times;</button>
+      </div>
+      <div class="modal-body p-4" style="background:#f8fafc;">
+        <div class="row g-3">
+          {% for img in prop.images.all %}
+          <div class="col-6 col-md-4 mb-3">
+            <div style="position:relative; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0; aspect-ratio:1/1; background:#fff;">
+              <img src="{{ img.image.url }}" alt="Agricultural Image" style="width:100%; height:100%; object-fit:cover;">
+              {% if img.category %}
+              <span style="position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.75); color:#fff; font-size:10px; padding:2px 8px; border-radius:4px;">
+                {{ img.category|title }}
+              </span>
+              {% endif %}
             </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="46" style="text-align:center;padding:40px;color:#94a3b8">
-            <i class="fas fa-inbox" style="font-size:32px;margin-bottom:8px;display:block"></i>No agricultural listings found.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </div>
+          {% empty %}
+          <div class="col-12 text-center text-muted py-4">No photos available for this property.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- Video Modals -->
+{% for vid in prop.video.all %}
+  {% if vid.source == 'uploaded' and vid.video %}
+  <div class="modal fade" id="modal-video-upload-{{ prop.id }}" tabindex="-1" aria-hidden="true" style="z-index:99999;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title"><i class="fas fa-video me-2"></i> Walkthrough Video — ID: {{ prop.id }}</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="background:none; border:none; font-size:1.4rem;">&times;</button>
+        </div>
+        <div class="modal-body text-center p-3 bg-dark">
+          <video controls style="width:100%; max-height:350px; border-radius:8px;">
+            <source src="{{ vid.video.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+  {% endif %}
+
+  {% if vid.source == 'auto' and vid.video %}
+  <div class="modal fade" id="modal-video-auto-{{ prop.id }}" tabindex="-1" aria-hidden="true" style="z-index:99999;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fas fa-magic me-2"></i> AI Generated Slideshow — ID: {{ prop.id }}</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="background:none; border:none; font-size:1.4rem;">&times;</button>
+        </div>
+        <div class="modal-body text-center p-3 bg-dark">
+          <video controls style="width:100%; max-height:350px; border-radius:8px;">
+            <source src="{{ vid.video.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if vid.source == 'rm_assisted' and vid.video_url %}
+  <div class="modal fade" id="modal-video-rm-{{ prop.id }}" tabindex="-1" aria-hidden="true" style="z-index:99999;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title"><i class="fas fa-play-circle me-2"></i> Property Video Link — ID: {{ prop.id }}</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="background:none; border:none; font-size:1.4rem;">&times;</button>
+        </div>
+        <div class="modal-body p-3 bg-dark text-center">
+          <div style="position:relative; width:100%; aspect-ratio:16/9;">
+            <iframe src="{{ vid.video_url }}" style="width:100%; height:100%; border:0; border-radius:8px;" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}
+
+{% endfor %}
 
 <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index:10000">
   <div class="modal-dialog modal-dialog-centered">
@@ -407,37 +760,72 @@
   </div>
 </div>
 
+<!-- EXCEL IMPORT MODAL -->
 <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:14px;overflow:hidden">
-      <div class="modal-header" style="background:linear-gradient(135deg,#667eea,#5a67d8);border:none;padding:20px 24px">
-        <h5 class="modal-title" style="color:#fff;font-weight:700"><i class="fas fa-file-import" style="margin-right:8px"></i>Import Agricultural Data</h5>
-        <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:1">&times;</button>
-      </div>
-      
-      <form id="importExcelForm" action="{% url 'import_agricultural_resale_excel' %}" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="modal-body" style="padding:24px">
-          <div class="text-center mb-4 pb-3" style="border-bottom:1px solid #e2e8f0">
-            <p class="text-muted mb-2" style="font-size:13px">Download the template, fill without changing headers (data starts Row 5/6), then upload.</p>
-            <a href="{% url 'download_agri_sample_excel' %}" class="btn btn-outline-success btn-sm"><i class="fas fa-download"></i> Download Template</a>
-          </div>
-          <div class="form-group">
-            <label class="form-label" style="font-weight:600;font-size:13px">Upload Excel/CSV File <span style="color:red">*</span></label>
-            <input type="file" class="form-control" name="excel_file" required accept=".xlsx,.csv" onchange="checkFile(this)">
-            <small class="text-muted">Only .xlsx or valid schema .csv files allowed.</small>
-          </div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-excel" style="margin-right:8px;"></i> Upload & Import Agricultural Resale Data Via Excel
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1; font-size:22px; background:none; border:none; line-height:1;">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Sample Download Banner -->
+                <div style="background:#EEF2FF; border:1px solid #C7D2FE; border-radius:8px; padding:12px 16px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                    <div>
+                        <p style="margin:0; font-size:13px; font-weight:600; color:#4338CA;">
+                            <i class="fas fa-info-circle"></i> Download sample layout template
+                        </p>
+                        <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">
+                            Ensure column headers match before importing data.
+                        </p>
+                    </div>
+                    <a href="{% url 'download_agri_sample_excel' %}" style="padding:7px 16px; background:#4F46E5; color:white; border-radius:6px; text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
+                        <i class="fas fa-download"></i> Sample Excel
+                    </a>
+                </div>
+
+                <!-- Dropzone Box -->
+                <div class="form-group">
+                    <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">
+                       Upload Excel Workbook <span style="color:red;">*</span>
+                    </label>
+                    
+                    <div class="dropzone" id="dropzoneBox" onclick="document.getElementById('resale_file').click()" style="border: 2px dashed #667eea; border-radius: 12px; padding: 25px 20px; text-align: center; cursor: pointer; background: #f8fafc; transition: all 0.3s ease;">
+                        <div id="dropzoneDefaultState">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem; color:#667eea; display:block; margin-bottom:10px;"></i>
+                            <p style="margin:0; font-size:14px; font-weight:600; color:#374151;">Click to browse or drag & drop</p>
+                            <p style="margin:4px 0 0; font-size:12px; color:#9CA3AF;">Supported format: <strong>.xlsx</strong></p>
+                        </div>
+                        
+                        <div id="dropzoneFileSelectedState" style="display: none;">
+                            <i class="fas fa-file-excel" style="font-size:2.5rem; color:#10b981; display:block; margin-bottom:10px;"></i>
+                            <p id="selectedFileNameText" style="margin:0; font-size:14px; font-weight:700; color:#065f46; word-break: break-all;"></p>
+                            <p id="selectedFileSizeText" style="margin:4px 0 0; font-size:12px; color:#047857;"></p>
+                            <span style="display:inline-block; margin-top:10px; font-size:12px; color:#4f46e5; text-decoration:underline; font-weight:600;">Click to change file</span>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="resale_file" name="resale_file" accept=".xlsx" style="display:none;" onchange="checkSelectedFileSize(this)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:6px; font-size:13px;">Close</button>
+                <button type="button" class="btn btn-primary" style="padding:8px 24px; background:var(--primary-gradient); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600;" onclick="Import_Resale_Data(this)">
+                    <i class="fas fa-upload"></i> Import Data
+                </button>
+            </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary" style="background:#667eea;border:none"><i class="fas fa-upload"></i> Upload & Import</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
+
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -445,26 +833,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <script>
-
 $("#Resale").addClass("active");
 
 let dtTable;
 $(document).ready(function(){
-  // Initialize DataTables with sorting and file extensions options
   dtTable = $('#agriTable').DataTable({
     dom: 'Bfrtip', 
     scrollX: true, 
     pageLength: 25,
-    order: [[40, 'desc']], // Orders by Date Added column
-    buttons: [], // DOM built-in buttons cleared to use custom top actions bar matching layout requirements
+    order: [[75, 'desc']], 
+    buttons: [],
     language: {search: 'Search By All:', paginate: {previous: '‹ Prev', next: 'Next ›'}}
   });
 
-  // Bind live processing filters to fields
-  ['f_village','f_city','f_taluka','f_type','f_ownership','f_irrigation','f_loan'].forEach(id=>{
+  ['f_village','f_taluka','f_type','f_ownership','f_water','f_loan'].forEach(id=>{
     document.getElementById(id).addEventListener('input', applyLiveFilters);
     document.getElementById(id).addEventListener('change', applyLiveFilters);
   });
@@ -472,27 +857,136 @@ $(document).ready(function(){
     document.getElementById(id).addEventListener('input', applyLiveFilters);
   });
 
-  // Connect Export components to reflect active backend searches dynamically
   updateExportLinks();
   document.getElementById('f_backend_search').addEventListener('input', updateExportLinks);
-
-  $("#Resale").addClass("active");
 });
+
+function openModal(modalId) {
+  $('#' + modalId).modal('show');
+}
 
 function updateExportLinks() {
   const currentSearch = encodeURIComponent(document.getElementById('f_backend_search').value.trim());
-  // Adjust these view names to exactly match your path pattern strings in urls.py
   document.getElementById('btnExportExcel').href = `{% url 'export_agricultural_resale_excel' %}?search=${currentSearch}`;
   document.getElementById('btnExportCSV').href = `{% url 'export_agricultural_resale_csv' %}?search=${currentSearch}`;
 }
 
+function checkSelectedFileSize(input) {
+    if (input.files && input.files[0]) {
+        var file = input.files[0];
+        
+        // Size validation (Max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            swal('Warning', 'File size exceeds the 5MB limit.', 'warning');
+            input.value = '';
+            return;
+        }
+
+        // Extension validation
+        var ext = file.name.split('.').pop().toLowerCase();
+        if (ext !== 'xlsx') {
+            swal('Warning', 'Only .xlsx Excel files are allowed.', 'warning');
+            input.value = '';
+            return;
+        }
+
+        // Display selected file UI state
+        document.getElementById('dropzoneDefaultState').style.display = 'none';
+        document.getElementById('dropzoneFileSelectedState').style.display = 'block';
+        document.getElementById('selectedFileNameText').textContent = file.name;
+        
+        var fileSizeKB = (file.size / 1024).toFixed(1);
+        document.getElementById('selectedFileSizeText').textContent = fileSizeKB + ' KB';
+    }
+}
+
+
+function Import_Resale_Data(_this) {
+    var resale_file = $("#resale_file")[0].files;
+    if (resale_file.length == 0) {
+        swal('Warning', 'Please select an Excel file to upload.', 'warning');
+        return;
+    }
+    
+    var fd = new FormData();
+    fd.append('excel_file', resale_file[0]);
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Importing...`);
+
+    $.ajax({
+        method: "POST",
+        url: "{% url 'import_agricultural_resale_excel' %}",
+        processData: false,
+        contentType: false,
+        data: fd,
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        success: function (response) {
+            $(_this).prop("disabled", false).html(`Import Data`);
+            
+            if (response.status === 'success') {
+                swal({
+                    title: 'Import Process Complete!',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        },
+                    },
+                    icon: 'success'
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else if (response.status === 'duplicate') {
+                swal({
+                    title: 'Duplicates Skipped',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        },
+                    },
+                    icon: 'warning'
+                });
+            } else {
+                swal({
+                    title: 'Import Error',
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: response.message
+                        },
+                    },
+                    icon: 'error'
+                });
+            }
+        },
+        error: function (xhr) {
+            $(_this).prop("disabled", false).html(`Import Data`);
+            let errorMsg = 'Server processing error occurred.';
+            try {
+                let jsonRes = JSON.parse(xhr.responseText);
+                if (jsonRes.message) errorMsg = jsonRes.message;
+            } catch(e) {}
+
+            swal({
+                title: 'Import Denied',
+                content: {
+                    element: "div",
+                    attributes: {
+                        innerHTML: `<div style="font-size:13px; color:#dc2626;">${errorMsg}</div>`
+                    },
+                },
+                icon: 'error'
+            });
+        }
+    });
+}
+
 function applyLiveFilters(){
   const village    = document.getElementById('f_village').value.trim().toLowerCase();
-  const city       = document.getElementById('f_city').value.trim().toLowerCase();
   const taluka     = document.getElementById('f_taluka').value.trim().toLowerCase();
   const type       = document.getElementById('f_type').value.toLowerCase();
   const ownership  = document.getElementById('f_ownership').value.toLowerCase();
-  const irrigation = document.getElementById('f_irrigation').value.toLowerCase();
+  const water      = document.getElementById('f_water').value.toLowerCase();
   const loan       = document.getElementById('f_loan').value.toLowerCase();
   const priceMin   = parseFloat(document.getElementById('f_price_min').value) || 0;
   const priceMax   = parseFloat(document.getElementById('f_price_max').value) || Infinity;
@@ -505,11 +999,10 @@ function applyLiveFilters(){
     const rowPrice = parseFloat(r.attr('data-price')) || 0;
     
     if (village    && !r.attr('data-village').includes(village))       return false;
-    if (city       && !r.attr('data-city').includes(city))             return false;
     if (taluka     && !r.attr('data-taluka').includes(taluka))         return false;
     if (type       && r.attr('data-type') !== type)                    return false;
     if (ownership  && r.attr('data-ownership') !== ownership)          return false;
-    if (irrigation && r.attr('data-irrigation') !== irrigation)        return false;
+    if (water      && !r.attr('data-water').includes(water))           return false;
     if (loan       && r.attr('data-loan') !== loan)                    return false;
     if (rowPrice < priceMin || rowPrice > priceMax)                    return false;
     
@@ -537,32 +1030,58 @@ function applyDateFilter(){
 
 function resetAllFilters(){
   document.getElementById('f_backend_search').value = '';
-  ['f_village','f_city','f_taluka','f_price_min','f_price_max'].forEach(id=>document.getElementById(id).value='');
-  ['f_type','f_ownership','f_irrigation','f_loan'].forEach(id=>document.getElementById(id).value='');
+  ['f_village','f_taluka','f_price_min','f_price_max'].forEach(id=>document.getElementById(id).value='');
+  ['f_type','f_ownership','f_water','f_loan'].forEach(id=>document.getElementById(id).value='');
   ['f_date_from','f_date_to'].forEach(id=>document.getElementById(id).value='');
   $.fn.dataTable.ext.search = [];
   dtTable.search('').draw();
   updateExportLinks();
-  // Submits form reset boundary to clear the backend criteria view completely
   document.getElementById('backendFilterForm').submit();
 }
 
-function confirmDelete(id){
-  Swal.fire({title:'Move to Recycle Bin?',icon:'warning',showCancelButton:true,confirmButtonColor:'#e74c3c',confirmButtonText:'Yes, delete!'})
-  .then(r=>{
-    if(!r.isConfirmed) return;
-    const csrf=document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const url="{% url 'delete_agricultural_property' 0 %}".replace('0',id);
-    fetch(url,{method:'POST',headers:{'X-CSRFToken':csrf,'Content-Type':'application/json'}})
-    .then(r=>r.json()).then(data=>{
-      if(data.status==='success'){
-        Swal.fire({icon:'success',title:'Deleted!',timer:1400,showConfirmButton:false});
-        const row=document.getElementById(`row-${id}`);
-        if(row) dtTable.row($(row)).remove().draw(); else window.location.reload();
-      } else Swal.fire('Error',data.message,'error');
-    }).catch(e=>Swal.fire('Error',e.message,'error'));
-  });
-}
+// Single Property Delete Handler
+    function confirmDelete(prop_id) {
+        swal({
+            title: 'Are you sure?',
+            text: "This action will permanently delete this agricultural resale property record!",
+            icon: 'warning',
+            buttons: ['Cancel', 'Yes, delete it!'],
+            dangerMode: true
+        }).then((isConfirmed) => {
+            if (isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_agricultural_property' %}",
+                    data: { 
+                        'prop_id': prop_id, 
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            swal('Deleted!', response.message, 'success').then(() => {
+                                const row = document.getElementById(`row-${prop_id}`);
+                                if(row) {
+                                    row.remove();
+                                } else {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            swal('Error', response.message || 'Deletion failed', 'error');
+                        }
+                    },
+                    error: function (xhr) {
+                        let errorMsg = 'Server processing error occurred.';
+                        try {
+                            let jsonRes = JSON.parse(xhr.responseText);
+                            if (jsonRes.message) errorMsg = jsonRes.message;
+                        } catch(e) {}
+                        
+                        swal('Error', errorMsg, 'error');
+                    }
+                });
+            }
+        });
+    }
 
 function toggleDeleteInputs(){
   const t=document.getElementById('deleteType').value;
@@ -612,19 +1131,8 @@ function checkFile(el){
   if(ext !== 'xlsx' && ext !== 'csv'){alert('Only Excel (.xlsx) or CSV (.csv) structural documents are accepted.');el.value='';return;}
 }
 
-function viewImages(arr){
-  if(!arr||!arr.length) return;
-  let html='<div style="display:flex;overflow-x:auto;gap:15px;padding:10px">';
-  arr.forEach((url,i)=>{html+=`<div style="flex:0 0 auto;position:relative"><span style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">${i+1}/${arr.length}</span><img src="${url}" style="height:320px;max-width:75vw;object-fit:cover;border-radius:8px"></div>`;});
-  html+='</div>';
-  if(arr.length>1) html+='<p style="color:#64748b;font-size:12px;margin-top:8px"><i class="fas fa-arrows-alt-h"></i> Scroll to see more</p>';
-  Swal.fire({title:'Property Images',html,width:'80%',showCloseButton:true,showConfirmButton:false,padding:'1.5em'});
-}
-
-// --- AJAX EXCEL IMPORT HANDLER ---
 document.getElementById('importExcelForm').addEventListener('submit', function(e) {
-  e.preventDefault(); // Stops the white JSON screen from loading
-  
+  e.preventDefault();
   const submitBtn = this.querySelector('button[type="submit"]');
   const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
@@ -635,26 +1143,16 @@ document.getElementById('importExcelForm').addEventListener('submit', function(e
   fetch(this.getAttribute('action'), {
       method: 'POST',
       body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' } // Tells Django it's an AJAX request
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
   })
   .then(res => res.json())
   .then(data => {
       if (data.status === 'success') {
-          // Close modal and show success alert
           $('#importModal').modal('hide');
-          Swal.fire({ 
-              icon: 'success', 
-              title: 'Import Successful!', 
-              text: data.message, 
-              confirmButtonColor: '#10b981' 
-          }).then(() => window.location.reload());
+          Swal.fire({ icon: 'success', title: 'Import Successful!', text: data.message, confirmButtonColor: '#56ab2f' })
+          .then(() => window.location.reload());
       } else {
-          // Show error alert
-          Swal.fire({ 
-              icon: 'error', 
-              title: 'Import Failed', 
-              text: data.message 
-          });
+          Swal.fire({ icon: 'error', title: 'Import Failed', text: data.message });
           submitBtn.innerHTML = originalText;
           submitBtn.disabled = false;
       }

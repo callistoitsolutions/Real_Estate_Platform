@@ -97,10 +97,11 @@ urlpatterns = [
 
     ############ urls for view resale residential form ########################
 
-
-    
-
     path('residential_resale_agency_view/<str:id>',views.residential_resale_agency_view,name="residential_resale_agency_view"),
+
+    ############ urls for update resale residential form ########################
+    
+    path('residential_resale_agency_update/<str:id>',views.residential_resale_agency_update,name="residential_resale_agency_update"),
 
     path('residential_resale_list_agency',views.residential_resale_list_agency,name="residential_resale_list_agency"),
 
@@ -111,24 +112,47 @@ urlpatterns = [
     path('commercial_resale_agency',views.commercial_resale_agency,name="commercial_resale_agency"),
     path('commercial_resale_list_agency',views.commercial_resale_list_agency,name="commercial_resale_list_agency"),
 
+    ######### urls for update commercial resale property form #####################
+
+    path('commercial_resale_agency_update/<str:id>',views.commercial_resale_agency_update,name="commercial_resale_agency_update"),
+
+    ######### urls for view commercial resale property form #####################
+
+    path('commercial_resale_agency_view/<str:id>',views.commercial_resale_agency_view,name="commercial_resale_agency_view"),
+
      
 
 
 
 
 
-        ############ urls for Resale Industrial Listing ############################
+    ############ urls for Resale Industrial Listing ############################
 
 
     path('industrial_resale_agency',views.industrial_resale_agency,name="industrial_resale_agency"),
     path('industrial_list_agency',views.industrial_list_agency,name="industrial_list_agency"),
 
-       ############ urls for Resale Agricultural Listing ############################
+    ######### urls for update resale industry form #############################
+
+    path('industrial_resale_agency_update/<str:id>',views.industrial_resale_agency_update,name="industrial_resale_agency_update"),
+
+    ######### urls for view resale industry form #############################
+
+    path('industrial_resale_agency_view/<str:id>',views.industrial_resale_agency_view,name="industrial_resale_agency_view"),
+
+    ########### urls for Resale Agricultural Listing ############################
 
 
     path('agricultural_resale_agency',views.agricultural_resale_agency,name="agricultural_resale_agency"),
     path('agricultural_list_agency',views.agricultural_list_agency,name="agricultural_list_agency"),
 
+    ######### urls for update agricultural resale property form ###################
+
+    path('agricultural_resale_agency_update/<str:id>',views.agricultural_resale_agency_update,name="agricultural_resale_agency_update"),
+
+    ######### urls for view agricultural resale property form ###################
+    
+    path('agricultural_resale_agency_view/<str:id>',views.agricultural_resale_agency_view,name="agricultural_resale_agency_view"),
 
      ############ urls for Resale Residential Plot Listing ############################
 
@@ -136,13 +160,29 @@ urlpatterns = [
     path('residential_plot_resale_agency',views.residential_plot_resale_agency,name="residential_plot_resale_agency"),
     path('residential_plot_resale_list_agency',views.residential_plot_resale_list_agency,name="residential_plot_resale_list_agency"),
 
+    ######## urls for update resale residential plot property form ##################
+
+    path('residential_plot_resale_agency_update/<str:id>',views.residential_plot_resale_agency_update,name="residential_plot_resale_agency_update"),
+
+    ######## urls for view resale residential plot property form ##################
+    
+    path('residential_plot_resale_agency_view/<str:id>',views.residential_plot_resale_agency_view,name="residential_plot_resale_agency_view"),
 
 
- ############ urls for Resale Commercial Plot Listing ############################
+
+    ############ urls for Resale Commercial Plot Listing ############################
 
     path('commercial_plot_resale_agency',views.commercial_plot_resale_agency,name="commercial_plot_resale_agency"),
 
     path('commercial_plot_resale_list_agency',views.commercial_plot_resale_list_agency,name="commercial_plot_resale_list_agency"),
+
+    ########## urls for update plot resale commercial form ######################
+
+    path('commercial_plot_resale_agency_update/<str:id>',views.commercial_plot_resale_agency_update,name="commercial_plot_resale_agency_update"),
+
+    ########## urls for view plot resale commercial form ######################
+    
+    path('commercial_plot_resale_agency_view/<str:id>',views.commercial_plot_resale_agency_view,name="commercial_plot_resale_agency_view"),
 
 
 ################START URL SECTION RESALE INDUSTRIAL PLOT LISTING  Agency ######################################################

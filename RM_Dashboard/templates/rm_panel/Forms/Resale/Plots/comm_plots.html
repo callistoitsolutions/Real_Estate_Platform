@@ -2612,264 +2612,6 @@
     togglePortalField();
   });
 
-  function updateBrokerageLabel(role) {
-    var labelElement = document.getElementById('brokerageLabel');
-    if (!labelElement) return;
-
-    var normalizedRole = (role || "").trim().toLowerCase();
-    var labelText = "";
-
-    switch (normalizedRole) {
-      case 'admin':
-        labelText = "EstateFlow Service Fee";
-        break;
-      case 'relationship manager':
-        labelText = "Buyer Service Fee";
-        break;
-      case 'landlord':
-        labelText = "Buyer Service Fee";
-        break;
-      case 'agent':
-        labelText = "Brokerage";
-        break;
-      case 'agency/builder':
-      case 'builder':
-        labelText = "Brokerage/Service Fee";
-        break;
-      default:
-        labelText = "Brokerage";
-        break;
-    }
-    labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
-  }
-
-  function Change_Fields() {
-    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
-    if (!checkedInput) return;
-    var selectedValue = checkedInput.value;
-
-    var admin_id = document.getElementById('selfUserId')?.value || "";
-    var admin_name = document.getElementById('selfUserName')?.value || "";
-    var admin_email = document.getElementById('selfUserEmail')?.value || "";
-    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
-    var admin_role = document.getElementById('selfUserRole')?.value || "";
-
-    var targetId = document.getElementById('listed_by_id');
-    var targetName = document.getElementById('listed_by_name');
-    var targetEmail = document.getElementById('listed_by_email');
-    var targetContact = document.getElementById('listed_by_contact');
-    var targetRole = document.getElementById('listed_by_role');
-
-    if (selectedValue === "self") {
-      var otherWrapper = document.getElementById('listedByOtherWrapper');
-      if (otherWrapper) otherWrapper.style.display = "none";
-
-      var hiddenSelect = document.getElementById('assigned_to');
-      if (hiddenSelect) {
-        hiddenSelect.value = "";
-        hiddenSelect.required = false;
-      }
-
-      var valueLabel = document.getElementById('assignedToValueLabel');
-      if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
-
-      if (targetId) targetId.value = admin_id;
-      if (targetName) targetName.value = admin_name;
-      if (targetEmail) targetEmail.value = admin_email;
-      if (targetContact) targetContact.value = admin_phone;
-      if (targetRole) targetRole.value = admin_role;
-
-      updateBrokerageLabel(admin_role);
-    } else {
-      if (targetId) targetId.value = "";
-      if (targetName) targetName.value = "";
-      if (targetEmail) targetEmail.value = "";
-      if (targetContact) targetContact.value = "";
-      if (targetRole) targetRole.value = "";
-
-      var otherWrapper = document.getElementById('listedByOtherWrapper');
-      if (otherWrapper) otherWrapper.style.display = "block";
-
-      var hiddenSelect = document.getElementById('assigned_to');
-      if (hiddenSelect) {
-        hiddenSelect.required = true;
-      }
-    }
-  }
-
-  (function () {
-    var wrapper = document.getElementById('assignedToSearchSelect');
-    var control = document.getElementById('assignedToControl');
-    var panel = document.getElementById('assignedToPanel');
-    var input = document.getElementById('searchTeamMember');
-    var optionsEl = document.getElementById('assignedToOptions');
-    var noResults = document.getElementById('assignedToNoResults');
-    var valueLabel = document.getElementById('assignedToValueLabel');
-    var hiddenSelect = document.getElementById('assigned_to');
-    var hiddenRole = document.getElementById('assigned_to_role');
-
-    if (!wrapper || !hiddenSelect) return;
-
-    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
-    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
-    var highlightedIndex = -1;
-
-    function openPanel() {
-      wrapper.classList.add('open');
-      input.value = '';
-      filterOptions('');
-      setTimeout(function () { input.focus(); }, 0);
-    }
-
-    function closePanel() {
-      wrapper.classList.remove('open');
-      highlightedIndex = -1;
-    }
-
-    function togglePanel() {
-      if (wrapper.classList.contains('open')) {
-        closePanel();
-      } else {
-        openPanel();
-      }
-    }
-
-    function selectOption(opt) {
-      var value = opt.getAttribute('data-value');
-      var name = opt.getAttribute('data-name');
-      var role = opt.getAttribute('data-role');
-      var uid = opt.getAttribute('data-uid');
-      var phone = opt.getAttribute('data-phone');
-
-      hiddenSelect.value = value;
-      if (hiddenRole) hiddenRole.value = role;
-      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
-      valueLabel.classList.remove('ss-placeholder');
-
-      options.forEach(function (o) { o.classList.remove('selected'); });
-      opt.classList.add('selected');
-
-      wrapper.classList.remove('validation-error');
-      closePanel();
-
-      var evt = new Event('change', { bubbles: true });
-      hiddenSelect.dispatchEvent(evt);
-    }
-
-    function filterOptions(query) {
-      query = query.trim().toLowerCase();
-      var anyVisible = false;
-      var groupHasVisible = {};
-
-      options.forEach(function (opt) {
-        var haystack = opt.getAttribute('data-search') || '';
-        var match = haystack.indexOf(query) !== -1;
-        opt.style.display = match ? '' : 'none';
-        if (match) {
-          anyVisible = true;
-          var prev = opt.previousElementSibling;
-          while (prev && !prev.classList.contains('search-select-group-label')) {
-            prev = prev.previousElementSibling;
-          }
-          if (prev) groupHasVisible[prev.textContent] = true;
-        }
-      });
-
-      groupLabels.forEach(function (label) {
-        label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
-      });
-
-      noResults.style.display = anyVisible ? 'none' : 'block';
-      highlightedIndex = -1;
-      options.forEach(function (o) { o.classList.remove('highlighted'); });
-    }
-
-    function visibleOptions() {
-      return options.filter(function (o) { return o.style.display !== 'none'; });
-    }
-
-    function moveHighlight(step) {
-      var visible = visibleOptions();
-      if (!visible.length) return;
-      visible.forEach(function (o) { o.classList.remove('highlighted'); });
-      highlightedIndex += step;
-      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
-      if (highlightedIndex >= visible.length) highlightedIndex = 0;
-      var el = visible[highlightedIndex];
-      el.classList.add('highlighted');
-      el.scrollIntoView({ block: 'nearest' });
-    }
-
-    control.addEventListener('click', togglePanel);
-    control.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        togglePanel();
-      }
-    });
-
-    input.addEventListener('input', function () {
-      filterOptions(input.value);
-    });
-
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
-      else if (e.key === 'Enter') {
-        e.preventDefault();
-        var visible = visibleOptions();
-        if (highlightedIndex >= 0 && visible[highlightedIndex]) {
-          selectOption(visible[highlightedIndex]);
-        } else if (visible.length === 1) {
-          selectOption(visible[0]);
-        }
-      } else if (e.key === 'Escape') {
-        closePanel();
-      }
-    });
-
-    options.forEach(function (opt) {
-      opt.addEventListener('click', function () { selectOption(opt); });
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!wrapper.contains(e.target)) closePanel();
-    });
-
-    hiddenSelect.addEventListener('change', function () {
-      if (typeof get_user_data === 'function') {
-        get_user_data(this);
-      }
-    });
-
-    if (typeof Change_Fields === 'function') {
-      Change_Fields();
-    }
-  })();
-
-  function get_user_data() {
-    var assigned_to = $("#assigned_to").val();
-    if (!assigned_to) {
-      $('#listed_by_id, #listed_by_name, #listed_by_email, #listed_by_contact, #listed_by_role').val('');
-      return;
-    }
-    $.ajax({
-      method: "POST",
-      url: "{% url 'get_user_data' %}",
-      data: { 'assigned_to': assigned_to },
-      dataType: "json",
-      success: function (response) {
-        $('#listed_by_id').val(response.user_id || '');
-        $('#listed_by_name').val(response.name || '');
-        $('#listed_by_email').val(response.email || '');
-        $('#listed_by_contact').val(response.contact || '');
-        $('#listed_by_role').val(response.role || '');
-        updateBrokerageLabel(response.role);
-      },
-      error: function (xhr, status, error) { console.error('Failed to fetch user data:', error); }
-    });
-  }
-
   let currentSection = null;
 
   window.openModal = function (section) {
@@ -2964,7 +2706,7 @@
     $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
   }
 
-  $('#itemsModal .btn-primary').on('click', function () {
+  window.applyModal = function () {
     if (!currentSection) return;
 
     const checked = $('.modal-item-checkbox:checked');
@@ -2974,7 +2716,7 @@
     });
 
     updateDisplay(currentSection);
-  });
+  };
 
   window.removeItem = function (section, name) {
     const items = $(`.${section}-checkbox`).filter(function () { return this.value === name; });
@@ -3025,40 +2767,26 @@
     if (!stepEl) return true;
     const required = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
     let isValid = true, missing = [];
-    let firstInvalidElement = null;
-
-    stepEl.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
 
     required.forEach(field => {
-      field.classList.remove('validation-error');
       if (field.type === 'radio') {
         const checked = Array.from(stepEl.querySelectorAll(`[name="${field.name}"]`)).some(r => r.checked);
         if (!checked) { 
           isValid = false; 
           const lbl = getLabel(field); 
           if (lbl && !missing.includes(lbl)) missing.push(lbl); 
-          if (!firstInvalidElement) firstInvalidElement = field;
         }
       } else if (!field.value?.trim()) {
         isValid = false; 
-        field.classList.add('validation-error');
-        if (field.id === 'assigned_to') {
-          const control = document.getElementById('assignedToControl');
-          if (control) control.classList.add('validation-error');
-        }
         const lbl = getLabel(field); 
         if (lbl && !missing.includes(lbl)) missing.push(lbl);
-        if (!firstInvalidElement) firstInvalidElement = field;
       }
     });
 
     if (!isValid) {
-      if (firstInvalidElement) {
-        firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if (typeof firstInvalidElement.focus === 'function') firstInvalidElement.focus();
-      }
-      Swal.fire({
-        icon: 'warning', title: 'Required Fields Missing',
+      swal({
+        icon: 'warning', 
+        title: 'Required Fields Missing',
         html: `<p>Please fill the following fields:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
         confirmButtonColor: '#f59e0b'
       });
@@ -3083,7 +2811,7 @@
   function generateTitle() {
     const area = document.getElementById('plot_area')?.value?.trim();
     const typeEl = document.getElementById('property_type');
-    const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text.split('(')[0].trim() : 'Residential Plot';
+    const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text.split('(')[0].trim() : 'Commercial Plot';
     const loc = document.getElementById('locality')?.value?.trim();
     const city = document.getElementById('city')?.value?.trim();
     
@@ -3113,13 +2841,12 @@
     const pPrice = document.getElementById('p_price');
     const pLoc = document.getElementById('p_loc');
 
-    if (pTitle) pTitle.textContent = title || 'Your Plot Headline';
+    if (pTitle) pTitle.textContent = title || 'Commercial Plot Headline';
     if (pArea) pArea.textContent = area ? Number(area).toLocaleString('en-IN') + ' sq.ft' : '0 sq.ft';
     if (pCat) pCat.textContent = document.getElementById('property_type')?.options[document.getElementById('property_type')?.selectedIndex]?.text.split('(')[0].trim() || '—';
     if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ 0';
-    if (pLoc) pLoc.textContent = [city, loc].filter(Boolean).join(', ') || 'City, Locality';
+    if (pLoc) pLoc.textContent = [city, loc].filter(Boolean).join(', ') || 'City, Area';
 
-    // Corrected Price Per Sq.ft Calculation
     const psf = document.getElementById('plot_price_per_sqft');
     if (psf) {
       if (price && area && parseFloat(area) > 0) {
@@ -3129,23 +2856,13 @@
       }
     }
 
-    // Checklist Verification Update for Residential Plot
-    setCheck('cl-listedby', true); // Defaults to self or valid selection
+    setCheck('cl-listedby', true);
     setCheck('cl-area', !!area && parseFloat(area) > 0);
     setCheck('cl-price', !!price && parseFloat(price) > 0);
     setCheck('cl-amenities', amenitiesChecked);
     setCheck('cl-facilities', facilitiesChecked);
     setCheck('cl-loc', !!city.trim() && !!loc.trim());
     setCheck('cl-images', window.totalImageCount() >= PLOT_MIN_REQUIRED);
-  }
-
-  function setupToggle(name, sectionId) {
-    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-      r.addEventListener('change', function () {
-        const sec = document.getElementById(sectionId);
-        if (sec) sec.style.display = this.value === 'yes' ? 'block' : 'none';
-      });
-    });
   }
 
   window.totalImageCount = function () {
@@ -3221,7 +2938,6 @@
           }
       }
 
-      // Refresh canvas preview if Auto-Generate is active
       if (document.getElementById('video_auto')?.checked) {
           startAutoSlideshowPreview();
       }
@@ -3234,11 +2950,11 @@
       var limit = PLOT_IMG_LIMITS[cat] || 5;
 
       if (window.catFiles[cat].length + incoming.length > limit) {
-          Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+          swal("Limit Reached", 'Maximum ' + limit + ' images allowed for this category.', 'warning');
           incoming = incoming.slice(0, Math.max(0, limit - window.catFiles[cat].length));
       }
       if (window.totalImageCount() + incoming.length > PLOT_TOTAL_LIMIT) {
-          Swal.fire('Total Limit Reached', 'Maximum ' + PLOT_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
+          swal("Limit Reached", 'Maximum ' + PLOT_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
           incoming = incoming.slice(0, Math.max(0, PLOT_TOTAL_LIMIT - window.totalImageCount()));
       }
 
@@ -3275,11 +2991,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    setupToggle('property_loan', 'loan_amt_section');
-    setupToggle('existing_tenants', 'tenant_section');
-    setupToggle('agri_dispute', 'dispute_section');
-    setupToggle('pending_tax_due', 'tax_section');
-
     const brokeragePercentage = document.getElementById('brokeragePercentage');
     if (brokeragePercentage) {
       brokeragePercentage.addEventListener('change', function () {
@@ -3363,16 +3074,13 @@
                     videoPreview.style.display = 'none';
                 }
 
-                Swal.fire({
-                    title: 'Video File Too Large',
-                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Share via WhatsApp',
-                    cancelButtonText: 'Okay',
-                    confirmButtonColor: '#10b981'
-                }).then(function (result) {
-                    if (result.isConfirmed) {
+                swal({
+                    title: "Video File Too Large",
+                    text: "This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.",
+                    icon: "warning",
+                    buttons: ["Okay", "Share via WhatsApp"]
+                }).then((willShare) => {
+                    if (willShare) {
                         window.open(whatsappUrl, '_blank');
                         var rmRadio = document.getElementById('video_rm');
                         if (rmRadio) rmRadio.checked = true;
@@ -3422,18 +3130,16 @@
       frame.style.display = 'block';
   }
 
-  // ── COMMERCIAL PLOT FORM SUBMISSION VIA SWAL WITH PERCENTAGE PROGRESS ──
+  // ── COMMERCIAL PLOT FORM SUBMISSION VIA NORMAL SWAL ──
   function Submit_Commercial_Plot(_this) {
-    Swal.fire({
-        title: 'Confirm Submission',
-        text: 'Are you sure you want to submit this commercial plot property?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#f59e0b',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, Submit!'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    swal({
+        title: "Confirm Submission",
+        text: "Are you sure you want to submit this commercial plot property?",
+        icon: "warning",
+        buttons: ["Cancel", "Yes, Submit!"],
+        dangerMode: false,
+    }).then((willSubmit) => {
+        if (willSubmit) {
             processPlotSubmission(_this);
         }
     });
@@ -3452,52 +3158,16 @@
         $('.img-total-summary').addClass('input-error');
         var imgSummaryEl = document.querySelector('.img-total-summary');
         if (imgSummaryEl) imgSummaryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        Swal.fire({
-            title: 'Missing Images',
-            text: 'Please upload at least 3 property images.',
-            icon: 'error',
-            confirmButtonColor: '#f59e0b'
-        });
+        swal("Missing Images", "Please upload at least 3 property images.", "error");
         return;
     } else {
         $('.img-total-summary').removeClass('input-error');
     }
 
-    function updateProgress(value, statusText) {
-        var progressText = document.getElementById('swalProgressText');
-        var progressBar = document.getElementById('swalProgressBar');
-        var progressStatus = document.getElementById('swalProgressStatus');
-
-        if (progressText) progressText.textContent = value + '%';
-        if (progressBar) progressBar.style.width = value + '%';
-        if (progressStatus && statusText) progressStatus.textContent = statusText;
-    }
-
-    var progressContainer = document.createElement('div');
-    progressContainer.innerHTML = `
-        <div style="padding: 10px 0;">
-            <div style="margin-bottom: 12px;">
-                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #f59e0b;">0%</span>
-            </div>
-            <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
-            </div>
-            <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
-                <i class="fas fa-spinner fa-spin me-1"></i> 
-                <span id="swalProgressStatus">Preparing data...</span>
-            </div>
-        </div>
-    `;
-
-    Swal.fire({
-        title: 'Submitting Property...',
-        html: progressContainer,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+    swal("Submitting Property...", "Please wait while we save your commercial plot listing.", {
+        buttons: false,
+        closeOnClickOutside: false,
+        closeOnEsc: false,
     });
 
     var formEl = document.getElementById('comPlotForm');
@@ -3562,15 +3232,11 @@
     fd.append('longitude', $('#longitude').val() || '');
 
     fd.append('listed_by_type', 'other');
-    
-       
-        
     fd.append('listed_by_id', $('#listed_by_id').val());
     fd.append('listed_by_name', $('#listed_by_name').val());
     fd.append('listed_by_email', $('#listed_by_email').val());
     fd.append('listed_by_contact', $('#listed_by_contact').val());
     fd.append('listed_by_role', $('#listed_by_role').val());
-
 
     var amenities = [];
     $('.amenities-checkbox:checked').each(function() { amenities.push($(this).val()); });
@@ -3626,69 +3292,30 @@
         data: fd,
         processData: false,
         contentType: false,
-        xhr: function() {
-            var xhr = new window.XMLHttpRequest();
-            xhr.upload.addEventListener("progress", function(evt) {
-                if (evt.lengthComputable) {
-                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
-                    var status = "Uploading media & details...";
-                    if (percentComplete >= 95) {
-                        status = "Saving to database...";
-                    }
-                    updateProgress(percentComplete, status);
-                }
-            }, false);
-            return xhr;
-        },
         success: function(response) {
-            updateProgress(100, "Completed!");
+            $(_this).prop("disabled", false);
 
-            setTimeout(function() {
-                Swal.close();
-                $(_this).prop("disabled", false);
+            if (response.status_code === 'duplicate_hard_block') {
+                swal("Duplicate Blocked", response.msg || response.message || 'This property is already listed in the system.', "error");
+                return;
+            }
 
-                if (response.status_code === 'duplicate_hard_block') {
-                    Swal.fire({
-                        title: 'Duplicate Blocked',
-                        text: response.msg || response.message || 'This property is already listed in the system.',
-                        icon: 'error',
-                        confirmButtonColor: '#e74c3c'
-                    });
-                    return;
-                }
-
-                if (response.status === '1' || response.status === 'success') {
-                    var propertyIdText = response.property_id ? '\nProperty ID: ' + response.property_id : '';
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Listing Active!',
-                        text: (response.msg || response.message || 'Commercial plot published successfully.') + propertyIdText,
-                        confirmButtonColor: '#f59e0b'
-                    }).then(() => {
-                        window.location.href = "{% url 'plot_resale_comm_rm_list' %}";
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Submission Failed',
-                        text: response.msg || response.message || "Something went wrong!",
-                        confirmButtonColor: '#e74c3c'
-                    });
-                }
-            }, 500);
+            if (response.status === '1' || response.status === 'success') {
+                var propertyIdText = response.property_id ? '\nProperty ID: ' + response.property_id : '';
+                swal("Listing Active!", (response.msg || response.message || 'Commercial plot published successfully.') + propertyIdText, "success")
+                .then(() => {
+                    window.location.href = "{% url 'plot_resale_comm_rm_list' %}";
+                });
+            } else {
+                swal("Submission Failed", response.msg || response.message || "Something went wrong!", "error");
+            }
         },
         error: function(xhr) {
-            Swal.close();
             $(_this).prop("disabled", false);
 
             if (xhr.status === 409 && xhr.responseJSON) {
                 var dupResponse = xhr.responseJSON;
-                Swal.fire({
-                    title: 'Duplicate Blocked',
-                    text: dupResponse.msg || dupResponse.message || 'Property already exists.',
-                    icon: 'error',
-                    confirmButtonColor: '#e74c3c'
-                });
+                swal("Duplicate Blocked", dupResponse.msg || dupResponse.message || 'Property already exists.', "error");
                 return;
             }
 
@@ -3708,12 +3335,7 @@
                 }
             }
 
-            Swal.fire({
-                icon: 'error',
-                title: 'Submission Failed',
-                text: errorMsg,
-                confirmButtonColor: '#e74c3c'
-            });
+            swal("Submission Failed", errorMsg, "error");
         }
     });
   }

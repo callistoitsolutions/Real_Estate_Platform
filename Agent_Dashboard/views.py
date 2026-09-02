@@ -6760,30 +6760,42 @@ def pg_bulk_delete_agent(request):
 
 
 def residential_resale_agent(request):
-   # 1. Retrieve BOTH possible session IDs from the browser
+# 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
+
+    
 
     # 2. VIP Access Control
     is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
 
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
 
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     ameneties_obj = Ameneties_Details.objects.all()
     facilities_obj = Facilities_Details.objects.all()
 
     
-
     
     context = {
         'user_obj': user_obj,
         'user_role': user_obj.user_role,
         'ameneties_obj':ameneties_obj,
-        'facilities_obj':facilities_obj
+        'facilities_obj':facilities_obj,
     }
     
     return render(request, "agent/Forms/Resale/residential_resale.html", context)
@@ -6792,25 +6804,26 @@ def residential_resale_agent(request):
 ############## Views start for residential resale form #####################
 
 def residential_resale_agent_view(request,id):
+
     # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
@@ -6821,8 +6834,7 @@ def residential_resale_agent_view(request,id):
     # Convert comma-separated string datasets into lists for badge generation loop arrays
     facilities_list = [f.strip() for f in property.nearby_facilities.split(',')] if property.nearby_facilities else []
     amenities_list = [a.strip() for a in property.amenities.split(',')] if property.amenities else []
-    
-    
+
     context = {
         'user_obj': user_obj,
         'user_role': user_obj.user_role,
@@ -6840,59 +6852,73 @@ def residential_resale_agent_view(request,id):
 ############### Views start for residential resale edit form ###################
 
 def residential_resale_agent_edit(request,id):
+
     # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
+
     property = ResaleResidentialProperty.objects.get(id=id)
+
+    
+    prop_facilities_list = (
+        [f.strip() for f in property.nearby_facilities.split(',')]
+        if property.nearby_facilities else []
+    )
+
+    prop_amenities_list = (
+        [a.strip() for a in property.amenities.split(',')]
+        if property.amenities else []
+    )
 
     existing_images = property.images.all()
 
-    facilities_obj = Facilities_Details.objects.all()
-    ameneties_obj = Ameneties_Details.objects.all()
+    videos_qs = property.video.all().order_by('-created_at')
 
-    amenities_list = []
-    if property.amenities:
-        amenities_list = [a.strip() for a in property.amenities.split(',') if a.strip()]
-    
-    # Parse facilities from stored comma-separated string
-    nearby_facilities_list = []
-    if property.nearby_facilities:
-        nearby_facilities_list = [f.strip() for f in property.nearby_facilities.split(',')]
-    
+    uploaded_video = videos_qs.filter(source='uploaded').first()
+    auto_video     = videos_qs.filter(source='auto').first()
+    rm_video       = videos_qs.filter(source='rm_assisted').first()
+
+    # "video_option" only decides which radio button + wrapper is active by default —
+    # it doesn't hide the other saved videos, those show in their own tabs regardless.
+    latest_video = videos_qs.first()
+    video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+    video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else 'upload'
+
     
     context = {
-        'user_obj': user_obj,
-        'user_role': user_obj.user_role,
-        "amenities_list": amenities_list,
-        'ameneties_obj':ameneties_obj,
-        'facilities_obj':facilities_obj,
-        'prop':property,
-        'existing_images':existing_images,
-        'facilities_obj':facilities_obj,
-        'ameneties_obj':ameneties_obj,
-        'amenities_list':amenities_list,
-        'nearby_facilities_list':nearby_facilities_list, 
+        "prop": property,
+        "prop_facilities_list": prop_facilities_list,
+        "prop_amenities_list": prop_amenities_list,
+        "ameneties_obj":Ameneties_Details.objects.all(),
+        "facilities_obj":Facilities_Details.objects.all(),
+        "existing_images": existing_images,
+        "categories_tuple" : ResalePropertyImage.CATEGORY_CHOICES,
+        "user_obj":user_obj,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video,
+        'video_option': video_option
     }
     
     return render(request, "agent/Forms/Resale/residential_resale_edit.html", context)
@@ -6902,26 +6928,25 @@ def residential_resale_agent_edit(request,id):
 
 def residential_resale_list_agent(request):
    
-
-      # 1. Retrieve BOTH possible session IDs from the browser
+    # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
@@ -7225,10 +7250,10 @@ def residential_resale_list_agent(request):
         )
     except Exception:
         uploaded_files = []
-
     
     context = {
         'user_obj': user_obj,
+        'user_role': user_obj.user_role,
         'properties':properties,
 
         'filtered_count': properties.count(),
@@ -7316,11 +7341,9 @@ def residential_resale_list_agent(request):
         'unique_society_types': unique_society_types,
 
         'uploaded_files': uploaded_files,
-        
     }
-
-    return render(request, 'agent/Reports/Resale/residential_resale_list.html', context)
-
+    
+    return render(request, "agent/Reports/Resale/residential_resale_list.html", context)
 
 
 
@@ -7369,52 +7392,393 @@ def commercial_resale_agent(request):
 
 
 def commercial_resale_list_agent(request):
-   
-
-      # 1. Retrieve BOTH possible session IDs from the browser
+# 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
-    # ═══════════════════════════════════════
-    # GET SEARCH & FILTERS
-    # ═══════════════════════════════════════
-  
+# ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
+    all_properties = (
+        CommercialResaleProperty.objects.filter(listed_by_id=user_obj.user_id,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role)
+        .prefetch_related('images')
+        .order_by('-created_at')
+    )
 
-    # ═══════════════════════════════════════
-   
+    # ── Read query params ────────────────────────────────────────────────────
+    search_query    = request.GET.get('search', '').strip()
+    prop_type       = request.GET.get('prop_type', '').strip()
+    bhk_filter      = request.GET.get('bhk', '').strip()
+    furnish         = request.GET.get('furnish', '').strip()
+    # zone_filter     = request.GET.get('zone', '').strip()
+    ownership       = request.GET.get('ownership', '').strip()
+    negotiable      = request.GET.get('negotiable', '').strip()
+    from_date       = request.GET.get('from_date', '').strip()
+    to_date         = request.GET.get('to_date', '').strip()
 
-    # ═══════════════════════════════════════
-    # CONTEXT MAP
-    # ═══════════════════════════════════════
+    # ── Apply filters ────────────────────────────────────────────────────────
+    properties = all_properties
+
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query)  |
+            Q(city__icontains=search_query)           |
+            Q(locality__icontains=search_query)       |
+            Q(listed_by_name__icontains=search_query)     |
+            Q(bhk__icontains=search_query)            |
+            Q(building_name__icontains=search_query)
+        )
+
+    if prop_type:
+        properties = properties.filter(property_type=prop_type)
+
+    if bhk_filter:
+        properties = properties.filter(bhk=bhk_filter)
+
+    if furnish:
+        properties = properties.filter(furnishing_status=furnish)
+
+    # if zone_filter:
+    #     properties = properties.filter(zone=zone_filter)
+
+    if ownership:
+        properties = properties.filter(ownership_status=ownership)
+
+    
+
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
+
+    # ── Thumbnail + helper attributes for each filtered property ─────────────
+    for prop in properties:
+        prop.thumbnail = prop.images.first()
+
+        prop.nearby_facilities_list = (
+            [f.strip() for f in prop.nearby_facilities.split(',')]
+            if prop.nearby_facilities else []
+        )
+        prop.amenities_list = (
+            [a.strip() for a in prop.amenities.split(',')]
+            if prop.amenities else []
+        )
+        prop.image_count = prop.images.count()
+        prop.image_urls  = [img.image.url for img in prop.images.all()]
+
+    # ════════════════════════════════════════════════════════════════════════
+    # KPI STATS (Calculated using exact form model keys: selling_price, furnishing_status, etc.)
+    # ════════════════════════════════════════════════════════════════════════
+    total_count = all_properties.count()
+
+    # ── Row 1 — Inventory ────────────────────────────────────────────────────
+    total_furnished   = all_properties.filter(furnishing_status='fully').count()
+    total_freehold    = all_properties.filter(ownership_status='Self Owned').count()
+    total_with_images = all_properties.filter(images__isnull=False).distinct().count()
+
+    def pct(part, whole):
+        return round(part / whole * 100) if whole else 0
+
+    
+    furnished_pct  = pct(total_furnished,    total_count)
+    freehold_pct   = pct(total_freehold,     total_count)
+    images_pct     = pct(total_with_images, total_count)
+
+    # ── Row 2 — Pricing (Using selling_price instead of expected_price) ───────
+    price_agg = all_properties.aggregate(
+        avg      = Avg('selling_price'),
+        max_val  = Max('selling_price'),
+        min_val  = Min('selling_price'),
+        avg_sqft = Avg('price_per_sqft'),
+        avg_area = Avg('builtup_area'),
+    )
+    avg_price      = price_agg['avg']
+    max_price      = price_agg['max_val']
+    min_price      = price_agg['min_val']
+    avg_price_sqft = price_agg['avg_sqft']
+    avg_builtup    = price_agg['avg_area']
+    total_with_loan = all_properties.filter(property_loan='yes').count()
+
+    # ── Row 3 — Legal & Status (Using government_tax instead of government_tax_dues) ───
+    no_dispute_count  = all_properties.filter(any_legal_dispute='no').count()
+    dispute_count     = all_properties.filter(any_legal_dispute='yes').count()
+    tax_pending_count = all_properties.filter(government_tax='yes').count()
+    tenant_occupied   = all_properties.filter(existing_tenants='yes').count()
+    premium_count     = all_properties.filter(selling_price__gte=10000000).count()    # >= 1 Cr
+
+    # ── Row 4 — Listing Quality ──────────────────────────────────────────────
+    with_video_count = (
+        all_properties
+        .exclude(property_video__isnull=True)
+        .exclude(property_video='')
+        .count()
+    )
+    with_floor_plan = (
+        all_properties
+        .exclude(floor_plan__isnull=True)
+        .exclude(floor_plan='')
+        .count()
+    )
+    with_owner_count = (
+        all_properties
+        .exclude(listed_by_name__isnull=True)
+        .exclude(listed_by_name='')
+        .count()
+    )
+    budget_count = all_properties.filter(selling_price__lt=3000000).count()            # < 30 L
+
+    # ── Charts ───────────────────────────────────────────────────────────────
+    property_type_counts = dict(
+        all_properties.values('property_type')
+        .annotate(count=Count('id'))
+        .values_list('property_type', 'count')
+    )
+    bhk_counts = dict(
+        all_properties.values('bhk')
+        .annotate(count=Count('id'))
+        .values_list('bhk', 'count')
+    )
+    fully_furnished = all_properties.filter(furnishing_status='Fully Furnished').count()
+    semi_furnished  = all_properties.filter(furnishing_status='Semi Furnished').count()
+    unfurnished     = all_properties.filter(furnishing_status='Unfurnished').count()
+
+
+    # zone_counts = dict(
+    #     all_properties.values('zone')
+    #     .annotate(count=Count('id'))
+    #     .values_list('zone', 'count')
+    # )
+
+    # ── Unique values for Select2 searchable dropdowns ───────────────────────
+    unique_prop_types  = list(
+        all_properties.values_list('property_type', flat=True)
+        .distinct().order_by('property_type')
+    )
+    unique_bhk_values  = list(
+        all_properties.values_list('bhk', flat=True)
+        .distinct().order_by('bhk')
+    )
+    # unique_zones       = list(
+    #     all_properties.values_list('zone', flat=True)
+    #     .distinct().order_by('zone')
+    # )
+    unique_cities      = list(
+        all_properties.values_list('city', flat=True)
+        .distinct().order_by('city')
+    )
+
+    try:
+        uploaded_files = (
+            all_properties
+            .exclude(upload_file_name__isnull=True)
+            .exclude(upload_file_name='')
+            .values_list('upload_file_name', flat=True)
+            .distinct()
+        )
+    except Exception:
+        uploaded_files = []
+
+    # ── Context ──────────────────────────────────────────────────────────────
     context = {
-        'user_obj': user_obj,
+        'user_obj'  : user_obj,
+        'properties' : properties,
+
+        # Counts
+        'filtered_count' : properties.count(),
+        'total_count'    : total_count,
+
+        # Active search params
+        'search_query'   : search_query,
+        'prop_type_query': prop_type,
+        'bhk_query'      : bhk_filter,
+        'furnish_query'  : furnish,
         
+        'ownership_query': ownership,
+        'negotiable_query': negotiable,
+        'from_date'      : from_date,
+        'to_date'        : to_date,
+
+        # Row 1 — Inventory
+       
+        'total_furnished'  : total_furnished,
+        'total_freehold'   : total_freehold,
+        'total_with_images': total_with_images,
+        
+        'furnished_pct'    : furnished_pct,
+        'freehold_pct'     : freehold_pct,
+        'images_pct'       : images_pct,
+
+        # Row 2 — Pricing
+        'avg_price'       : avg_price,
+        'max_price'       : max_price,
+        'min_price'       : min_price,
+        'avg_price_sqft'  : avg_price_sqft,
+        'total_with_loan' : total_with_loan,
+
+        # Row 3 — Legal
+        'no_dispute_count' : no_dispute_count,
+        'dispute_count'    : dispute_count,
+        'tax_pending_count': tax_pending_count,
+        'tenant_occupied'  : tenant_occupied,
+        'avg_builtup'      : avg_builtup,
+        'premium_count'    : premium_count,
+
+        # Row 4 — Quality
+        'with_video_count': with_video_count,
+        'with_floor_plan' : with_floor_plan,
+        'with_owner_count': with_owner_count,
+        'budget_count'    : budget_count,
+
+        # Charts
+        'property_type_counts': property_type_counts,
+        'bhk_counts'          : bhk_counts,
+        'fully_furnished'     : fully_furnished,
+        'semi_furnished'      : semi_furnished,
+        'unfurnished'         : unfurnished,
+        
+
+        # Select2 unique options
+        'unique_prop_types' : unique_prop_types,
+        'unique_bhk_values' : unique_bhk_values,
+
+        'unique_cities'     : unique_cities,
+
+        'uploaded_files': uploaded_files,
     }
 
     return render(request, 'agent/Reports/Resale/commercial_list.html', context)
 
 
+############# Views start for commercial resale edit form ################
 
+def commercial_resale_agent_edit(request,id):
+# 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    property = CommercialResaleProperty.objects.get(id=id)
+
+    # --- GET REQUEST Context ---
+    ameneties_obj = Ameneties_Details.objects.all() if 'Ameneties_Details' in globals() else []
+    facilities_obj = Facilities_Details.objects.all() if 'Facilities_Details' in globals() else []
+    
+    prop_facilities_list = [f.strip() for f in property.nearby_facilities.split(',')] if property.nearby_facilities else []
+    prop_amenities_list = [a.strip() for a in property.amenities.split(',')] if property.amenities else []
+
+    videos_qs = property.video.all().order_by('-created_at')
+    
+    uploaded_video = videos_qs.filter(source='uploaded').first()
+    auto_video     = videos_qs.filter(source='auto').first()
+    rm_video       = videos_qs.filter(source='rm_assisted').first()
+    
+    # "video_option" only decides which radio button + wrapper is active by default —
+    # it doesn't hide the other saved videos, those show in their own tabs regardless.
+    latest_video = videos_qs.first()
+    video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+    video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else 'upload'
+    
+    existing_images = property.images.all()
+
+
+    context = {
+        "prop": property,
+        "ameneties_obj": ameneties_obj,
+        "facilities_obj": facilities_obj,
+        "prop_facilities_list": prop_facilities_list,
+        "prop_amenities_list": prop_amenities_list,
+        "existing_images": existing_images,
+        'user_obj': user_obj,
+        'video_option': video_option,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video
+    }
+
+    return render(request,'agent/Forms/Resale/commercial_resale_edit.html',context)
+
+############ Views end for commercial resale edit form ####################
+
+
+########## Views start for view commercial resale form ###################
+
+def commercial_resale_agent_view(request,id):
+# 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    prop = get_object_or_404(CommercialResaleProperty, id=id)
+    images = prop.images.all()
+    
+    # Split strings for nice badge rendering in HTML
+    facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+    context = {
+        'user_obj': user_obj,
+        'prop': prop,
+        'images': images,
+        'facilities_list': facilities_list,
+        'amenities_list': amenities_list
+    }
+    return render(request, 'agent/Forms/Resale/commercial_resale_view.html', context)
+
+############### Views end for view commercial resale form ######################
 
 #################Views Start For Resale Industrial Listing Property###########################
 
@@ -7459,56 +7823,346 @@ def industrial_resale_agent(request):
 
 
 def industrial_list_agent(request):
-   
 
-      # 1. Retrieve BOTH possible session IDs from the browser
+    # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
-    # ═══════════════════════════════════════
-    # GET SEARCH & FILTERS
-    # ═══════════════════════════════════════
-  
+    base_qs = IndustrialResaleProperty.objects.filter(is_deleted=False,listed_by_id=user_obj.user_id,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role)
+    
+    # ─── Filter Parameters ───
+    search_query = request.GET.get('search', '').strip()
+    city_query = request.GET.get('city', 'All Cities')
+    prop_type_query = request.GET.get('property_type', 'All Types')
+    power_query = request.GET.get('power_supply', 'Any Power Supply')
+    legal_query = request.GET.get('legal_status', 'All')  # Legal filter
+    from_date = request.GET.get('from_date', '')
+    to_date = request.GET.get('to_date', '')
 
-    # ═══════════════════════════════════════
-   
+    # ─── Apply Filters ───
+    if search_query:
+        base_qs = base_qs.filter(
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |  
+            Q(listed_by_name__icontains=search_query) |
+            Q(id__icontains=search_query)
+        )
 
-    # ═══════════════════════════════════════
-    # CONTEXT MAP
-    # ═══════════════════════════════════════
+    if city_query != 'All Cities':
+        base_qs = base_qs.filter(city__iexact=city_query)
+        
+    if prop_type_query != 'All Types':
+        base_qs = base_qs.filter(property_type__iexact=prop_type_query)
+        
+    if power_query == 'heavy':
+        base_qs = base_qs.filter(power_supply=True, kva_capacity__gte=100)
+    elif power_query == 'light':
+        base_qs = base_qs.filter(power_supply=True, kva_capacity__lt=100)
+        
+    if legal_query == 'clear':
+        # Must have no tax dues AND no legal disputes
+        base_qs = base_qs.filter(government_tax=False, legal_dispute=False)
+    elif legal_query == 'dispute':
+        # Has EITHER tax dues OR a legal dispute
+        base_qs = base_qs.filter(Q(government_tax=True) | Q(legal_dispute=True))
+        
+    if from_date and to_date:
+        base_qs = base_qs.filter(created_at__date__gte=from_date, created_at__date__lte=to_date)
+
+    # Sort listings chronologically
+    properties_qs = base_qs.order_by('-created_at')
+
+    # ─── EXPORT LOGIC (CSV / EXCEL) ───
+    download_type = request.GET.get('download')
+    if download_type in ['csv', 'excel']:
+        # Headers aligned precisely with the actual IndustrialResaleProperty model fields
+        headers = [
+            "ID", "Property Title", "Property Type", "Property No", "Land Area", "Built-up Area",
+            "Industrial Zone Classification", "Main Road Connectivity", "Power Supply", "KVA Capacity",
+            "Water Supply", "Truck Accessibility", "Loading Dock", "Floor Load Capacity",
+            "Crane / Heavy Machinery", "Worker Housing Nearby", "Selling Price", "Price Per Sqft",
+            "Brokerage Percentage", "Manual Brokerage", "Ownership Type", "Ownership Document Type",
+            "Title Status", "Sanctioning Authority", "Property Loan", "Loan Amount", "Existing Tenants",
+            "Tenant Details", "Legal Dispute", "Legal Dispute Details", "Government Tax Dues",
+            "Tax Amount", "Tax Clearance Cert", "Factory License Status", "Fire NOC Status",
+            "Pollution Control Approval", "Amenities", "Nearby Facilities", "User Description",
+            "City", "Locality", "Building Name", "Address", "Pincode", "Property Landmark", "State",
+            "Residency Status", "Google Maps Link", "Latitude", "Longitude", "Listed By Type",
+            "Listed By ID", "Listed By Name", "Listed By Email", "Listed By Contact", "Listed By Role",
+            "Assigned To", "Listed Elsewhere", "Portal Name", "Uploaded By Name", "Uploaded By Email",
+            "Uploaded By Contact", "Uploaded By Role", "Listing Status", "Approval Status",
+            "Is Duplicate", "Created At", "Updated At", "Is Deleted", "Deleted At", "Deleted By"
+        ]
+
+        def get_row_data(prop):
+            return [
+                prop.id, prop.property_title, prop.property_type, prop.property_no, prop.land_area, prop.builtup_area,
+                prop.industrial_zone_classification, prop.main_road_connectivity, "Yes" if prop.power_supply else "No", prop.kva_capacity,
+                prop.water_supply, prop.truck_accessibility, prop.loading_dock, prop.floor_load_capacity,
+                "Yes" if prop.crane_heavy_machinery else "No", "Yes" if prop.worker_housing_nearby else "No", prop.selling_price, prop.price_per_sqft,
+                prop.brokerage_percentage, prop.manual_brokerage, prop.ownership_type, prop.ownership_document_type,
+                prop.title_status, prop.sanctioning_authority, "Yes" if prop.property_loan else "No", prop.loan_amount, "Yes" if prop.existing_tenants else "No",
+                prop.tenant_details, "Yes" if prop.legal_dispute else "No", prop.legal_dispute_details, "Yes" if prop.government_tax else "No",
+                prop.tax_amount, "Yes" if prop.tax_clearance_cert else "No", prop.factory_license_status, prop.fire_noc_status,
+                prop.pollution_control_approval, prop.amenities, prop.nearby_facilities, prop.user_description,
+                prop.city, prop.locality, prop.building_name, prop.address, prop.pincode, prop.property_landmark, prop.state,
+                prop.residency_status, prop.google_maps_link, prop.latitude, prop.longitude, prop.listed_by_type,
+                prop.listed_by_id, prop.listed_by_name, prop.listed_by_email, prop.listed_by_contact, prop.listed_by_role,
+                prop.assigned_to, prop.listed_elsewhere, prop.portal_name, prop.uploaded_by_name, prop.uploaded_by_email,
+                prop.uploaded_by_contact, prop.uploaded_by_role, prop.listing_status, prop.approval_status,
+                "Yes" if prop.is_duplicate else "No",
+                str(prop.created_at.replace(tzinfo=None)) if prop.created_at else "",
+                str(prop.updated_at.replace(tzinfo=None)) if prop.updated_at else "",
+                "Yes" if prop.is_deleted else "No",
+                str(prop.deleted_at.replace(tzinfo=None)) if prop.deleted_at else "",
+                prop.deleted_by
+            ]
+
+        if download_type == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="Industrial_Resale_Report.csv"'
+            writer = csv.writer(response)
+            writer.writerow(headers)
+            for prop in properties_qs:
+                writer.writerow(get_row_data(prop))
+            return response
+
+        elif download_type == 'excel':
+            wb = openpyxl.Workbook()
+            sheet = wb.active
+            sheet.title = "Industrial Report Data"
+            sheet.append(headers)
+            for prop in properties_qs:
+                sheet.append(get_row_data(prop))
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="Industrial_Resale_Report.xlsx"'
+            wb.save(response)
+            return response
+
+    # ─── Pagination ───
+    paginator = Paginator(properties_qs, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    for prop in properties_qs:
+        prop.thumbnail = prop.images.first()
+        
+        prop.nearby_facilities_list = (
+        [f.strip() for f in prop.nearby_facilities.split(',')]
+            if prop.nearby_facilities else []
+        )
+        prop.amenities_list = (
+            [a.strip() for a in prop.amenities.split(',')]
+            if prop.amenities else []
+        )
+        prop.image_count = prop.images.count()
+        prop.image_urls  = [img.image.url for img in prop.images.all()]
+
+    # ─── Dynamic Statistical Compilations ───
+    total_count = IndustrialResaleProperty.objects.filter(is_deleted=False,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role).count()
+
+    filtered_count = properties_qs.count()
+    active_listings = properties_qs.filter(selling_price__gt=0).count()
+    warehouse_count = properties_qs.filter(property_type__icontains='warehouse').count()
+    compliance_passed = properties_qs.exclude(compliance_docs='').exclude(compliance_docs__isnull=True).count()
+
+    # ─── Chart Data Aggregation ───
+    small_cap = properties_qs.filter(land_area__lte=20000).count()
+    mid_cap = properties_qs.filter(land_area__gt=20000, land_area__lte=80000).count()
+    large_cap = properties_qs.filter(land_area__gt=80000).count()
+    
+    manufacturing = properties_qs.filter(property_type__icontains='manufacturing').count()
+    cold_storage = properties_qs.filter(property_type__icontains='cold_storage').count()
+    
+    low_risk = properties_qs.filter(government_tax=False, legal_dispute=False).count()
+    medium_risk = properties_qs.filter(government_tax=True, legal_dispute=False).count()
+    high_risk = properties_qs.filter(legal_dispute=True).count()
+
+    # Dropdown Options Pickers
+    unique_cities = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(city__isnull=True).exclude(city='').values_list('city', flat=True).distinct()
+    unique_property_types = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(property_type__isnull=True).exclude(property_type='').values_list('property_type', flat=True).distinct()
+
     context = {
         'user_obj': user_obj,
+        'page_obj': page_obj,
+        'properties': page_obj, 
+        'total_properties': total_count, 
+        'total_count': total_count,
+        'filtered_count': filtered_count,
+        'active_listings': active_listings,
+        'warehouse_count': warehouse_count,
+        'compliance_passed': compliance_passed,
         
+        # Chart Data
+        'capacity_labels': json.dumps(["Small (≤ 20k sqft)", "Mid (20-80k sqft)", "Large (80k+ sqft)"]),
+        'capacity_data': json.dumps([small_cap, mid_cap, large_cap]),
+        'type_labels': json.dumps(["Warehouse", "Manufacturing", "Cold Storage", "Other"]),
+        'type_data': json.dumps([warehouse_count, manufacturing, cold_storage, filtered_count - (warehouse_count + manufacturing + cold_storage)]),
+        'risk_labels': json.dumps(["Low Risk", "Medium Risk", "High Risk"]),
+        'risk_data': json.dumps([low_risk, medium_risk, high_risk]),
+        
+        # Select Dropdowns
+        'unique_cities': unique_cities,
+        'unique_property_types': unique_property_types,
+        
+        # Maintained Filter States
+        'search_query': search_query,
+        'city_query': city_query,
+        'prop_type_query': prop_type_query,
+        'power_query': power_query,
+        'legal_query': legal_query
     }
-
     return render(request, 'agent/Reports/Resale/industrial_list.html', context)
 
+
+############## Views start for edit industrial resale form ########################
+
+def industrial_list_agent_update(request,id):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+ 
+
+    prop = IndustrialResaleProperty.objects.get(id=id)
+
+    ameneties_obj = Ameneties_Details.objects.all() if 'Ameneties_Details' in globals() else []
+    facilities_obj = Facilities_Details.objects.all() if 'Facilities_Details' in globals() else []
+            
+    prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+    videos_qs = prop.video.all().order_by('-created_at')
+            
+    uploaded_video = videos_qs.filter(source='uploaded').first()
+    auto_video     = videos_qs.filter(source='auto').first()
+    rm_video       = videos_qs.filter(source='rm_assisted').first()
+            
+    # "video_option" only decides which radio button + wrapper is active by default —
+    # it doesn't hide the other saved videos, those show in their own tabs regardless.
+    latest_video = videos_qs.first()
+    video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+    video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else 'upload'
+            
+    existing_images = IndustrialPropertyImage.objects.filter(property=prop)
+
+    context = {
+        "prop": prop,
+        "ameneties_obj": ameneties_obj,
+        "facilities_obj": facilities_obj,
+        "prop_facilities_list": prop_facilities_list,
+        "prop_amenities_list": prop_amenities_list,
+        "existing_images": existing_images,
+        'user_obj': user_obj,
+        'video_option': video_option,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video,
+    }
+
+    return render(request, 'agent/Forms/Resale/industrial_edit.html', context)
+
+############ Views end for edit industrial resale form ########################
+
+
+########### Views start for view industrial resale form ####################
+
+def industrial_list_agent_view(request,id):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+    prop = get_object_or_404(
+        IndustrialResaleProperty.objects.prefetch_related('images', 'faqs'),
+        id=id
+    )
+
+    # FAQs are now persisted in DB via generate_auto_faqs() called on save().
+    # If for any reason they are missing (e.g. old record), regenerate on the fly.
+    if not prop.faqs.exists():
+        prop.generate_auto_faqs()
+
+    images = prop.images.all()
+    
+    # Split strings for nice badge rendering in HTML
+    facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+    context = {
+        'user_obj':user_obj,
+        'prop': prop,
+        'faqs': prop.faqs.all(),   # QuerySet from IndustrialResaleFAQ table
+        'images': images,
+        'facilities_list': facilities_list,
+        'amenities_list': amenities_list
+    }
+    return render(request, 'agent/Forms/Resale/industrial_view.html', context)
+
+
+############## Views end for view industrial resale form ########################
 
 #################Views Start For Resale Agricultural Listing Property###########################
 
 
 def agricultural_resale_agent(request):
-   # 1. Retrieve BOTH possible session IDs from the browser
+
+    # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
@@ -7547,88 +8201,448 @@ def agricultural_resale_agent(request):
 
 
 def agricultural_list_agent(request):
-   
 
-      # 1. Retrieve BOTH possible session IDs from the browser
-    user_id = request.session.get('User_id')
-    admin_id = request.session.get('Admin_id') 
+    # 1. Retrieve identity from browser session
+
+    session_user_id = request.session.get('User_id')
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
-    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
-    if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
-        dashboard_user_id = user_id
+        dashboard_user_id = session_user_id 
 
-    # 4. Data Fetching: Get the full user object using the final decided ID
+    # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
+    # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
+    all_properties = (
+        AgriculturalResaleProperty.objects.filter(listed_by_id=user_obj.user_id,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role)
+        .prefetch_related('images', 'video')
+        .order_by('-created_at')
+    )
 
-    # ═══════════════════════════════════════
-    # GET SEARCH & FILTERS
-    # ═══════════════════════════════════════
-  
+    # ── Read query params ────────────────────────────────────────────────────
+    search_query     = request.GET.get('search', '').strip()
+    prop_type        = request.GET.get('prop_type', '').strip()
+    village_filter   = request.GET.get('village', '').strip()
+    taluka_filter    = request.GET.get('taluka', '').strip()
+    ownership        = request.GET.get('ownership', '').strip()
+    water_filter     = request.GET.get('water', '').strip()
+    from_date        = request.GET.get('from_date', '').strip()
+    to_date          = request.GET.get('to_date', '').strip()
 
-    # ═══════════════════════════════════════
-   
+    # ── Apply filters ────────────────────────────────────────────────────────
+    properties = all_properties
 
-    # ═══════════════════════════════════════
-    # CONTEXT MAP
-    # ═══════════════════════════════════════
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query)  |
+            Q(village__icontains=search_query)         |
+            Q(taluka__icontains=search_query)          |
+            Q(district__icontains=search_query)        |
+            Q(city__icontains=search_query)            |
+            Q(locality__icontains=search_query)        |
+            Q(listed_by_name__icontains=search_query)  |
+            Q(property_type__icontains=search_query)
+        )
+
+    if prop_type:
+        properties = properties.filter(property_type=prop_type)
+
+    if village_filter:
+        properties = properties.filter(Q(village__icontains=village_filter) | Q(district__icontains=village_filter))
+
+    if taluka_filter:
+        properties = properties.filter(taluka__icontains=taluka_filter)
+
+    if ownership:
+        properties = properties.filter(ownership_type=ownership)
+
+    if water_filter:
+        properties = properties.filter(water_source__icontains=water_filter)
+
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
+
+    # ── Thumbnail + helper attributes for each filtered property ─────────────
+    for prop in properties:
+        prop.thumbnail = prop.images.first()
+
+        prop.nearby_facilities_list = (
+            [f.strip() for f in prop.nearby_facilities.split(',')]
+            if prop.nearby_facilities else []
+        )
+        prop.amenities_list = (
+            [a.strip() for a in prop.amenities.split(',')]
+            if prop.amenities else []
+        )
+        prop.image_count = prop.images.count()
+        prop.image_urls  = [img.image.url for img in prop.images.all()]
+
+    # ════════════════════════════════════════════════════════════════════════
+    # KPI STATS (Calculated using exact agricultural model keys)
+    # ════════════════════════════════════════════════════════════════════════
+    total_count = all_properties.count()
+
+    # ── Row 1 — Inventory Categories ──────────────────────────────────────────
+    farmland_count     = all_properties.filter(property_type='farmland').count()
+    orchard_count      = all_properties.filter(property_type='orchard_land').count()
+    plantation_count   = all_properties.filter(property_type='plantation_land').count()
+    farmhouse_count    = all_properties.filter(property_type='farm_house_land').count()
+    plot_count         = all_properties.filter(property_type='agricultural_plot').count()
+    mixed_count        = all_properties.filter(property_type='mixed_agriculture_land').count()
+
+    def pct(part, whole):
+        return round(part / whole * 100) if whole else 0
+
+    farmland_pct   = pct(farmland_count,   total_count)
+    orchard_pct    = pct(orchard_count,    total_count)
+    plantation_pct = pct(plantation_count, total_count)
+
+    # ── Row 2 — Pricing ──────────────────────────────────────────────────────
+    price_agg = all_properties.aggregate(
+        avg      = Avg('selling_price'),
+        max_val  = Max('selling_price'),
+        min_val  = Min('selling_price'),
+        avg_acre = Avg('price_per_acre'),
+        avg_area = Avg('land_area'),
+    )
+    avg_price      = price_agg['avg']
+    max_price      = price_agg['max_val']
+    min_price      = price_agg['min_val']
+    avg_price_acre = price_agg['avg_acre']
+    avg_land_area  = price_agg['avg_area']
+    total_value    = all_properties.aggregate(sum_val=Sum('selling_price'))['sum_val'] or 0
+
+    # ── Row 3 — Legal & Status ───────────────────────────────────────────────
+    no_dispute_count  = all_properties.filter(agri_dispute='no').count()
+    dispute_count     = all_properties.filter(agri_dispute='yes').count()
+    tax_pending_count = all_properties.filter(pending_tax_due='yes').count()
+    tenant_occupied   = all_properties.filter(existing_tenants='yes').count()
+    total_with_loan   = all_properties.filter(property_loan='yes').count()
+    irrigated_count   = all_properties.exclude(water_source='none').count()
+
+    # ── Row 4 — Listing Quality ──────────────────────────────────────────────
+    with_video_count = (
+        all_properties
+        .exclude(property_video__isnull=True)
+        .exclude(property_video='')
+        .count()
+    )
+    with_cert_count = (
+        all_properties
+        .exclude(encumbrance_cert__isnull=True)
+        .exclude(encumbrance_cert='')
+        .count()
+    )
+    with_owner_count = (
+        all_properties
+        .exclude(listed_by_name__isnull=True)
+        .exclude(listed_by_name='')
+        .count()
+    )
+    total_with_images = all_properties.filter(images__isnull=False).distinct().count()
+
+    # ── Charts ───────────────────────────────────────────────────────────────
+    property_type_counts = dict(
+        all_properties.values('property_type')
+        .annotate(count=Count('id'))
+        .values_list('property_type', 'count')
+    )
+    water_source_counts = dict(
+        all_properties.values('water_source')
+        .annotate(count=Count('id'))
+        .values_list('water_source', 'count')
+    )
+    soil_type_counts = dict(
+        all_properties.values('soil_type')
+        .annotate(count=Count('id'))
+        .values_list('soil_type', 'count')
+    )
+
+    # ── Unique values for dropdowns ──────────────────────────────────────────
+    unique_prop_types = list(
+        all_properties.values_list('property_type', flat=True)
+        .distinct().order_by('property_type')
+    )
+    unique_villages = list(
+        all_properties.values_list('village', flat=True)
+        .distinct().order_by('village')
+    )
+    unique_talukas = list(
+        all_properties.values_list('taluka', flat=True)
+        .distinct().order_by('taluka')
+    )
+    unique_cities = list(
+        all_properties.values_list('district', flat=True)
+        .distinct().order_by('district')
+    )
+
+    try:
+        uploaded_files = (
+            all_properties
+            .exclude(upload_file_name__isnull=True)
+            .exclude(upload_file_name='')
+            .values_list('upload_file_name', flat=True)
+            .distinct()
+        )
+    except Exception:
+        uploaded_files = []
+
+    # ── Context ──────────────────────────────────────────────────────────────
     context = {
-        'user_obj': user_obj,
-        
+        'user_obj'          : user_obj,
+        'properties'         : properties,
+
+        # Counts
+        'filtered_count'     : properties.count(),
+        'total_count'        : total_count,
+
+        # Active search params
+        'search_query'       : search_query,
+        'prop_type_query'    : prop_type,
+        'village_query'      : village_filter,
+        'taluka_query'       : taluka_filter,
+        'ownership_query'    : ownership,
+        'water_query'        : water_filter,
+        'from_date'          : from_date,
+        'to_date'            : to_date,
+
+        # Stats bundle matching template cards
+        'stats': {
+            'total'          : total_count,
+            'farmland'       : farmland_count,
+            'orchard_land'   : orchard_count,
+            'plantation_land': plantation_count,
+            'farm_house_land': farmhouse_count,
+            'agricultural_plot': plot_count,
+            'mixed_agriculture_land': mixed_count,
+            'total_value'    : total_value,
+            'irrigated_count': irrigated_count,
+        },
+
+        # Row 1 — Inventory Percentages
+        'farmland_pct'       : farmland_pct,
+        'orchard_pct'        : orchard_pct,
+        'plantation_pct'     : plantation_pct,
+        'total_with_images'  : total_with_images,
+
+        # Row 2 — Pricing
+        'avg_price'          : avg_price,
+        'max_price'          : max_price,
+        'min_price'          : min_price,
+        'avg_price_acre'     : avg_price_acre,
+        'avg_land_area'      : avg_land_area,
+        'total_with_loan'    : total_with_loan,
+
+        # Row 3 — Legal
+        'no_dispute_count'   : no_dispute_count,
+        'dispute_count'      : dispute_count,
+        'tax_pending_count'  : tax_pending_count,
+        'tenant_occupied'    : tenant_occupied,
+
+        # Row 4 — Quality
+        'with_video_count'   : with_video_count,
+        'with_cert_count'    : with_cert_count,
+        'with_owner_count'   : with_owner_count,
+
+        # Charts
+        'property_type_counts': property_type_counts,
+        'water_source_counts' : water_source_counts,
+        'soil_type_counts'    : soil_type_counts,
+
+        # Dropdowns
+        'unique_prop_types'  : unique_prop_types,
+        'unique_villages'    : unique_villages,
+        'unique_talukas'     : unique_talukas,
+        'unique_cities'      : unique_cities,
+
+        'uploaded_files'     : uploaded_files
     }
 
     return render(request, 'agent/Reports/Resale/agricultural_list.html', context)
 
 
+############# Views start for update agricultural resale property form ###########
 
+def agricultural_list_agent_update(request,id):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    property_obj = AgriculturalResaleProperty.objects.get(id=id)
+
+    ameneties_obj = Ameneties_Details.objects.all() if 'Ameneties_Details' in globals() else []
+    facilities_obj = Facilities_Details.objects.all() if 'Facilities_Details' in globals() else []
+    
+    prop_facilities_list = [f.strip() for f in property_obj.nearby_facilities.split(',')] if property_obj.nearby_facilities else []
+    prop_amenities_list = [a.strip() for a in property_obj.amenities.split(',')] if property_obj.amenities else []
+
+    videos_qs = property_obj.video.all().order_by('-created_at') if hasattr(property_obj, 'video') else []
+    
+    uploaded_video = videos_qs.filter(source='uploaded').first() if hasattr(videos_qs, 'filter') else None
+    auto_video     = videos_qs.filter(source='auto').first() if hasattr(videos_qs, 'filter') else None
+    rm_video       = videos_qs.filter(source='rm_assisted').first() if hasattr(videos_qs, 'filter') else None
+    
+    latest_video = videos_qs.first() if hasattr(videos_qs, 'first') else None
+    video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+    video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else (property_obj.video_option or 'upload')
+    
+    existing_images = property_obj.images.all() if hasattr(property_obj, 'images') else []
+
+    agricultural_image_categories = [
+        ('land_overview', 'Land Overview'),
+        ('soil_quality', 'Soil Quality'),
+        ('water_source', 'Water Source'),
+        ('irrigation_system', 'Irrigation'),
+        ('crop_cultivation', 'Crops / Cultivation'),
+        ('farm_house', 'Farm House'),
+        ('electricity_setup', 'Electricity Setup'),
+        ('storage_shed', 'Storage Shed'),
+        ('boundary_fencing', 'Boundary & Fencing'),
+        ('approach_road', 'Approach Road'),
+        ('tubewell_pump', 'Tubewell & Pump'),
+        ('aerial_drone', 'Aerial / Drone')
+    ]
+
+    context = {
+        'user_obj': user_obj,
+        'prop': property_obj,
+        'ameneties_obj': ameneties_obj,
+        'facilities_obj': facilities_obj,
+        'prop_facilities_list': prop_facilities_list,
+        'prop_amenities_list': prop_amenities_list,
+        'existing_images': existing_images,
+        'user_obj': user_obj,
+        'video_option': video_option,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video,
+        'agricultural_image_categories': agricultural_image_categories
+    }
+
+    return render(request, 'agent/Forms/Resale/edit_agricultural_resale.html', context)
+
+########## Views end for update agricultural resale property form ####################
+
+
+########### Views start for view agricultural resale property form ###############
+
+def agricultural_list_agent_view(request,id):
+# 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    property_obj = get_object_or_404(
+        AgriculturalResaleProperty.objects.prefetch_related('images', 'faqs'),
+        id=id
+    )
+
+    # Safety: regenerate FAQs if missing (old records before migration)
+    if not property_obj.faqs.exists():
+        property_obj.generate_auto_faqs()
+
+    # FAQs are now persisted in DB via generate_auto_faqs() called on save()
+
+    images = property_obj.images.all()
+    
+    # Split strings for nice badge rendering in HTML
+    facilities_list = [f.strip() for f in property_obj.nearby_facilities.split(',')] if property_obj.nearby_facilities else []
+    amenities_list = [a.strip() for a in property_obj.amenities.split(',')] if property_obj.amenities else []
+
+    context = {
+        'prop': property_obj,
+        'faqs': property_obj.faqs.all(),
+        'images': images,
+        'facilities_list': facilities_list,
+        'amenities_list': amenities_list,
+        'user_obj':user_obj
+    }
+
+    return render(request, 'agent/Forms/Resale/view_agriculture_resale.html', context)
+
+############ Views end for view agricultural resale property form ##############
 
 #################Views Start For Resale Plot Residential Listing Property###########################
 
 
 def residential_plot_resale_agent(request):
-   # 1. Retrieve BOTH possible session IDs from the browser
-    
 
+    # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
-
     ameneties_obj = Ameneties_Details.objects.all()
     facilities_obj = Facilities_Details.objects.all()
-    
+
     
     context = {
         'user_obj': user_obj,
@@ -7637,85 +8651,349 @@ def residential_plot_resale_agent(request):
         'facilities_obj':facilities_obj
     }
     
-    return render(request, "agent/Forms/Resale_Plot/residential_plot_resale.html", context)
+    return render(request, "agent/Forms/Resale/Plots/res_plots.html", context)
+
 
 
 def residential_plot_resale_list_agent(request):
-   
-
-      # 1. Retrieve BOTH possible session IDs from the browser
+# 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
+
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
+    all_properties = (
+        ResidentialPlotResaleProperty.objects
+        .filter(is_deleted=False,listed_by_id=user_obj.user_id,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role)
+        .prefetch_related('images', 'video')
+        .order_by('-created_at')
+    )
+
+    # Read query params
+    search_query       = request.GET.get('search', '').strip()
+    prop_type          = request.GET.get('plot_type', '').strip()
+    city_filter        = request.GET.get('city', '').strip()
+    locality_filter    = request.GET.get('locality', '').strip()
+    road_facing_filter = request.GET.get('road_facing', '').strip()
+    corner_filter      = request.GET.get('corner_plot', '').strip()
+    loan_filter        = request.GET.get('loan', '').strip()
+    min_price          = request.GET.get('min_price', '').strip()
+    max_price          = request.GET.get('max_price', '').strip()
+    from_date          = request.GET.get('from_date', '').strip()
+    to_date            = request.GET.get('to_date', '').strip()
+
+    # Apply filters
+    properties = all_properties
+
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query)  |
+            Q(city__icontains=search_query)            |
+            Q(locality__icontains=search_query)        |
+            Q(state__icontains=search_query)           |
+            Q(listed_by_name__icontains=search_query)  |
+            Q(property_type__icontains=search_query)   |
+            Q(layout_name__icontains=search_query)
+        )
+
+    if prop_type:
+        properties = properties.filter(property_type=prop_type)
+
+    if city_filter:
+        properties = properties.filter(city__icontains=city_filter)
+
+    if locality_filter:
+        properties = properties.filter(locality__icontains=locality_filter)
+
+    if road_facing_filter:
+        properties = properties.filter(plot_facing__icontains=road_facing_filter)
+
+    if corner_filter:
+        properties = properties.filter(corner_plot__iexact=corner_filter)
+
+    if loan_filter:
+        if loan_filter.lower() == 'yes':
+            properties = properties.exclude(Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__isnull=True) | Q(property_loan_status=''))
+        elif loan_filter.lower() == 'no':
+            properties = properties.filter(Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__isnull=True) | Q(property_loan_status=''))
+
+    if min_price:
+        try: properties = properties.filter(selling_price__gte=float(min_price))
+        except ValueError: pass
+
+    if max_price:
+        try: properties = properties.filter(selling_price__lte=float(max_price))
+        except ValueError: pass
+
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
+
+    # Thumbnail and helpers
+    for prop in properties:
+        prop.thumbnail = prop.images.first()
+        prop.nearby_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+        prop.amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+        prop.image_count = prop.images.count()
+        prop.image_urls  = [img.image.url for img in prop.images.all()]
+
+    # ── KPI STATS & FORM-ALIGNED METRICS ─────────────────────────────────────
+    total_count = all_properties.count()
+
+    residential_count  = all_properties.filter(land_use__icontains='Residential').count()
+    commercial_count   = all_properties.filter(land_use__icontains='Commercial').count()
+    agricultural_count = all_properties.filter(land_use__icontains='Agricultural').count()
+    
+    finance_ready_count = all_properties.filter(
+        Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__iexact='Loan Closed')
+    ).count()
+
+    corner_plot_count  = all_properties.filter(corner_plot__iexact='yes').count()
+    fenced_plot_count  = all_properties.exclude(Q(plot_fencing__iexact='none') | Q(plot_fencing__isnull=True) | Q(plot_fencing='')).count()
+    active_listings    = all_properties.exclude(selling_price__isnull=True).count()
+
+    # Form-specific analytic cards
+    na_converted_count = all_properties.filter(na_status__icontains='NA').count()
+    clear_title_count  = all_properties.filter(title_clearance__icontains='Clear').count()
+
+    # Duplication metrics
+    duplicate_properties_count = all_properties.filter(is_duplicate=True).count()
+    duplicate_count_sum = all_properties.aggregate(total_dups=Sum('duplicate_count'))['total_dups'] or 0
+
+    price_agg = all_properties.aggregate(
+        avg      = Avg('selling_price'),
+        max_val  = Max('selling_price'),
+        min_val  = Min('selling_price'),
+        avg_sqft = Avg('plot_price_per_sqft'),
+        avg_area = Avg('plot_area'),
+    )
+    avg_price       = price_agg['avg']
+    max_price       = price_agg['max_val']
+    min_price       = price_agg['min_val']
+    avg_price_sqft  = price_agg['avg_sqft']
+    avg_plot_area   = price_agg['avg_area']
+    total_value     = all_properties.aggregate(sum_val=Sum('selling_price'))['sum_val'] or 0
+
+    property_type_counts = dict(all_properties.values('property_type').annotate(count=Count('id')).values_list('property_type', 'count'))
+    ownership_counts = dict(all_properties.values('ownership_type').annotate(count=Count('id')).values_list('ownership_type', 'count'))
+
+    unique_prop_types = list(all_properties.values_list('property_type', flat=True).distinct().order_by('property_type'))
+    unique_cities = list(all_properties.values_list('city', flat=True).distinct().order_by('city'))
+    unique_localities = list(all_properties.values_list('locality', flat=True).distinct().order_by('locality'))
+
+    try:
+        uploaded_files = all_properties.exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+
+    context = {
+        'user_obj'                   : user_obj,
+        'properties'                 : properties,
+        'filtered_count'             : properties.count(),
+        'total_properties'           : total_count,
+        'total_count'                : total_count,
+
+        'search_query'               : search_query,
+        'prop_type_query'            : prop_type,
+        'city_query'                 : city_filter,
+        'locality_query'             : locality_filter,
+        'road_facing_query'          : road_facing_filter,
+        'corner_query'               : corner_filter,
+        'loan_query'                 : loan_filter,
+        'from_date'                  : from_date,
+        'to_date'                    : to_date,
+
+        # Metric Cards
+        'active_listings'            : active_listings,
+        'residential_count'          : residential_count,
+        'commercial_count'           : commercial_count,
+        'agricultural_count'         : agricultural_count,
+        'finance_ready_count'        : finance_ready_count,
+        'corner_plot_count'          : corner_plot_count,
+        'fenced_plot_count'          : fenced_plot_count,
+        'na_converted_count'         : na_converted_count,
+        'clear_title_count'          : clear_title_count,
+        'duplicate_properties_count' : duplicate_properties_count,
+        'duplicate_count_sum'        : duplicate_count_sum,
+
+        'avg_price'                  : avg_price,
+        'max_price'                  : max_price,
+        'min_price'                  : min_price,
+        'avg_price_sqft'             : avg_price_sqft,
+        'avg_plot_area'              : avg_plot_area,
+        'total_value'                : total_value,
+
+        'property_type_counts'       : property_type_counts,
+        'ownership_counts'           : ownership_counts,
+        'unique_prop_types'          : unique_prop_types,
+        'unique_cities'              : unique_cities,
+        'unique_localities'          : unique_localities,
+        'uploaded_files'             : uploaded_files
+    }
+
+    return render(request, 'agent/Reports/Resale/Plots/res_plots_list.html', context)
+
+
+
+############### Views start for update residential resale plot property form ###########
+
+def residential_plot_resale_agent_update(request,id):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     ameneties_obj = Ameneties_Details.objects.all()
     facilities_obj = Facilities_Details.objects.all()
+
+    prop = ResidentialPlotResaleProperty.objects.get(id=id)
+
+    prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+    videos_qs = prop.video.all().order_by('-created_at') if hasattr(prop, 'video') else []
+        
+    uploaded_video = videos_qs.filter(source='uploaded').first() if hasattr(videos_qs, 'filter') else None
+    auto_video     = videos_qs.filter(source='auto').first() if hasattr(videos_qs, 'filter') else None
+    rm_video       = videos_qs.filter(source='rm_assisted').first() if hasattr(videos_qs, 'filter') else None
+        
+    latest_video = videos_qs.first() if hasattr(videos_qs, 'first') else None
+    video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+    video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else (prop.video_option or 'upload')
+        
+    existing_images = prop.images.all() if hasattr(prop, 'images') else []
+
+    context = {'user_obj':user_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj,'prop':prop,'prop_facilities_list':prop_facilities_list,'prop_amenities_list':prop_amenities_list,'existing_images':existing_images,'video_option':video_option,'uploaded_video':uploaded_video,'auto_video':auto_video,'rm_video':rm_video}
+
+    return render(request,"agent/Forms/Resale/Plots/update_resi_plots.html",context)
+
+
+############ Views end for update residential resale plot property form ############## 
+
+
+########### Views start for view residential resale plot property form ################
+
+def residential_plot_resale_agent_view(request,id):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
     
-    
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    prop = ResidentialPlotResaleProperty.objects.get(id=id)
+
+    # Safety: regenerate FAQs if missing (old records before migration)
+    if not prop.faqs.exists():
+        prop.generate_auto_faqs()
+
+    # FAQs are now persisted in DB via generate_auto_faqs() called on save()
+
+    images = prop.images.all()
+        
+    # Split strings for nice badge rendering in HTML
+    facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
     context = {
-        'user_obj': user_obj,
-        'user_role': user_obj.user_role,
-        'ameneties_obj':ameneties_obj,
-        'facilities_obj':facilities_obj
+        'user_obj':user_obj,
+        'prop':prop,
+        'faqs': prop.faqs.all(),
+        'facilities_list': facilities_list,
+        'amenities_list': amenities_list,
+        'images': images
     }
 
-    return render(request, 'agent/Reports/Resale_Plot/residential_plot_resale_list.html', context)
+    return render(request,"agent/Forms/Resale/Plots/view_resi_plots.html",context)
 
 
-
+########## Views end for view residential resale plot property form ###################
 
 #################Views Start For Resale Plot Commericial Listing Property###########################
 
 
 def commercial_plot_resale_agent(request):
-   # 1. Retrieve BOTH possible session IDs from the browser
+# 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
-
     ameneties_obj = Ameneties_Details.objects.all()
     facilities_obj = Facilities_Details.objects.all()
-    
+
     
     context = {
         'user_obj': user_obj,
@@ -7723,52 +9001,313 @@ def commercial_plot_resale_agent(request):
         'ameneties_obj':ameneties_obj,
         'facilities_obj':facilities_obj
     }
-    return render(request, "agent/Forms/Resale_Plot/commercial_plot_resale.html", context)
+    
+    return render(request, "agent/Forms/Resale/Plots/comm_plots.html", context)
 
 
 def commercial_plot_resale_list_agent(request):
-   
+# 1. Retrieve BOTH possible session IDs from the browser
 
-      # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    # 2.  VIP Access Control
-    is_valid_agent = (user_id and logged_in_role == "Agent")
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agent")
     is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
 
-    # If they aren't a valid Agent, AND they aren't an Admin trying to impersonate... kick them out.
-    if not is_valid_agent and not is_valid_admin:
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3.  The ID Swap
+    # 3. The ID Swap
     if is_valid_admin:
-        # Admin is visiting: pull the target Agent's ID
+        # Admin is visiting: pull the target Landlord's ID
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        # Normal Agent is visiting: use their normal ID
+        # Normal Landlord is visiting: use their normal ID
         dashboard_user_id = user_id
 
     # 4. Data Fetching: Get the full user object using the final decided ID
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
+    # Fetch ALL non-deleted properties
+    all_properties = (
+        CommercialPlotResaleProperty.objects
+        .filter(is_deleted=False,listed_by_id=user_obj.user_id,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role)
+        .prefetch_related('images', 'video')
+        .order_by('-created_at')
+    )
 
-    ameneties_obj = Ameneties_Details.objects.all()
-    facilities_obj = Facilities_Details.objects.all()
+    # Read query params
+    search_query       = request.GET.get('search', '').strip()
+    prop_type          = request.GET.get('plot_type', '').strip()
+    city_filter        = request.GET.get('city', '').strip()
+    locality_filter    = request.GET.get('locality', '').strip()
+    road_facing_filter = request.GET.get('road_facing', '').strip()
+    corner_filter      = request.GET.get('corner_plot', '').strip()
+    loan_filter        = request.GET.get('loan', '').strip()
+    min_price          = request.GET.get('min_price', '').strip()
+    max_price          = request.GET.get('max_price', '').strip()
+    from_date          = request.GET.get('from_date', '').strip()
+    to_date            = request.GET.get('to_date', '').strip()
+
+    # Apply filters
+    properties = all_properties
+
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query)  |
+            Q(city__icontains=search_query)            |
+            Q(locality__icontains=search_query)        |
+            Q(state__icontains=search_query)           |
+            Q(listed_by_name__icontains=search_query)  |
+            Q(property_type__icontains=search_query)   |
+            Q(layout_name__icontains=search_query)
+        )
+
+    if prop_type:
+        properties = properties.filter(property_type=prop_type)
+
+    if city_filter:
+        properties = properties.filter(city__icontains=city_filter)
+
+    if locality_filter:
+        properties = properties.filter(locality__icontains=locality_filter)
+
+    if road_facing_filter:
+        properties = properties.filter(plot_facing__icontains=road_facing_filter)
+
+    if corner_filter:
+        properties = properties.filter(corner_plot__iexact=corner_filter)
+
+    if loan_filter:
+        if loan_filter.lower() == 'yes':
+            properties = properties.exclude(Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__isnull=True) | Q(property_loan_status=''))
+        elif loan_filter.lower() == 'no':
+            properties = properties.filter(Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__isnull=True) | Q(property_loan_status=''))
+
+    if min_price:
+        try: properties = properties.filter(selling_price__gte=float(min_price))
+        except ValueError: pass
+
+    if max_price:
+        try: properties = properties.filter(selling_price__lte=float(max_price))
+        except ValueError: pass
+
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
+
+    # Thumbnail and helpers
+    for prop in properties:
+        prop.thumbnail = prop.images.first()
+        prop.nearby_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+        prop.amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+        prop.image_count = prop.images.count()
+        prop.image_urls  = [img.image.url for img in prop.images.all()]
+
+    # ── KPI STATS & FORM-ALIGNED METRICS ─────────────────────────────────────
+    total_count = all_properties.count()
+
+    residential_count  = all_properties.filter(land_use__icontains='Residential').count()
+    commercial_count   = all_properties.filter(land_use__icontains='Commercial').count()
+    agricultural_count = all_properties.filter(land_use__icontains='Agricultural').count()
     
-    
+    finance_ready_count = all_properties.filter(
+        Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__iexact='Loan Closed')
+    ).count()
+
+    # corner_plot_count  = all_properties.filter(corner_plot__iexact='yes').count()
+    fenced_plot_count  = all_properties.exclude(Q(plot_fencing__iexact='none') | Q(plot_fencing__isnull=True) | Q(plot_fencing='')).count()
+    active_listings    = all_properties.exclude(selling_price__isnull=True).count()
+
+    # Form-specific analytic cards
+    na_converted_count = all_properties.filter(na_status__icontains='NA').count()
+    clear_title_count  = all_properties.filter(title_clearance__icontains='Clear').count()
+
+    # Duplication metrics
+    duplicate_properties_count = all_properties.filter(is_duplicate=True).count()
+    duplicate_count_sum = all_properties.aggregate(total_dups=Sum('duplicate_count'))['total_dups'] or 0
+
+    price_agg = all_properties.aggregate(
+        avg      = Avg('selling_price'),
+        max_val  = Max('selling_price'),
+        min_val  = Min('selling_price'),
+        avg_sqft = Avg('plot_price_per_sqft'),
+        avg_area = Avg('plot_area'),
+    )
+    avg_price       = price_agg['avg']
+    max_price       = price_agg['max_val']
+    min_price       = price_agg['min_val']
+    avg_price_sqft  = price_agg['avg_sqft']
+    avg_plot_area   = price_agg['avg_area']
+    total_value     = all_properties.aggregate(sum_val=Sum('selling_price'))['sum_val'] or 0
+
+    property_type_counts = dict(all_properties.values('property_type').annotate(count=Count('id')).values_list('property_type', 'count'))
+    ownership_counts = dict(all_properties.values('ownership_type').annotate(count=Count('id')).values_list('ownership_type', 'count'))
+
+    unique_prop_types = list(all_properties.values_list('property_type', flat=True).distinct().order_by('property_type'))
+    unique_cities = list(all_properties.values_list('city', flat=True).distinct().order_by('city'))
+    unique_localities = list(all_properties.values_list('locality', flat=True).distinct().order_by('locality'))
+
+    try:
+        uploaded_files = all_properties.exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+
     context = {
-        'user_obj': user_obj,
-        'user_role': user_obj.user_role,
-        'ameneties_obj':ameneties_obj,
-        'facilities_obj':facilities_obj
+        'user_obj'                   : user_obj,
+        'properties'                 : properties,
+        'filtered_count'             : properties.count(),
+        'total_properties'           : total_count,
+        'total_count'                : total_count,
+
+        'search_query'               : search_query,
+        'prop_type_query'            : prop_type,
+        'city_query'                 : city_filter,
+        'locality_query'             : locality_filter,
+        'road_facing_query'          : road_facing_filter,
+        'corner_query'               : corner_filter,
+        'loan_query'                 : loan_filter,
+        'from_date'                  : from_date,
+        'to_date'                    : to_date,
+
+        # Metric Cards
+        'active_listings'            : active_listings,
+        'residential_count'          : residential_count,
+        'commercial_count'           : commercial_count,
+        'agricultural_count'         : agricultural_count,
+        'finance_ready_count'        : finance_ready_count,
+        'fenced_plot_count'          : fenced_plot_count,
+        'na_converted_count'         : na_converted_count,
+        'clear_title_count'          : clear_title_count,
+        'duplicate_properties_count' : duplicate_properties_count,
+        'duplicate_count_sum'        : duplicate_count_sum,
+
+        'avg_price'                  : avg_price,
+        'max_price'                  : max_price,
+        'min_price'                  : min_price,
+        'avg_price_sqft'             : avg_price_sqft,
+        'avg_plot_area'              : avg_plot_area,
+        'total_value'                : total_value,
+
+        'property_type_counts'       : property_type_counts,
+        'ownership_counts'           : ownership_counts,
+        'unique_prop_types'          : unique_prop_types,
+        'unique_cities'              : unique_cities,
+        'unique_localities'          : unique_localities,
+        'uploaded_files'             : uploaded_files
     }
 
-    return render(request, 'agent/Reports/Resale_Plot/commercial_plot_resale_list.html', context)
+    return render(request, 'agent/Reports/Resale/Plots/comm_plots_list.html', context)
 
 
+######### Views start for update plot resale commercial property #################
 
+def commercial_plot_resale_agent_update(request,id):
+    # 1. Retrieve identity from browser session
+        session_user_id = request.session.get('User_id')
+        logged_in_role = request.session.get('user_type')
+    
+        #  2. UPDATED SECURITY CHECK
+        
+        is_valid_rm = (session_user_id and logged_in_role == "Agent")
+        is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    
+        if not is_valid_rm and not is_valid_admin:
+            return redirect('login') 
+    
+        # 3. The ID Swap
+        if logged_in_role == "Admin":
+            dashboard_user_id = request.session.get('impersonate_id')
+        else:
+            dashboard_user_id = session_user_id 
+    
+        # 3. Data Fetching: Get the full user object for the template
+        user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+
+
+        prop = CommercialPlotResaleProperty.objects.get(id=id)
+        
+        prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+        prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+        videos_qs = prop.video.all().order_by('-created_at') if hasattr(prop, 'video') else []
+        
+        uploaded_video = videos_qs.filter(source='uploaded').first() if hasattr(videos_qs, 'filter') else None
+        auto_video     = videos_qs.filter(source='auto').first() if hasattr(videos_qs, 'filter') else None
+        rm_video       = videos_qs.filter(source='rm_assisted').first() if hasattr(videos_qs, 'filter') else None
+        
+        latest_video = videos_qs.first() if hasattr(videos_qs, 'first') else None
+        video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+        video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else (prop.video_option or 'upload')
+        
+        existing_images = prop.images.all() if hasattr(prop, 'images') else []
+
+        context = {'user_obj':user_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj,'prop':prop,'prop_facilities_list':prop_facilities_list,'prop_amenities_list':prop_amenities_list,'existing_images':existing_images,'video_option':video_option,'uploaded_video':uploaded_video,'auto_video':auto_video,'rm_video':rm_video}
+
+        return render(request,"agent/Forms/Resale/Plots/update_comm_plots.html",context)
+
+
+############# Views end for update plot resale commercial property ###################
+
+
+######### Views start for view plot resale commercial property ##################
+
+def commercial_plot_resale_agent_view(request,id):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+    
+    #  2. UPDATED SECURITY CHECK
+        
+    is_valid_rm = (session_user_id and logged_in_role == "Agent")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+    
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+    
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    prop = CommercialPlotResaleProperty.objects.get(id=id)
+        
+    # Safety: regenerate FAQs if missing (old records before migration)
+    if not prop.faqs.exists():
+        prop.generate_auto_faqs()
+
+    # FAQs are now persisted in DB via generate_auto_faqs() called on save()
+
+    images = prop.images.all()
+        
+    # Split strings for nice badge rendering in HTML
+    facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+    context = {'user_obj':user_obj,
+        'prop':prop,
+        'faqs': prop.faqs.all(),
+        'facilities_list': facilities_list,
+        'amenities_list': amenities_list,
+        'images': images
+    }
+
+    return render(request,"agent/Forms/Resale/Plots/view_comm_plots.html",context)
+
+############ Views end for view plot resale commercial property #################
 
 ############# Views Start for Resale Plot Industrial Module for Agent ######################################
 

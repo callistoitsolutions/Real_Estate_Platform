@@ -1,26 +1,38 @@
-
-{% include "agency_panel/agency_header.html" %}
+{% include "landlord/landlord_header.html" %}
 {% load static %}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<!-- SweetAlert CDN -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <style>
-   :root {
-     --primary-gradient: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%); /* Gold to Bronze */
-    --success-gradient: linear-gradient(135deg, #10b981 0%, #065f46 100%); /* Jade Green */
-    --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); /* Neon Orange-Red */
-    --warning-gradient: linear-gradient(135deg, #facc15 0%, #ca8a04 100%); /* Vivid Yellow */
-    --info-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); /* Electric Blue */
-    --dark-gradient: linear-gradient(180deg, #0b1528 0%, #1e293b 100%); /* Dark Deep Ocean Blue */
+  :root {
+    --primary: #667eea;
+    --primary-dark: #5a67d8;
+    --primary-gradient: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%); /* Gold to Bronze */
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --success: #10b981;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg-light: #f8f9fa;
+    --text-dark: #2d3748;
+    --text-mid: #4a5568;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.07);
+    --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.05);
     --sidebar-width: 280px;
-    --sidebar-collapsed-width: 80px;
     --topbar-height: 70px;
-}
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  }
 
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     font-family: 'Poppins', 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -28,481 +40,245 @@
     overflow-x: hidden;
   }
 
-  .main-content {
-    margin-left: var(--sidebar-width);
-    margin-top: var(--topbar-height);
-    padding: 28px;
-    min-height: calc(100vh - var(--topbar-height));
-  }
+  .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 28px; min-height: calc(100vh - var(--topbar-height)); }
+  .page-wrapper { display: grid; grid-template-columns: 1fr 300px; grid-template-rows: auto auto 1fr; gap: 22px; align-items: start; }
 
-  .page-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    grid-template-rows: auto auto 1fr;
-    gap: 22px;
-    align-items: start;
-  }
-
-
-  /* Drag and Drop Image Sequencing Styles */
-  .preview-item-wrapper {
-    position: relative;
-    cursor: move;
-    transition: transform 0.2s ease;
-  }
-  .preview-item-wrapper:active {
-    transform: scale(0.95);
-  }
-  .preview-item-wrapper .preview-item {
-    width: 100%;
-    height: 100%;
-  }
+  /* Page Header Styles */
   .page-header {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    background: var(--primary-gradient);
-    border-radius: var(--radius-xl);
-    padding: 28px 35px;
-    color: white;
-    box-shadow: 0 8px 32px rgba(102,126,234,0.35);
-    position: relative;
-    overflow: hidden;
+    grid-column: 1 / -1; grid-row: 1; background: var(--primary-gradient); border-radius: var(--radius-xl);
+    padding: 28px 35px; color: white; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.35); position: relative; overflow: hidden;
   }
-  .page-header::after {
-    content: '';
-    position: absolute;
-    right: -40px; top: -40px;
-    width: 200px; height: 200px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
+  .page-header::after { content: ''; position: absolute; right: -40px; top: -40px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; }
+
+  .page-header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
   }
 
-  .stepper-container {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    background: #fff;
-    border-radius: var(--radius-xl);
-    padding: 22px 30px;
-    box-shadow: var(--shadow-card);
+  .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
   }
 
-  .form-container {
-    grid-column: 1 / 2;
-    grid-row: 3;
-    background: #fff;
-    border-radius: var(--radius-xl);
-    padding: 32px;
-    box-shadow: var(--shadow-card);
-    min-width: 0;
+  /* Admin User Badge */
+  .admin-user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px 6px 8px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: white;
   }
 
-  .preview-sidebar {
-    grid-column: 2 / 3;
-    grid-row: 3;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    position: sticky;
-    top: calc(var(--topbar-height) + 20px);
-    align-self: start;
+  .admin-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #1e293b;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.82rem;
   }
 
-  .page-title   { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
-  .page-subtitle{ font-size: 0.95rem; opacity: 0.85; margin: 0; font-weight: 400; }
+  .admin-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+  }
+
+  .admin-email {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+  }
+
+  .admin-role {
+      font-size: 0.7rem;
+      opacity: 0.85;
+      text-transform: capitalize;
+  }
+
+  .stepper-container { grid-column: 1 / -1; grid-row: 2; background: #fff; border-radius: var(--radius-xl); padding: 22px 30px; box-shadow: var(--shadow-card); }
+  .form-container { grid-column: 1 / 2; grid-row: 3; background: #fff; border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-card); min-width: 0; }
+  .preview-sidebar { grid-column: 2 / 3; grid-row: 3; display: flex; flex-direction: column; gap: 18px; position: sticky; top: calc(var(--topbar-height) + 20px); align-self: start; }
+
+  .page-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .page-subtitle { font-size: 0.95rem; opacity: 0.85; margin: 0; font-weight: 400; }
 
   .stepper { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; }
   .step-item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-  .step-circle {
-    width: 46px; height: 46px; min-width: 46px; min-height: 46px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 0.9rem; font-weight: 700; border: 3px solid var(--border);
-    background: #fff; color: var(--muted); transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex-shrink: 0;
-  }
-  .step-circle.active { background: var(--primary-gradient); color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 4px 16px rgba(102,126,234,0.45); }
-  .step-circle.done   { background: var(--success-gradient); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(16,185,129,0.35); }
-  .step-circle i { font-size: 0.85rem; }
-
+  .step-circle { width: 46px; height: 46px; min-width: 46px; min-height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 3px solid var(--border); background: #fff; color: var(--muted); transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); flex-shrink: 0; }
+  .step-circle.active { background: var(--primary-gradient); color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45); }
+  .step-circle.done { background: var(--success-gradient); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
   .step-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color 0.3s; }
   .step-label.active { color: var(--primary); }
-  .step-label.done   { color: var(--success); }
-
+  .step-label.done { color: var(--success); }
   .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background 0.4s; }
   .step-line.done { background: var(--success-gradient); }
 
   .step-content { display: none; }
   .step-content.active { display: block; animation: fadeInUp 0.35s ease; }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .form-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 28px; padding-bottom: 18px; border-bottom: 2px solid #f0f0f0;
-    gap: 12px; flex-wrap: wrap;
-  }
+  .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 2px solid #f0f0f0; gap: 12px; flex-wrap: wrap; }
   .form-title { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
-  .form-title i {
-    width: 42px; height: 42px; min-width: 42px;
-    background: var(--primary-gradient); color: white;
-    border-radius: var(--radius-md); display: inline-flex;
-    align-items: center; justify-content: center; font-size: 1rem;
-  }
-
-  .btn-back {
-    background: var(--bg-light); color: var(--text-dark);
-    padding: 10px 20px; border-radius: var(--radius-md);
-    border: 2px solid var(--border); font-weight: 600; cursor: pointer;
-    transition: all 0.3s ease; display: inline-flex; align-items: center;
-    gap: 8px; text-decoration: none; font-size: 0.88rem; white-space: nowrap; font-family: inherit;
-  }
-  .btn-back:hover { background: var(--dark-gradient); color: white; border-color: transparent; transform: translateY(-2px); text-decoration: none; }
+  .form-title i { width: 42px; height: 42px; min-width: 42px; background: var(--primary-gradient); color: white; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; }
+  
+  .btn-back { background: #ffffff; color: #2c3e50; padding: 10px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); font-size: 0.88rem; white-space: nowrap; font-family: inherit; }
+  .btn-back:hover { background: #f8f9fa; transform: translateY(-2px); text-decoration: none; }
 
   .form-section { margin-bottom: 26px; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-soft); }
-  .section-header {
-    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%); 
-    color: white;
-    padding: 13px 20px; font-weight: 600; font-size: 0.95rem;
-    display: flex; align-items: center; gap: 10px; letter-spacing: 0.01em;
-  }
+  .section-header { background: var(--primary-gradient); color: white; padding: 13px 20px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; letter-spacing: 0.01em; }
   .form-section.facility-theme .section-header { background: var(--info-gradient); }
-  .section-body {
-    background: var(--bg-light); padding: 22px 24px;
-    border: 2px solid #e9ecef; border-top: none;
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-  }
+  .section-body { background: var(--bg-light); padding: 22px 24px; border: 2px solid #e9ecef; border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
 
   .form-label { font-weight: 600; color: var(--text-dark); margin-bottom: 7px; font-size: 0.88rem; display: flex; align-items: center; gap: 5px; }
-  .required { color: #e74c3c; font-size: 1rem; line-height: 1; }
-
-  .form-control, .form-select {
-    border: 2px solid #e9ecef; border-radius: var(--radius-md);
-    padding: 10px 14px; font-size: 0.92rem; width: 100%;
-    transition: border-color 0.25s, box-shadow 0.25s;
-    background-color: #fff; color: var(--text-dark); font-family: inherit;
-  }
-  .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102,126,234,0.15); outline: none; }
+  .required, .required-star { color: #e74c3c; font-size: 1rem; line-height: 1; }
+  .form-control, .form-select { border: 2px solid #e9ecef; border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.92rem; width: 100%; transition: border-color 0.25s, box-shadow 0.25s; background-color: #fff; color: var(--text-dark); font-family: inherit; }
+  .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); outline: none; }
   .form-control[readonly], .form-control:disabled { background-color: #edf2f7; border-color: #cbd5e0; color: var(--text-mid); font-weight: 600; cursor: not-allowed; }
-
-  select.form-control, .form-select {
-    appearance: none; -webkit-appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px;
-  }
+  
+  select.form-control, .form-select { appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px; }
   textarea.form-control { min-height: 100px; resize: vertical; line-height: 1.6; }
 
   .radio-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
-  .radio-option {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 18px; background: #fff; border: 2px solid #e9ecef;
-    border-radius: var(--radius-md); cursor: pointer; font-weight: 600;
-    font-size: 0.88rem; color: var(--text-dark); transition: border-color 0.2s, background 0.2s;
-  }
+  .radio-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: #fff; border: 2px solid #e9ecef; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(--text-dark); transition: border-color 0.2s, background 0.2s; }
   .radio-option:hover { border-color: var(--primary); background: #f0f3ff; }
   .radio-option input[type="radio"] { accent-color: var(--primary); width: 16px; height: 16px; }
 
-  .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; }
-  .checkbox-item { flex: 1; min-width: 145px; }
-  .form-check { padding: 12px 14px; background: #fff; border-radius: var(--radius-md); border: 2px solid #e9ecef; transition: border-color 0.2s; height: 100%; }
-  .form-check:hover { border-color: var(--primary); }
-  .form-check-input { width: 17px; height: 17px; border: 2px solid #cbd5e0; border-radius: 5px; cursor: pointer; accent-color: var(--primary); vertical-align: middle; margin-top: 0; flex-shrink: 0; }
-  .form-check-label { font-weight: 600; color: var(--text-dark); margin-left: 8px; cursor: pointer; font-size: 0.85rem; vertical-align: middle; }
-
-  .conditional-section { animation: slideDown 0.3s ease; }
-  @keyframes slideDown { from { opacity: 0; max-height: 0; overflow: hidden; } to { opacity: 1; max-height: 500px; } }
-
-  .step-nav, .form-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 26px; gap: 12px; flex-wrap: wrap;
-    padding-top: 20px; border-top: 2px solid #f0f0f0;
-  }
+  .step-nav, .form-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; gap: 12px; flex-wrap: wrap; padding-top: 20px; border-top: 2px solid #f0f0f0; }
   .btn-step { padding: 12px 28px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all 0.3s ease; border: none; }
-  .btn-next, .btn-submit { background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
-    color: white; box-shadow: 0 4px 14px rgba(102,126,234,0.35); }
-  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.5); }
-  .btn-prev { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border) !important; }
+  .btn-next, .btn-submit { background: var(--primary-gradient); color: white; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35); }
+  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5); }
+  .btn-prev { background: #f8f9fa; color: #2d3748; border: 2px solid var(--border) !important; }
   .btn-prev:hover { background: #e9ecef; }
-  .btn-reset { background: var(--warning-gradient); color: white; box-shadow: 0 4px 14px rgba(245,87,108,0.3); }
-  .btn-reset:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,87,108,0.45); }
+  .btn-reset { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
 
-  .image-upload-area {
-    border: 3px dashed #cbd5e0; border-radius: var(--radius-lg);
-    padding: 40px 20px; text-align: center; background: var(--bg-light);
-    cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
-  }
-  .image-upload-area:hover, .image-upload-area.dragover { border-color: var(--primary); background: #f0f3ff; transform: scale(1.01); }
-  .upload-text { font-weight: 700; font-size: 1.05rem; color: var(--text-dark); margin-top: 10px; }
-  .upload-subtext { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+  /* Validation Error Styles */
+  .input-error { border-color: #e74c3c !important; box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important; }
+  .radio-error-group { border: 1px solid #e74c3c !important; border-radius: 12px; padding: 10px; box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important; }
 
-  .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; margin-top: 18px; }
-  .preview-item { position: relative; border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; border: 2px solid var(--border); background: #fff; }
-  .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .remove-image {
-    position: absolute; top: 7px; right: 7px; width: 28px; height: 28px;
-    background: #e74c3c; color: white; border: none; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 0.75rem; z-index: 10; transition: background 0.2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  .remove-image:hover { background: #c0392b; }
+  /* Categorized Images & Video Options */
+  .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .img-cat-tab { border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap; }
+  .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
 
-  .preview-card {
-    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
-    border-radius: var(--radius-lg); padding: 18px; color: white;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.2);
-  }
-  .preview-header { font-size: 0.82rem; font-weight: 600; opacity: 0.8; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+  .img-cat-panel { display: none; }
+  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  .img-cat-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
+  .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+  .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: grab; }
+  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .img-cat-preview-item .remove-image { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; }
+
+  .img-total-summary { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; }
+
+  /* Modern Video Option Cards */
+  .video-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .video-option-card { position: relative; border: 2px solid #e2e8f0; border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; background: #fff; transition: all 0.3s; }
+  .video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
+  .video-option-card.active { border-color: #667eea; background: #f0f4ff; box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15); }
+  .video-option-card input[type="radio"] { position: absolute; opacity: 0; }
+  .vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
+  .video-option-card.active .vo-icon { color: #667eea; }
+  .vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+  .vo-desc { font-size: 0.8rem; color: #64748b; }
+  .vo-check { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; }
+  .video-option-card.active .vo-check { opacity: 1; }
+
+  /* Preview Sidebar */
+  .preview-card { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: var(--radius-lg); padding: 18px; color: white; }
   .preview-mock { border-radius: var(--radius-md); overflow: hidden; }
-  .preview-image {
-    height: 130px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 3rem; position: relative;
-  }
+  .preview-image { height: 130px; background: linear-gradient(135deg, #e0e7ff, #c7d2fe); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
   .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; }
-  .preview-badge { font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255,255,255,0.95); color: #0f172a; letter-spacing: 0.03em; }
-  .preview-price { position: absolute; bottom: 9px; left: 9px; background: rgba(15,23,42,0.88); color: white; font-size: 0.88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; }
+  .preview-badge { font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: #0f172a; }
+  .preview-price { position: absolute; bottom: 9px; left: 9px; background: rgba(15, 23, 42, 0.88); color: white; font-size: 0.88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; }
   .preview-body { background: white; padding: 14px; color: #0f172a; }
-  .preview-title { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .preview-location { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+  .preview-title { font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+  .preview-location { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
   .preview-specs { display: flex; gap: 14px; font-size: 0.75rem; color: #475569; font-weight: 600; }
 
-  .checklist-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; box-shadow: var(--shadow-soft); }
+  .checklist-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; }
   .checklist-title { font-size: 0.88rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
-  .checklist-item { display: flex; align-items: center; gap: 9px; padding: 8px 0; font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; transition: color 0.3s; }
-  .checklist-item:last-child { border-bottom: none; }
-  .checklist-item i { font-size: 0.75rem; width: 14px; flex-shrink: 0; color: #cbd5e0; transition: color 0.3s; }
+  .checklist-item { display: flex; align-items: center; gap: 9px; padding: 8px 0; font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; }
   .checklist-item.done { color: var(--success); }
-  .checklist-item.done i { color: var(--success); }
 
-  .counter-box { width: 50px; text-align: center; border-radius: var(--radius-sm); border: 1px solid var(--border); font-weight: 700; background: #f8faff; color: var(--text-dark); padding: 4px 0; }
-  .counter-box.blue-theme { border-color: #bae6fd; background: #f0f9ff; color: #0369a1; }
-  .validation-error { border-color: #e74c3c !important; background: #fff5f5 !important; box-shadow: 0 0 0 3px rgba(231,76,60,0.12) !important; }
+  @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } .form-container { grid-column: 1 / -1; } }
 
-  @media (max-width: 1200px) {
-    .page-wrapper { grid-template-columns: 1fr; }
-    .preview-sidebar { display: none; }
-    .form-container { grid-column: 1 / -1; }
-  }
-  @media (max-width: 992px) { .main-content { margin-left: 0; } }
-  @media (max-width: 768px) {
-    .main-content { padding: 16px; }
-    .form-container { padding: 20px; }
-    .stepper-container { padding: 16px; }
-    .step-label { display: none; }
-    .step-line { min-width: 12px; margin: 0 6px; }
-    .form-header { flex-direction: column; align-items: flex-start; }
-    .page-title { font-size: 1.35rem; }
-  }
-
-  /* ============================================================
-   DROPDOWN PANEL OVERFLOW FIX
-   ============================================================ */
-  /* Fix parent containers that might hide the dropdown panel */
-  .form-group,
-  .col-md-12,
-  .section-body,
-  .step-content,
-  .row,
-  .modal-body {
-    overflow: visible !important;
-  }
-
-  /* Specifically fix Step 4 */
-  #step4 .section-body {
-    overflow: visible !important;
-  }
-
-  /* ============================================================
-   CUSTOM SEARCHABLE DROPDOWN (no jQuery / Select2 dependency)
-   ============================================================ */
-  .search-select {
-    position: relative;
-    width: 100%;
-    font-size: 0.95rem;
-  }
-
-  .search-select-control {
-    border: 2px solid #e9ecef;
+  /* =========================================
+     MODERN SUBMIT PROPERTY BUTTON
+     ========================================= */
+  .btn-submit {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    padding: 13px 32px;
     border-radius: 12px;
-    padding: 12px 15px;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
-    min-height: 48px;
-  }
-
-  .search-select-control:hover,
-  .search-select-control:focus {
-    border-color: #667eea;
-    outline: none;
-  }
-
-  .search-select.open .search-select-control {
-    border-color: #667eea;
-  }
-
-  .search-select-value {
-    color: #1e293b;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-height: 1.2em;
-    display: inline-block;
-  }
-
-  .search-select-value.ss-placeholder {
-    color: #94a3b8;
-  }
-
-  .search-select-value:empty::before {
-    content: "-- Select Team Member --";
-    color: #94a3b8;
-  }
-
-  .search-select-arrow {
-    color: #64748b;
-    transition: transform 0.2s ease;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-    margin-left: 8px;
-  }
-
-  .search-select.open .search-select-arrow {
-    transform: rotate(180deg);
-  }
-
-  .search-select-panel {
-    display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #ced4da;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
-    overflow: hidden;
-  }
-
-  .search-select.open .search-select-panel {
-    display: block;
-  }
-
-  .search-select-input {
-    width: 100%;
     border: none;
-    border-bottom: 2px solid #e9ecef;
-    padding: 12px 15px;
-    font-size: 0.9rem;
-    outline: none;
-    box-sizing: border-box;
-  }
-
-  .search-select-input:focus {
-    border-bottom-color: #667eea;
-  }
-
-  .search-select-options {
-    max-height: 260px;
-    overflow-y: auto;
-  }
-
-  .search-select-group-label {
-    padding: 8px 15px 4px;
-    font-size: 0.72rem;
     font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    background: #f8f9fa;
-  }
-
-  .search-select-option {
-    padding: 10px 16px;
+    font-size: 0.98rem;
+    letter-spacing: 0.02em;
     cursor: pointer;
-    color: #2d3748;
-    font-size: 0.9rem;
-  }
-
-  .search-select-option:hover,
-  .search-select-option.highlighted {
-    background-color: #667eea;
-    color: white;
-  }
-
-  .search-select-option:hover .opt-role,
-  .search-select-option.highlighted .opt-role {
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  .search-select-option.selected {
-    background-color: #eef2ff;
-    font-weight: 600;
-  }
-
-  .opt-role {
-    color: #64748b;
-    font-weight: 400;
-  }
-
-  .search-select-no-results {
-    padding: 16px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 0.85rem;
-  }
-
-  .search-select.validation-error .search-select-control {
-    border-color: #e74c3c !important;
-    background: #fff5f5 !important;
-  }
-
-  .selected-items-display {
-    padding: 12px;
-    background: #f8f9fa;
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    min-height: 50px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .item-tag {
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 13px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
   }
 
-  .item-tag .remove-btn {
-    cursor: pointer;
-    color: #dc3545;
-    margin-left: 4px;
-    font-size: 12px;
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(16, 185, 129, 0.45);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
   }
 
+  .btn-submit:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
 
+  .btn-submit i {
+    font-size: 1.05rem;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-submit:hover i {
+    transform: scale(1.15);
+  }
 </style>
 
 <div class="main-content">
   <div class="page-wrapper">
 
+    <!-- PAGE HEADER WITH PROPER CSS USER BADGE & BACK BUTTON -->
     <div class="page-header">
-      <h1 class="page-title"><i class="fas fa-building" style="margin-right: 10px; opacity: 0.9;"></i>Sell Your Commercial Property</h1>
-      <p class="page-subtitle">List your office, shop, or commercial space in 4 quick steps to attract premium buyers and investors.</p>
+      <div class="page-header-content">
+        <div>
+          <h1 class="page-title"><i class="fas fa-building" style="margin-right: 10px; opacity: 0.9;"></i>Sell Your Commercial Property</h1>
+          <p class="page-subtitle">List your office, shop, or commercial space in 4 quick steps to attract premium buyers and investors.</p>
+        </div>
+        
+        <div class="header-actions">
+        
+
+          <!-- BACK BUTTON -->
+          <button class="btn-back" type="button" onclick="history.back();">
+            <i class="fas fa-arrow-left"></i> Back to List
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- ROW 2: STEPPER -->
@@ -534,11 +310,8 @@
     <div class="form-container">
       <div class="form-header">
         <div class="form-title">
-          <i class="fas fa-building"></i>  Sell Your Commercial Property
+          <i class="fas fa-building"></i> Sell Your Commercial Property
         </div>
-        <button class="btn-back" type="button" onclick="history.back();">
-          <i class="fas fa-arrow-left"></i> Back to List
-        </button>
       </div>
 
       <form method="POST" action="" enctype="multipart/form-data" id="commercialPropertyForm" novalidate>
@@ -547,50 +320,45 @@
         <!-- ══════════════════ STEP 1 ══════════════════ -->
         <div class="step-content active" id="step1">
 
-            <div class="form-section">
-              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                  <span><i class="fas fa-upload"></i> Listed By</span>
-                            
+          <div class="form-section">
+            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <span><i class="fas fa-upload"></i> Listed By</span>
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="text-danger">*</span></label>
+                  </div>
+                </div>
               </div>
 
-              <div class="section-body">
-                <div class="row">
-                  <div class="col-md-12">
-                      <div class="form-group">
-                        <label class="form-label">
-                          <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
-                        </label>
+              <br>
 
-                      
+              <div class="row" id="user_data_div">
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{user_obj.user_id}}"></div>
+                </div>
 
-                     
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{user_obj.user_name}}"></div>
+                </div>
 
-                     
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{user_obj.user_email}}"></div>
+                </div>
 
-                            
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div>
+                </div>
 
-                                
-                                </div>
-                            </div>
-                            </div>
+                <div class="col-md-3">
+                  <div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{user_obj.user_role}}"></div>
+                </div>
 
-                            <br>
-
-                            <div class="row" id="user_data_div">
-                              
-                           <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" value="{{ user_obj.user_id }}" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" value="{{ user_obj.user_name }}" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-5"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" value="{{ user_obj.user_email }}" id="listed_by_email" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" value="{{ user_obj.user_phone }}" id="listed_by_contact" readonly style="background-color:#e9ecef;"></div></div>
-
-                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" value="{{ user_obj.user_role }}" id="listed_by_role" readonly style="background-color:#e9ecef;"></div></div>
-
-                            </div>
-                        </div>
-                    </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Basic Information -->
           <div class="form-section">
@@ -599,90 +367,70 @@
 
               <div class="form-group mb-4">
                 <label class="form-label" style="color:#4facfe;"><i class="fas fa-wand-magic-sparkles"></i> Property Title</label>
-                <input type="text" class="form-control" id="comm_title_display" readonly
-                 placeholder="Property Title auto-generated by system" 
-                  style="background-color:#e9ecef; font-weight:600; color:#495057;">
+                <input type="text" class="form-control" id="property_title" name="property_title" readonly placeholder="Property Title auto-generated by system" style="background-color:#e9ecef; font-weight:600; color:#495057;">
               </div>
 
               <div class="row">
+
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                   
-
-                    <label class="form-label">
-    Property Type <span class="required">*</span>
-</label>
-
-<select class="form-select form-control" id="comm_property_type" name="property_type" required>
-    <option value="">Select Property Type</option>
-
-    <optgroup label="Office Properties">
-        <option value="office_space">Office Space</option>
-        <option value="it_park">IT Park / Tech Park Office</option>
-        <option value="business_center">Business Center</option>
-        <option value="coworking_space">Co-working Space</option>
-    </optgroup>
-
-    <optgroup label="Retail Properties">
-        <option value="shop">Shop</option>
-        <option value="showroom">Showroom</option>
-        <option value="retail_store">Retail Store</option>
-        <option value="shopping_mall_space">Mall Shop / Retail Space</option>
-    </optgroup>
-
-    <optgroup label="Industrial Properties">
-        <option value="warehouse">Warehouse</option>
-        <option value="godown">Godown</option>
-        <option value="industrial_shed">Industrial Shed</option>
-        <option value="factory">Factory</option>
-        <option value="industrial_building">Industrial Building</option>
-    </optgroup>
-
-    <optgroup label="Hospitality & Service">
-        <option value="hotel">Hotel</option>
-        <option value="restaurant">Restaurant / Cafe</option>
-        <option value="banquet_hall">Banquet Hall</option>
-        <option value="service_center">Service Center</option>
-    </optgroup>
-
-    <optgroup label="Healthcare & Education">
-        <option value="hospital">Hospital / Clinic</option>
-        <option value="medical_shop">Medical Shop</option>
-        <option value="school_college">School / College Building</option>
-    </optgroup>
-
- 
-
-    <optgroup label="Other Commercial">
-        <option value="mixed_use_building">Mixed Use Building</option>
-        <option value="commercial_building">Commercial Building</option>
-        <option value="business_complex">Business Complex</option>
-       
-    </optgroup>
-</select>
+                    <label class="form-label">Property Type <span class="required">*</span></label>
+                    <select class="form-select form-control" id="property_type" name="property_type" required>
+                      <option value="">Select Property Type</option>
+                      <optgroup label="Office Properties">
+                        <option value="office_space">Office Space</option>
+                        <option value="it_park">IT Park / Tech Park Office</option>
+                        <option value="business_center">Business Center</option>
+                        <option value="coworking_space">Co-working Space</option>
+                      </optgroup>
+                      <optgroup label="Retail Properties">
+                        <option value="shop">Shop</option>
+                        <option value="showroom">Showroom</option>
+                        <option value="retail_store">Retail Store</option>
+                        <option value="shopping_mall_space">Mall Shop / Retail Space</option>
+                      </optgroup>
+                      <optgroup label="Industrial Properties">
+                        <option value="warehouse">Warehouse</option>
+                        <option value="godown">Godown</option>
+                        <option value="industrial_shed">Industrial Shed</option>
+                        <option value="factory">Factory</option>
+                        <option value="industrial_building">Industrial Building</option>
+                      </optgroup>
+                      <optgroup label="Hospitality & Service">
+                        <option value="hotel">Hotel</option>
+                        <option value="restaurant">Restaurant / Cafe</option>
+                        <option value="banquet_hall">Banquet Hall</option>
+                        <option value="service_center">Service Center</option>
+                      </optgroup>
+                      <optgroup label="Healthcare & Education">
+                        <option value="hospital">Hospital / Clinic</option>
+                        <option value="medical_shop">Medical Shop</option>
+                        <option value="school_college">School / College Building</option>
+                      </optgroup>
+                      <optgroup label="Other Commercial">
+                        <option value="mixed_use_building">Mixed Use Building</option>
+                        <option value="commercial_building">Commercial Building</option>
+                        <option value="business_complex">Business Complex</option>
+                      </optgroup>
+                    </select>
                   </div>
                 </div>
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                   
-                   
-
                     <label class="form-label">Property Category</label>
-
-<select class="form-control" id="property_category" name="property_category">
-    <option value="">Select Property Category</option>
-
-    <option value="ready_to_move">Ready to Move</option>
-    <option value="under_construction">Under Construction</option>
-    <option value="pre_leased">Pre-Leased (Rental Income)</option>
-    <option value="vacant">Vacant Possession</option>
-    <option value="owner_occupied">Owner Occupied</option>
-    <option value="tenant_occupied">Tenant Occupied</option>
-    <option value="investment_property">Investment Property</option>
-    <option value="distressed_sale">Distressed Sale</option>
-    <option value="auction_property">Auction Property</option>
-</select>
+                    <select class="form-control" id="property_category" name="property_category">
+                      <option value="">Select Property Category</option>
+                      <option value="ready_to_move">Ready to Move</option>
+                      <option value="under_construction">Under Construction</option>
+                      <option value="pre_leased">Pre-Leased (Rental Income)</option>
+                      <option value="vacant">Vacant Possession</option>
+                      <option value="owner_occupied">Owner Occupied</option>
+                      <option value="tenant_occupied">Tenant Occupied</option>
+                      <option value="investment_property">Investment Property</option>
+                      <option value="distressed_sale">Distressed Sale</option>
+                      <option value="auction_property">Auction Property</option>
+                    </select>
                   </div>
                 </div>
 
@@ -691,95 +439,76 @@
                     <label class="form-label">Shop/Godown No/Unit No <span style="color:red;">*</span></label>
                     <input type="text" id="property_no" class="form-control" name="property_no" placeholder="Enter Shop/Godown No/Unit No" required>
                     <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
-                        <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                      <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
                     </span>
                   </div>
                 </div>
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                 
-
-                    <label class="form-label">
-    Occupancy Status <span class="required">*</span>
-</label>
-
-<select class="form-select form-control" name="occupancy_status" id="occupancy_status">
-    <option value="">Select Occupancy Status</option>
-
-    <option value="Vacant">Vacant</option>
-    <option value="Owner Occupied">Owner Occupied</option>
-    <option value="Tenant Occupied">Tenant Occupied</option>
-    <option value="Partially Occupied">Partially Occupied</option>
-    <option value="Pre-Leased">Pre-Leased (Rental Income)</option>
-    <option value="Under Renovation">Under Renovation</option>
-    <option value="Ready for Possession">Ready for Possession</option>
-</select>
+                    <label class="form-label">Occupancy Status <span class="required">*</span></label>
+                    <select class="form-select form-control" name="occupancy_status" id="occupancy_status" required>
+                      <option value="">Select Occupancy Status</option>
+                      <option value="Vacant">Vacant</option>
+                      <option value="Owner Occupied">Owner Occupied</option>
+                      <option value="Tenant Occupied">Tenant Occupied</option>
+                      <option value="Partially Occupied">Partially Occupied</option>
+                      <option value="Pre-Leased">Pre-Leased (Rental Income)</option>
+                      <option value="Under Renovation">Under Renovation</option>
+                      <option value="Ready for Possession">Ready for Possession</option>
+                    </select>
                   </div>
                 </div>
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                 
-                  <label class="form-label">
-    Zone Type <span class="required">*</span>
-</label>
-
-<select class="form-select form-control" id="comm_zone" name="zone_type" required>
-    <option value="">Select Zone Type</option>
-
-    <option value="commercial">Commercial Zone</option>
-    <option value="industrial">Industrial Zone</option>
-    <option value="mixed_use">Mixed Use Zone</option>
-    <option value="business_park">Business Park</option>
-    <option value="it_park">IT / Tech Park</option>
-    <option value="sez">Special Economic Zone (SEZ)</option>
-    <option value="logistics_park">Logistics Park</option>
-    <option value="warehouse_zone">Warehouse Zone</option>
-    <option value="institutional">Institutional Zone</option>
-    <option value="residential_commercial">Residential-Commercial Mixed Zone</option>
-
-</select>
-                  </div>
-                </div>
-
-                 <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Location Hub</label>
-                   
-
-
-<select class="form-select form-control" id="comm_location_hub" name="location_hub">
-    <option value="">Select Location Hub</option>
-
-    <option value="central_business_district">Central Business District (CBD)</option>
-    <option value="business_park">Business Park</option>
-    <option value="it_park">IT / Tech Park</option>
-    <option value="commercial_complex">Commercial Complex</option>
-    <option value="shopping_mall">Shopping Mall</option>
-    <option value="high_street">High Street Market</option>
-    <option value="market_area">Market Area</option>
-    <option value="industrial_estate">Industrial Estate</option>
-    <option value="logistics_hub">Logistics Hub</option>
-    <option value="warehouse_cluster">Warehouse Cluster</option>
-    <option value="transport_hub">Transport Hub</option>
-    <option value="metro_corridor">Metro Corridor</option>
-    <option value="highway_frontage">Highway Frontage</option>
-    <option value="mixed_use_development">Mixed Use Development</option>
-    <option value="standalone">Standalone Building</option>
-  
-</select>
+                    <label class="form-label">Zone Type <span class="required">*</span></label>
+                    <select class="form-select form-control" id="zone_type" name="zone_type" required>
+                      <option value="">Select Zone Type</option>
+                      <option value="commercial">Commercial Zone</option>
+                      <option value="industrial">Industrial Zone</option>
+                      <option value="mixed_use">Mixed Use Zone</option>
+                      <option value="business_park">Business Park</option>
+                      <option value="it_park">IT / Tech Park</option>
+                      <option value="sez">Special Economic Zone (SEZ)</option>
+                      <option value="logistics_park">Logistics Park</option>
+                      <option value="warehouse_zone">Warehouse Zone</option>
+                      <option value="institutional">Institutional Zone</option>
+                      <option value="residential_commercial">Residential-Commercial Mixed Zone</option>
+                    </select>
                   </div>
                 </div>
               </div><!-- /row -->
 
               <div class="row">
-               
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Location Hub</label>
+                    <select class="form-select form-control" id="location_hub" name="location_hub">
+                      <option value="">Select Location Hub</option>
+                      <option value="central_business_district">Central Business District (CBD)</option>
+                      <option value="business_park">Business Park</option>
+                      <option value="it_park">IT / Tech Park</option>
+                      <option value="commercial_complex">Commercial Complex</option>
+                      <option value="shopping_mall">Shopping Mall</option>
+                      <option value="high_street">High Street Market</option>
+                      <option value="market_area">Market Area</option>
+                      <option value="industrial_estate">Industrial Estate</option>
+                      <option value="logistics_hub">Logistics Hub</option>
+                      <option value="warehouse_cluster">Warehouse Cluster</option>
+                      <option value="transport_hub">Transport Hub</option>
+                      <option value="metro_corridor">Metro Corridor</option>
+                      <option value="highway_frontage">Highway Frontage</option>
+                      <option value="mixed_use_development">Mixed Use Development</option>
+                      <option value="standalone">Standalone Building</option>
+                    </select>
+                  </div>
+                </div>
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label"><i class="fas fa-tools"></i> Property Condition <span class="required">*</span></label>
-                    <select class="form-select form-control" id="comm_condition" name="property_condition" required>
+                    <select class="form-select form-control" id="property_condition" name="property_condition" required>
                       <option value="">Select Property Condition</option>
                       <option value="Brand New">Brand New</option>
                       <option value="Less than 1 Year Old">Less than 1 Year Old</option>
@@ -792,18 +521,15 @@
                     </select>
                   </div>
                 </div>
-
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Age of Property <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="comm_age" name="age_of_property" placeholder="Enter Property Age" required>
-                  </div>
-                </div>
               </div><!-- /row -->
 
               <div class="row">
-              
-                
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Age of Property <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="property_age" name="property_age" placeholder="Enter Property Age" required>
+                  </div>
+                </div>
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
@@ -813,69 +539,30 @@
                       <option value="Fully Furnished">Fully Furnished</option>
                       <option value="Semi Furnished">Semi Furnished</option>
                       <option value="Unfurnished">Unfurnished</option>
-                     
                     </select>
                   </div>
                 </div>
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                   
                     <label class="form-label">Facing Direction</label>
-
-<select class="form-select form-control" name="facing_direction" id="facing_direction">
-    <option value="">Select Facing Direction</option>
-
-    <option value="North">North</option>
-    <option value="North-East">North-East</option>
-    <option value="East">East</option>
-    <option value="South-East">South-East</option>
-    <option value="South">South</option>
-    <option value="South-West">South-West</option>
-    <option value="West">West</option>
-    <option value="North-West">North-West</option>
-
-    <option value="Corner">Corner Property (Multiple Facing)</option>
-    <option value="Internal">Internal / No Road Facing</option>
-    <option value="Not Available">Not Available</option>
-</select>
+                    <select class="form-select form-control" name="facing_direction" id="facing_direction">
+                      <option value="">Select Facing Direction</option>
+                      <option value="North">North</option>
+                      <option value="North-East">North-East</option>
+                      <option value="East">East</option>
+                      <option value="South-East">South-East</option>
+                      <option value="South">South</option>
+                      <option value="South-West">South-West</option>
+                      <option value="West">West</option>
+                      <option value="North-West">North-West</option>
+                      <option value="Corner">Corner Property (Multiple Facing)</option>
+                      <option value="Internal">Internal / No Road Facing</option>
+                      <option value="Not Available">Not Available</option>
+                    </select>
                   </div>
                 </div>
               </div><!-- /row -->
-
-
-
-                <div class="row">
-              
-                
-                             <div class="col-md-4 mb-3">
-        <div class="form-group">
-            <label class="form-label">
-                Building Configuration <span style="color: red;"class="required">*</span>
-            </label>
-            <input type="text" class="form-control"
-                   id="res_floor"
-                   name="building_configuration"
-                   placeholder="e.g., G, G+1, G+2, G+3"
-                   required>
-        </div>
-    </div>
-                                 <div class="col-md-4 mb-3">
-        <div class="form-group">
-            <label class="form-label">
-                Total Floors Constructed <span style="color: red;"class="required">*</span>
-            </label>
-            <input type="number" class="form-control"
-                   id="res_total_floors"
-                   name="total_floors"
-                   placeholder="e.g., 3"
-                   required>
-        </div>
-    </div>
-
-              
-              </div><!-- /row -->
-
             </div>
           </div><!-- /Basic Information -->
 
@@ -885,26 +572,31 @@
               <div class="row">
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
+                    <label class="form-label">Super Built-up Area (sq.ft) <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="super_builtup_area" name="super_builtup_area" placeholder="e.g., 2000" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
                     <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="comm_builtup_area" name="builtup_area" placeholder="e.g., 2000" required>
+                    <input type="number" class="form-control" id="builtup_area" name="builtup_area" placeholder="e.g., 2000" required>
                   </div>
                 </div>
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label">Carpet Area (sq.ft)</label>
-                    <input type="number" class="form-control" name="carpet_area" placeholder="e.g., 1600">
+                    <input type="number" class="form-control" name="carpet_area" id="carpet_area" placeholder="e.g., 1600">
                   </div>
                 </div>
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label">Plot Area (sq.ft)</label>
-                    <input type="number" class="form-control" name="plot_area" placeholder="optional">
+                    <input type="number" class="form-control" name="plot_area" id="plot_area" placeholder="optional">
                   </div>
                 </div>
               </div><!-- /row -->
             </div>
           </div><!-- /Area Measurements -->
-
 
           <!-- Commercial Specifications -->
           <div class="form-section">
@@ -914,25 +606,25 @@
                 <div class="col-md-3 mt-2">
                   <div class="form-group">
                     <label class="form-label">No. of Staircases</label>
-                    <input type="number" class="form-control" name="num_staircases" min="0" placeholder="e.g., 2">
+                    <input type="number" class="form-control" name="no_staircases" id="no_staircases" min="0" placeholder="e.g., 2">
                   </div>
                 </div>
                 <div class="col-md-3 mt-2">
                   <div class="form-group">
                     <label class="form-label">Passenger Lifts</label>
-                    <input type="number" class="form-control" name="passenger_lifts" min="0" value="0">
+                    <input type="number" class="form-control" name="passenger_lifts" id="passenger_lifts" min="0" value="0">
                   </div>
                 </div>
                 <div class="col-md-3 mt-2">
                   <div class="form-group">
                     <label class="form-label">Service Lifts</label>
-                    <input type="number" class="form-control" name="service_lifts" min="0" value="0">
+                    <input type="number" class="form-control" name="service_lifts" id="service_lifts" min="0" value="0">
                   </div>
                 </div>
                 <div class="col-md-3 mt-2">
                   <div class="form-group">
                     <label class="form-label">No. of Cabins</label>
-                    <input type="number" class="form-control" name="num_cabins" min="0" placeholder="e.g., 5">
+                    <input type="number" class="form-control" name="num_cabins" id="num_cabins" min="0" placeholder="e.g., 5">
                   </div>
                 </div>
               </div><!-- /row -->
@@ -940,19 +632,19 @@
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label">Meeting Rooms</label>
-                    <input type="number" class="form-control" name="meeting_rooms" min="0" placeholder="e.g., 2">
+                    <input type="number" class="form-control" name="meeting_rooms" id="meeting_rooms" min="0" placeholder="e.g., 2">
                   </div>
                 </div>
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label">Min. Seats</label>
-                    <input type="number" class="form-control" name="min_seats" placeholder="e.g., 20">
+                    <input type="number" class="form-control" name="min_seats" id="min_seats" placeholder="e.g., 20">
                   </div>
                 </div>
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label">Max. Seats</label>
-                    <input type="number" class="form-control" name="max_seats" placeholder="e.g., 50">
+                    <input type="number" class="form-control" name="max_seats" id="max_seats" placeholder="e.g., 50">
                   </div>
                 </div>
               </div><!-- /row -->
@@ -960,43 +652,26 @@
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label">Private Parking <span class="required">*</span></label>
-                    <input type="number" class="form-control" name="private_parking" min="0" value="0" required>
+                    <input type="number" class="form-control" name="private_parking" id="private_parking" min="0" value="0" required>
                   </div>
                 </div>
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label">Public Parking</label>
-                    <input type="number" class="form-control" name="public_parking" min="0" placeholder="e.g., 20">
+                    <input type="number" class="form-control" name="public_parking" id="public_parking" min="0" placeholder="e.g., 20">
                   </div>
                 </div>
 
-                <div class="col-md-6 mb-3" id="brokerageSection">
-                  <label class="form-label mt-2" id="brokerageLabel">Service Fee <span class="required">*</span></label>
-                      <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
-                        <option value="">Select</option>
-                        <option value="No Brokerage">No Brokerage</option>
-                        <option value="1% of amount">1% of sale value</option>
-                        <option value="1.5% of amount">1.5% of sale value</option>
-                        <option value="2% of amount">2% of sale value</option>
-                        <option value="Fixed Amount">Fixed Amount</option>
-                        <option value="Negotiable">Negotiable</option>
-                      </select>
-                </div>
-
-                  <div class="col-md-6 mb-3" id="manualBrokerage" style="display:none;">
-                    <label class="form-label">Enter Fixed Brokerage</label>
-                    <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
-                  </div>
+               
               </div><!-- /row -->
             </div>
           </div><!-- /Commercial Specifications -->
 
-          <!-- Area Measurements -->
-          
+          <!-- STEP BUTTONS -->
           <div class="step-nav">
             <div></div>
             <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
-              Next — Legal &amp; Pricing <i class="fas fa-arrow-right"></i>
+              Move to Next Page <i class="fas fa-arrow-right"></i>
             </button>
           </div>
 
@@ -1015,7 +690,7 @@
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label">No. of Owners <span class="required">*</span></label>
-                    <select class="form-select form-control" id="comm_num_owners" name="num_owners" required>
+                    <select class="form-select form-control" id="no_of_owners" name="no_of_owners" required>
                       <option value="">Select</option>
                       <option value="1">Single Owner</option>
                       <option value="2">2 Owners</option>
@@ -1026,48 +701,25 @@
                 </div>
               </div><!-- /row -->
 
-              <!-- ✅ NEW Row 2: Ownership Status + Ownership Document Type -->
+              <!-- Row 2: Ownership Status + Ownership Document Type -->
               <div class="row">
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-user-shield"></i> Ownership Status
-                    </label>
-                    <select class="form-select form-control" name="ownership_status" id="ownership_status_legal">
+                    <label class="form-label"><i class="fas fa-user-shield"></i> Ownership Status</label>
+                    <select class="form-select form-control" name="ownership_status" id="ownership_status">
                       <option value="">Select Ownership Status</option>
-                      
-                      
-                                            <option value="Self Owned">
-    Sole Owner (Owned by One Person)
-</option>
-
-<option value="Joint Ownership">
-    Joint Ownership (Owned by Multiple Persons)
-</option>
-
-<option value="Inherited">
-    Inherited from Family
-</option>
-
-<option value="Gifted">
-    Received as Gift
-</option>
-
-<option value="Company Owned">
-    Company / Corporate Owned
-</option>
-
-<option value="Trust Owned">
-    Trust Owned Property
-</option>
+                      <option value="Self Owned">Sole Owner (Owned by One Person)</option>
+                      <option value="Joint Ownership">Joint Ownership (Owned by Multiple Persons)</option>
+                      <option value="Inherited">Inherited from Family</option>
+                      <option value="Gifted">Received as Gift</option>
+                      <option value="Company Owned">Company / Corporate Owned</option>
+                      <option value="Trust Owned">Trust Owned Property</option>
                     </select>
                   </div>
                 </div>
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-file-contract"></i> Ownership Document Type
-                    </label>
+                    <label class="form-label"><i class="fas fa-file-contract"></i> Ownership Document Type</label>
                     <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
                       <option value="">Select Document Type</option>
                       <option value="Sale Deed">Sale Deed</option>
@@ -1083,13 +735,11 @@
                 </div>
               </div><!-- /row -->
 
-              <!-- ✅ NEW Row 3: Title Clarity Status + Encumbrance Status -->
+              <!-- Row 3: Title Clarity Status + Encumbrance Status -->
               <div class="row">
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-certificate"></i> Title Clarity Status
-                    </label>
+                    <label class="form-label"><i class="fas fa-certificate"></i> Title Clarity Status</label>
                     <select class="form-select form-control" name="title_clarity_status" id="title_clarity_status">
                       <option value="">Select Title Status</option>
                       <option value="Clear Title">Clear Title</option>
@@ -1102,9 +752,7 @@
                 </div>
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-lock"></i> Encumbrance Status
-                    </label>
+                    <label class="form-label"><i class="fas fa-lock"></i> Encumbrance Status</label>
                     <select class="form-select form-control" name="encumbrance_status" id="encumbrance_status">
                       <option value="">Select Encumbrance Status</option>
                       <option value="Clear / No Encumbrance">Clear / No Encumbrance</option>
@@ -1121,14 +769,14 @@
               <div class="form-group mt-3">
                 <label class="form-label">Loan on Property? <span class="required">*</span></label>
                 <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="loan_on_property" value="no" checked> No</label>
-                  <label class="radio-option"><input type="radio" name="loan_on_property" value="yes"> Yes</label>
+                  <label class="radio-option"><input type="radio" name="property_loan" id="property_loan_no" value="no" checked> No</label>
+                  <label class="radio-option"><input type="radio" name="property_loan" id="property_loan_yes" value="yes"> Yes</label>
                 </div>
               </div>
               <div class="conditional-section mt-2" id="comm_loan_amount_section" style="display:none;">
                 <div class="form-group">
                   <label class="form-label">Loan Amount (₹)</label>
-                  <input type="number" class="form-control" name="loan_amount" placeholder="e.g., 5000000">
+                  <input type="number" class="form-control" name="loan_amount" id="loan_amount" placeholder="e.g., 5000000">
                 </div>
               </div>
 
@@ -1136,8 +784,8 @@
               <div class="form-group mt-3">
                 <label class="form-label">Existing Tenants? <span class="required">*</span></label>
                 <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="existing_tenants" value="no" checked> No</label>
-                  <label class="radio-option"><input type="radio" name="existing_tenants" value="yes"> Yes</label>
+                  <label class="radio-option"><input type="radio" name="existing_tenants" id="existing_tenants_no" value="no" checked> No</label>
+                  <label class="radio-option"><input type="radio" name="existing_tenants" id="existing_tenants_yes" value="yes"> Yes</label>
                 </div>
               </div>
               <div class="conditional-section mt-2" id="comm_tenant_details_section" style="display:none;">
@@ -1151,8 +799,8 @@
               <div class="form-group mt-3">
                 <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
                 <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="any_legal_dispute" value="no" checked> No</label>
-                  <label class="radio-option"><input type="radio" name="any_legal_dispute" value="yes"> Yes</label>
+                  <label class="radio-option"><input type="radio" name="any_legal_dispute" id="any_legal_dispute_no" value="no" checked> No</label>
+                  <label class="radio-option"><input type="radio" name="any_legal_dispute" id="any_legal_dispute_yes" value="yes"> Yes</label>
                 </div>
               </div>
               <div class="conditional-section mt-2" id="comm_dispute_details_section" style="display:none;">
@@ -1166,8 +814,8 @@
               <div class="form-group mt-3">
                 <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
                 <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="government_tax_dues" value="no" checked> No </label>
-                  <label class="radio-option"><input type="radio" name="government_tax_dues" value="yes"> Yes — Pending</label>
+                  <label class="radio-option"><input type="radio" name="government_tax" id="government_tax_no" value="no" checked> No</label>
+                  <label class="radio-option"><input type="radio" name="government_tax" id="government_tax_yes" value="yes"> Yes — Pending</label>
                 </div>
               </div>
               <div class="conditional-section mt-2" id="comm_tax_amount_section" style="display:none;">
@@ -1181,25 +829,18 @@
               <div class="form-group mt-3">
                 <label class="form-label">Fire Safety NOC Available?</label>
                 <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="fire_safety_noc_available" value="no" checked> No</label>
-                  <label class="radio-option"><input type="radio" name="fire_safety_noc_available" value="yes"> Yes</label>
+                  <label class="radio-option"><input type="radio" name="fire_safety_noc" id="fire_safety_noc_no" value="no" checked> No</label>
+                  <label class="radio-option"><input type="radio" name="fire_safety_noc" id="fire_safety_noc_yes" value="yes"> Yes</label>
                 </div>
               </div>
 
-              <!-- ✅ NEW: Sanctioning / Approving Authority (moved from Pricing to Legal) -->
+              <!-- Sanctioning / Approving Authority -->
               <div class="row">
                 <div class="col-md-12 mt-3">
                   <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-landmark"></i> Sanctioning / Approving Authority <span class="required">*</span>
-                    </label>
-                    <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority"
-                      placeholder="e.g., Municipal Corporation, Development Authority, NIT, CIDCO, MIDC, MHADA or Gram Panchayat"
-                      style="min-height: 90px;" required></textarea>
-                    <small class="form-text" style="font-size:0.8rem; color:#718096; margin-top:5px; display:block;">
-                      <i class="fas fa-info-circle"></i>
-                      Enter the government body or authority that approved / sanctioned this property's construction or layout.
-                    </small>
+                    <label class="form-label"><i class="fas fa-landmark"></i> Sanctioning / Approving Authority <span class="required">*</span></label>
+                    <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" placeholder="e.g., Municipal Corporation, Development Authority, NIT, CIDCO, MIDC, MHADA or Gram Panchayat" style="min-height: 90px;" required></textarea>
+                    <small class="form-text" style="font-size:0.8rem; color:#718096; margin-top:5px; display:block;"><i class="fas fa-info-circle"></i> Enter the government body or authority that approved / sanctioned this property's construction or layout.</small>
                   </div>
                 </div>
               </div><!-- /row -->
@@ -1212,30 +853,46 @@
             <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
             <div class="section-body">
               <div class="row">
-                
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label">Selling Price <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="comm_price" name="expected_price" placeholder="e.g., 10000000" required>
+                    <input type="number" class="form-control" id="selling_price" name="selling_price" placeholder="e.g., 10000000" required>
                   </div>
                 </div>
+
+                 <div class="col-md-4 mt-2" id="brokerageSection">
+                  <label class="form-label mt-2" id="brokerageLabel">Buyer Service Fee <span class="required">*</span></label>
+                  <select class="form-select" name="brokerage_percentage" id="brokerage_percentage" required>
+                    <option value="">Select</option>
+                    <option value="No Brokerage">No Brokerage</option>
+                    <option value="1% of amount">1% of sale value</option>
+                    <option value="1.5% of amount">1.5% of sale value</option>
+                    <option value="2% of amount">2% of sale value</option>
+                    <option value="Fixed Amount">Fixed Amount</option>
+                    <option value="Negotiable">Negotiable</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-2" id="manualBrokerage" style="display:none;">
+                  <label class="form-label">Enter Fixed Brokerage</label>
+                  <input type="text" class="form-control" name="manual_brokerage" id="manual_brokerage" placeholder="e.g. Fixed Amount">
+                </div>
+
                 <div class="col-md-4 mt-2">
                   <div class="form-group">
                     <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price Per Sqft (Auto)</label>
-                    <input type="text" class="form-control" id="comm_price_per_sqft" readonly
-                      placeholder="Calculated automatically..."
-                      style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                    <input type="text" class="form-control" id="price_per_sqft_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                    <input type="hidden" id="price_per_sqft" name="price_per_sqft">
                   </div>
                 </div>
               </div><!-- /row -->
-
             </div>
           </div><!-- /Pricing Details -->
 
-
+          <!-- STEP BUTTONS -->
           <div class="step-nav">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next — Amenities &amp; Location <i class="fas fa-arrow-right"></i></button>
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Move to Next Page <i class="fas fa-arrow-right"></i></button>
           </div>
 
         </div><!-- /step2 -->
@@ -1253,8 +910,7 @@
               </div>
 
               <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
-                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2"
-                    id="facilitiesBadge">0</span>
+                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2" id="facilitiesBadge">0</span>
               </button>
 
               <div id="facilitiesDisplay" class="selected-items-display">
@@ -1264,8 +920,7 @@
               <!-- Hidden checkboxes for form submission -->
               <div style="display:none;">
                 {% for fa in facilities_obj %}
-                  <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
-                  class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
+                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}" class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
                 {% endfor %}
               </div>
             </div>
@@ -1281,8 +936,7 @@
               </div>
 
               <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
-                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2"
-                id="amenitiesBadge">0</span>
+                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2" id="amenitiesBadge">0</span>
               </button>
 
               <div id="amenitiesDisplay" class="selected-items-display">
@@ -1292,8 +946,7 @@
               <!-- Hidden checkboxes for form submission -->
               <div style="display:none;">
                 {% for am in ameneties_obj %}
-                  <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox"
-                  data-icon="{{am.amenties_icon}}">
+                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox" data-icon="{{am.amenties_icon}}">
                 {% endfor %}
               </div>
             </div>
@@ -1305,12 +958,9 @@
               <div class="form-group mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
-
                 </div>
-                <textarea class="form-control" name="user_description" rows="3"
-                placeholder="Describe the commercial space briefly..."></textarea>
+                <textarea class="form-control" name="user_description" id="user_description" rows="3" placeholder="Describe the commercial space briefly..."></textarea>
               </div>
-
             </div>
           </div>
 
@@ -1319,139 +969,110 @@
             <div class="section-header"><i class="fas fa-location-dot"></i> Address Details</div>
             <div class="section-body">
               <div class="row">
-               
-                 <div class="col-md-6"><div class="form-group"><label class="form-label">City <span style="color:red;" class="required-star">*</span></label>
-                                <input type="text"
-       class="form-control"
-       id="cityInput"
-       name="city"
-       placeholder="e.g., Pune"
-       required>
-
-<script>
-document.getElementById('cityInput').addEventListener('input', function () {
-    this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
-});
-</script></div></div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">City <span style="color:red;" class="required-star">*</span></label>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Pune" required>
+                    <script>
+                      document.getElementById('city').addEventListener('input', function () {
+                        this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+                      });
+                    </script>
+                  </div>
+                </div>
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label">Area / Locality <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="comm_locality" name="area_locality" placeholder="e.g., BKC" required>
+                    <input type="text" class="form-control" id="locality" name="locality" placeholder="e.g., BKC" required>
                   </div>
                 </div>
               </div><!-- /row -->
+              
               <div class="form-group mt-2">
                 <label class="form-label">Building / Project / Society</label>
-                <input type="text" class="form-control" id="comm_building" name="building_name" placeholder="Building name">
+                <input type="text" class="form-control" id="building_name" name="building_name" placeholder="Building name">
               </div>
+
               <div class="form-group mt-2">
                 <label class="form-label">Property Address <span class="required">*</span></label>
-                <textarea class="form-control" name="property_address" placeholder="Complete address" required></textarea>
+                <textarea class="form-control" name="address" id="address" placeholder="Complete address" required></textarea>
               </div>
+
               <div class="form-group mt-2">
                 <label class="form-label">Property Landmark</label>
-                <input type="text" class="form-control" name="property_landmark" placeholder="Enter Property Landmark">
+                <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="Enter Property Landmark">
               </div>
 
+              <div class="row">
+                <div class="col-md-6 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">State <span style="color:red;" class="required-star">*</span></label>
+                    <select class="form-select form-control" name="state" id="state" required>
+                      <option value="">Select State</option>
+                      <option value="Andhra Pradesh">Andhra Pradesh</option>
+                      <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                      <option value="Assam">Assam</option>
+                      <option value="Bihar">Bihar</option>
+                      <option value="Chhattisgarh">Chhattisgarh</option>
+                      <option value="Goa">Goa</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Haryana">Haryana</option>
+                      <option value="Himachal Pradesh">Himachal Pradesh</option>
+                      <option value="Jharkhand">Jharkhand</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Manipur">Manipur</option>
+                      <option value="Meghalaya">Meghalaya</option>
+                      <option value="Mizoram">Mizoram</option>
+                      <option value="Nagaland">Nagaland</option>
+                      <option value="Odisha">Odisha</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Sikkim">Sikkim</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="Tripura">Tripura</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Uttarakhand">Uttarakhand</option>
+                      <option value="West Bengal">West Bengal</option>
+                      <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                      <option value="Chandigarh">Chandigarh</option>
+                      <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                      <option value="Ladakh">Ladakh</option>
+                      <option value="Lakshadweep">Lakshadweep</option>
+                      <option value="Puducherry">Puducherry</option>
+                    </select>
+                  </div>
+                </div>
 
-              <div class="col-md-6">
-    <div class="form-group">
-        <label class="form-label">
-            State <span style="color:red;" class="required-star">*</span>
-        </label>
-
-        <select class="form-select form-control" name="state" required>
-            <option value="">Select State</option>
-
-            <!-- States -->
-            <option value="Andhra Pradesh">Andhra Pradesh</option>
-            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-            <option value="Assam">Assam</option>
-            <option value="Bihar">Bihar</option>
-            <option value="Chhattisgarh">Chhattisgarh</option>
-            <option value="Goa">Goa</option>
-            <option value="Gujarat">Gujarat</option>
-            <option value="Haryana">Haryana</option>
-            <option value="Himachal Pradesh">Himachal Pradesh</option>
-            <option value="Jharkhand">Jharkhand</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Kerala">Kerala</option>
-            <option value="Madhya Pradesh">Madhya Pradesh</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Manipur">Manipur</option>
-            <option value="Meghalaya">Meghalaya</option>
-            <option value="Mizoram">Mizoram</option>
-            <option value="Nagaland">Nagaland</option>
-            <option value="Odisha">Odisha</option>
-            <option value="Punjab">Punjab</option>
-            <option value="Rajasthan">Rajasthan</option>
-            <option value="Sikkim">Sikkim</option>
-            <option value="Tamil Nadu">Tamil Nadu</option>
-            <option value="Telangana">Telangana</option>
-            <option value="Tripura">Tripura</option>
-            <option value="Uttar Pradesh">Uttar Pradesh</option>
-            <option value="Uttarakhand">Uttarakhand</option>
-            <option value="West Bengal">West Bengal</option>
-
-            <!-- Union Territories -->
-            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-            <option value="Chandigarh">Chandigarh</option>
-            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-            <option value="Ladakh">Ladakh</option>
-            <option value="Lakshadweep">Lakshadweep</option>
-            <option value="Puducherry">Puducherry</option>
-        </select>
-    </div>
-</div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+                  <input type="url" class="form-control" name="google_maps_link" placeholder="https://maps.google.com/?q=…">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Latitude</label>
+                  <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 20.9834">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Longitude</label>
+                  <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.1567">
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Pincode <span style="color:red;">*</span></label>
+                  <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440024" required>
+                </div>
+              </div>
             </div>
           </div><!-- /Address -->
 
-          <!-- Owner Contact (hidden) -->
-          <div class="form-section" hidden>
-            <div class="section-header"><i class="fas fa-user"></i> Owner Contact Information</div>
-            <div class="section-body">
-              <div class="row">
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Owner Name</label>
-                    <input type="text" class="form-control" id="comm_owner_name" name="owner_name" placeholder="Full name">
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Owner Contact</label>
-                    <input type="tel" class="form-control" id="comm_owner_contact" name="owner_contact" placeholder="10-digit mobile" pattern="[0-9]{10}">
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Owner Email</label>
-                    <input type="email" class="form-control" id="comm_owner_email" name="owner_email" placeholder="email@example.com">
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Owner Role</label>
-                    <input type="text" class="form-control" id="comm_owner_role" name="owner_role" placeholder="Enter Role">
-                  </div>
-                </div>
-              </div><!-- /row -->
-              <div class="form-group mt-2">
-                <label class="form-label">Residential Status <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="residential_status" value="resident" checked> Resident</label>
-                  <label class="radio-option"><input type="radio" name="residential_status" value="nri"> NRI</label>
-                  <label class="radio-option"><input type="radio" name="residential_status" value="pio"> PIO</label>
-                </div>
-              </div>
-            </div>
-          </div><!-- /Owner Contact -->
-
+          <!-- STEP BUTTONS -->
           <div class="step-nav">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next — Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Move to Next Page <i class="fas fa-arrow-right"></i></button>
           </div>
 
         </div><!-- /step3 -->
@@ -1459,37 +1080,190 @@ document.getElementById('cityInput').addEventListener('input', function () {
         <!-- ══════════════════ STEP 4 ══════════════════ -->
         <div class="step-content" id="step4">
 
-          <!-- Property Images -->
+          <!-- ADVANCED CATEGORIZED IMAGES -->
           <div class="form-section">
             <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
             <div class="section-body">
-              <div class="image-upload-area" id="uploadArea">
-                <input type="file" id="imageInput" name="property_images" multiple accept="image/*" style="display:none;">
-                <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:3rem; color:#667eea;"></i></div>
-                <div class="upload-text">Click or Drag Images Here</div>
-                <div class="upload-subtext mt-1">
-                  <span class="badge bg-dark p-2" id="uploadCounterBadge" style="font-size:0.85rem; letter-spacing:0.05em;">
-                    Uploaded: 0 / 10 Images
-                  </span>
+              <div class="img-total-summary">
+                <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/20</div>
+                <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images (across any areas) to publish</div>
+              </div>
+
+              <div class="img-cat-tabs" id="imgCatTabs">
+                <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Exterior / Building <span class="cat-count" id="count-exterior">0</span></div>
+                <div class="img-cat-tab" data-cat="living"><i class="fas fa-desktop"></i> Main Workspace <span class="cat-count" id="count-living">0</span></div>
+                <div class="img-cat-tab" data-cat="bedroom"><i class="fas fa-door-closed"></i> Cabins / Rooms <span class="cat-count" id="count-bedroom">0</span></div>
+                <div class="img-cat-tab" data-cat="kitchen"><i class="fas fa-coffee"></i> Pantry / Kitchen <span class="cat-count" id="count-kitchen">0</span></div>
+                <div class="img-cat-tab" data-cat="bathroom"><i class="fas fa-bath"></i> Washroom <span class="cat-count" id="count-bathroom">0</span></div>
+                <div class="img-cat-tab" data-cat="balcony"><i class="fas fa-chalkboard-teacher"></i> Conference Room <span class="cat-count" id="count-balcony">0</span></div>
+                <div class="img-cat-tab" data-cat="others"><i class="fas fa-car"></i> Parking / Others <span class="cat-count" id="count-others">0</span></div>
+              </div>
+
+              <div class="img-cat-panels">
+                <div class="img-cat-panel active" data-cat-panel="exterior">
+                  <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="exterior">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Exterior / Building Photos Here</div>
+                    <div class="upload-subtext">Front view, entrance, building — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-exterior"></div>
+                </div>
+                <div class="img-cat-panel" data-cat-panel="living">
+                  <input type="file" class="img-cat-input" id="imgInput-living" name="property_images_living[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="living">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Main Workspace Photos Here</div>
+                    <div class="upload-subtext">Open office, shop floor, main hall — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-living"></div>
+                </div>
+                <div class="img-cat-panel" data-cat-panel="bedroom">
+                  <input type="file" class="img-cat-input" id="imgInput-bedroom" name="property_images_bedroom[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="bedroom">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Cabins / Private Rooms Photos Here</div>
+                    <div class="upload-subtext">MD cabins, private sections — up to 6 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-bedroom"></div>
+                </div>
+                <div class="img-cat-panel" data-cat-panel="kitchen">
+                  <input type="file" class="img-cat-input" id="imgInput-kitchen" name="property_images_kitchen[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="kitchen">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Pantry / Kitchen Photos Here</div>
+                    <div class="upload-subtext">Cafeteria, pantry — up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-kitchen"></div>
+                </div>
+                <div class="img-cat-panel" data-cat-panel="bathroom">
+                  <input type="file" class="img-cat-input" id="imgInput-bathroom" name="property_images_bathroom[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="bathroom">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Washroom Photos Here</div>
+                    <div class="upload-subtext">Up to 4 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-bathroom"></div>
+                </div>
+                <div class="img-cat-panel" data-cat-panel="balcony">
+                  <input type="file" class="img-cat-input" id="imgInput-balcony" name="property_images_balcony[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="balcony">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Conference Room Photos Here</div>
+                    <div class="upload-subtext">Up to 3 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-balcony"></div>
+                </div>
+                <div class="img-cat-panel" data-cat-panel="others">
+                  <input type="file" class="img-cat-input" id="imgInput-others" name="property_images_others[]" accept="image/*" multiple style="display:none;">
+                  <div class="img-cat-upload-area" data-cat="others">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Parking / Other Photos Here</div>
+                    <div class="upload-subtext">Parking, amenities etc. — up to 5 images</div>
+                  </div>
+                  <div class="img-cat-preview" id="imgPreview-others"></div>
                 </div>
               </div>
-              <div class="image-preview" id="imagePreview"></div>
-              <div class="row mt-3">
+
+              <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+                <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The very first image under
+                <strong>Exterior / Building</strong> or <strong>Main Workspace</strong> (whichever has an image first) is used as the cover photo.
+              </div>
+              
+              <!-- Floor Plan simple upload -->
+              <div class="row mt-4 pt-3 border-top">
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label class="form-label"><i class="fa-solid fa-map"></i> Upload Floor Plan</label>
-                    <input type="file" class="form-control" name="floor_plan">
+                    <label class="form-label"><i class="fa-solid fa-map"></i> Upload Floor Plan (Optional)</label>
+                    <input type="file" class="form-control" name="floor_plan" id="floor_plan">
                   </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="form-group">
-                    <label class="form-label"><i class="fa-solid fa-video"></i> Upload Video</label>
-                    <input type="file" class="form-control" name="property_video" accept="video/*">
-                  </div>
-                </div>
-              </div><!-- /row -->
+              </div>
             </div>
           </div><!-- /Property Images -->
+
+          <!-- ADVANCED VIDEO SECTION -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+            <div class="section-body">
+              
+              <!-- Upgraded Video Options Grid -->
+              <div class="video-options-grid">
+                <label class="video-option-card active" id="card_video_upload">
+                  <input type="radio" name="video_option" id="video_upload" value="upload" checked>
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="vo-title">Upload Video</div>
+                  <div class="vo-desc">Upload a pre-recorded walkthrough (Max 20MB)</div>
+                </label>
+
+                <label class="video-option-card" id="card_video_auto">
+                  <input type="radio" name="video_option" id="video_auto" value="auto">
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-magic"></i></div>
+                  <div class="vo-title">Auto-Generate</div>
+                  <div class="vo-desc">Create a dynamic slideshow from your uploaded photos</div>
+                </label>
+
+                <label class="video-option-card" id="card_video_rm">
+                  <input type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                  <div class="vo-check"><i class="fas fa-check"></i></div>
+                  <div class="vo-icon"><i class="fas fa-link"></i></div>
+                  <div class="vo-title">Link / RM Assisted</div>
+                  <div class="vo-desc">Paste YouTube link or share a large video via RM</div>
+                </label>
+              </div>
+
+              <input type="hidden" name="video_source" id="video_source" value="upload">
+
+              <!-- Direct Video Upload -->
+              <div id="videoUploadWrapper">
+                <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+                <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border-color: #cbd5e1;">
+                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#667eea;"></i></div>
+                  <div class="upload-text">Click to Select Property Video</div>
+                  <div class="upload-subtext">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
+                </div>
+                <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px; border: 2px solid #e2e8f0;"></video>
+              </div>
+
+              <!-- Auto Slideshow Preview -->
+              <div id="videoAutoWrapper" style="display:none;">
+                <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#667eea;"></i> AI Slideshow Generator</div>
+                  <div style="font-size: 0.85rem; color: #4b5563;">We will automatically generate a smooth, professional walkthrough video using the images you've uploaded above (minimum 3 required).</div>
+                </div>
+                <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                  <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                  <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:3px solid #1e293b; background:#000; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"></canvas>
+                </div>
+                <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:13px; font-weight:600; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #fecaca;">
+                  <i class="fas fa-exclamation-triangle me-1"></i> Please upload at least 3 property images in the section above to preview the auto-slideshow.
+                </div>
+              </div>
+
+              <!-- RM Assisted / Link -->
+              <div id="videoRMWrapper" style="display:none;">
+                <div class="alert alert-info" style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fab fa-youtube me-2" style="color:#ef4444;"></i> Public URL / RM Assist</div>
+                  <div style="font-size: 0.85rem; color: #4b5563;">If your video is already on YouTube/Instagram, paste the link below. If your video file is larger than 20MB, contact our RM via WhatsApp to upload it for you.</div>
+                </div>
+                
+                <div class="form-group mb-0">
+                  <label class="form-label">Published Video Link</label>
+                  <div class="input-group">
+                    <span class="input-group-text" style="background: #f8fafc; border-color: #e9ecef;"><i class="fas fa-link text-muted"></i></span>
+                    <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                  </div>
+                </div>
+                <button type="button" class="btn-reset mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
+                
+                <div id="rmVideoFrame" style="display:none; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                  <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                </div>
+              </div>
+            </div>
+          </div><!-- /Video -->
 
           <div class="form-section">
             <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
@@ -1497,45 +1271,64 @@ document.getElementById('cityInput').addEventListener('input', function () {
                 <div class="col-md-6">
                   <div class="form-group">
                     <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
-                        <label class="form-check-label" for="listed_yes">Yes</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
-                        <label class="form-check-label" for="listed_no">No</label>
-                      </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                      <label class="form-check-label" for="listed_yes">Yes</label>
                     </div>
-                  </div>
-                  <div class="col-md-6" id="portalField" style="display:none;">
-                    <div class="form-group">
-                      <label class="form-label">Portal Name</label>
-                        <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                      <label class="form-check-label" for="listed_no">No</label>
                     </div>
                   </div>
                 </div>
+                <div class="col-md-6" id="portalField" style="display:none;">
+                  <div class="form-group">
+                    <label class="form-label">Portal Name</label>
+                    <input type="text" class="form-control" name="portal_name" id="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                  </div>
+                </div>
               </div>
+            </div>
           </div>
 
-          <!-- Property Listed By -->
-      
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="uploaded_by_name" name="uploaded_by_name" value="{{ user_obj.user_name }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="uploaded_by_email" name="uploaded_by_email" value="{{ user_obj.user_email }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Contact</label>
+                    <input type="text" class="form-control" id="uploaded_by_contact" name="uploaded_by_contact" value="{{ user_obj.user_phone }}" readonly>
+                  </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <input type="text" class="form-control" id="uploaded_by_role" name="uploaded_by_role" value="{{ user_obj.user_role }}" readonly>
+                  </div>
+                </div>
+              </div><!-- /row -->
+            </div>
+          </div><!-- /Uploaded By -->
 
-           <div class="form-section" hidden>
-                        <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
-                        <div class="section-body">
-                            <div class="row">
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text" class="form-control" name="uploaded_by_name" value="{{ user_obj.user_name }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" value="{{ user_obj.user_email }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div></div>
-                            </div>
-                        </div>
-                    </div>
-
+          <!-- STEP BUTTONS -->
           <div class="form-footer">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="reset" class="btn-step btn-reset"><i class="fas fa-redo"></i> Reset</button>
-            <button type="submit" class="btn-step btn-submit"><i class="fas fa-save"></i> Submit Property</button>
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+            <button type="button" class="btn-submit" onclick="Submit_Commercial_Property(this)">
+              <i class="fas fa-check-circle"></i> Submit Property
+            </button>
           </div>
 
         </div><!-- /step4 -->
@@ -1577,7 +1370,6 @@ document.getElementById('cityInput').addEventListener('input', function () {
   </div><!-- /page-wrapper -->
 </div><!-- /main-content -->
 
-
 <!-- Common Modal -->
 <div class="modal fade" id="itemsModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -1592,149 +1384,97 @@ document.getElementById('cityInput').addEventListener('input', function () {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span
-            id="modalSelectedCount">0</span>)</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span id="modalSelectedCount">0</span>)</button>
       </div>
     </div>
   </div>
 </div>
 
-
-
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+  $("#Resale").addClass("active");
 
-    $("#Resale").addClass("active");
-
-    document.addEventListener('DOMContentLoaded', function() {
-    // 1. Get the radio buttons and the hidden portal input field
+  document.addEventListener('DOMContentLoaded', function () {
     var yesRadio = document.getElementById('listed_yes');
     var noRadio = document.getElementById('listed_no');
     var portalField = document.getElementById('portalField');
-    
-    // 2. Create a function that checks if "Yes" is selected
+
     function togglePortalField() {
-        if (portalField) {
-            // If yes is checked, show it ('block'). If not, hide it ('none').
-            portalField.style.display = yesRadio.checked ? 'block' : 'none';
-        }
+      if (portalField) {
+        portalField.style.display = yesRadio.checked ? 'block' : 'none';
+      }
     }
-    
-    // 3. Attach the function to run whenever the user clicks either radio button
     if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
     if (noRadio) noRadio.addEventListener('change', togglePortalField);
-    
-    // 4. Run it once immediately when the page loads to set the initial state
     togglePortalField();
-});
-
-
-</script>
-
-<script>
+  });
 
   function updateBrokerageLabel(role) {
     var labelElement = document.getElementById('brokerageLabel');
     if (!labelElement) return;
 
-    // Normalize the string text to lowercase to ensure clean matches
     var normalizedRole = (role || "").trim().toLowerCase();
     var labelText = "";
-
     switch (normalizedRole) {
-      case 'admin':
-        labelText = "EstateFlow Service Fee";
-        break;
-      case 'relationship manager':
-        labelText = "Buyer Service Fee";
-        break;
-      case 'landlord':
-        labelText = "Buyer Service Fee";
-        break;
-      case 'agent':
-        labelText = "Brokerage";
-        break;
+      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'relationship manager': labelText = "Buyer Service Fee"; break;
+      case 'landlord': labelText = "Buyer Service Fee"; break;
+      case 'agent': labelText = "Brokerage"; break;
       case 'agency/builder':
-      case 'builder':
-        labelText = "Brokerage/Service Fee";
-        break;
-      default:
-        labelText = "Brokerage"; // Fallback default text
-        break;
+      case 'builder': labelText = "Brokerage/Service Fee"; break;
+      default: labelText = "Brokerage"; break;
     }
-
-    // Inject the text along with a red styled asterisk span
     labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
   }
 
-</script>
-
-<script>
-  function Change_Fields(){
+  function Change_Fields() {
     var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
     if (!checkedInput) return;
-    
     var selectedValue = checkedInput.value;
-    
-    var admin_id    = document.getElementById('selfUserId')?.value || "";
-    var admin_name  = document.getElementById('selfUserName')?.value || "";
+
+    var admin_id = document.getElementById('selfUserId')?.value || "";
+    var admin_name = document.getElementById('selfUserName')?.value || "";
     var admin_email = document.getElementById('selfUserEmail')?.value || "";
     var admin_phone = document.getElementById('selfUserPhone')?.value || "";
-    var admin_role  = document.getElementById('selfUserRole')?.value || "";
+    var admin_role = document.getElementById('selfUserRole')?.value || "";
 
-    var targetId      = document.getElementById('uploaded_by_id')      || document.querySelector('#user_data_div [id$="id"]');
-    var targetName    = document.getElementById('uploaded_by_name')    || document.querySelector('#user_data_div [id$="name"]');
-    var targetEmail   = document.getElementById('uploaded_by_email')   || document.querySelector('#user_data_div [id$="email"]');
-    var targetContact = document.getElementById('uploaded_by_contact') || document.querySelector('#user_data_div [id$="contact"]');
-    var targetRole    = document.getElementById('uploaded_by_role')    || document.querySelector('#user_data_div [id$="role"]');
-    var hiddenSelect  = document.getElementById('assigned_to');
+    var targetId = document.getElementById('listed_by_id');
+    var targetName = document.getElementById('listed_by_name');
+    var targetEmail = document.getElementById('listed_by_email');
+    var targetContact = document.getElementById('listed_by_contact');
+    var targetRole = document.getElementById('listed_by_role');
 
-    if(selectedValue == "self"){
-        var otherWrapper = document.getElementById('listedByOtherWrapper');
-        if (otherWrapper) otherWrapper.style.display = "none";
-        
-        if (hiddenSelect) {
-            hiddenSelect.value = "";
-            hiddenSelect.required = false; 
-            hiddenSelect.classList.remove('is-invalid');
-        }
-        var valueLabel = document.getElementById('assignedToValueLabel');
-        if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+    if (selectedValue === "self") {
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "none";
+      var hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) { hiddenSelect.value = ""; hiddenSelect.required = false; }
+      var valueLabel = document.getElementById('assignedToValueLabel');
+      if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
 
-        if (targetId)      targetId.value = admin_id;
-        if (targetName)    targetName.value = admin_name;
-        if (targetEmail)   targetEmail.value = admin_email;
-        if (targetContact) targetContact.value = admin_phone;
-        if (targetRole)    targetRole.value = admin_role;
+      if (targetId) targetId.value = admin_id;
+      if (targetName) targetName.value = admin_name;
+      if (targetEmail) targetEmail.value = admin_email;
+      if (targetContact) targetContact.value = admin_phone;
+      if (targetRole) targetRole.value = admin_role;
+      updateBrokerageLabel(admin_role);
+    } else {
+      if (targetId) targetId.value = "";
+      if (targetName) targetName.value = "";
+      if (targetEmail) targetEmail.value = "";
+      if (targetContact) targetContact.value = "";
+      if (targetRole) targetRole.value = "";
 
-        updateBrokerageLabel(admin_role);
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "block";
+      var hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) { hiddenSelect.required = true; }
     }
-    else {
-        if (hiddenSelect) {
-            hiddenSelect.required = true;
-        }
-        
-        if (targetId)      targetId.value = "";
-        if (targetName)    targetName.value = "";
-        if (targetEmail)   targetEmail.value = "";
-        if (targetContact) targetContact.value = "";
-        if (targetRole)    targetRole.value = "";
-        
-        var otherWrapper = document.getElementById('listedByOtherWrapper');
-        if (otherWrapper) otherWrapper.style.display = "block";
-    }
-}
-</script>
+  }
 
-<script>
-
-  // ============================================================
-  // Custom searchable dropdown for "Listed By (User)"
-  // Pure vanilla JS — no Select2 dependency.
-  // ============================================================
+  // Search Select logic
   (function () {
     var wrapper = document.getElementById('assignedToSearchSelect');
     var control = document.getElementById('assignedToControl');
@@ -1752,25 +1492,9 @@ document.getElementById('cityInput').addEventListener('input', function () {
     var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
     var highlightedIndex = -1;
 
-    function openPanel() {
-      wrapper.classList.add('open');
-      input.value = '';
-      filterOptions('');
-      setTimeout(function () { input.focus(); }, 0);
-    }
-
-    function closePanel() {
-      wrapper.classList.remove('open');
-      highlightedIndex = -1;
-    }
-
-    function togglePanel() {
-      if (wrapper.classList.contains('open')) {
-        closePanel();
-      } else {
-        openPanel();
-      }
-    }
+    function openPanel() { wrapper.classList.add('open'); input.value = ''; filterOptions(''); setTimeout(function () { input.focus(); }, 0); }
+    function closePanel() { wrapper.classList.remove('open'); highlightedIndex = -1; }
+    function togglePanel() { if (wrapper.classList.contains('open')) { closePanel(); } else { openPanel(); } }
 
     function selectOption(opt) {
       var value = opt.getAttribute('data-value');
@@ -1783,14 +1507,10 @@ document.getElementById('cityInput').addEventListener('input', function () {
       if (hiddenRole) hiddenRole.value = role;
       valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
       valueLabel.classList.remove('ss-placeholder');
-
       options.forEach(function (o) { o.classList.remove('selected'); });
       opt.classList.add('selected');
-
       wrapper.classList.remove('validation-error');
       closePanel();
-
-      // Fire native change event so existing listeners (get_user_data etc.) still run
       var evt = new Event('change', { bubbles: true });
       hiddenSelect.dispatchEvent(evt);
     }
@@ -1798,38 +1518,25 @@ document.getElementById('cityInput').addEventListener('input', function () {
     function filterOptions(query) {
       query = query.trim().toLowerCase();
       var anyVisible = false;
-
-      // Track which groups have at least one visible option
       var groupHasVisible = {};
-
       options.forEach(function (opt) {
         var haystack = opt.getAttribute('data-search') || '';
         var match = haystack.indexOf(query) !== -1;
         opt.style.display = match ? '' : 'none';
         if (match) {
           anyVisible = true;
-          var group = opt.closest('.search-select-options');
-          // find the preceding group label for this option
           var prev = opt.previousElementSibling;
-          while (prev && !prev.classList.contains('search-select-group-label')) {
-            prev = prev.previousElementSibling;
-          }
+          while (prev && !prev.classList.contains('search-select-group-label')) { prev = prev.previousElementSibling; }
           if (prev) groupHasVisible[prev.textContent] = true;
         }
       });
-
-      groupLabels.forEach(function (label) {
-        label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
-      });
-
+      groupLabels.forEach(function (label) { label.style.display = groupHasVisible[label.textContent] ? '' : 'none'; });
       noResults.style.display = anyVisible ? 'none' : 'block';
       highlightedIndex = -1;
       options.forEach(function (o) { o.classList.remove('highlighted'); });
     }
 
-    function visibleOptions() {
-      return options.filter(function (o) { return o.style.display !== 'none'; });
-    }
+    function visibleOptions() { return options.filter(function (o) { return o.style.display !== 'none'; }); }
 
     function moveHighlight(step) {
       var visible = visibleOptions();
@@ -1844,116 +1551,32 @@ document.getElementById('cityInput').addEventListener('input', function () {
     }
 
     control.addEventListener('click', togglePanel);
-    control.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        togglePanel();
-      }
-    });
-
-    input.addEventListener('input', function () {
-      filterOptions(input.value);
-    });
-
+    control.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePanel(); } });
+    input.addEventListener('input', function () { filterOptions(input.value); });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
-      else if (e.key === 'Enter') {
-        e.preventDefault();
-        var visible = visibleOptions();
-        if (highlightedIndex >= 0 && visible[highlightedIndex]) {
-          selectOption(visible[highlightedIndex]);
-        } else if (visible.length === 1) {
-          selectOption(visible[0]);
-        }
-      } else if (e.key === 'Escape') {
-        closePanel();
-      }
+      else if (e.key === 'Enter') { e.preventDefault(); var visible = visibleOptions(); if (highlightedIndex >= 0 && visible[highlightedIndex]) { selectOption(visible[highlightedIndex]); } else if (visible.length === 1) { selectOption(visible[0]); } }
+      else if (e.key === 'Escape') { closePanel(); }
     });
+    options.forEach(function (opt) { opt.addEventListener('click', function () { selectOption(opt); }); });
+    document.addEventListener('click', function (e) { if (!wrapper.contains(e.target)) closePanel(); });
 
-    options.forEach(function (opt) {
-      opt.addEventListener('click', function () { selectOption(opt); });
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!wrapper.contains(e.target)) closePanel();
-    });
-
-    // ============================================================
-    // FIXED/ADDED: Trigger get_user_data execution on selection change
-    // ============================================================
-    hiddenSelect.addEventListener('change', function () {
-      if (typeof get_user_data === 'function') {
-        get_user_data(this);
-      }
-    });
-
-    // ============================================================
-    // ADDED HERE: Run your field configuration safely on load
-    // ============================================================
-    if (typeof Change_Fields === 'function') {
-      Change_Fields();
-    }
-
-
+    hiddenSelect.addEventListener('change', function () { if (typeof get_user_data === 'function') { get_user_data(this); } });
+    if (typeof Change_Fields === 'function') { Change_Fields(); }
   })();
 
-
+ 
 </script>
 
-{% comment %} Javascript to get user details according to listing by {% endcomment %}
-
 <script>
-  function get_user_data() {
-
-    var assigned_to = $("#assigned_to").val();
-
-    if (!assigned_to) {
-      $('#uploaded_by_id, #uploaded_by_name, #uploaded_by_email, #uploaded_by_contact, #uploaded_by_role').val('');
-      return;
-    }
-
-    $.ajax({
-      method: "POST",
-      url: "{% url 'get_user_data' %}",
-      data: {
-        'assigned_to': assigned_to,
-      },
-      dataType: "json", // Tells jQuery to parse incoming data as an object
-      success: function (response) {
-
-        // Map JSON object values directly to permanent textboxes
-        $('#uploaded_by_id').val(response.user_id || '');
-        $('#uploaded_by_name').val(response.name || '');
-        $('#uploaded_by_email').val(response.email || '');
-        $('#uploaded_by_contact').val(response.contact || '');
-        $('#uploaded_by_role').val(response.role || '');
-
-        // Call the update script immediately with the new role
-        updateBrokerageLabel(response.role);
-      },
-      error: function (xhr, status, error) {
-        console.error('Failed to fetch user data:', error);
-      }
-    });
-  }
-</script>
-
-
-<script>
-
-  // jQuery Version
   $(document).ready(function () {
     const sections = ['amenities', 'facilities'];
-
-    sections.forEach(section => {
-      updateDisplay(section);
-    });
+    sections.forEach(section => { updateDisplay(section); });
 
     window.openModal = function (section) {
       currentSection = section;
       $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
-
       const container = $('#modalItemsList').empty();
       $(`.${section}-checkbox`).each(function () {
         container.append(`
@@ -1967,15 +1590,12 @@ document.getElementById('cityInput').addEventListener('input', function () {
         </div>
       `);
       });
-
       updateModalCount();
       $('#itemsModal').modal('show');
     };
 
     window.removeItem = function (section, name) {
-      const items = $(`.${section}-checkbox`).filter(function () {
-        return this.value === name;
-      });
+      const items = $(`.${section}-checkbox`).filter(function () { return this.value === name; });
       items.prop('checked', false);
       updateDisplay(section);
     };
@@ -1991,10 +1611,8 @@ document.getElementById('cityInput').addEventListener('input', function () {
     function updateDisplay(section) {
       const checked = $(`.${section}-checkbox:checked`);
       const count = checked.length;
-
       $(`#${section}Count`).text(`${count} selected`);
       $(`#${section}Badge`).text(count);
-
       const display = $(`#${section}Display`).empty();
 
       if (count === 0) {
@@ -2003,45 +1621,29 @@ document.getElementById('cityInput').addEventListener('input', function () {
         checked.each(function () {
           display.append(`
           <span class="item-tag">
-            <i class="${$(this).data('icon')}"></i>
-            ${this.value}
-            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
-              <i class="fas fa-times-circle"></i>
-            </span>
+            <i class="${$(this).data('icon')}"></i> ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')"><i class="fas fa-times-circle"></i></span>
           </span>
         `);
         });
       }
     }
 
-    function updateModalCount() {
-      $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
-    }
-
+    function updateModalCount() { $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length); }
     $(document).on('change', '.modal-item-checkbox', updateModalCount);
 
     $('#itemsModal .btn-primary').on('click', function () {
       if (!currentSection) return;
-
       const checked = $('.modal-item-checkbox:checked');
       $(`.${currentSection}-checkbox`).prop('checked', false);
-      checked.each(function () {
-        $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
-      });
-
+      checked.each(function () { $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true); });
       updateDisplay(currentSection);
     });
   });
-
-
 </script>
-
-
 
 <script>
   let currentStep = 1;
-  let selectedFiles = [];
-  const maxAllowedImages = 10;
 
   function goToStep(n) {
     if (n > currentStep && !validateStep(currentStep)) return false;
@@ -2051,10 +1653,10 @@ document.getElementById('cityInput').addEventListener('input', function () {
       const sc = document.getElementById('sc' + i);
       const sl = document.getElementById('sl' + i);
       const line = document.getElementById('line' + i);
-      if (!sc || !sl) continue;
       sc.className = 'step-circle';
       sl.className = 'step-label';
       if (line) line.className = 'step-line';
+
       if (i < n) {
         sc.classList.add('done'); sl.classList.add('done');
         sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
@@ -2067,86 +1669,136 @@ document.getElementById('cityInput').addEventListener('input', function () {
       }
     }
     currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Smoothly scroll to the top of the form container for both Next and Previous page clicks
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     updatePreview();
   }
 
   function validateStep(step) {
-    const stepEl = document.getElementById('step' + step);
-    if (!stepEl) return true;
-    const required = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
-    let isValid = true, missing = [];
-    required.forEach(field => {
-      field.classList.remove('validation-error');
-      if (field.type === 'radio') {
-        const checked = Array.from(stepEl.querySelectorAll(`[name="${field.name}"]`)).some(r => r.checked);
-        if (!checked) {
-          isValid = false;
-          const lbl = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
-          if (lbl && !missing.includes(lbl)) missing.push(lbl);
+    const stepElement = document.getElementById('step' + step);
+    if (!stepElement) return true;
+    
+    const requiredFields = stepElement.querySelectorAll('[required]');
+    let isValid = true;
+    let missingFields = [];
+    let firstInvalidElement = null;
+
+    stepElement.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    stepElement.querySelectorAll('.radio-error-group').forEach(el => el.classList.remove('radio-error-group'));
+
+    requiredFields.forEach(field => {
+        if (field.type === 'radio') {
+            const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
+            const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+
+            if (!isChecked) {
+                isValid = false;
+                const groupContainer = field.closest('.radio-group') || field.closest('.form-group') || field.closest('div');
+                if (groupContainer) {
+                    groupContainer.classList.add('radio-error-group');
+                    if (!firstInvalidElement) firstInvalidElement = groupContainer;
+                }
+                const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                if (label && !missingFields.includes(label)) missingFields.push(label);
+            }
+        } else if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add('input-error');
+
+            if (field.id === 'assigned_to') {
+                const control = document.getElementById('assignedToControl');
+                if (control) {
+                    control.classList.add('input-error');
+                    if (!firstInvalidElement) firstInvalidElement = control;
+                }
+            } else {
+                if (!firstInvalidElement) firstInvalidElement = field;
+            }
+            const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+            if (label && !missingFields.includes(label)) missingFields.push(label);
+        } else if (field.pattern) {
+            const regex = new RegExp('^' + field.pattern + '$');
+            if (!regex.test(field.value.trim())) {
+                isValid = false;
+                field.classList.add('input-error');
+                if (!firstInvalidElement) firstInvalidElement = field;
+                let label = (field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim() || '') + ' (Invalid Format)';
+                if (!missingFields.includes(label)) missingFields.push(label);
+            }
         }
-      } else if (!field.value?.trim()) {
-        isValid = false;
-        field.classList.add('validation-error');
-        const lbl = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
-        if (lbl && !missing.includes(lbl)) missing.push(lbl);
-      } else if (field.pattern) {
-        const regex = new RegExp('^' + field.pattern + '$');
-        if (!regex.test(field.value.trim())) {
-          isValid = false;
-          field.classList.add('validation-error');
-          let lbl = (field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim() || '') + ' (Invalid Format)';
-          if (!missing.includes(lbl)) missing.push(lbl);
-        }
-      }
     });
+
     if (!isValid) {
-      Swal.fire({
-        icon: 'warning', title: 'Required Fields Missing',
-        html: `<p>Please fill the following fields:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f=>`<li>${f}</li>`).join('')}</ul>`,
-        confirmButtonColor: '#667eea'
-      });
+        if (firstInvalidElement) {
+            firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof firstInvalidElement.focus === 'function') firstInvalidElement.focus();
+        }
+        swal({
+            title: 'Required Fields Missing',
+            text: 'Please fill all required fields:\n• ' + missingFields.join('\n• '),
+            icon: 'warning',
+            button: 'Got it!'
+        });
+        return false;
     }
-    return isValid;
+    return true;
   }
 
   function updatePreview() {
-    const typeEl = document.getElementById('comm_property_type');
-    const typeTxt = typeEl?.value ? typeEl.options[typeEl.selectedIndex].text : 'Commercial';
-    const areaVal = document.getElementById('comm_builtup_area')?.value || '—';
-    const buildVal = document.getElementById('comm_building')?.value;
-    const localityVal = document.getElementById('comm_locality')?.value || 'Area';
-    const cityVal = document.getElementById('comm_city')?.value || 'City';
+    const typeEl = document.getElementById('property_type');
+    const typeTxt = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text : 'Commercial';
+    const areaVal = document.getElementById('builtup_area')?.value || '—';
+    const buildVal = document.getElementById('building_name')?.value;
+    const localityVal = document.getElementById('locality')?.value || 'Area';
+    const cityVal = document.getElementById('city')?.value || 'City';
+    const price = document.getElementById('selling_price')?.value;
 
-    let title = `Premium ${areaVal} Sqft ${typeTxt}`;
+    let title = `Premium ${areaVal !== '—' ? areaVal + ' Sqft ' : ''}${typeTxt}`;
     if (buildVal) title += ` in ${buildVal}`;
     title += ` at ${localityVal}, ${cityVal}`;
 
-    const titleBox = document.getElementById('comm_title_display');
-    if (titleBox) titleBox.value = title;
+    const titleBox = document.getElementById('property_title');
+    if (titleBox && (localityVal !== 'Area' || typeEl?.value)) {
+      titleBox.value = title;
+    }
     const previewTitle = document.getElementById('previewTitle');
     if (previewTitle) previewTitle.textContent = title;
 
-    const price = document.getElementById('comm_price')?.value;
-    if (price) document.getElementById('previewPrice').textContent = '₹' + parseInt(price).toLocaleString('en-IN');
+    if (price) {
+      document.getElementById('previewPrice').textContent = '₹' + parseInt(price, 10).toLocaleString('en-IN');
+    } else {
+      document.getElementById('previewPrice').textContent = '₹ —';
+    }
+    
     document.getElementById('prevArea').textContent = (areaVal !== '—' ? areaVal : '—') + ' sqft';
     document.getElementById('previewLoc').innerHTML = `<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ${localityVal}, ${cityVal}`;
 
-    const psf = document.getElementById('comm_price_per_sqft');
-    if (price && areaVal && parseFloat(areaVal) > 0) {
-      psf.value = '₹' + (parseFloat(price) / parseFloat(areaVal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' / sqft';
-    } else {
-      psf.value = '';
+    const psf = document.getElementById('price_per_sqft');
+    const psfDisp = document.getElementById('price_per_sqft_display');
+    if (psf && psfDisp) {
+      if (price && areaVal !== '—' && parseFloat(areaVal) > 0) {
+        const calcRate = (parseFloat(price) / parseFloat(areaVal)).toFixed(2);
+        psfDisp.value = '₹ ' + parseFloat(calcRate).toLocaleString('en-IN') + ' / sqft';
+        psf.value = calcRate;
+      } else {
+        psfDisp.value = ''; psf.value = '';
+      }
     }
     updateChecklist();
   }
 
   function updateChecklist() {
-    setCheck('cl-type',     !!document.getElementById('comm_property_type')?.value);
-    setCheck('cl-area',     !!document.getElementById('comm_builtup_area')?.value);
-    setCheck('cl-price',    !!document.getElementById('comm_price')?.value);
-    setCheck('cl-location', !!document.getElementById('comm_city')?.value && !!document.getElementById('comm_locality')?.value);
-    setCheck('cl-owner',    !!document.getElementById('comm_owner_name')?.value && !!document.getElementById('comm_owner_role')?.value);
+    setCheck('cl-type', !!document.getElementById('property_type')?.value);
+    setCheck('cl-area', !!document.getElementById('builtup_area')?.value);
+    setCheck('cl-price', !!document.getElementById('selling_price')?.value);
+    setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality')?.value);
+    setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
   }
 
   function setCheck(id, done) {
@@ -2156,29 +1808,28 @@ document.getElementById('cityInput').addEventListener('input', function () {
     el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  function renderSequenceIndices() {
-    const preview = document.getElementById('imagePreview');
-    const items = preview.querySelectorAll('.preview-item');
-    const badge = document.getElementById('uploadCounterBadge');
-    if (badge) badge.textContent = `Uploaded: ${items.length} / ${maxAllowedImages} Images`;
-    items.forEach((item, i) => {
-      const lbl = item.querySelector('.img-sequence-badge');
-      if (lbl) lbl.textContent = `#${i + 1}`;
+  // ADVANCED IMAGE & VIDEO SCRIPTS
+  document.addEventListener("DOMContentLoaded", function () {
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('change', updatePreview);
+        input.addEventListener('input', updatePreview);
+        
+        // Remove red border when user types/selects
+        input.addEventListener('input', function () { this.classList.remove('input-error'); });
+        input.addEventListener('change', function () {
+            this.classList.remove('input-error');
+            if (this.type === 'radio') {
+                const group = this.closest('.radio-error-group');
+                if (group) group.classList.remove('radio-error-group');
+            }
+        });
     });
-  }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-      el.addEventListener('change', updatePreview);
-      el.addEventListener('input', updatePreview);
-    });
-
-    document.getElementById('brokerageSelect')?.addEventListener('change', function () {
-      document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
-      if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
-    });
-    document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
-      document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    const brokeragePercentage = document.getElementById("brokerage_percentage");
+    const manualBrokerage = document.getElementById("manualBrokerage");
+    brokeragePercentage?.addEventListener("change", function () {
+        manualBrokerage.style.display = (this.value === "Fixed Amount") ? "block" : "none";
     });
 
     const setupToggle = (name, sectionId) => {
@@ -2188,190 +1839,742 @@ document.getElementById('cityInput').addEventListener('input', function () {
         });
       });
     };
-    setupToggle('loan_on_property',    'comm_loan_amount_section');
-    setupToggle('existing_tenants',    'comm_tenant_details_section');
-    setupToggle('any_legal_dispute',   'comm_dispute_details_section');
-    setupToggle('government_tax_dues', 'comm_tax_amount_section');
+    setupToggle('property_loan', 'comm_loan_amount_section');
+    setupToggle('existing_tenants', 'comm_tenant_details_section');
+    setupToggle('any_legal_dispute', 'comm_dispute_details_section');
+    setupToggle('government_tax', 'comm_tax_amount_section');
 
-    const uploadArea  = document.getElementById('uploadArea');
-    const imageInput  = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
+    const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+    const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
+    const IMG_TOTAL_LIMIT = 20;
+    const IMG_MIN_REQUIRED = 3;
 
-  
+    window.catFiles = {};
+    IMG_CATEGORIES.forEach(function (c) { window.catFiles[c] = []; });
 
-    // File Input & Drop Area Listeners
-    uploadArea?.addEventListener('click', () => imageInput.click());
-    uploadArea?.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea?.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-    uploadArea?.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-    imageInput?.addEventListener('change', e => handleFiles(e.target.files));
-
-    // UPDATED: handleFiles generates a unique ID for each image
-    function handleFiles(files) {
-      const arr = Array.from(files).filter(file => file.type.startsWith('image/'));
-      if (selectedFiles.length + arr.length > maxAllowedImages) {
-        Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: `Max ${maxAllowedImages} images allowed`, confirmButtonColor: '#667eea' });
-        return;
-      }
-      arr.forEach(file => {
-        // Assign a unique ID so we can track it when dragged
-        file.uniqueId = 'img_' + Date.now() + Math.random().toString(36).substr(2, 9);
-        selectedFiles.push(file);
-      });
-      renderPreviews();
-    }
-
-    // NEW: renderPreviews rebuilds the DOM and attaches drag listeners
-    function renderPreviews() {
-      const imagePreview = document.getElementById('imagePreview');
-      if (!imagePreview) return;
-      imagePreview.innerHTML = '';
-      
-      selectedFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          // Create the draggable wrapper
-          const wrapper = document.createElement('div');
-          wrapper.className = 'preview-item-wrapper';
-          wrapper.setAttribute('draggable', 'true');
-          wrapper.setAttribute('data-id', file.uniqueId);
-          
-          wrapper.innerHTML = `
-            <div class="preview-item">
-              <span class="img-sequence-badge" style="position:absolute;top:7px;left:7px;background:rgba(102,126,234,.95);color:white;font-size:0.68rem;font-weight:bold;padding:3px 8px;border-radius:6px;z-index:5;">#${index + 1}</span>
-              <img src="${e.target.result}">
-              <button type="button" class="remove-image" onclick="removeImageFile('${file.uniqueId}')"><i class="fas fa-times"></i></button>
-            </div>`;
-          
-          // Attach drag events to the wrapper
-          wrapper.addEventListener('dragstart', handleDragStart);
-          wrapper.addEventListener('dragover', handleDragOver);
-          wrapper.addEventListener('drop', handleDrop);
-          
-          imagePreview.appendChild(wrapper);
-        };
-        reader.readAsDataURL(file);
-      });
-      
-      // Update your badge counter
-      renderSequenceIndices(); 
-    }
-
-    // NEW: Native Drag & Drop Handlers
-    let dragSrcEl = null;
-
-    function handleDragStart(e) {
-      dragSrcEl = this;
-      e.dataTransfer.effectAllowed = 'move';
-      setTimeout(() => this.style.opacity = '0.4', 0); // Dim while dragging
-    }
-
-    function handleDragOver(e) {
-      if (e.preventDefault) e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      return false;
-    }
-
-    function handleDrop(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      dragSrcEl.style.opacity = '1';
-      
-      if (dragSrcEl !== this) {
-        const sourceId = dragSrcEl.getAttribute('data-id');
-        const targetId = this.getAttribute('data-id');
-        
-        const sourceIndex = selectedFiles.findIndex(f => f.uniqueId === sourceId);
-        const targetIndex = selectedFiles.findIndex(f => f.uniqueId === targetId);
-        
-        // Reorder the array
-        const [movedFile] = selectedFiles.splice(sourceIndex, 1);
-        selectedFiles.splice(targetIndex, 0, movedFile);
-        
-        // Re-draw with new sequence
-        renderPreviews();
-      }
-      return false;
-    }
-
-    // Reset opacity if dropped outside
-    document.addEventListener('dragend', e => {
-      if(e.target.classList && e.target.classList.contains('preview-item-wrapper')) {
-        e.target.style.opacity = '1';
-      }
-    });
-
-    // UPDATED: Remove by unique ID instead of file name, then re-render
-    window.removeImageFile = function (uniqueId) {
-      selectedFiles = selectedFiles.filter(f => f.uniqueId !== uniqueId);
-      renderPreviews();
+    window.totalImageCount = function () {
+        return IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
     };
 
-    
+    function findCoverCategory() {
+        var priority = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+        for (var i = 0; i < priority.length; i++) {
+            if (window.catFiles[priority[i]].length > 0) return priority[i];
+        }
+        return null;
+    }
 
-    const hookCounter = (chkName, counterId) => {
-      document.querySelectorAll(`input[name="${chkName}"]`).forEach(c => {
-        c.addEventListener('change', () => {
-          document.getElementById(counterId).value = document.querySelectorAll(`input[name="${chkName}"]:checked`).length;
+    function syncCategoryInput(cat) {
+        var dt = new DataTransfer();
+        window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
+        var inputEl = document.getElementById('imgInput-' + cat);
+        if (inputEl) inputEl.files = dt.files;
+    }
+
+    function renderCategory(cat) {
+        var preview = document.getElementById('imgPreview-' + cat);
+        if (!preview) return;
+
+        preview.innerHTML = '';
+        var coverCat = findCoverCategory();
+
+        window.catFiles[cat].forEach(function (file, idx) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var div = document.createElement('div');
+                div.className = 'img-cat-preview-item';
+                div.draggable = true;
+                div.dataset.fileName = file.name;
+                div.dataset.cat = cat;
+
+                var isCover = (cat === coverCat && idx === 0);
+                div.innerHTML =
+                    '<img src="' + e.target.result + '">' +
+                    '<span class="img-index-badge">Image ' + (idx + 1) + '</span>' +
+                    (isCover ? '<span class="cover-badge"><i class="fas fa-star"></i> Cover Photo</span>' : '') +
+                    '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)">✖</button>';
+
+                div.addEventListener('dragstart', handleCatDragStart);
+                div.addEventListener('dragover', handleCatDragOver);
+                div.addEventListener('drop', handleCatDrop);
+                div.addEventListener('dragend', function () { div.classList.remove('dragging'); });
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
         });
-      });
-    };
-    hookCounter('amenities',        'amenityCounter');
-    hookCounter('nearby_facilities','facilityCounter');
 
-    const form = document.getElementById('commercialPropertyForm');
-    form?.addEventListener('submit', function (e) {
-      e.preventDefault();
-      for (let i = 1; i <= 4; i++) {
-        if (!validateStep(i)) { goToStep(i); return; }
-      }
-      Swal.fire({
-        title: 'Confirm Submission',
-        text: 'Are you sure you want to publish this commercial listing?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#11998e',
-        cancelButtonColor: '#cbd5e0',
-        confirmButtonText: 'Yes, Submit Property',
-        cancelButtonText: 'Cancel'
-      }).then(result => {
-        if (!result.isConfirmed) return;
-        Swal.fire({ title: 'Uploading...', text: 'Please wait.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        var countEl = document.getElementById('count-' + cat);
+        if (countEl) countEl.innerText = window.catFiles[cat].length;
+        var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+        if (tab) tab.classList.toggle('has-images', window.catFiles[cat].length > 0);
+    }
 
-        const formData = new FormData(form);
-        formData.delete('property_images');
-        selectedFiles.forEach(f => formData.append('property_images', f));
+    function renderAllCategories() {
+        IMG_CATEGORIES.forEach(renderCategory);
+        var total = window.totalImageCount();
+        var totalCountEl = document.getElementById('imgTotalCount');
+        if (totalCountEl) totalCountEl.innerText = total;
 
-        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.resale_commercial_desc) {
-          formData.set('property_description', CKEDITOR.instances.resale_commercial_desc.getData());
+        var notice = document.getElementById('imgMinNotice');
+        if (notice) {
+            if (total >= IMG_MIN_REQUIRED) {
+                notice.className = 'min-ok';
+                notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images added.';
+            } else {
+                notice.className = 'min-warning';
+                notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' images (across any areas) to publish';
+            }
+        }
+        if (typeof updatePreview === 'function') updatePreview();
+    }
+
+    function handleCatFiles(cat, files) {
+        var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+        var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+
+        if (window.catFiles[cat].length + incoming.length > limit) {
+            swal('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+            incoming = incoming.slice(0, Math.max(0, limit - window.catFiles[cat].length));
+        }
+        if (window.totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+            swal('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all areas.', 'warning');
+            incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - window.totalImageCount()));
         }
 
-        const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-        fetch(form.action || window.location.href, {
-          method: 'POST',
-          body: formData,
-          headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf }
-        })
-        .then(async res => {
-          if (!res.ok) { const t = await res.text(); console.error('Server error:', t); throw new Error(`HTTP ${res.status}`); }
-          return res.json();
-        })
-        .then(data => {
-          if (data.status === 'success') {
-            Swal.fire({ icon: 'success', title: 'Property Listed!', text: data.message || 'Commercial property added successfully.', confirmButtonColor: '#667eea' })
-              .then(() => window.location.reload());
-          } else {
-            Swal.fire({ icon: 'error', title: 'Submission Failed', text: data.message, confirmButtonColor: '#e74c3c' });
-          }
-        })
-        .catch(err => {
-          console.error('Fetch error:', err);
-          Swal.fire({ icon: 'error', title: 'Error', text: 'Check browser console (F12) for the exact error.', confirmButtonColor: '#e74c3c' });
+        window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+        syncCategoryInput(cat);
+        renderAllCategories();
+    }
+
+    window.removeCatImage = function (cat, fileName, evt) {
+        if (evt) evt.stopPropagation();
+        window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
+        syncCategoryInput(cat);
+        renderAllCategories();
+    };
+
+    var draggedCatFileName = null, draggedCatName = null;
+    function handleCatDragStart(e) { draggedCatFileName = this.dataset.fileName; draggedCatName = this.dataset.cat; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+    function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function handleCatDrop(e) {
+        e.preventDefault();
+        var targetCat = this.dataset.cat;
+        var targetFileName = this.dataset.fileName;
+        if (targetCat !== draggedCatName || targetFileName === draggedCatFileName) return;
+
+        var arr = window.catFiles[targetCat];
+        var fromIdx = arr.findIndex(function (f) { return f.name === draggedCatFileName; });
+        var toIdx = arr.findIndex(function (f) { return f.name === targetFileName; });
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        var moved = arr.splice(fromIdx, 1)[0];
+        arr.splice(toIdx, 0, moved);
+        syncCategoryInput(targetCat);
+        renderAllCategories();
+    }
+
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+
+            this.classList.add('active');
+            var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (activePanel) activePanel.classList.add('active');
         });
-      });
     });
 
-    renderSequenceIndices();
-    updatePreview();
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (zone && input) {
+            zone.addEventListener('click', function () { input.click(); });
+            input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+            zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                handleCatFiles(cat, e.dataTransfer.files);
+            });
+        }
+    });
+
+    renderAllCategories();
+
+    // ── VIDEO SCRIPTS ──
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    function getUploadedImages(callback) {
+        var sources = [];
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) sources.push({ type: 'file', data: file });
+                    });
+                }
+            });
+        }
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) { seen.add(key); uniqueSources.push(s); }
+        });
+
+        if (uniqueSources.length === 0) { callback([]); return; }
+
+        var loadedImages = [];
+        var processed = 0;
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () { loadedImages.push(img); processed++; if (processed === uniqueSources.length) callback(loadedImages); };
+            img.onerror = function () { processed++; if (processed === uniqueSources.length) callback(loadedImages); };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+        var durationPerSlide = 3500;
+        var fadeDuration = 800;
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (videoSourceField) {
+            videoSourceField.value = uploadRadio && uploadRadio.checked ? 'upload' : (autoRadio && autoRadio.checked ? 'auto' : 'rm_assisted');
+        }
+
+        document.querySelectorAll('.video-option-card').forEach(card => card.classList.remove('active'));
+        if (uploadRadio && uploadRadio.checked) document.getElementById('card_video_upload')?.classList.add('active');
+        if (autoRadio && autoRadio.checked) document.getElementById('card_video_auto')?.classList.add('active');
+        if (rmRadio && rmRadio.checked) document.getElementById('card_video_rm')?.classList.add('active');
+
+        if (autoRadio && autoRadio.checked) { startAutoSlideshowPreview(); } else { stopAutoSlideshowPreview(); }
+        if (rmRadio && rmRadio.checked) { renderVideoPreview(); }
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.type === 'file' && e.target.id !== 'videoInput') {
+            if (autoRadio && autoRadio.checked) setTimeout(startAutoSlideshowPreview, 300);
+        }
+    });
+
+    if (videoArea && videoInput) videoArea.addEventListener('click', function () { videoInput.click(); });
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var propCity     = document.getElementById('city')?.value.trim() || '';
+            var propLocality = document.getElementById('locality')?.value.trim() || '';
+            var locationInfo = (propLocality || propCity) ? ' (' + [propLocality, propCity].filter(Boolean).join(', ') + ')' : '';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+
+            var companyWhatsAppNumber = "917057205423";
+            var rawMessage = "Hello Team,\n\n" +
+                             "I am trying to upload a video for my property listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + locationInfo + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                swal({
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: 'Okay',
+                        confirm: {
+                            text: 'Share via WhatsApp',
+                            value: true,
+                            visible: true,
+                            className: 'btn-success'
+                        }
+                    }
+                }).then(function (isConfirmed) {
+                    if (isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                        var linkField = document.getElementById('property_video_link');
+                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+        
+        if (url.includes('wa.me') || url.includes('whatsapp.com')) {
+            frame.innerHTML = '<div style="padding:20px; text-align:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">' +
+                              '  <i class="fab fa-whatsapp" style="font-size:2rem; color:#16a34a; margin-bottom:8px;"></i>' +
+                              '  <p style="margin:0; font-size:13px; font-weight:600; color:#15803d;">WhatsApp Link Detected</p>' +
+                              '  <p style="margin:4px 0 12px; font-size:11px; color:#4b5563;">WhatsApp chat links cannot be played inside an iframe.</p>' +
+                              '  <a href="' + url + '" target="_blank" class="btn btn-sm btn-success" style="font-size:12px;"><i class="fas fa-external-link-alt me-1"></i> Open in WhatsApp</a>' +
+                              '</div>';
+            frame.style.display = 'block';
+            return;
+        }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowtransparency="true" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) { embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1'; frame.style.display = 'block'; return; }
+
+        var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) { embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/'; frame.style.display = 'block'; return; }
+
+        if (url.includes('facebook.com') || url.includes('fb.watch')) {
+            embedIframe.src = 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=false';
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+        linkInputEl.addEventListener('paste', function () { setTimeout(renderVideoPreview, 100); });
+    }
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
   });
+
+
+  // ── COMMERCIAL FORM SUBMISSION VIA SWAL ──
+  function Submit_Commercial_Property(_this) {
+    swal({
+        title: 'Confirm Submission',
+        text: 'Are you sure you want to submit this commercial property?',
+        icon: 'question',
+        buttons: ['No, Cancel', 'Yes, Submit!']
+    }).then((isConfirmed) => {
+        if (isConfirmed) {
+            processCommercialSubmission(_this);
+        }
+    });
+  }
+
+  // ── COMMERCIAL FORM SUBMISSION VIA SWAL WITH PERCENTAGE PROGRESS ──
+  function Submit_Commercial_Property(_this) {
+    swal({
+        title: 'Confirm Submission',
+        text: 'Are you sure you want to submit this commercial property?',
+        icon: 'warning',
+        buttons: ['No, Cancel', 'Yes, Submit!']
+    }).then((isConfirmed) => {
+        if (isConfirmed) {
+            processCommercialSubmission(_this);
+        }
+    });
+  }
+
+  function processCommercialSubmission(_this) {
+    
+    // Validate all tabs before submitting
+    for (let i = 1; i <= 4; i++) {
+        if (!validateStep(i)) {
+            goToStep(i);
+            return;
+        }
+    }
+
+    if (window.totalImageCount && window.totalImageCount() < 3) {
+        goToStep(4);
+        $('.img-total-summary').addClass('input-error');
+        document.querySelector('.img-total-summary').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        swal({
+            title: 'Missing Images',
+            text: 'Please upload at least 3 property images.',
+            icon: 'error'
+        });
+        return;
+    } else {
+        $('.img-total-summary').removeClass('input-error');
+    }
+
+    // Function to dynamically update progress elements inside swal
+    function updateProgress(value, statusText) {
+        var progressText = document.getElementById('swalProgressText');
+        var progressBar = document.getElementById('swalProgressBar');
+        var progressStatus = document.getElementById('swalProgressStatus');
+
+        if (progressText) progressText.textContent = value + '%';
+        if (progressBar) progressBar.style.width = value + '%';
+        if (progressStatus && statusText) progressStatus.textContent = statusText;
+    }
+
+    // Create custom DOM element for live percentage UI inside swal
+    var progressContainer = document.createElement('div');
+    progressContainer.innerHTML = `
+        <div style="padding: 10px 0;">
+            <div style="margin-bottom: 12px;">
+                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #667eea;">0%</span>
+            </div>
+            <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+            </div>
+            <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
+                <i class="fas fa-spinner fa-spin me-1"></i> 
+                <span id="swalProgressStatus">Preparing data...</span>
+            </div>
+        </div>
+    `;
+
+    // Display SweetAlert loading popup
+    swal({
+        title: 'Submitting Property...',
+        content: progressContainer,
+        buttons: false,
+        closeOnClickOutside: false,
+        closeOnEsc: false
+    });
+
+    var fd = new FormData();
+    fd.append('id', '');
+    fd.append('listing_type', 'Resale');
+    fd.append('category', 'Commercial');
+    
+    // Basic Info
+    fd.append('property_title', $('#property_title').val());
+    fd.append('property_type', $('#property_type').val());
+    fd.append('property_category', $('#property_category').val());
+    fd.append('property_no', $('#property_no').val());
+    fd.append('occupancy_status', $('#occupancy_status').val());
+    fd.append('zone_type', $('#zone_type').val());
+    fd.append('location_hub', $('#location_hub').val());
+    fd.append('property_condition', $('#property_condition').val());
+    fd.append('property_age', $('#property_age').val());
+    fd.append('furnishing_status', $('#furnishing_status').val());
+    fd.append('facing_direction', $('#facing_direction').val());
+
+    // Areas
+    fd.append('super_builtup_area', $('#super_builtup_area').val());
+    fd.append('builtup_area', $('#builtup_area').val());
+    fd.append('carpet_area', $('#carpet_area').val());
+    fd.append('plot_area', $('#plot_area').val());
+
+    // Commercial Specs
+    fd.append('no_staircases', $('#no_staircases').val());
+    fd.append('passenger_lifts', $('#passenger_lifts').val());
+    fd.append('service_lifts', $('#service_lifts').val());
+    fd.append('num_cabins', $('#num_cabins').val());
+    fd.append('meeting_rooms', $('#meeting_rooms').val());
+    fd.append('min_seats', $('#min_seats').val());
+    fd.append('max_seats', $('#max_seats').val());
+    fd.append('private_parking', $('#private_parking').val());
+    fd.append('public_parking', $('#public_parking').val());
+    fd.append('brokerage_percentage', $('#brokerage_percentage').val());
+    fd.append('manual_brokerage', $('#manual_brokerage').val());
+
+    // Legal & Pricing
+    fd.append('no_of_owners', $('#no_of_owners').val());
+    fd.append('ownership_status', $('#ownership_status').val());
+    fd.append('ownership_document_type', $('#ownership_document_type').val());
+    fd.append('title_clarity_status', $('#title_clarity_status').val());
+    fd.append('encumbrance_status', $('#encumbrance_status').val());
+    fd.append('property_loan', $('input[name="property_loan"]:checked').val() || 'no');
+    fd.append('loan_amount', $('#loan_amount').val());
+    fd.append('existing_tenants', $('input[name="existing_tenants"]:checked').val() || 'no');
+    fd.append('tenant_details', $('textarea[name="tenant_details"]').val());
+    fd.append('any_legal_dispute', $('input[name="any_legal_dispute"]:checked').val() || 'no');
+    fd.append('dispute_details', $('textarea[name="dispute_details"]').val());
+    fd.append('government_tax', $('input[name="government_tax"]:checked').val() || 'no');
+    fd.append('pending_tax_amount', $('input[name="pending_tax_amount"]').val());
+    fd.append('fire_safety_noc', $('input[name="fire_safety_noc"]:checked').val() || 'no');
+    fd.append('sanctioning_authority', $('#sanctioning_authority').val());
+    
+    fd.append('selling_price', $('#selling_price').val());
+    fd.append('price_per_sqft', $('#price_per_sqft').val());
+
+    // Location
+    fd.append('city', $('#city').val());
+    fd.append('locality', $('#locality').val());
+    fd.append('building_name', $('#building_name').val());
+    fd.append('address', $('#address').val());
+    fd.append('pincode', $('#pincode').val());
+    fd.append('property_landmark', $('#property_landmark').val());
+    fd.append('state', $('#state').val());
+    fd.append('google_maps_link', $('input[name="google_maps_link"]').val() || '');
+    fd.append('latitude', $('#latitude').val() || '');
+    fd.append('longitude', $('#longitude').val() || '');
+    fd.append('pincode', $('#pincode').val() || '');
+
+    fd.append('listed_by_type', 'other');
+    
+    fd.append('listed_by_id', $('#listed_by_id').val());
+    fd.append('listed_by_name', $('#listed_by_name').val());
+    fd.append('listed_by_email', $('#listed_by_email').val());
+    fd.append('listed_by_contact', $('#listed_by_contact').val());
+    fd.append('listed_by_role', $('#listed_by_role').val());
+
+    // Amenities & Facilities
+    var amenities = [];
+    $('.amenities-checkbox:checked').each(function() { amenities.push($(this).val()); });
+    fd.append('amenities', JSON.stringify(amenities));
+
+    var facilities = [];
+    $('.facilities-checkbox:checked').each(function() { facilities.push($(this).val()); });
+    fd.append('nearby_facilities', JSON.stringify(facilities));
+
+    fd.append('user_description', $('#user_description').val());
+
+    // Other Details
+    fd.append('listed_elsewhere', $('input[name="listed_elsewhere"]:checked').val() || 'No');
+    fd.append('portal_name', $('#portal_name').val());
+    fd.append('uploaded_by_name', $('#uploaded_by_name').val());
+    fd.append('uploaded_by_email', $('#uploaded_by_email').val());
+    fd.append('uploaded_by_contact', $('#uploaded_by_contact').val());
+    fd.append('uploaded_by_role', $('#uploaded_by_role').val());
+    fd.append('listing_status', 'Draft');
+    fd.append('approval_status', 'Pending');
+
+    // Video options
+    const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value || 'upload';
+    fd.append('video_option', selectedVideoOption);
+    fd.append('property_video_link', $('#property_video_link').val() || '');
+
+    // Categorized Images Append
+    const cats = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+    cats.forEach(function (cat) {
+        if (window.catFiles && window.catFiles[cat] && window.catFiles[cat].length > 0) {
+            window.catFiles[cat].forEach(function (file) {
+                fd.append('property_images_' + cat + '[]', file);
+                fd.append('property_images', file);
+            });
+        }
+    });
+
+    var videoInput = document.getElementById('videoInput');
+    if (videoInput && videoInput.files.length > 0) {
+        fd.append('property_video', videoInput.files[0]);
+    }
+    var floorPlanInput = document.getElementById('floor_plan');
+    if (floorPlanInput && floorPlanInput.files.length > 0) {
+        fd.append('floor_plan', floorPlanInput.files[0]);
+    }
+
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Submitting Property...`);
+
+    $.ajax({
+        method: "POST",
+        url: $(_this).closest('form').attr('action') || "{% url 'Resale_Commercial_Ajax' %}",
+        data: fd,
+        processData: false,
+        contentType: false,
+        xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                    var status = "Uploading media & details...";
+                    if (percentComplete >= 95) {
+                        status = "Saving to database...";
+                    }
+                    updateProgress(percentComplete, status);
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            updateProgress(100, "Completed!");
+
+            setTimeout(function() {
+                swal.close();
+                $(_this).prop("disabled", false).html(`<i class="fas fa-save"></i> Submit Property`);
+
+                if (response.status_code === 'duplicate_hard_block') {
+                    swal({
+                        title: 'Duplicate Blocked',
+                        text: response.msg || 'This property is already listed in the system.',
+                        icon: 'error'
+                    });
+                    return;
+                }
+
+                if (response.status == '1' || response.status === 'success') {
+                    var propertyIdText = response.property_id ? '\nProperty ID: ' + response.property_id : '';
+                    swal({
+                        title: 'Property Submitted Successfully!',
+                        text: (response.msg || response.message || 'Commercial property has been saved successfully.') + propertyIdText,
+                        icon: 'success',
+                        button: 'View Property List'
+                    }).then(() => {
+                        const hardcodedUrl = "{% url 'commercial_resale_list_agency' %}";
+                        window.location.href = hardcodedUrl;
+                    });
+                } else {
+                    swal({
+                        title: 'Submission Failed',
+                        text: response.msg || response.message || "Something went wrong!",
+                        icon: 'error'
+                    });
+                }
+            }, 500);
+        },
+        error: function(xhr) {
+            swal.close();
+            $(_this).prop("disabled", false).html(`<i class="fas fa-save"></i> Submit Property`);
+
+            if (xhr.status === 409 && xhr.responseJSON) {
+                var response = xhr.responseJSON;
+                swal({
+                    title: 'Duplicate Blocked',
+                    text: response.msg || 'Property already exists.',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            var errorMsg = "An error occurred while submitting the form.";
+
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.errors) {
+                    var errors = xhr.responseJSON.errors;
+                    var errorList = [];
+                    for (var key in errors) {
+                        errorList.push(key + ': ' + errors[key].join(', '));
+                    }
+                    errorMsg = errorList.join('\n');
+                } else if (xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                } else if (xhr.responseJSON.msg) {
+                    errorMsg = xhr.responseJSON.msg;
+                }
+            }
+
+            swal({
+                title: 'Submission Failed',
+                text: errorMsg,
+                icon: 'error'
+            });
+        }
+    });
+  }
+
+  
 </script>
+
+</body>
+</html>

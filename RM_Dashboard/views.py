@@ -350,6 +350,122 @@ def Update_Profile_Rm(request):
 ############## Views end for update rm profile ########################
 
 
+########## Views start for display id cards for rm #####################
+
+def Id_Card_Rm(request):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+    # 4. Data Fetching
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
+    }
+    
+    return render(request, "rm_panel/Docs/id_card.html", context)
+
+############ Views end for display id cards for rm #######################
+
+
+########### Views start for display joining letter for rm ####################
+
+def Joining_Letter_Rm(request):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+    # 4. Data Fetching
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
+    }
+    
+    return render(request, "rm_panel/Docs/joining_letter.html", context)
+
+########### Views end for display joining letter for rm #####################
+
+
+########### Views start for display validity letter for rm ##################
+
+def Validity_Letter_Rm(request):
+
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+    # 4. Data Fetching
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
+    }
+    
+    return render(request, "rm_panel/Docs/validity_letter.html", context)
+
+########### Views end for display validity letter for rm ###################
+
 ############### Views start for assign enquiries to Rm #######################
 
 def Assign_Enquiry_Rm(request):
@@ -2901,7 +3017,7 @@ def commercial_resale_rm_list(request):
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
-# ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
+    # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
     all_properties = (
         CommercialResaleProperty.objects.filter(listed_by_id=user_obj.user_id,listed_by_name=user_obj.user_name,listed_by_email=user_obj.user_email,listed_by_contact=user_obj.user_phone,listed_by_role=user_obj.user_role)
         .prefetch_related('images')
@@ -3991,6 +4107,113 @@ def plot_resale_comm_rm(request):
 ############ Views end for commercial plot for rm #######################
 
 
+########### Views start for update commercial plot list form #################
+
+def plot_resale_comm_rm_update(request,id):
+    # 1. Retrieve identity from browser session
+        session_user_id = request.session.get('User_id')
+        logged_in_role = request.session.get('user_type')
+    
+        #  2. UPDATED SECURITY CHECK
+        
+        is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+        is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    
+        if not is_valid_rm and not is_valid_admin:
+            return redirect('login') 
+    
+        # 3. The ID Swap
+        if logged_in_role == "Admin":
+            dashboard_user_id = request.session.get('impersonate_id')
+        else:
+            dashboard_user_id = session_user_id 
+    
+        # 3. Data Fetching: Get the full user object for the template
+        user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+    
+        enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
+        prop = CommercialPlotResaleProperty.objects.get(id=id)
+        
+        prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+        prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+        videos_qs = prop.video.all().order_by('-created_at') if hasattr(prop, 'video') else []
+        
+        uploaded_video = videos_qs.filter(source='uploaded').first() if hasattr(videos_qs, 'filter') else None
+        auto_video     = videos_qs.filter(source='auto').first() if hasattr(videos_qs, 'filter') else None
+        rm_video       = videos_qs.filter(source='rm_assisted').first() if hasattr(videos_qs, 'filter') else None
+        
+        latest_video = videos_qs.first() if hasattr(videos_qs, 'first') else None
+        video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+        video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else (prop.video_option or 'upload')
+        
+        existing_images = prop.images.all() if hasattr(prop, 'images') else []
+
+        context = {'user_obj':user_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj,'prop':prop,'prop_facilities_list':prop_facilities_list,'prop_amenities_list':prop_amenities_list,'existing_images':existing_images,'video_option':video_option,'uploaded_video':uploaded_video,'auto_video':auto_video,'rm_video':rm_video,'enquiry_obj_rm':enquiry_obj_rm}
+
+        return render(request,"rm_panel/Forms/Resale/Plots/update_comm_plots.html",context)
+
+########### Views end for update commercial plot list form ##################
+
+
+########## Views start for view commercial plot list form ################
+
+def plot_resale_comm_rm_view(request,id):
+    # 1. Retrieve identity from browser session
+        session_user_id = request.session.get('User_id')
+        logged_in_role = request.session.get('user_type')
+    
+        #  2. UPDATED SECURITY CHECK
+        
+        is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+        is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    
+        if not is_valid_rm and not is_valid_admin:
+            return redirect('login') 
+    
+        # 3. The ID Swap
+        if logged_in_role == "Admin":
+            dashboard_user_id = request.session.get('impersonate_id')
+        else:
+            dashboard_user_id = session_user_id 
+    
+        # 3. Data Fetching: Get the full user object for the template
+        user_obj = User_Details.objects.get(id=dashboard_user_id)
+        
+    
+        enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
+        prop = CommercialPlotResaleProperty.objects.get(id=id)
+        
+        # Safety: regenerate FAQs if missing (old records before migration)
+        if not prop.faqs.exists():
+            prop.generate_auto_faqs()
+
+        # FAQs are now persisted in DB via generate_auto_faqs() called on save()
+
+        images = prop.images.all()
+        
+        # Split strings for nice badge rendering in HTML
+        facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+        amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+
+        context = {'user_obj':user_obj,
+        'prop':prop,
+        'faqs': prop.faqs.all(),
+        'facilities_list': facilities_list,
+        'amenities_list': amenities_list,
+        'images': images,
+        'enquiry_obj_rm':enquiry_obj_rm
+       }
+
+        return render(request,"rm_panel/Forms/Resale/Plots/view_comm_plots.html",context)
+
+############# Views end for view commercial plot list form #################
+
 ############ Views start for industrial plot list for rm ##################
 
 def plot_resale_ind_rm_list(request):
@@ -4334,7 +4557,7 @@ def industry_resale_rm(request):
 
 def industrial_resale_rm_update(request,id): 
     
-# 1. Retrieve identity from browser session
+    # 1. Retrieve identity from browser session
     session_user_id = request.session.get('User_id')
     logged_in_role = request.session.get('user_type')
 
@@ -4406,7 +4629,7 @@ def industrial_resale_rm_update(request,id):
 
 def industrial_resale_rm_view(request,id):
 
-# 1. Retrieve identity from browser session
+    # 1. Retrieve identity from browser session
     session_user_id = request.session.get('User_id')
     logged_in_role = request.session.get('user_type')
 
@@ -4867,7 +5090,7 @@ def agriculture_resale_rm(request):
 
 def agriculture_resale_rm_update(request,id):
 
-# 1. Retrieve identity from browser session
+    # 1. Retrieve identity from browser session
     session_user_id = request.session.get('User_id')
     logged_in_role = request.session.get('user_type')
 

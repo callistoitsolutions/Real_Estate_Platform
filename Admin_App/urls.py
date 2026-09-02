@@ -26,6 +26,26 @@ urlpatterns = [
 
     path('api/notifications/today/', views.get_todays_notifications, name='get_todays_notifications'),
 
+    ############ urls for display approval pending listings ##################
+
+    path('Listing_Approval_Admin', views.Listing_Approval_Admin, name='Listing_Approval_Admin'),
+
+    ########### urls for display subscription pending approval ################
+
+    path('Payment_Approval_Admin', views.Payment_Approval_Admin, name='Payment_Approval_Admin'),
+
+    ######### urls for update subscriptions payments ###########################
+
+    path('Update_Payment_Admin/<int:id>', views.Update_Payment_Admin, name='Update_Payment_Admin'),
+
+    ########## urls for generate invoice for subscription payments ###############
+
+    path('Payment_Invoice_Admin/<int:id>', views.Payment_Invoice_Admin, name='Payment_Invoice_Admin'),
+
+    ############ urls for display payments list ###################
+
+    path('Payments_List_Admin', views.Payments_List_Admin, name='Payments_List_Admin'),
+
      ############ urls for rental forms ##########################
 
      path('residential',views.residential,name="residential"),

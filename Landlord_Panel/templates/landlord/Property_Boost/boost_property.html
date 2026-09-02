@@ -1,0 +1,384 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+  /* --- Original Layout Styles --- */
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+  }
+  
+  html, body { 
+    font-family: 'Poppins', sans-serif; 
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+    overflow-x: hidden; 
+    min-height: 100vh; 
+  }
+  
+  .main-content { 
+    margin-left: var(--sidebar-width); 
+    margin-top: var(--topbar-height); 
+    padding: 30px; 
+    min-height: calc(100vh - var(--topbar-height)); 
+    transition: all 0.3s ease; 
+  }
+  
+  .form-container { 
+    background: white; 
+    border-radius: 24px; 
+    padding: 40px; 
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08); 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    width: 100%; 
+  }
+  
+  .form-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 35px; 
+    padding-bottom: 20px; 
+    border-bottom: 2px solid #f1f5f9; 
+    flex-wrap: wrap; 
+    gap: 15px; 
+  }
+  
+  .btn-back {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  
+  .btn-back:hover { 
+    background: #0f172a; 
+    color: white; 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 15px rgba(15, 23, 42, 0.2);
+  }
+
+  .section-header { 
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+    color: white; 
+    padding: 18px 25px; 
+    border-radius: 16px 16px 0 0; 
+    font-weight: 600; 
+    font-size: 1.1rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.1);
+  }
+  
+  .section-body { 
+    background: #f8fafc; 
+    padding: 40px 25px; 
+    border-radius: 0 0 16px 16px; 
+    border: 2px solid #e2e8f0; 
+    border-top: none; 
+  }
+  
+  .form-title { 
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: #0f172a; 
+    display: flex; 
+    align-items: center; 
+    gap: 14px; 
+  }
+  
+  .form-title i { 
+    width: 48px; 
+    height: 48px; 
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); 
+    color: white; 
+    border-radius: 14px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+  }
+
+  /* --- ATTRACTIVE PORTAL SUBSCRIPTION PACKAGE STYLING --- */
+  .subscription-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 30px;
+    justify-content: center;
+  }
+
+  .package-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 35px 30px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  /* Smooth Elevation and Border Shadow Glow on Hover */
+  .package-card:hover {
+    transform: translateY(-8px);
+    border-color: #4f46e5;
+    box-shadow: 0 20px 40px rgba(79, 70, 229, 0.15);
+  }
+
+  .package-card.popular {
+    border-color: #4f46e5;
+    background: linear-gradient(180deg, #ffffff 0%, #fefefe 100%);
+    box-shadow: 0 15px 35px rgba(79, 70, 229, 0.08);
+  }
+
+  .popular-badge {
+    position: absolute;
+    top: -15px;
+    right: 30px;
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 30px;
+    letter-spacing: 0.8px;
+    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+  }
+
+  .package-header {
+    margin-bottom: 20px;
+  }
+
+  .package-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+  }
+
+  .package-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .package-meta span {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .package-pricing {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .current-price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+
+  .original-price {
+    font-size: 1.05rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 500;
+  }
+
+  .discount-tag {
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .package-desc {
+    font-size: 0.88rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    flex-grow: 1;
+  }
+
+  .btn-select-package {
+    background: #0f172a;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+  }
+
+  .btn-select-package:hover {
+    background: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+  }
+
+  .package-card.popular .btn-select-package {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+  }
+  
+  .package-card.popular .btn-select-package:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+  }
+
+  @media(max-width: 768px) {
+    .main-content { 
+      margin-left: 0; 
+      padding: 15px; 
+    }
+    .form-container { 
+      padding: 20px; 
+    }
+    .subscription-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="main-content">
+  <div class="form-container">
+    <div class="form-header">
+      <div class="form-title"><i class="fas fa-cubes"></i> Property Boost & Subscription Packages</div>
+      <button class="btn-back" onclick="history.back();">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- SUBSCRIPTION PACKAGE MODULE SECTION -->
+    <div class="form-section">
+      <div class="section-header">
+        <span><i class="fas fa-star me-2 text-warning"></i> Choose a Boosting Plan for Landlords</span>
+      </div>
+
+      <div class="section-body">
+        <div class="subscription-grid">
+          
+          {% for subscription in subscriptions_obj %}
+            <div class="package-card {% if forloop.first %}popular{% endif %}">
+              {% if forloop.first %}
+                <div class="popular-badge"><i class="fas fa-bolt me-1"></i> Recommended</div>
+              {% endif %}
+              
+              <div class="package-header">
+                <h3>{{ subscription.package_name }} - {{ subscription.plan_type }}</h3>
+                <div class="package-meta">
+                  <span style="color:black;"><i class="far fa-clock text-primary" ></i> Duration: {{ subscription.plan_duration }}</span>
+                  <span style="color:black;"><i class="fas fa-list-ul text-success" ></i> Valid Listings: {{ subscription.plan_max_listings }} listings</span>
+                </div>
+              </div>
+
+              <div class="package-pricing">
+                <div class="price-row">
+                  <span class="current-price">₹{{ subscription.plan_offer_price }}</span>
+                  <span class="original-price">₹{{ subscription.plan_base_price }}</span>
+                </div>
+                <span class="discount-tag">{{ subscription.plan_discount }}% OFF</span>
+              </div>
+
+              <div class="package-desc">
+                <p style="color:black;">{{ subscription.plan_desc }}</p>
+              </div>
+
+              <a href="{% url "Buy_Plan_Landlord" subscription.id %}"><button type="button" class="btn-select-package">
+                Select Plan <i class="fas fa-arrow-right ms-2" style="font-size: 0.8rem;"></i>
+              </button></a>
+            </div>
+          {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #64748b;">
+              <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+              <p style="font-size: 1rem; font-weight: 500;">No subscription packages available at the moment.</p>
+            </div>
+          {% endfor %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+  $("#Landlord_Dashboard").addClass("active");
+
+  function selectPackage(packageName, price) {
+      alert("You selected the " + packageName + " package (₹" + price + "). Proceeding to checkout...");
+      // Add your AJAX or form submission trigger here
+  }
+
+  // Sidebar Toggle for Desktop and Mobile
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const windowWidth = window.innerWidth;
+
+    if (windowWidth <= 768) {
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    } else {
+      sidebar.classList.toggle('collapsed');
+    }
+  }
+
+  function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function toggleSubmenu(event, element) {
+    event.preventDefault();
+    event.stopPropagation();
+    const submenu = element.nextElementSibling;
+    submenu.classList.toggle('active');
+    element.classList.toggle('dropdown-open');
+    return false;
+  }
+</script>

@@ -424,6 +424,7 @@ class Subscription_Details(models.Model):
     plan_offer_start_date = models.DateField(blank=True,null=True)
     plan_offer_end_date = models.DateField(blank=True,null=True)
     plan_desc = models.TextField(blank=True, null=True)
+    offer_days = models.CharField(max_length=200,blank=True,null=True)
 
 
     plan_upload_date = models.DateField(blank=True,null=True)
@@ -431,6 +432,22 @@ class Subscription_Details(models.Model):
 
     def __str__(self):
         return str(self.package_name)+"-"+self.plan_type+"-"+self.plan_for
+
+
+############# Modal Start for Buy Subscriptions #########################
+
+class Subscription_Purchase_Details(models.Model):
+   
+    fk_user = models.ForeignKey(User_Details, on_delete=models.CASCADE, blank=True, null=True)
+    fk_subscription = models.ForeignKey(Subscription_Details, on_delete=models.CASCADE, blank=True, null=True)
+
+    plan_start_date = models.DateField(blank=True,null=True)
+    plan_end_date = models.DateField(blank=True,null=True)
+    payment_ss = models.ImageField(upload_to="Payments/", blank=True, null=True)
+    plan_status = models.CharField(max_length=200,blank=True,null=True,default="Pending")
+
+    purchase_date = models.DateField(blank=True,null=True)
+    purchase_time = models.TimeField(blank=True,null=True)
 
         
     

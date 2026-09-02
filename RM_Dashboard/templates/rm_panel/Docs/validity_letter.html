@@ -1,0 +1,280 @@
+{% include "rm_panel/rm_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+  
+  .main-content { 
+    margin-left: var(--sidebar-width); 
+    margin-top: var(--topbar-height); 
+    padding: 30px; 
+    min-height: calc(100vh - var(--topbar-height)); 
+    transition: all 0.3s ease; 
+  }
+  
+  .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); max-width: 900px; margin: 0 auto; }
+  
+  .form-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 30px; 
+    padding-bottom: 20px; 
+    border-bottom: 2px solid #f0f0f0; 
+    flex-wrap: wrap; 
+    gap: 15px; 
+  }
+  
+  .btn-back {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+  .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+
+  .section-header { 
+    background: var(--primary-gradient); 
+    color: white; 
+    padding: 15px 20px; 
+    border-radius: 12px 12px 0 0; 
+    font-weight: 600; 
+    font-size: 1.1rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+  }
+  
+  .section-body { background: #f8f9fa; padding: 40px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; display: flex; justify-content: center; }
+  
+  .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
+  .form-title i { width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* JOINING LETTER DOCUMENT STYLING */
+  .letter-preview {
+    background: #ffffff;
+    width: 100%;
+    max-width: 700px;
+    padding: 50px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    position: relative;
+  }
+  
+  .letter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .company-brand { font-size: 1.3rem; font-weight: 700; color: #4f46e5; display: flex; align-items: center; gap: 8px; }
+  .letter-date { font-size: 0.82rem; color: #64748b; font-weight: 600; text-align: right; }
+  
+  .candidate-info { margin-bottom: 20px; }
+  .candidate-info h4 { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+  .candidate-info p { font-size: 0.82rem; color: #64748b; margin: 0; word-break: break-word; }
+
+  .letter-title { text-align: center; font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  .letter-body p { margin-bottom: 14px; text-align: justify; }
+  
+  .letter-footer {
+    margin-top: 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  .signature-box { text-align: left; }
+  .signature-line { width: 170px; border-bottom: 1px solid #cbd5e1; margin-bottom: 8px; height: 30px; }
+  .signature-title { font-size: 0.8rem; font-weight: 700; color: #0f172a; }
+  .signature-subtitle { font-size: 0.72rem; color: #64748b; }
+
+  .download-btn-custom {
+    background: #4f46e5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .download-btn-custom:hover { background: #4338ca; }
+
+  /* --- Responsive Media Queries --- */
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0 !important;
+      padding: 15px;
+    }
+    .form-container {
+      padding: 20px;
+    }
+    .form-title {
+      font-size: 1.25rem;
+    }
+    .section-body {
+      padding: 20px 15px;
+    }
+    .letter-preview {
+      padding: 20px;
+    }
+    .letter-date {
+      text-align: left;
+    }
+    .letter-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .signature-box, .signature-box[style*="text-align: right;"] {
+      text-align: left !important;
+      width: 100%;
+    }
+    .signature-line {
+      margin-left: 0 !important;
+    }
+  }
+</style>
+
+<div class="main-content">
+  <div class="form-container">
+    <div class="form-header">
+      <div class="form-title"><i class="fas fa-file-contract"></i> Official Joining & Validity Letter</div>
+      <button class="btn-back" onclick="history.back();">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- JOINING LETTER SECTION -->
+    <div class="form-section">
+      <div class="section-header">
+        <span><i class="fas fa-award me-2"></i> Employment Offer & Terms Document</span>
+        <button type="button" class="download-btn-custom" onclick="downloadLetterAsPDF()">
+          <i class="fas fa-download"></i> Download PDF
+        </button>
+      </div>
+
+      <div class="section-body">
+        <!-- Renderable Joining Letter Document -->
+        <div class="letter-preview" id="joiningLetterDoc">
+          <div class="letter-header">
+            <div class="company-brand"><i class="fas fa-building"></i> EstateFlow</div>
+            <div class="letter-date">
+              <strong>Date:</strong> <span id="currentDate"></span><br>
+              <strong>Ref ID:</strong> EF/HR/2026/{{ user_obj.user_id|default:"RM001" }}
+            </div>
+          </div>
+
+          <div class="candidate-info">
+            <h4>To, {{ user_obj.user_name|default:"Valued Associate" }}</h4>
+            <p>RM ID: {{ user_obj.user_id|default:"N/A" }}</p>
+            <p>Email: {{ user_obj.user_email|default:"N/A" }} | Phone: {{ user_obj.user_phone|default:"N/A" }}</p>
+          </div>
+
+          <div class="letter-title">Letter of Appointment & Validity Terms</div>
+
+          <div class="letter-body">
+            <p>Dear <strong>{{ user_obj.user_name|default:"Associate" }}</strong>,</p>
+            
+            <p>We are delighted to formally welcome you to <strong>EstateFlow</strong> in the capacity of <strong>{{ user_obj.user_role|default:"Relationship Manager" }}</strong>. Your onboarding marks an exciting step forward as we expand our real estate and client management operations.</p>
+            
+            <p><strong>Validity & Renewal Terms:</strong> This joining letter and associated credentials/access remain valid for a period of <strong>one (1) year</strong> from the date of issuance, completely free of charge. Upon the completion of this 1-year validity period, continuation of services and account renewal will be subject to applicable maintenance or renewal fees as determined by company policy.</p>
+            
+            <p>As part of your daily profile role, you will continue managing client portfolios, facilitating property listings, and driving strategic business growth within your designated sector.</p>
+            
+            <p>We trust that your association with us will be mutually rewarding, productive, and filled with professional milestones. Please sign and return a copy of this letter to signify your agreement.</p>
+            
+            <p>Welcome aboard to the EstateFlow family!</p>
+          </div>
+
+          <div class="letter-footer">
+            <div class="signature-box">
+              <div class="signature-line"></div>
+              <div class="signature-title">Authorized Signatory</div>
+              <div class="signature-subtitle">Human Resources, EstateFlow</div>
+            </div>
+            <div class="signature-box" style="text-align: right;">
+              <div class="signature-line" style="margin-left: auto;"></div>
+              <div class="signature-title">Accepted By</div>
+              <div class="signature-subtitle">{{ user_obj.user_name|default:"Candidate Signature" }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $("#Docs").addClass("active");
+
+  // Display Current Date Format
+  document.addEventListener('DOMContentLoaded', function() {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const dateEl = document.getElementById('currentDate');
+    if (dateEl) {
+      dateEl.textContent = new Date().toLocaleDateString('en-US', options);
+    }
+  });
+
+  // Download Joining Letter as PDF using jsPDF and html2canvas
+  function downloadLetterAsPDF() {
+      const element = document.getElementById('joiningLetterDoc');
+      html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          
+          const imgWidth = 210; // A4 width in mm
+          const pageHeight = 295; // A4 height in mm
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
+          let position = 0;
+
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+
+          while (heightLeft >= 0) {
+              position = heightLeft - imgHeight;
+              pdf.addPage();
+              pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+          }
+
+          pdf.save('Validity_Letter_{{ user_obj.user_id|default:"Associate" }}.pdf');
+      });
+  }
+</script>
