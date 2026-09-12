@@ -1,0 +1,1452 @@
+{% include "crm/crm_header.html" %}
+
+<div class="main-content">
+
+    <div class="container-fluid py-4 service-request-page">
+
+        <!-- =====================================================
+             PAGE HEADER
+        ====================================================== -->
+
+        <div class="page-header mb-4">
+
+            <div>
+                <div class="page-title-row">
+
+                    <div class="page-title-icon">
+                        <i class="bi bi-headset"></i>
+                    </div>
+
+                    <div>
+                        <h3 class="page-title">
+                            Service Requests
+                        </h3>
+
+                        <p class="page-subtitle">
+                            Manage customer service inquiries, verify requirements
+                            and assign suitable vendors.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="page-header-actions">
+
+                <a href="{% url 'service_requests' %}"
+                   class="btn btn-light border refresh-btn text-dark">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Refresh
+
+                </a>
+
+                <span class="service-lead-badge">
+                    <i class="bi bi-briefcase"></i>
+                    Service Leads
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SUMMARY CARDS
+        ====================================================== -->
+
+        <div class="row g-3 mb-4">
+
+            <!-- TOTAL -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon blue">
+                        <i class="bi bi-inbox"></i>
+                    </div>
+
+                    <div class="summary-content">
+
+                        <span>Total Requests</span>
+
+                        <h3>
+                            {{ total_requests|default:"0" }}
+                        </h3>
+
+                        <small>
+                            All service inquiries
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- NEW -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon orange">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                    <div class="summary-content">
+
+                        <span>New Requests</span>
+
+                        <h3>
+                            {{ new_requests|default:"0" }}
+                        </h3>
+
+                        <small>
+                            Waiting for RM review
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ASSIGNED -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon green">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+
+                    <div class="summary-content">
+
+                        <span>Vendor Assigned</span>
+
+                        <h3>
+                            {{ assigned_requests|default:"0" }}
+                        </h3>
+
+                        <small>
+                            Assigned to vendors
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETED -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon purple">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+
+                    <div class="summary-content">
+
+                        <span>Completed</span>
+
+                        <h3>
+                            {{ completed_requests|default:"0" }}
+                        </h3>
+
+                        <small>
+                            Successfully completed
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             FILTER BAR
+        ====================================================== -->
+
+        <div class="filter-card mb-4">
+
+            <div class="filter-heading">
+
+                <div>
+                    <i class="bi bi-funnel"></i>
+                    Filter Service Requests
+                </div>
+
+                {% if request.GET.search or request.GET.service or request.GET.status or request.GET.city %}
+
+                    <span class="filter-active-badge">
+                        Filters Applied
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <form method="GET">
+
+                <div class="row g-3">
+
+                    <!-- SEARCH -->
+
+                    <div class="col-xl-3 col-md-6">
+
+                        <label class="filter-label">
+                            Search
+                        </label>
+
+                        <div class="input-icon-wrapper">
+
+                            <i class="bi bi-search"></i>
+
+                            <input type="text"
+                                   name="search"
+                                   value="{{ request.GET.search }}"
+                                   class="form-control"
+                                   placeholder="Request ID / Customer / Phone">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SERVICE -->
+
+                    <div class="col-xl-2 col-md-6">
+
+                        <label class="filter-label">
+                            Service
+                        </label>
+
+                        <select name="service"
+                                class="form-select">
+
+                            <option value="">
+                                All Services
+                            </option>
+
+                            {% for service in services %}
+
+                                <option value="{{ service.id }}"
+                                    {% if request.GET.service == service.id|stringformat:"s" %}
+                                        selected
+                                    {% endif %}>
+
+                                    {{ service.title }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="col-xl-2 col-md-6">
+
+                        <label class="filter-label">
+                            Status
+                        </label>
+
+                        <select name="status"
+                                class="form-select">
+
+                            <option value="">
+                                All Status
+                            </option>
+
+                            <option value="new"
+                                {% if request.GET.status == "new" %}
+                                    selected
+                                {% endif %}>
+                                New
+                            </option>
+
+                            <option value="contacted"
+                                {% if request.GET.status == "contacted" %}
+                                    selected
+                                {% endif %}>
+                                Contacted
+                            </option>
+
+                            <option value="verified"
+                                {% if request.GET.status == "verified" %}
+                                    selected
+                                {% endif %}>
+                                Verified
+                            </option>
+
+                            <option value="vendor_assigned"
+                                {% if request.GET.status == "vendor_assigned" %}
+                                    selected
+                                {% endif %}>
+                                Vendor Assigned
+                            </option>
+
+                            <option value="in_progress"
+                                {% if request.GET.status == "in_progress" %}
+                                    selected
+                                {% endif %}>
+                                In Progress
+                            </option>
+
+                            <option value="completed"
+                                {% if request.GET.status == "completed" %}
+                                    selected
+                                {% endif %}>
+                                Completed
+                            </option>
+
+                            <option value="cancelled"
+                                {% if request.GET.status == "cancelled" %}
+                                    selected
+                                {% endif %}>
+                                Cancelled
+                            </option>
+
+                            <option value="closed"
+                                {% if request.GET.status == "closed" %}
+                                    selected
+                                {% endif %}>
+                                Closed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- CITY -->
+
+                    <div class="col-xl-2 col-md-6">
+
+                        <label class="filter-label">
+                            City
+                        </label>
+
+                        <input type="text"
+                               name="city"
+                               value="{{ request.GET.city }}"
+                               class="form-control"
+                               placeholder="Enter city">
+
+                    </div>
+
+
+                    <!-- BUTTONS -->
+
+                    <div class="col-xl-3 col-md-12 d-flex align-items-end">
+
+                        <button type="submit"
+                                class="btn btn-primary filter-btn">
+
+                            <i class="bi bi-search"></i>
+                            Search
+
+                        </button>
+
+
+                        <a href="{% url 'service_requests' %}"
+                           class="btn btn-light border reset-btn text-dark">
+
+                            <i class="bi bi-x-circle"></i>
+                            Reset
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- =====================================================
+             REQUEST TABLE
+        ====================================================== -->
+
+        <div class="table-card">
+
+            <!-- TABLE HEADER -->
+
+            <div class="table-card-header">
+
+                <div>
+
+                    <h5>
+                        Service Request List
+                    </h5>
+
+                    <p>
+                        Customer service inquiries received through EstateFlow.
+                    </p>
+
+                </div>
+
+                <div class="request-count">
+
+                    {% if service_leads %}
+
+                        {{ service_leads|length }} Request{{ service_leads|length|pluralize }}
+
+                    {% else %}
+
+                        0 Requests
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-responsive">
+
+                <table class="table service-request-table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            
+                            <th>
+                            Sr.No
+                            </th>
+                            <th>
+                                Request ID
+                            </th>
+
+                            <th>
+                                Service
+                            </th>
+
+                            <th>
+                                Customer
+                            </th>
+
+                            <th>
+                                Location
+                            </th>
+
+                            <th>
+                                Callback
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Vendor
+                            </th>
+
+                            <th>
+                                Created
+                            </th>
+
+                            <th class="text-center">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    {% for lead in service_leads %}
+
+                        <tr>
+
+                            <!-- =================================
+                                 REQUEST ID
+                            ================================== -->
+
+
+                             <td>
+
+                               {{forloop.counter}}
+
+                            </td>
+                            <td>
+
+                                <div class="request-id">
+
+                                    {{ lead.lead_id }}
+
+                                </div>
+
+                                <small class="record-id">
+                                    DB ID: {{ lead.id }}
+                                </small>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 SERVICE
+                            ================================== -->
+
+                            <td>
+
+                                <div class="service-name">
+
+                                    <div class="service-icon-small">
+
+                                        <i class="{{ lead.service.icon|default:'bi bi-briefcase' }}"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ lead.service.title }}
+                                        </strong>
+
+                                        {% if lead.service_option %}
+
+                                            <small>
+                                                {{ lead.service_option.option_name }}
+                                            </small>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CUSTOMER
+                            ================================== -->
+
+                            <td>
+
+                                <div class="customer-name">
+
+                                    <strong>
+                                        {{ lead.customer_name }}
+                                    </strong>
+
+                                </div>
+
+                                <div class="customer-phone">
+
+                                    <i class="bi bi-telephone"></i>
+
+                                    {{ lead.customer_phone }}
+
+                                </div>
+
+                                {% if lead.customer_email %}
+
+                                    <div class="customer-email">
+
+                                        <i class="bi bi-envelope"></i>
+
+                                        {{ lead.customer_email }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- =================================
+                                 LOCATION
+                            ================================== -->
+
+                            <td>
+
+                                <div class="location-info">
+
+                                    <div>
+
+                                        <i class="bi bi-geo-alt"></i>
+
+                                        {{ lead.city }}
+
+                                    </div>
+
+                                    {% if lead.area %}
+
+                                        <small>
+                                            {{ lead.area }}
+                                        </small>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CALLBACK TIME
+                            ================================== -->
+
+                            <td>
+
+                                {% if lead.preferred_callback_time %}
+
+                                    <span class="callback-time">
+
+                                        <i class="bi bi-clock"></i>
+
+                                        {{ lead.preferred_callback_time }}
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="not-available">
+                                        --
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- =================================
+                                 STATUS
+                            ================================== -->
+
+                            <td>
+
+                                {% if lead.status == "new" %}
+
+                                    <span class="status-badge status-new">
+                                        <i class="bi bi-circle-fill"></i>
+                                        New
+                                    </span>
+
+
+                                {% elif lead.status == "contacted" %}
+
+                                    <span class="status-badge status-contacted">
+                                        <i class="bi bi-telephone"></i>
+                                        Contacted
+                                    </span>
+
+
+                                {% elif lead.status == "verified" %}
+
+                                    <span class="status-badge status-verified">
+                                        <i class="bi bi-patch-check"></i>
+                                        Verified
+                                    </span>
+
+
+                                {% elif lead.status == "vendor_assigned" %}
+
+                                    <span class="status-badge status-assigned">
+                                        <i class="bi bi-person-check"></i>
+                                        Vendor Assigned
+                                    </span>
+
+
+                                {% elif lead.status == "in_progress" %}
+
+                                    <span class="status-badge status-progress">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                        In Progress
+                                    </span>
+
+
+                                {% elif lead.status == "completed" %}
+
+                                    <span class="status-badge status-completed">
+                                        <i class="bi bi-check-circle"></i>
+                                        Completed
+                                    </span>
+
+
+                                {% elif lead.status == "cancelled" %}
+
+                                    <span class="status-badge status-cancelled">
+                                        <i class="bi bi-x-circle"></i>
+                                        Cancelled
+                                    </span>
+
+
+                                {% elif lead.status == "closed" %}
+
+                                    <span class="status-badge status-closed">
+                                        <i class="bi bi-lock"></i>
+                                        Closed
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span class="status-badge status-default">
+
+                                        {{ lead.status|title }}
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- =================================
+                                 VENDOR
+                            ================================== -->
+
+                            <td>
+
+                                {% if lead.assigned_vendor %}
+
+                                    <div class="vendor-info">
+
+                                        <div class="vendor-avatar">
+
+                                            <i class="bi bi-person"></i>
+
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ lead.assigned_vendor.user_name }}
+                                            </strong>
+
+                                            <small>
+                                                Assigned
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="not-assigned">
+
+                                        <i class="bi bi-person-x"></i>
+
+                                        Not Assigned
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- =================================
+                                 CREATED
+                            ================================== -->
+
+                            <td>
+
+                                <div class="created-date">
+
+                                    <strong>
+                                        {{ lead.created_at|date:"d M Y" }}
+                                    </strong>
+
+                                    <small>
+                                        {{ lead.created_at|date:"h:i A" }}
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- =================================
+                                 ACTION
+                            ================================== -->
+
+                            <td class="text-center">
+
+                              <button type="button" class="btn btn-sm btn-primary view-btn">
+                                  <i class="bi bi-eye"></i> View
+                              </button>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <!-- =================================
+                             EMPTY STATE
+                        ================================== -->
+
+                        <tr>
+
+                            <td colspan="9">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+
+                                        <i class="bi bi-inbox"></i>
+
+                                    </div>
+
+                                    <h5>
+                                        No Service Requests Found
+                                    </h5>
+
+                                    <p>
+                                        There are currently no service requests
+                                        matching your search criteria.
+                                    </p>
+
+                                    {% if request.GET.search or request.GET.service or request.GET.status or request.GET.city %}
+
+                                        <a href="{% url 'service_requests' %}"
+                                           class="btn btn-outline-primary">
+
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                            Clear Filters
+
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div> <!-- Close main-content -->
+</div> <!-- Close main-wrapper -->
+
+
+<!-- =========================================================
+     PAGE CSS
+========================================================= -->
+
+<style>
+
+.service-request-page {
+    color: #1e293b;
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    /* Removed custom background so it perfectly inherits the global CRM styling */
+}
+
+.page-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.page-title-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2); /* Contrast against teal background */
+    color: #ffffff;
+    font-size: 26px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 26px; /* Increased */
+    font-weight: 800;
+    color: #ffffff !important; /* Force white over gradient */
+}
+
+.page-subtitle {
+    margin: 6px 0 0;
+    font-size: 14px; /* Increased */
+    color: rgba(255, 255, 255, 0.85) !important; /* Force readable light text over gradient */
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.refresh-btn {
+    font-size: 14px; /* Increased */
+    font-weight: 600;
+    padding: 8px 16px;
+}
+
+.service-lead-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: #0d9488;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px; /* Increased */
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* =========================================================
+   SUMMARY CARDS
+========================================================= */
+
+.summary-card {
+    height: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 3px 14px rgba(15,23,42,.05);
+    transition: .2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15,23,42,.08);
+}
+
+.summary-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.summary-icon.blue { background: #dbeafe; color: #2563eb; }
+.summary-icon.orange { background: #fef3c7; color: #d97706; }
+.summary-icon.green { background: #dcfce7; color: #16a34a; }
+.summary-icon.purple { background: #ede9fe; color: #7c3aed; }
+
+.summary-content span {
+    display: block;
+    font-size: 14px; /* Increased */
+    font-weight: 700;
+    color: #475569; /* Darkened for visibility */
+}
+
+.summary-content h3 {
+    margin: 5px 0 3px;
+    font-size: 28px; /* Increased */
+    line-height: 1;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.summary-content small {
+    color: #64748b; /* Darkened for visibility */
+    font-size: 12px; /* Increased */
+}
+
+/* =========================================================
+   FILTER
+========================================================= */
+
+.filter-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 3px 12px rgba(15,23,42,.04);
+}
+
+.filter-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 16px; /* Increased */
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.filter-heading i { color: #2563eb; margin-right: 8px; }
+
+.filter-active-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px; /* Increased */
+    font-weight: 700;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px; /* Increased */
+    font-weight: 700;
+    color: #334155; /* Darkened */
+}
+
+.filter-card .form-control,
+.filter-card .form-select {
+    min-height: 44px;
+    border-radius: 8px;
+    border: 1px solid #dbe1e8;
+    font-size: 13px; /* Increased */
+}
+
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+}
+
+.input-icon-wrapper { position: relative; }
+
+.input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 15px;
+    z-index: 2;
+}
+
+.input-icon-wrapper .form-control { padding-left: 40px; }
+
+.filter-btn {
+    min-height: 44px;
+    border-radius: 8px;
+    padding: 0 24px;
+    font-size: 14px; /* Increased */
+    font-weight: 700;
+}
+
+.reset-btn {
+    min-height: 44px;
+    margin-left: 10px;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-size: 14px; /* Increased */
+    font-weight: 600;
+}
+
+/* =========================================================
+   TABLE CARD
+========================================================= */
+
+.table-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 3px 14px rgba(15,23,42,.05);
+}
+
+.table-card-header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-card-header h5 {
+    margin: 0;
+    font-size: 17px; /* Increased */
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.table-card-header p {
+    margin: 6px 0 0;
+    font-size: 13px; /* Increased */
+    color: #64748b;
+}
+
+.request-count {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px; /* Increased */
+    font-weight: 700;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.service-request-table {
+    margin: 0;
+    min-width: 1200px;
+}
+
+.service-request-table thead { background: #f8fafc; }
+
+.service-request-table th {
+    padding: 15px 18px;
+    font-size: 12px; /* Increased */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #475569; /* Darkened */
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.service-request-table td {
+    padding: 18px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px; /* Increased */
+    vertical-align: middle;
+}
+
+.service-request-table tbody tr { transition: .15s; }
+.service-request-table tbody tr:hover { background: #f8fbff; }
+.service-request-table tbody tr:last-child td { border-bottom: 0; }
+
+/* =========================================================
+   REQUEST ID
+========================================================= */
+
+.request-id {
+    font-size: 14px; /* Increased */
+    font-weight: 800;
+    color: #2563eb;
+    white-space: nowrap;
+}
+
+.record-id {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px; /* Increased */
+    color: #64748b;
+}
+
+/* =========================================================
+   SERVICE
+========================================================= */
+
+.service-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 190px;
+}
+
+.service-icon-small {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.service-name strong {
+    display: block;
+    max-width: 180px;
+    color: #0f172a;
+    font-size: 14px; /* Increased */
+    font-weight: 700;
+}
+
+.service-name small {
+    display: block;
+    margin-top: 4px;
+    max-width: 180px;
+    color: #64748b;
+    font-size: 12px; /* Increased */
+}
+
+/* =========================================================
+   CUSTOMER
+========================================================= */
+
+.customer-name strong {
+    color: #0f172a;
+    font-size: 14px; /* Increased */
+}
+
+.customer-phone,
+.customer-email {
+    margin-top: 5px;
+    color: #475569; /* Darkened */
+    font-size: 12px; /* Increased */
+    white-space: nowrap;
+}
+
+.customer-phone i,
+.customer-email i { color: #64748b; margin-right: 4px; }
+
+/* =========================================================
+   LOCATION
+========================================================= */
+
+.location-info div {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 13px; /* Increased */
+    white-space: nowrap;
+}
+
+.location-info i { color: #2563eb; margin-right: 4px; }
+
+.location-info small {
+    display: block;
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 12px; /* Increased */
+}
+
+/* =========================================================
+   CALLBACK
+========================================================= */
+
+.callback-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 12px; /* Increased */
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.callback-time i { color: #2563eb; }
+.not-available { color: #94a3b8; font-size: 12px;}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 11px; /* Increased */
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.status-badge i { font-size: 8px; }
+.status-new { background: #fef3c7; color: #92400e; }
+.status-contacted { background: #dbeafe; color: #1d4ed8; }
+.status-verified { background: #dcfce7; color: #166534; }
+.status-assigned { background: #e0e7ff; color: #4338ca; }
+.status-progress { background: #cffafe; color: #155e75; }
+.status-completed { background: #dcfce7; color: #166534; }
+.status-cancelled { background: #fee2e2; color: #991b1b; }
+.status-closed { background: #e2e8f0; color: #475569; }
+.status-default { background: #f1f5f9; color: #475569; }
+
+/* =========================================================
+   VENDOR
+========================================================= */
+
+.vendor-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 140px;
+}
+
+.vendor-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.vendor-info strong {
+    display: block;
+    color: #0f172a;
+    font-size: 13px; /* Increased */
+    white-space: nowrap;
+}
+
+.vendor-info small {
+    display: block;
+    color: #16a34a;
+    font-size: 11px; /* Increased */
+    margin-top: 3px;
+}
+
+.not-assigned {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 12px; /* Increased */
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   CREATED
+========================================================= */
+
+.created-date strong {
+    display: block;
+    color: #1e293b;
+    font-size: 13px; /* Increased */
+    white-space: nowrap;
+}
+
+.created-date small {
+    display: block;
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 11px; /* Increased */
+}
+
+/* =========================================================
+   VIEW BUTTON
+========================================================= */
+
+.view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12px; /* Increased */
+    font-weight: 700;
+    transition: .2s;
+    white-space: nowrap;
+}
+
+.view-btn:hover {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state { padding: 80px 20px; text-align: center; }
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: 36px;
+}
+
+.empty-state h5 {
+    margin: 0 0 8px;
+    font-size: 17px; /* Increased */
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.empty-state p {
+    max-width: 420px;
+    margin: 0 auto 20px;
+    color: #64748b;
+    font-size: 14px; /* Increased */
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width: 768px) {
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .page-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .page-title { font-size: 24px; }
+    .filter-btn, .reset-btn { flex: 1; }
+    .table-card-header {
+        align-items: flex-start;
+        gap: 12px;
+        flex-direction: column;
+    }
+}
+</style>

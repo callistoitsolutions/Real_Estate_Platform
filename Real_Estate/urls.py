@@ -19,6 +19,7 @@ from django.urls import path,include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.sitemaps.views import sitemap
+from django.views.generic import TemplateView
 from Main_App.sitemaps import sitemaps
 # finance.api import router as finance_router
 
@@ -26,7 +27,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('Main_App.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-       
+
+    # NEW: robots.txt — was completely missing before. Renders the
+    # plain-text template at templates/robots.txt (see robots.txt file
+    # provided alongside this one; drop it into Main_App/templates/).
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name='robots_txt'),
+
     path('Admin_App/',include('Admin_App.urls')),
     path('Tenant_Panel/', include(('Tenant_App.urls', 'Tenant_App'), namespace='Tenant_App')),
     #path('Tenant_Panel/',include('Tenant_Panel.urls')),

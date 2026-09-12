@@ -690,3 +690,42 @@ def lead_report(request):
     return render(request, 'crm/lead_report.html', context)
 
 
+
+
+
+def service_requests(request):
+    service_leads = Service_Lead.objects.select_related(
+        "service",
+        "service_option",
+        "assigned_vendor"
+    ).order_by("-created_at")
+
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    services = Service.objects.filter(
+        status="active"
+    ).order_by("title")
+
+    context = {
+        "service_leads": service_leads,
+        'admin_obj': admin_obj,
+        "services": services,
+        "total_requests": Service_Lead.objects.count(),
+        "new_requests": Service_Lead.objects.filter(status="new").count(),
+        "assigned_requests": Service_Lead.objects.filter(
+            status="vendor_assigned"
+        ).count(),
+        "completed_requests": Service_Lead.objects.filter(
+            status="completed"
+        ).count(),
+    }
+
+    return render(
+        request,
+        "crm/Property_Enquiry/service_requests.html",
+        context
+    )

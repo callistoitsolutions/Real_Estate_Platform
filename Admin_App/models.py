@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.timezone import now
 from decimal import Decimal,InvalidOperation
 
+
+
 import uuid
 # 📂 Go to the VERY TOP of models.py
 from django.db import models, transaction # 🚀 MAKE SURE ", transaction" IS ADDED HERE
@@ -90,23 +92,83 @@ class BroadcastEmail(models.Model):
     
  
 
+
+
 class HeroSection(models.Model):
-    title = models.CharField(max_length=200)
-    subtitle = models.TextField(blank=True)
-    background_image = models.ImageField(upload_to="hero_images/")
+    eyebrow       = models.CharField(max_length=100, default="PREMIUM PROPERTIES  •  VERIFIED & TRUSTED")
+    title_line1   = models.CharField(max_length=100, default="Find Properties That")
+    title_line2   = models.CharField(max_length=100, default="Define Your Lifestyle")
+    description   = models.TextField(default="Buy, rent, sell or invest in residential, commercial and land properties across Nagpur — every listing verified, every deal backed by a dedicated relationship manager.")
+    cta_text      = models.CharField(max_length=50, default="Explore Properties")
+    cta_url       = models.CharField(max_length=200, default="#properties")
+    bg_image      = models.ImageField(upload_to="hero/", blank=True, null=True)
+    is_active     = models.BooleanField(default=True)
+    updated_at    = models.DateTimeField(auto_now=True)
 
-    title_font_size = models.CharField(max_length=10, default="48px")
-    subtitle_font_size = models.CharField(max_length=10, default="18px")
-    text_color = models.CharField(max_length=20, default="#ffffff")
-    overlay_color = models.CharField(max_length=20, default="#080808b3")
-
-    is_active = models.BooleanField(default=True)
+    def save(self, *args, **kwargs):
+        if self.is_active:
+            HeroSection.objects.exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        return f"{self.title_line1} {self.title_line2}"
 
 
 
+
+class HeaderSettings(models.Model):
+    logo = models.ImageField(
+        upload_to="site/header/",
+        blank=True,
+        null=True
+    )
+
+    logo_alt = models.CharField(
+        max_length=150,
+        default="EstateFlow"
+    )
+
+    logo_width = models.PositiveIntegerField(
+        default=180
+    )
+
+    transparent_header = models.BooleanField(
+        default=False
+    )
+
+    header_background = models.CharField(
+        max_length=100,
+        default="#ffffff"
+    )
+
+    header_text_color = models.CharField(
+        max_length=100,
+        default="#16233A"
+    )
+
+    sticky_header = models.BooleanField(
+        default=True
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def save(self, *args, **kwargs):
+
+        if self.is_active:
+            HeaderSettings.objects.exclude(
+                pk=self.pk
+            ).update(is_active=False)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "Header Settings"
 
 
 from django.utils.text import slugify
@@ -159,34 +221,119 @@ class Blog(models.Model):
         return self.title
 
 
+
+
+
+class Service_Type_Details(models.Model):
+   
+    service_id = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    service_name = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    service_upload_date = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    service_upload_time = models.TimeField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return str(self.service_id) + "-" + str(self.service_name)
+
+
+
+
+
+
 class Service(models.Model):
+
     STATUS_CHOICES = [
         ("active", "Active"),
         ("inactive", "Inactive"),
     ]
 
-    CATEGORY_CHOICES = [
-        ("legal_services", "Legal Services"),
-        ("loan_services", "Loan Services"),
-        ("interior_services", "Interior Services"),
-        ("packers_movers", "Packers & Movers"),
-        ("vastu_services", "Vastu Services"),
-        ("property_valuation", "Property Valuation"),
-        ("property_photography", "Property Photography"),
+    PRICE_TYPE_CHOICES = [
+        ("fixed", "Fixed Price"),
+        ("starting_from", "Starting From"),
+        ("on_request", "On Request"),
     ]
 
-    title = models.CharField(max_length=200)                                       # name="title"
-    icon = models.CharField(max_length=50, blank=True,
-                             help_text="Bootstrap icon class (e.g. bi bi-house)")   # name="icon"
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES,
-                                 null=True, blank=True)                             # name="category"
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
-                               default="active")                                    # name="status"
-    cta_text = models.CharField(max_length=50, default="Request Callback")          # name="cta_text"
-    sort_order = models.PositiveIntegerField(default=0, blank=True, null=True)      # name="sort_order"
-    short_description = models.TextField()                                          # name="short_description"
-    featured_image = models.ImageField(upload_to="services/", blank=True, null=True)  # name="featured_image"
-    content = RichTextField()                                                       # name="content"
+    title = models.CharField(max_length=200)
+
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Bootstrap icon class (e.g. bi bi-house)"
+    )
+
+    category = models.ForeignKey(
+        Service_Type_Details,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="services"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="active"
+    )
+
+    cta_text = models.CharField(
+        max_length=50,
+        default="Request Callback"
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        blank=True,
+        null=True
+    )
+
+    short_description = models.TextField()
+
+    featured_image = models.ImageField(
+        upload_to="services/",
+        blank=True,
+        null=True
+    )
+
+    content = RichTextField()
+
+    # =====================================
+    # PRICING
+    # =====================================
+
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    price_type = models.CharField(
+        max_length=20,
+        choices=PRICE_TYPE_CHOICES,
+        default="on_request"
+    )
+
+    duration = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         ordering = ["sort_order", "title"]
@@ -196,6 +343,224 @@ class Service(models.Model):
 
 
 
+
+class Service_Option(models.Model):
+
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="options"
+    )
+
+    option_name = models.CharField(
+        max_length=200
+    )
+
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    duration = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    sort_order = models.PositiveIntegerField(
+        default=0
+    )
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return f"{self.service.title} - {self.option_name}"
+
+
+
+
+
+
+############### Models start for user details model ############################
+
+
+
+class User_Details(models.Model):
+   
+    user_id = models.CharField(max_length=200,blank=True,null=True)
+    user_name = models.CharField(max_length=200,blank=True,null=True)
+    user_email = models.CharField(max_length=200,blank=True,null=True)
+    user_phone = models.CharField(max_length=200,blank=True,null=True)
+    user_state = models.CharField(max_length=200,blank=True,null=True)
+    user_city = models.CharField(max_length=200,blank=True,null=True)
+    user_address = models.TextField(blank=True,null=True)
+
+    user_password = models.CharField(max_length=200,blank=True,null=True)
+    user_profile = models.ImageField(upload_to="Profile/", blank=True, null=True)
+    user_role = models.CharField(max_length=200,blank=True,null=True)
+
+    user_agency_name = models.CharField(max_length=200,blank=True,null=True)
+    user_license_number = models.CharField(max_length=200,blank=True,null=True)
+
+    user_service_type = models.CharField(max_length=200,blank=True,null=True)
+    user_company_name = models.CharField(max_length=200,blank=True,null=True)
+    user_pan_number = models.CharField(max_length=200,blank=True,null=True)
+    user_gstin_number = models.CharField(max_length=200,blank=True,null=True)
+
+    user_operational_scope = models.CharField(max_length=10,default='all',null=True,blank=True)
+
+    # This will store the comma-separated list of states or "ALL_INDIA"
+    selected_regions = models.TextField(null=True, blank=True)
+
+    user_register_date = models.DateField(blank=True,null=True)
+    user_register_time = models.TimeField(blank=True,null=True)
+
+    slug = models.SlugField(max_length=220, unique=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.user_name:
+            base_slug = slugify(self.user_name)
+            slug = base_slug
+            counter = 1
+            while User_Details.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.user_id)+"-"+self.user_name+"-"+self.user_role
+
+
+
+class Service_Lead(models.Model):
+
+    STATUS_CHOICES = [
+        ("new", "New"),
+        ("contacted", "Contacted"),
+        ("verified", "Requirement Verified"),
+        ("vendor_assigned", "Vendor Assigned"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+        ("closed", "Closed"),
+    ]
+
+    lead_id = models.CharField(
+        max_length=50,
+        unique=True,
+        blank=True
+    )
+
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="service_leads"
+    )
+
+    service_option = models.ForeignKey(
+        Service_Option,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="leads"
+    )
+
+    customer_name = models.CharField(max_length=200)
+
+    customer_phone = models.CharField(max_length=20)
+
+    customer_email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    city = models.CharField(max_length=100)
+
+    area = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    preferred_callback_time = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    requirement = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default="new"
+    )
+
+    assigned_vendor = models.ForeignKey(
+        User_Details,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_service_leads"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.lead_id} - {self.customer_name}"
+
+
+
+class Vendor_Service(models.Model):
+
+    vendor = models.ForeignKey(
+        "Admin_App.User_Details",
+        on_delete=models.CASCADE,
+        related_name="vendor_services"
+    )
+
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="service_vendors"
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    is_verified = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["vendor", "service"],
+                name="unique_vendor_service"
+            )
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.vendor} - {self.service.title}"
+    
+############## Models end for service type details of vendors ##########################
 
 class AboutPage(models.Model):
     title = models.CharField(max_length=200)
@@ -366,57 +731,6 @@ class Facilities_Details(models.Model):
 ############### Views end for nearby facilities details #############################
 
 
-########### Models start for services type details of vendors ######################
-
-class Service_Type_Details(models.Model):
-   
-    service_id = models.CharField(max_length=200,blank=True,null=True)
-    service_name = models.CharField(max_length=200,blank=True,null=True)
-    service_upload_date = models.DateField(blank=True,null=True)
-    service_upload_time = models.TimeField(blank=True,null=True)
-
-    def __str__(self):
-        return str(self.service_id)+"-"+self.service_name
-    
-############## Models end for service type details of vendors ##########################
-
-
-############### Models start for user details model ############################
-
-
-
-class User_Details(models.Model):
-   
-    user_id = models.CharField(max_length=200,blank=True,null=True)
-    user_name = models.CharField(max_length=200,blank=True,null=True)
-    user_email = models.CharField(max_length=200,blank=True,null=True)
-    user_phone = models.CharField(max_length=200,blank=True,null=True)
-    user_state = models.CharField(max_length=200,blank=True,null=True)
-    user_city = models.CharField(max_length=200,blank=True,null=True)
-    user_address = models.TextField(blank=True,null=True)
-
-    user_password = models.CharField(max_length=200,blank=True,null=True)
-    user_profile = models.ImageField(upload_to="Profile/", blank=True, null=True)
-    user_role = models.CharField(max_length=200,blank=True,null=True)
-
-    user_agency_name = models.CharField(max_length=200,blank=True,null=True)
-    user_license_number = models.CharField(max_length=200,blank=True,null=True)
-
-    user_service_type = models.CharField(max_length=200,blank=True,null=True)
-    user_company_name = models.CharField(max_length=200,blank=True,null=True)
-    user_pan_number = models.CharField(max_length=200,blank=True,null=True)
-    user_gstin_number = models.CharField(max_length=200,blank=True,null=True)
-
-    user_operational_scope = models.CharField(max_length=10,default='all',null=True,blank=True)
-
-    # This will store the comma-separated list of states or "ALL_INDIA"
-    selected_regions = models.TextField(null=True, blank=True)
-
-    user_register_date = models.DateField(blank=True,null=True)
-    user_register_time = models.TimeField(blank=True,null=True)
-
-    def __str__(self):
-        return str(self.user_id)+"-"+self.user_name+"-"+self.user_role
 
 
 ############## Modal starts for subscription package details ###################
@@ -6924,3 +7238,9 @@ class PropertyInteraction(models.Model):
             models.Index(fields=['content_type', 'object_id', 'interaction_type']),
             models.Index(fields=['created_at']),
         ]
+
+
+
+
+
+

@@ -64,6 +64,12 @@ urlpatterns = [
     ######### urls for ajax for datewise filter #########################
 
     path('date_property_filter',views.date_property_filter,name="date_property_filter"),
+
+
+    path(
+    "service-requests/",
+    views.service_requests,
+    name="service_requests"),
     
      
     

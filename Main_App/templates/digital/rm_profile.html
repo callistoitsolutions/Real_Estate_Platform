@@ -1,0 +1,8 @@
+<h1>{{ user.user_name }}</h1>
+<p>{{ user.user_phone }}</p>
+
+{% for item in properties %}
+  <div>
+    <strong>{{ item.type_label }}</strong>: {{ item.obj.property_title }}
+  </div>
+{% endfor %}

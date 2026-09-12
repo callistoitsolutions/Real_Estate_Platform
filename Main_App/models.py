@@ -38,28 +38,16 @@ class Contact_Enquiry(models.Model):
 
 ############### Wishlist Property Modal Starts Here ###########################
 
+
 class WishlistProperty(models.Model):
-
-    # 1. The type of property (PG, Commercial, etc.)
-    content_type = models.ForeignKey(
-        ContentType, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True
-    )
-    
-    # 2. The ID of that specific property
-    object_id = models.PositiveIntegerField(null=True, blank=True)
-
-    # 3. The Generic Foreign Key (Combines the two above)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.CharField(max_length=50, null=True, blank=True)   # ← changed from PositiveIntegerField
     property_object = GenericForeignKey('content_type', 'object_id')
 
-    # --- Your existing fields stay the same ---
-    user = models.ForeignKey(User_Details,on_delete=models.CASCADE,blank=True,null=True
-    )
+    user = models.ForeignKey(User_Details, on_delete=models.CASCADE, blank=True, null=True)
+    wishlist_date = models.DateField(blank=True, null=True)
+    wishlist_time = models.TimeField(blank=True, null=True)
 
-    wishlist_date = models.DateField(blank=True,null=True)
-    wishlist_time = models.TimeField(blank=True,null=True)
     
 ################## Wishlist Property Modal Ends Here ############################
 
@@ -187,3 +175,152 @@ class LocalityPriceTrend(models.Model):
 
     class Meta:
         unique_together = ('city', 'locality')
+
+
+
+def generate_lead_id():
+    return f"EF-AI-{uuid.uuid4().hex[:8].upper()}"
+
+
+class ChatbotLead(models.Model):
+    """One row per chatbot session. Upserted on every turn so RMs always see
+    the latest captured requirement without the visitor filling a form."""
+
+    LEAD_CLASS_CHOICES = [
+        ("HOT", "🔥 Hot Lead"),
+        ("WARM", "🟡 Warm / Qualified"),
+        ("INFO", "🔵 Information Seeker"),
+        ("TIMEPASS", "🟣 Timepass / Low Intent"),
+        ("FRAUD", "🔴 Fraud / High Risk"),
+    ]
+    STAGE_CHOICES = [
+        ("NEW", "New"),
+        ("QUALIFIED", "Requirement Qualified"),
+        ("CONTACTED", "RM Contacted"),
+        ("VISIT_PLANNED", "Visit Planned"),
+        ("VISIT_DONE", "Visit Completed"),
+        ("NEGOTIATION", "Negotiation"),
+        ("DOCUMENTATION", "Documentation"),
+        ("BOOKED", "Booking"),
+        ("CLOSED", "Deal Closed"),
+        ("DROPPED", "Dropped"),
+    ]
+    TXN_CHOICES = [("rent", "Rent"), ("buy", "Buy / Resale"), ("unknown", "Unknown")]
+
+    id = models.CharField(max_length=30, primary_key=True, default=generate_lead_id, editable=False)
+    session_id = models.CharField(max_length=100, db_index=True)
+
+    # Customer-provided
+    customer_name = models.CharField(max_length=150, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=150, blank=True, null=True)
+    customer_type = models.CharField(max_length=50, blank=True, null=True)  # Tenant/Buyer/Investor/Owner
+
+    # Requirement (captured across the conversation, never re-asked once known)
+    transaction_type = models.CharField(max_length=10, choices=TXN_CHOICES, default="unknown")
+    category = models.CharField(max_length=50, blank=True, null=True)   # residential/commercial/pg/plot/industrial/agricultural
+    city = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=150, blank=True, null=True)
+    bhk = models.CharField(max_length=20, blank=True, null=True)
+    budget_min = models.BigIntegerField(blank=True, null=True)
+    budget_max = models.BigIntegerField(blank=True, null=True)
+    furnishing = models.CharField(max_length=50, blank=True, null=True)
+    timeline = models.CharField(max_length=50, blank=True, null=True)      # "immediate" / "<=30d" / "1-3m" / etc.
+    preferred_visit_time = models.CharField(max_length=100, blank=True, null=True)
+    property_id_ref = models.CharField(max_length=50, blank=True, null=True)  # if chat centred on one listing
+
+    # AI outputs
+    primary_intent = models.CharField(max_length=100, blank=True, null=True)
+    secondary_intents = models.CharField(max_length=255, blank=True, null=True)
+    lead_score = models.IntegerField(default=0)
+    lead_classification = models.CharField(max_length=20, choices=LEAD_CLASS_CHOICES, default="INFO")
+    risk_level = models.CharField(max_length=10, default="LOW")  # LOW/MEDIUM/HIGH
+    conversation_summary = models.TextField(blank=True, null=True)
+    next_best_action = models.CharField(max_length=255, blank=True, null=True)
+
+    # Behaviour flags
+    rm_requested = models.BooleanField(default=False)
+    visit_requested = models.BooleanField(default=False)
+    negotiation_requested = models.BooleanField(default=False)
+    properties_viewed = models.TextField(blank=True, null=True)   # comma-separated IDs shown to the visitor
+
+    # CRM
+    source = models.CharField(max_length=50, default="AI Assistant")
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default="NEW")
+    assigned_rm_id = models.CharField(max_length=50, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.id} - {self.lead_classification} ({self.location or 'no location'})"
+
+
+class ChatbotMessage(models.Model):
+    lead = models.ForeignKey(ChatbotLead, on_delete=models.CASCADE, related_name="messages")
+    sender = models.CharField(max_length=10, choices=[("user", "User"), ("bot", "Bot")])
+    message = models.TextField()
+    intent = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+
+class ChatbotRiskEvent(models.Model):
+    RISK_CHOICES = [("LOW", "Low"), ("MEDIUM", "Medium"), ("HIGH", "High")]
+
+    session_id = models.CharField(max_length=100, db_index=True)
+    lead = models.ForeignKey(ChatbotLead, on_delete=models.SET_NULL, null=True, blank=True, related_name="risk_events")
+    message = models.TextField()
+    matched_rule = models.CharField(max_length=255, blank=True, null=True)
+    risk_level = models.CharField(max_length=10, choices=RISK_CHOICES, default="HIGH")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+
+
+
+class IntentMaster(models.Model):
+    intent_id = models.CharField(max_length=20, unique=True)
+    category = models.CharField(max_length=50)
+    intent_name = models.CharField(max_length=150)
+    customer_type = models.CharField(max_length=50)
+    example_utterance = models.TextField()
+    ai_logic_description = models.TextField()
+    next_best_action = models.CharField(max_length=255)
+    lead_classification = models.CharField(max_length=50)
+    base_score = models.IntegerField(default=0)
+    entities_to_extract = models.CharField(max_length=255, blank=True, null=True)
+    requires_rm = models.CharField(max_length=20)
+    risk_level = models.CharField(max_length=20)
+    clarification_prompt = models.TextField()
+    notes = models.TextField(blank=True, null=True)
+
+class FraudRiskRule(models.Model):
+    risk_id = models.CharField(max_length=20, unique=True)
+    signal = models.CharField(max_length=150)
+    example = models.TextField()
+    risk_level = models.CharField(max_length=50)
+    ai_action = models.TextField()
+    human_action = models.CharField(max_length=150)
+    data_to_log = models.CharField(max_length=255)
+
+class LeadScoringRule(models.Model):
+    rule_id = models.CharField(max_length=20, unique=True)
+    signal = models.CharField(max_length=150)
+    example = models.TextField()
+    points = models.IntegerField(default=0)
+    classification_impact = models.CharField(max_length=150)
+    notes = models.TextField(blank=True, null=True)
+
+
+
+
+        

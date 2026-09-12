@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /Adminlogin
+Disallow: /api/
+
+Sitemap: https://estateflow.nedient.co.in/sitemap.xml

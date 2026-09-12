@@ -23,6 +23,11 @@ admin.site.register(Facilities_Details)
 
 admin.site.register(Service_Type_Details)
 
+
+########### Register Service lead Details Model ##################
+
+admin.site.register(Service_Lead)
+
 ########### Register User Details Table/Modal ###############
 
 admin.site.register(User_Details)

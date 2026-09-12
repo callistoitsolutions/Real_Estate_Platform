@@ -101,6 +101,11 @@ urlpatterns = [
    # path("property/<str:type>/<int:id>/faqs/", views.property_faq_view, name="property_faq"),
     path("faqs/", views.all_faqs, name="all_faqs"),
     path('property-analytics/', views.property_analytics, name='property_analytics'),
+    path(
+    "service-inquiry/",
+    views.service_inquiry,
+    name="service_inquiry"
+),
     
 
 
@@ -174,6 +179,14 @@ urlpatterns = [
 
 
 
+
+
+   
+
+    # 🟢 new — chatbot
+    path('api/chatbot-query/', views.chatbot_query_api, name='chatbot_query_api'),
+    # urls.py
+    path("digital/<slug:slug>/", views.digital_profile, name="digital_profile"),
 
 
 

@@ -1201,23 +1201,21 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
             property_model = AgriculturalResaleProperty
             seo_page_type  = 'agriculture_sale'
         elif clean_category in ('plot', 'plot-resale'):
-            # INTEGRATING THE 4 NEW PLOT MODELS
-            from .models import AgriculturalPlotResaleProperty, ResidentialPlotResaleProperty, CommercialPlotResaleProperty, IndustrialPlotResaleProperty
-            if str(pk).startswith('EFAPR'):
-                property_model = AgriculturalPlotResaleProperty
-                seo_page_type  = 'agricultural_plot_sale'
-            elif ResidentialPlotResaleProperty.objects.filter(pk=pk).exists():
-                property_model = ResidentialPlotResaleProperty
-                seo_page_type  = 'residential_plot_sale'
-            elif CommercialPlotResaleProperty.objects.filter(pk=pk).exists():
-                property_model = CommercialPlotResaleProperty
-                seo_page_type  = 'commercial_plot_sale'
-            elif IndustrialPlotResaleProperty.objects.filter(pk=pk).exists():
-                property_model = IndustrialPlotResaleProperty
-                seo_page_type  = 'industrial_plot_sale'
-            elif AgriculturalPlotResaleProperty.objects.filter(pk=pk).exists():
-                property_model = AgriculturalPlotResaleProperty
-                seo_page_type  = 'agricultural_plot_sale'
+    
+            property_model = AgriculturalPlotResaleProperty
+            seo_page_type  = 'agricultural_plot_resale'      # was 'agricultural_plot_sale'
+        elif ResidentialPlotResaleProperty.objects.filter(pk=pk).exists():
+            property_model = ResidentialPlotResaleProperty
+            seo_page_type  = 'residential_plot_resale'       # was 'residential_plot_sale'
+        elif CommercialPlotResaleProperty.objects.filter(pk=pk).exists():
+            property_model = CommercialPlotResaleProperty
+            seo_page_type  = 'commercial_plot_resale'        # was 'commercial_plot_sale'
+        elif IndustrialPlotResaleProperty.objects.filter(pk=pk).exists():
+            property_model = IndustrialPlotResaleProperty
+            seo_page_type  = 'industrial_plot_resale'        # was 'industrial_plot_sale'
+        elif AgriculturalPlotResaleProperty.objects.filter(pk=pk).exists():
+            property_model = AgriculturalPlotResaleProperty
+            seo_page_type  = 'agricultural_plot_resale'      # was 'agricultural_plot_sale'
 
     if not property_model:
         return render(request, 'home_page/property_not_found.html', {
@@ -1294,28 +1292,25 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
     
 
     CATEGORY_BY_SEO_TYPE = {
-        'rental_residential':     'Residential',
-        'commercial_rental':      'Commercial',
-        'pg_coliving':            'PG / Co-living',
-
-        'resale_residential':     'Residential',
-        'commercial_resale':      'Commercial',
-        'industrial_sale':        'Industrial',
-        'agriculture_sale':       'Agriculture',
-
-        'agricultural_plot_sale': 'Plot',
-        'residential_plot_sale':  'Plot',
-        'commercial_plot_sale':   'Plot',
-        'industrial_plot_sale':   'Plot',
-    }
+    'rental_residential':     'Residential',
+    'commercial_rental':      'Commercial',
+    'pg_coliving':            'PG / Co-living',
+    'resale_residential':     'Residential',
+    'commercial_resale':      'Commercial',
+    'industrial_sale':        'Industrial',
+    'agriculture_sale':       'Agriculture',
+    'agricultural_plot_resale': 'Plot',   # was 'agricultural_plot_sale'
+    'residential_plot_resale':  'Plot',   # was 'residential_plot_sale'
+    'commercial_plot_resale':   'Plot',   # was 'commercial_plot_sale'
+    'industrial_plot_resale':   'Plot',   # was 'industrial_plot_sale'
+}
 
     SUBCATEGORY_BY_SEO_TYPE = {
-        'agricultural_plot_sale': 'Agricultural Plot',
-        'residential_plot_sale':  'Residential Plot',
-        'commercial_plot_sale':   'Commercial Plot',
-        'industrial_plot_sale':   'Industrial Plot',
-        # everything else has no sub_category — stays None
-    }
+    'agricultural_plot_resale': 'Agricultural Plot',   # was 'agricultural_plot_sale'
+    'residential_plot_resale':  'Residential Plot',    # was 'residential_plot_sale'
+    'commercial_plot_resale':   'Commercial Plot',     # was 'commercial_plot_sale'
+    'industrial_plot_resale':   'Industrial Plot',     # was 'industrial_plot_sale'
+}
 
     p['category']          = CATEGORY_BY_SEO_TYPE.get(seo_page_type, category.title())
     p['category_name']     = p['category']
@@ -2009,9 +2004,9 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
 
     # DYNAMIC PRICE EXTRACTION FOR CONTEXT
     price_per_sqm = None
-    if seo_page_type == 'industrial_plot_sale':
+    if seo_page_type == 'industrial_plot_resale':
         price_per_sqm = getattr(obj, 'price_per_sqft', None)
-    elif seo_page_type == 'commercial_plot_sale':
+    elif seo_page_type == 'commercial_plot_resale':
         price_per_sqm = getattr(obj, 'plot_price_per_sqft', None)
         
     price_per_unit = getattr(obj, 'price_per_unit', getattr(obj, 'price_per_acre_display', getattr(obj, 'price_per_acre', None)))
@@ -3899,95 +3894,205 @@ def Prop_Register_Api(request):
 
 ############# Views start for wishlist properties ######################
 
+
+
+
+
+def normalize_category(raw):
+    if not raw:
+        return ""
+    s = re.sub(r'[^a-z0-9]+', '_', str(raw).strip().lower()).strip('_')
+    s = s.replace('data', '').strip('_')
+    aliases = {
+        'pg_co_living': 'pg', 'pg_coliving': 'pg', 'co_living': 'pg',
+        'residential_plot': 'residential_plot', 'plot_residential': 'residential_plot',
+        'commercial_plot': 'commercial_plot', 'plot_commercial': 'commercial_plot',
+        'industrial_plot': 'industrial_plot', 'plot_industrial': 'industrial_plot',
+        'agricultural_plot': 'agricultural_plot', 'plot_agricultural': 'agricultural_plot',
+    }
+    return aliases.get(s, s)
+
+
+def normalize_listing_type(raw):
+    s = (raw or "").strip().lower()
+    if s in ("rent", "rental", "renting", "lease", "for_rent"):
+        return "rent"
+    if s in ("sale", "sell", "resale", "buy", "for_sale"):
+        return "sale"
+    return s
+
+def _first_image_url(obj):
+    try:
+        img = obj.images.first()
+        return img.image.url if img and img.image else None
+    except Exception:
+        return None
+
+
+def _price_display(obj, listing_type):
+    listing_type = (listing_type or "").strip().lower()
+
+    if listing_type in ("rent", "rental"):
+        val = getattr(obj, 'monthly_rent', None)
+    else:
+        val = (
+            getattr(obj, 'selling_price', None)
+            or getattr(obj, 'plot_price', None)
+        )
+
+    # Fallback: if the expected field is empty, try the other price fields too
+    # rather than assuming it's genuinely "no price"
+    if not val:
+        val = (
+            getattr(obj, 'monthly_rent', None)
+            or getattr(obj, 'selling_price', None)
+            or getattr(obj, 'plot_price', None)
+        )
+
+    if not val:
+        return "Price on Request"
+
+    try:
+        val = int(float(val))
+    except (TypeError, ValueError):
+        return "Price on Request"
+
+    if val <= 0:
+        return "Price on Request"
+
+    if val >= 10000000:
+        return f"₹{val/10000000:.2f} Cr"
+    if val >= 100000:
+        return f"₹{val/100000:.2f} Lac"
+    return f"₹{val:,}"
+
+def _location_display(obj):
+    parts = []
+    for f in ('building_name', 'locality_area', 'locality', 'village'):
+        v = getattr(obj, f, None)
+        if v:
+            parts.append(v)
+            break
+    city = getattr(obj, 'city', None)
+    if city:
+        parts.append(city)
+    return ", ".join(parts) if parts else (getattr(obj, 'address', '') or "")
+
+
 def Wishlist_Property(request):
     context = {}
-    # ═══════════════════════════════════════════════════════
-    # HANDLE LOGGED-IN USER
-    # ═══════════════════════════════════════════════════════
     session_id = request.session.get('User_id')
-    if session_id:
-        user_obj = User_Details.objects.filter(id=session_id).first()
-        if user_obj:     
-            wishlist_property = WishlistProperty.objects.filter(user=user_obj).order_by('-id')
-            context = {'user_obj':user_obj,
-            'wishlist_property':wishlist_property}
+    if not session_id:
+        return render(request, 'home_page/Wishlist/wishlist.html', context)
 
-    return render(request,'home_page/Wishlist/wishlist.html',context)
+    user_obj = User_Details.objects.filter(id=session_id).first()
+    if not user_obj:
+        return render(request, 'home_page/Wishlist/wishlist.html', context)
+
+    wishlist_qs = WishlistProperty.objects.filter(user=user_obj).order_by('-id')
+
+    wishlist_property = []
+    for item in wishlist_qs:
+        real_obj = item.property_object   # GFK — correct field name on your model
+        if not real_obj or getattr(real_obj, 'is_deleted', False):
+            continue
+
+        listing_type = normalize_listing_type(getattr(real_obj, 'listing_type', ''))
+        category = normalize_category(getattr(real_obj, 'category', '') or '')
+        real_obj.url_category = category   # same normalized slug used by property_detail url elsewhere
+
+        # ── Attach display attributes directly onto the real object ──
+        real_obj.title = getattr(real_obj, 'property_title', None) or getattr(real_obj, 'plot_title', 'Property')
+        real_obj.location = _location_display(real_obj)
+        real_obj.price_display = _price_display(real_obj, listing_type)   # <-- PRICE FIX
+        real_obj.image_url = _first_image_url(real_obj)
+        real_obj.emoji = "🏠"
+        real_obj.is_ai_match = False
+        real_obj.is_new = False
+        real_obj.beds = (getattr(real_obj, 'bhk_type', None) or getattr(real_obj, 'bhk', None)
+                          or getattr(real_obj, 'room_type', None))
+        real_obj.baths = getattr(real_obj, 'bathrooms', None) or getattr(real_obj, 'baths', None)
+        area_val = (getattr(real_obj, 'built_up_area', None) or getattr(real_obj, 'builtup_area', None)
+                    or getattr(real_obj, 'plot_area', None) or getattr(real_obj, 'land_area', None)
+                    or getattr(real_obj, 'carpet_area', None))
+        real_obj.area = f"{area_val} sq.ft" if area_val else None
+        real_obj.furnished = getattr(real_obj, 'furnishing_status', None) or getattr(real_obj, 'furnished', None)
+        real_obj.property_type = getattr(real_obj, 'property_type', None)
+        real_obj.owner = (getattr(real_obj, 'listed_by_name', None)
+                           or getattr(real_obj, 'uploaded_by_name', None) or "KANISHKAIMPERIA Property")
+        real_obj.owner_initials = (real_obj.owner or "E")[0].upper()
+        real_obj.phone = (getattr(real_obj, 'listed_by_contact', None)
+                           or getattr(real_obj, 'uploaded_by_contact', None) or "")
+        real_obj.listing_type = listing_type
+        real_obj.category = category
+
+        # Re-assign explicitly to be 100% safe against any GFK cache edge-case
+        item.property_object = real_obj
+
+        wishlist_property.append(item)
+        print(f"DEBUG price for {real_obj.pk}: {real_obj.price_display}")
+
+    context = {'user_obj': user_obj, 'wishlist_property': wishlist_property}
+    return render(request, 'home_page/Wishlist/wishlist.html', context)
+
+
 
 ############## Views end for wishlist properties #######################
 
 
 ############# Views start for ajax for add property to wishlist ##################
 
+
+
 @csrf_exempt
 def Wishlist_Ajax(request):
-    if request.method == "POST":
-        data = request.POST.dict()   
-        
-        # 1.  SECURITY FIX: Get the user ID from the secure session, NOT the frontend data
-        user_id = request.session.get('User_id')
-        if not user_id:
-            return JsonResponse({"status": "0", "msg": "User not authenticated. Please log in."})
+    if request.method != "POST":
+        return JsonResponse({"status": "0", "msg": "Invalid request method."})
 
-        try:
-            user_data = User_Details.objects.get(id=user_id)
-        except User_Details.DoesNotExist:
-            return JsonResponse({"status": "0", "msg": "Invalid user session."})
+    data = request.POST.dict()
 
-        real_property = None
-        property_id = data.get('property_id')
-        
-        # 2.  CRASH PREVENTION: Safely try to get the property
-        try:
-            if data['listing_type'] == "rent" and data['category'] == "Residential Data":
-                real_property = RentalResidentialProperty.objects.get(id=property_id)
+    user_id = request.session.get('User_id')
+    if not user_id:
+        return JsonResponse({"status": "0", "msg": "User not authenticated. Please log in."})
 
-            elif data['listing_type'] == "rent" and data['category'] == "PG Data":
-                real_property = PGColivingProperty.objects.get(id=property_id)
+    try:
+        user_data = User_Details.objects.get(id=user_id)
+    except User_Details.DoesNotExist:
+        return JsonResponse({"status": "0", "msg": "Invalid user session."})
 
-            elif data['listing_type'] == "rent" and data['category'] == "Commercial Data":
-                real_property = CommercialProperty.objects.get(id=property_id)
+    property_id = data.get('property_id')
+    listing_type = data.get('listing_type')
+    category = data.get('category')
 
-        except ObjectDoesNotExist:
-            return JsonResponse({"status": "0", "msg": "Property not found in the database."})
+    model_cls = resolve_property_model(listing_type, category)
+    if not model_cls:
+        return JsonResponse({"status": "0", "msg": f"Unsupported property type: {listing_type}/{category}"})
 
-        if not real_property:
-            return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
-        
-        property_content_type = ContentType.objects.get_for_model(real_property)
+    try:
+        real_property = model_cls.objects.get(pk=property_id)
+    except ObjectDoesNotExist:
+        return JsonResponse({"status": "0", "msg": "Property not found in the database."})
 
-        # 3. TOGGLE LOGIC: Check if it's already in the wishlist
-        # If it exists, delete it (Remove from wishlist)
-        wishlist_item = WishlistProperty.objects.filter(
-            content_type=property_content_type, 
-            object_id=real_property.id, 
-            user=user_data
-        ).first()
-        
-        if wishlist_item:
-            wishlist_item.delete()
-            return JsonResponse({
-                "status": "1", 
-                "action": "removed", 
-                "msg": "Property removed from wishlist."
-            })
-            
-        # If it doesn't exist, create it (Add to wishlist)
-        else:
-            WishlistProperty.objects.create(
-                content_type=property_content_type, # Passes the model type (e.g. CommercialProperty)
-                object_id=real_property.id,         # Passes the ID (e.g. 5)
-                user=user_data,
-                wishlist_date=datetime.today(),
-                wishlist_time=datetime.now()
-            )
-            return JsonResponse({
-                "status": "1", 
-                "action": "added", 
-                "msg": "Property added to wishlist successfully!"
-            })
+    property_content_type = ContentType.objects.get_for_model(model_cls)
 
-    return JsonResponse({"status": "0", "msg": "Invalid request method."})
+    wishlist_item = WishlistProperty.objects.filter(
+    content_type=property_content_type,
+    object_id=real_property.pk,   # now safely a string, matches CharField
+    user=user_data
+).first()
+
+    if wishlist_item:
+        wishlist_item.delete()
+        return JsonResponse({"status": "1", "action": "removed", "msg": "Property removed from wishlist."})
+
+    WishlistProperty.objects.create(
+        content_type=property_content_type,
+        object_id=real_property.pk,
+        user=user_data,
+        wishlist_date=datetime.today(),
+        wishlist_time=datetime.now()
+    )
+    return JsonResponse({"status": "1", "action": "added", "msg": "Property added to wishlist successfully!"})
 
 ############ Views end for ajax for add property to wishlist #########################
 
@@ -3996,11 +4101,69 @@ def Wishlist_Ajax(request):
 
 
 
+# (listing_type, normalized_category) -> Model
+PROPERTY_MODEL_MAP = {
+    ('rent', 'residential'): RentalResidentialProperty,
+    ('rent', 'commercial'): CommercialRentalProperty,
+    ('rent', 'pg'): PGColivingProperty,
+
+    ('sale', 'residential'): ResaleResidentialProperty,
+    ('sale', 'commercial'): CommercialResaleProperty,
+    ('sale', 'industrial'): IndustrialResaleProperty,
+    ('sale', 'agricultural'): AgriculturalResaleProperty,
+
+    ('sale', 'residential_plot'): ResidentialPlotResaleProperty,
+    ('sale', 'commercial_plot'): CommercialPlotResaleProperty,
+    ('sale', 'industrial_plot'): IndustrialPlotResaleProperty,
+    ('sale', 'agricultural_plot'): AgriculturalPlotResaleProperty,
+}
+
+
+def resolve_property_model(listing_type, category):
+    listing_type = normalize_listing_type(listing_type)
+    return PROPERTY_MODEL_MAP.get((listing_type, normalize_category(category)))
+
+
+
+from types import SimpleNamespace
 
 
 
 
 
+def build_property_object(obj, listing_type, category):
+    beds = (getattr(obj, 'bhk_type', None) or getattr(obj, 'bhk', None)
+            or getattr(obj, 'room_type', None))
+    baths = getattr(obj, 'bathrooms', None) or getattr(obj, 'baths', None)
+    area = (getattr(obj, 'built_up_area', None) or getattr(obj, 'builtup_area', None)
+            or getattr(obj, 'plot_area', None) or getattr(obj, 'land_area', None)
+            or getattr(obj, 'carpet_area', None))
+    furnished = getattr(obj, 'furnishing_status', None) or getattr(obj, 'furnished', None)
+
+    owner = (getattr(obj, 'listed_by_name', None) or getattr(obj, 'uploaded_by_name', None)
+             or "KANISHKAIMPERIA Property")
+    phone = (getattr(obj, 'listed_by_contact', None) or getattr(obj, 'uploaded_by_contact', None) or "")
+
+    return SimpleNamespace(
+        id=obj.pk,
+        listing_type=listing_type,
+        category=category,
+        title=getattr(obj, 'property_title', None) or getattr(obj, 'plot_title', "Property"),
+        location=_location_display(obj),
+        price_display=_price_display(obj, listing_type),
+        image_url=_first_image_url(obj),
+        emoji="🏠",
+        is_ai_match=False,
+        is_new=False,
+        beds=beds,
+        baths=baths,
+        area=f"{area} sq.ft" if area else None,
+        furnished=furnished,
+        property_type=getattr(obj, 'property_type', None),
+        owner=owner,
+        owner_initials=(owner or "E")[0].upper(),
+        phone=phone,
+    )
 
 
 
@@ -4289,6 +4452,7 @@ def index(request):
         'trending_props': trending_props,
         'featured_props': featured_props,
         'live_stats': live_stats,
+        
     }
 
     return render(request, "home_page/index.html", context)
@@ -5057,3 +5221,771 @@ def property_analytics(request):
         'total_searches_month': SearchLog.objects.filter(created_at__gte=month_ago).count(),
     }
     return render(request, 'Search_log/property_analytics.html', context)
+
+
+
+from django.views.decorators.csrf import csrf_protect
+
+
+
+
+
+from django.core.cache import cache
+
+
+# =============================================================================
+
+
+
+
+# Ensure your property models and Service model are imported correctly above
+
+# =============================================================================
+# 1. SEARCH REGISTRY
+# =============================================================================
+
+SEARCH_REGISTRY = {
+    "rent_residential": dict(
+        model=RentalResidentialProperty, kind="rent", label="Residential Rental",
+        locality_field="locality_area", city_field="city", price_field="monthly_rent",
+        bhk_field="bhk_type", furnishing_field="furnishing_status", area_field="carpet_area",
+    ),
+    "rent_commercial": dict(
+        model=CommercialRentalProperty, kind="rent", label="Commercial Rental",
+        locality_field="locality", city_field="city", price_field="monthly_rent",
+        bhk_field=None, furnishing_field=None, area_field="carpet_area",
+    ),
+    "rent_pg": dict(
+        model=PGColivingProperty, kind="rent", label="PG / Co-living",
+        locality_field="locality", city_field="city", price_field="monthly_rent",
+        bhk_field=None, furnishing_field="furnishing_status", area_field=None,
+    ),
+    "buy_residential": dict(
+        model=ResaleResidentialProperty, kind="buy", label="Residential Resale",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field="bhk", furnishing_field="furnishing_status", area_field="carpet_area",
+    ),
+    "buy_commercial": dict(
+        model=CommercialResaleProperty, kind="buy", label="Commercial Resale",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="carpet_area",
+    ),
+    "buy_plot_residential": dict(
+        model=ResidentialPlotResaleProperty, kind="buy", label="Residential Plot",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="plot_area",
+    ),
+    "buy_plot_commercial": dict(
+        model=CommercialPlotResaleProperty, kind="buy", label="Commercial Plot",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="plot_area",
+    ),
+    "buy_industrial": dict(
+        model=IndustrialResaleProperty, kind="buy", label="Industrial Property",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="builtup_area",
+    ),
+    "buy_agricultural": dict(
+        model=AgriculturalResaleProperty, kind="buy", label="Agricultural Land",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="land_area",
+    ),
+    "buy_plot_industrial": dict(
+        model=IndustrialPlotResaleProperty, kind="buy", label="Industrial Plot",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="plot_area",
+    ),
+    "buy_plot_agricultural": dict(
+        model=AgriculturalPlotResaleProperty, kind="buy", label="Agricultural Plot",
+        locality_field="locality", city_field="city", price_field="selling_price",
+        bhk_field=None, furnishing_field=None, area_field="plot_area",
+    ),
+    "buy_plot": dict(
+        model=PlotSaleProperty, kind="buy", label="Plot (Sale)",
+        locality_field="plot_locality", city_field="plot_city", price_field="plot_price",
+        bhk_field=None, furnishing_field=None, area_field="plot_area",
+    ),
+}
+
+CATEGORY_KEYWORD_MAP = {
+    "commercial": ["commercial", "office", "shop", "showroom", "warehouse"],
+    "pg": ["pg", "co-living", "coliving", "hostel", "paying guest"],
+    "plot": ["plot", "land parcel", "gunta"],
+    "industrial": ["industrial", "factory", "warehouse", "godown"],
+    "agricultural": ["agricultural", "farm land", "farmland", "agri land"],
+    "residential": ["flat", "apartment", "bhk", "house", "villa", "residential"],
+}
+
+def registry_keys_for(transaction_type=None, category=None):
+    keys = []
+    for key, cfg in SEARCH_REGISTRY.items():
+        if transaction_type and cfg["kind"] != transaction_type:
+            continue
+        if category:
+            if category == "residential" and not key.endswith("residential") and key != "rent_pg":
+                continue
+            if category != "residential" and category not in key:
+                continue
+        keys.append(key)
+    return keys
+
+# =============================================================================
+# 2. ENTITY EXTRACTION
+# =============================================================================
+
+LOCALITY_CACHE_KEY = "estateflow_ai_known_localities_v1"
+LOCALITY_CACHE_SECONDS = 60 * 30 
+
+def get_known_localities():
+    cached = cache.get(LOCALITY_CACHE_KEY)
+    if cached is not None:
+        return cached
+
+    values = set()
+    for cfg in SEARCH_REGISTRY.values():
+        model = cfg["model"]
+        for field in (cfg["locality_field"], cfg["city_field"]):
+            if not field: continue
+            try:
+                qs = model.objects.exclude(**{f"{field}__isnull": True}).exclude(**{field: ""})
+                for v in qs.values_list(field, flat=True).distinct()[:500]:
+                    if v and len(str(v).strip()) >= 3:
+                        values.add(str(v).strip())
+            except Exception:
+                continue
+
+    values = sorted(values, key=len, reverse=True)
+    cache.set(LOCALITY_CACHE_KEY, values, LOCALITY_CACHE_SECONDS)
+    return values
+
+BHK_RE = re.compile(r"(\d)\s*[- ]?\s*bhk", re.I)
+PROPERTY_ID_RE = re.compile(r"\b([A-Z]{2,6}-[A-Z0-9]{6,10})\b")
+LAKH_CR_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(lakh|lac|l|cr|crore|k)\b", re.I)
+PLAIN_NUM_RE = re.compile(r"₹?\s?(\d[\d,]{2,})")
+TIMELINE_IMMEDIATE_RE = re.compile(r"\b(immediately|today|asap|urgent|right away|this week)\b", re.I)
+TIMELINE_30D_RE = re.compile(r"\b(this month|within a month|within 30 days|next month)\b", re.I)
+TIMELINE_3M_RE = re.compile(r"\b(\d\s*-?\s*3 months|couple of months|few months|1-3 months)\b", re.I)
+MOBILE_RE = re.compile(r"\b[6-9]\d{9}\b")
+
+def _unit_to_amount(num, unit):
+    unit = (unit or "").lower()
+    if unit in ("lakh", "lac", "l"): return num * 100_000
+    if unit in ("cr", "crore"): return num * 10_000_000
+    if unit == "k": return num * 1_000
+    return num
+
+def extract_entities(message):
+    t = message.lower()
+    entities = {}
+
+    if re.search(r"\b(rent|rental|lease|to let)\b", t):
+        entities["transaction_type"] = "rent"
+    elif re.search(r"\b(buy|purchase|resale|for sale)\b", t):
+        entities["transaction_type"] = "buy"
+
+    for cat, kws in CATEGORY_KEYWORD_MAP.items():
+        if any(kw in t for kw in kws):
+            entities["category"] = cat
+            break
+
+    for loc in get_known_localities():
+        if loc.lower() in t:
+            entities["location"] = loc
+            break
+
+    bhk_m = BHK_RE.search(t)
+    if bhk_m: entities["bhk"] = bhk_m.group(1)
+
+    lakh_m = LAKH_CR_RE.search(t)
+    if lakh_m:
+        entities["budget_max"] = int(_unit_to_amount(float(lakh_m.group(1)), lakh_m.group(2)))
+    else:
+        plain_m = PLAIN_NUM_RE.search(t)
+        if plain_m:
+            n = int(plain_m.group(1).replace(",", ""))
+            if n >= 1000: entities["budget_max"] = n
+
+    if "semi" in t and "furnish" in t: entities["furnishing"] = "Semi-Furnished"
+    elif "unfurnish" in t: entities["furnishing"] = "Unfurnished"
+    elif "furnish" in t: entities["furnishing"] = "Furnished"
+
+    if TIMELINE_IMMEDIATE_RE.search(t): entities["timeline"] = "immediate"
+    elif TIMELINE_30D_RE.search(t): entities["timeline"] = "<=30d"
+    elif TIMELINE_3M_RE.search(t): entities["timeline"] = "1-3m"
+
+    mob = MOBILE_RE.search(message)
+    if mob: entities["mobile"] = mob.group(0)
+
+    return entities
+
+def find_property_by_id(message):
+    m = PROPERTY_ID_RE.search(message.upper())
+    if not m: return None, None
+    pid = m.group(1)
+    for cfg in SEARCH_REGISTRY.values():
+        model = cfg["model"]
+        try:
+            obj = model.objects.filter(pk=pid, is_deleted=False).first()
+        except Exception:
+            obj = None
+        if obj: return obj, cfg
+    return None, None
+
+# =============================================================================
+# 3. STATIC FALLBACKS & HELPERS
+# =============================================================================
+
+NEGOTIATION_RE = re.compile(r"\b(negotiate|discount|reduce the (price|rent)|lower)\b", re.I)
+LEGAL_RE = re.compile(r"\b(legal(ly)?|title (clear|clarity)|stamp duty|rera)\b", re.I)
+COMPLAINT_RE = re.compile(r"\b(complain|complaint|rm (behaved|was rude|misbehaved))\b", re.I)
+VISIT_RE = re.compile(r"\bvisit\b", re.I)
+RM_RE = re.compile(r"\b(talk to (an?|the) rm|call me|callback)\b", re.I)
+SERVICE_RE = re.compile(r"\b(service|verification service|featured|sponsored)\b", re.I)
+TIMEPASS_RE = re.compile(r"\b(just browsing|only checking|college project)\b", re.I)
+
+def money(n):
+    if n is None: return None
+    try: return f"₹{int(n):,}"
+    except (TypeError, ValueError): return f"₹{n}"
+
+def not_verified(label, pid):
+    return f"I don't have verified information on {label} for {pid} yet. I can flag it for RM verification."
+
+def answer_property_fact(prop, cfg, message):
+    t = message.lower()
+    pid = prop.pk
+    
+    if "price" in t or "rent" in t or "cost" in t:
+        price_field = cfg.get("price_field")
+        if price_field and hasattr(prop, price_field):
+            price_val = getattr(prop, price_field)
+            if price_val:
+                unit = "/month" if cfg.get("kind") == "rent" else ""
+                return f"The verified {'rent' if cfg.get('kind')=='rent' else 'price'} for {pid} is {money(price_val)}{unit}."
+
+    if "carpet area" in t or "area" in t:
+        area = getattr(prop, cfg.get("area_field") or "", None) if cfg.get("area_field") else None
+        return f"{pid} has an area of {area} sq.ft." if area else not_verified("the area", pid)
+
+    return getattr(prop, "property_title", None) or f"Here's what I have on {pid}."
+
+def build_property_line(prop, cfg):
+    price_val = getattr(prop, cfg["price_field"], None)
+    unit = "/month" if cfg["kind"] == "rent" else ""
+    title = getattr(prop, "property_title", None) or prop.pk
+    return f"• [{prop.pk}] {title} — {money(price_val) or 'price on request'}{unit}"
+
+def search_listings(entities, limit=5):
+    """SAFE SEARCH: Prevents silent DB crashes from missing fields or integer lookups."""
+    keys = registry_keys_for(entities.get("transaction_type"), entities.get("category"))
+    if not keys:
+        keys = list(SEARCH_REGISTRY.keys())
+
+    results = []
+    for key in keys:
+        cfg = SEARCH_REGISTRY[key]
+        model = cfg["model"]
+
+        try:
+            field_names = [f.name for f in model._meta.get_fields()]
+            qs = model.objects.filter(is_deleted=False) if "is_deleted" in field_names else model.objects.all()
+        except Exception:
+            continue
+
+        loc = entities.get("location")
+        if loc:
+            filt = Q()
+            if cfg.get("locality_field") and cfg["locality_field"] in field_names:
+                filt |= Q(**{f"{cfg['locality_field']}__icontains": loc})
+            if cfg.get("city_field") and cfg["city_field"] in field_names:
+                filt |= Q(**{f"{cfg['city_field']}__icontains": loc})
+            if filt:
+                qs = qs.filter(filt)
+
+        bhk = entities.get("bhk")
+        bhk_field = cfg.get("bhk_field")
+        if bhk and bhk_field and bhk_field in field_names:
+            bhk_num = "".join(filter(str.isdigit, str(bhk)))
+            if bhk_num:
+                # Safely check if field is an integer or string in DB
+                field_type = model._meta.get_field(bhk_field).get_internal_type()
+                if "Integer" in field_type:
+                    qs = qs.filter(**{f"{bhk_field}": int(bhk_num)})
+                else:
+                    qs = qs.filter(**{f"{bhk_field}__icontains": bhk_num})
+
+        budget = entities.get("budget_max")
+        price_field = cfg.get("price_field")
+        if budget and price_field and price_field in field_names:
+            qs = qs.filter(**{f"{price_field}__lte": int(budget * 1.15)})
+
+        order_col = "-created_at" if "created_at" in field_names else "-id"
+        try:
+            for obj in qs.order_by(order_col)[:limit]:
+                results.append((obj, cfg))
+        except Exception:
+            continue
+
+        if len(results) >= limit:
+            break
+
+    return results[:limit]
+
+def active_services():
+    try:
+        # Assuming you have a Service model imported
+        return list(Service.objects.filter(status="active").order_by("sort_order")[:6])
+    except Exception:
+        return []
+
+# =============================================================================
+# 5. DYNAMIC RULES ENGINE (Reads from DB instead of hardcodes)
+# =============================================================================
+
+def check_fraud_dynamic(message_text):
+    message_lower = message_text.lower()
+    try:
+        rules = FraudRiskRule.objects.all()
+        for rule in rules:
+            trigger_words = [w.strip() for w in rule.example.lower().replace('/', ' ').split()]
+            if any(t in message_lower for t in trigger_words if len(t) > 3):
+                return rule
+    except Exception:
+        pass
+    return None
+
+def score_and_classify(lead: ChatbotLead, message_text: str, signals: dict):
+    score = 0
+    message_lower = message_text.lower()
+    
+    if lead.location: score += 10
+    if lead.budget_max or lead.budget_min: score += 10
+    if lead.bhk or lead.category: score += 10
+    if lead.property_id_ref: score += 15
+    if lead.timeline in ["<=30d", "immediate"]: score += 20
+    elif lead.timeline == "1-3m": score += 10
+    if lead.visit_requested: score += 20
+    if lead.rm_requested: score += 15
+    if lead.negotiation_requested: score += 20
+    if lead.mobile: score += 10
+
+    # Add points dynamically from LeadScoringRule table
+    try:
+        for rule in LeadScoringRule.objects.all():
+            keywords = [k.strip() for k in rule.signal.lower().split()]
+            if any(kw in message_lower for kw in keywords if len(kw) > 3):
+                score += rule.points
+    except Exception:
+        pass
+
+    if lead.risk_level == "HIGH":
+        classification = "FRAUD"
+    elif signals.get("timepass"):
+        classification = "TIMEPASS"
+    elif score >= 70:
+        classification = "HOT"
+    elif score >= 40:
+        classification = "WARM"
+    else:
+        classification = "INFO"
+
+    return score, classification
+
+def next_best_action(lead: ChatbotLead):
+    if lead.rm_requested: return "Contact customer within SLA"
+    if lead.visit_requested: return "Confirm visit time and property availability"
+    if lead.negotiation_requested: return "Arrange authorized RM to discuss price"
+    if lead.location and (lead.budget_max or lead.bhk): return "Send 2-3 suitable verified options"
+    if lead.location: return "Ask budget, furnishing and move-in date"
+    return "Understand requirement (rent/buy, location, budget)"
+
+def build_summary(lead: ChatbotLead):
+    parts = []
+    parts.append("Looking to " + ("rent" if lead.transaction_type == "rent" else "buy") if lead.transaction_type != "unknown" else "Exploring")
+    if lead.bhk: parts.append(f"{lead.bhk} BHK")
+    if lead.category and lead.category != "residential": parts.append(lead.category)
+    if lead.location: parts.append(f"in {lead.location}")
+    if lead.budget_max: parts.append(f"budget ~{money(lead.budget_max)}")
+    if lead.furnishing: parts.append(lead.furnishing.lower())
+    if lead.timeline: parts.append(f"timeline: {lead.timeline}")
+    if lead.visit_requested: parts.append("wants a site visit")
+    if lead.rm_requested: parts.append("requested RM callback")
+    return " • ".join(parts) if parts else "New visitor, requirement not yet captured."
+
+def get_or_create_lead(session_id):
+    lead = ChatbotLead.objects.filter(session_id=session_id).exclude(stage__in=["CLOSED", "DROPPED"]).order_by("-updated_at").first()
+    if lead: return lead
+    return ChatbotLead.objects.create(session_id=session_id)
+
+def apply_entities(lead: ChatbotLead, entities: dict):
+    if entities.get("transaction_type"): lead.transaction_type = entities["transaction_type"]
+    if entities.get("category"): lead.category = entities["category"]
+    if entities.get("location"): lead.location = entities["location"]
+    if entities.get("bhk"): lead.bhk = entities["bhk"]
+    if entities.get("budget_max"): lead.budget_max = entities["budget_max"]
+    if entities.get("furnishing"): lead.furnishing = entities["furnishing"]
+    if entities.get("timeline"): lead.timeline = entities["timeline"]
+    if entities.get("mobile"): lead.mobile = entities["mobile"]
+
+
+# =============================================================================
+# 6. THE VIEW
+# =============================================================================
+
+@csrf_protect
+@require_POST
+def chatbot_query_api(request):
+    message = (request.POST.get("message") or "").strip()
+    session_id = (request.POST.get("session_id") or request.session.session_key or "").strip()
+
+    if not session_id:
+        request.session.save()
+        session_id = request.session.session_key or "anon-session"
+
+    if not message:
+        return JsonResponse({"reply": "Could you type your question?", "options": []})
+
+    lead = get_or_create_lead(session_id)
+    ChatbotMessage.objects.create(lead=lead, sender="user", message=message)
+
+    def finish(reply, options=None, intent="GENERIC", extra_signals=None, results_payload=None):
+        signals = extra_signals or {}
+        entities = extract_entities(message)
+        apply_entities(lead, entities)
+        
+        lead.primary_intent = intent
+        lead.conversation_summary = build_summary(lead)
+        score, classification = score_and_classify(lead, message, signals) # Uses dynamic scoring now
+        
+        lead.lead_score = score
+        lead.lead_classification = classification
+        lead.next_best_action = next_best_action(lead)
+        if lead.stage == "NEW" and classification in ("HOT", "WARM"):
+            lead.stage = "QUALIFIED"
+        lead.save()
+
+        ChatbotMessage.objects.create(lead=lead, sender="bot", message=reply, intent=intent)
+
+        payload = {
+            "reply": reply,
+            "options": options or [],
+            "intent": intent,
+            "lead_id": lead.id,
+            "lead_score": lead.lead_score,
+            "lead_classification": lead.lead_classification,
+            "risk": lead.risk_level,
+            "next_best_action": lead.next_best_action,
+        }
+        if results_payload:
+            payload["results"] = results_payload
+        return JsonResponse(payload)
+
+    # 1. DYNAMIC FRAUD CHECK (Reads from DB)
+    fraud_rule = check_fraud_dynamic(message)
+    if fraud_rule:
+        lead.risk_level = "HIGH"
+        lead.save()
+        ChatbotRiskEvent.objects.create(
+            session_id=session_id, lead=lead, message=message,
+            matched_rule=fraud_rule.risk_id, risk_level="HIGH",
+        )
+        return finish(fraud_rule.ai_action, [], intent="FRAUD")
+
+    if TIMEPASS_RE.search(message):
+        return finish(
+            "No problem, take your time! Feel free to ask about localities, pricing trends, or EstateFlow's process whenever you're ready.",
+            [["🏠 Rent", "I want to rent"], ["🏡 Buy", "I want to buy"]],
+            intent="TIMEPASS", extra_signals={"timepass": True}
+        )
+
+    # 2. NEGOTIATION
+    if NEGOTIATION_RE.search(message):
+        lead.negotiation_requested = True
+        prop, cfg = find_property_by_id(message)
+        base = f" The current listed figure for {prop.pk} is {money(getattr(prop, cfg['price_field'], None))}." if prop else ""
+        return finish(
+            f"I can record your target price and pass it to an authorized RM — I can't promise the owner will accept a lower amount.{base}",
+            [["📞 Send to RM", "talk to an RM"]], intent="NEGOTIATION"
+        )
+
+    # 3. LEGAL / COMPLAINT
+    if LEGAL_RE.search(message):
+        return finish("I can explain the process, but legal interpretation should be reviewed by a professional.", [["📋 Route to legal review", "talk to an RM"]], intent="LEGAL")
+    
+    if COMPLAINT_RE.search(message):
+        lead.stage = "CONTACTED"
+        return finish("This needs human review. I've logged it as a priority case.", [["📞 Confirm callback", "talk to an RM"]], intent="COMPLAINT")
+
+    # 4. ID LOOKUP
+    prop, cfg = find_property_by_id(message)
+    if prop:
+        lead.property_id_ref = prop.pk
+        return finish(answer_property_fact(prop, cfg, message), [["📅 Arrange visit", f"I want to visit {prop.pk}"]], intent="PROPERTY_FACT")
+
+    # 5. VISIT / RM
+    if VISIT_RE.search(message):
+        lead.visit_requested = True
+        ask = " Could I get your name and mobile number?" if not lead.mobile else " I'll pass this to an RM to confirm the slot."
+        return finish("I can check visit slots." + ask, [["📞 Provide details", "talk to an RM"]], intent="VISIT")
+
+    if RM_RE.search(message):
+        lead.rm_requested = True
+        return finish("I've flagged this for RM callback with your saved details.", [], intent="RM")
+
+    if SERVICE_RE.search(message):
+        services = active_services()
+        if not services: return finish("I don't currently have any active services to show.", [], intent="SERVICE")
+        lines = "\n".join(f"• {sv.title} — {sv.cta_text}" for sv in services)
+        return finish(f"Here are the active services:\n\n{lines}", [["📞 Talk to RM", "talk to an RM"]], intent="SERVICE")
+
+    # 6. SEARCH LOGIC (MEMORY TRAP FIXED)
+    entities_now = extract_entities(message)
+    apply_entities(lead, entities_now)
+
+    # Only run DB search if the user just provided NEW search criteria in this exact message
+    has_active_search_criteria = bool(
+        entities_now.get("bhk") or entities_now.get("location") 
+        or entities_now.get("budget_max") or entities_now.get("category")
+    )
+
+    if "search" in message.lower() and not has_active_search_criteria:
+        return finish(
+            "I can help you find verified listings. Are you looking to rent or buy? And in which locality?",
+            [["🏠 Rent a Property", "I want to rent"], ["🏡 Buy a Property", "I want to buy"]],
+            intent="SEARCH_INIT",
+        )
+
+    if lead.transaction_type != "unknown" and not (lead.location or lead.bhk or lead.budget_max):
+        return finish(
+            f"Great, looking to {lead.transaction_type}! Which locality or configuration are you looking for?",
+            [["📍 Any Location", "show all properties"], ["🏠 2 BHK", "2 BHK"]],
+            intent="SEARCH_CLARIFY",
+        )
+
+    # Actually execute the query against the database
+    if has_active_search_criteria or (lead.location or lead.bhk):
+        merged = {
+            "transaction_type": lead.transaction_type if lead.transaction_type != "unknown" else None,
+            "category": lead.category, "location": lead.location, "bhk": lead.bhk,
+            "budget_max": lead.budget_max, "furnishing": lead.furnishing,
+        }
+        results = search_listings(merged, limit=5)
+
+        if not results:
+            return finish(
+                f"I couldn't find any matching verified listings for {build_summary(lead)} right now. I can alert you when one is posted.",
+                [["📞 Notify me / RM", "talk to an RM"]],
+                intent="SEARCH_EMPTY", extra_signals={"property_search": True},
+            )
+
+        lines = "\n".join(build_property_line(p, c) for p, c in results)
+        lead.properties_viewed = ",".join(str(p.pk) for p, _ in results)
+        
+        results_payload = [
+            {"id": p.pk, "title": getattr(p, "property_title", str(p.pk)),
+             "price": getattr(p, c["price_field"], None), "kind": c["kind"], "label": c["label"]}
+            for p, c in results
+        ]
+        return finish(
+            f"Here is what matches from verified listings:\n\n{lines}",
+            [["📅 Arrange visit", "I want to visit"], ["📞 Talk to RM", "talk to an RM"]],
+            intent="SEARCH", extra_signals={"property_search": True}, results_payload=results_payload,
+        )
+
+    # 7. DEFAULT FALLBACK
+    return finish(
+        "I can help with verified property search, listing facts, arranging visits, or connecting you with an RM.",
+        [
+            ["🏠 Rent a Property", "I want to rent a property"],
+            ["🏡 Buy a Property", "I want to buy a property"],
+            ["📅 Arrange Visit", "I want to visit a property"],
+            ["🤝 Talk to an RM", "talk to an RM"],
+        ],
+        intent="GENERIC",
+    )
+
+
+
+def digital_profile(request, slug):
+    user = get_object_or_404(User_Details, slug=slug)
+    properties = get_properties_for_user(user.user_id)
+    return render(request, "digital/rm_profile.html", {
+        "user": user,
+        "properties": properties,
+    })
+
+
+
+
+
+
+
+
+def service_inquiry(request):
+
+    if request.method != "POST":
+        return JsonResponse({
+            "status": "0",
+            "msg": "Invalid request."
+        })
+
+    # ---------------------------------
+    # GET FORM DATA
+    # ---------------------------------
+
+    service_id = request.POST.get("service_id")
+    option_id = request.POST.get("option_id")
+
+    name = request.POST.get("name")
+    phone = request.POST.get("phone")
+    email = request.POST.get("email")
+
+    city = request.POST.get("city")
+    area = request.POST.get("area")
+
+    callback_time = request.POST.get("callback_time")
+    requirement = request.POST.get("requirement")
+
+
+    # ---------------------------------
+    # VALIDATION
+    # ---------------------------------
+
+    if not service_id:
+        return JsonResponse({
+            "status": "0",
+            "msg": "Service is required."
+        })
+
+
+    if not name or not phone or not city:
+        return JsonResponse({
+            "status": "0",
+            "msg": "Please fill all required fields."
+        })
+
+
+    # ---------------------------------
+    # PHONE VALIDATION
+    # ---------------------------------
+
+    if not phone.isdigit() or len(phone) != 10:
+        return JsonResponse({
+            "status": "0",
+            "msg": "Please enter a valid 10 digit mobile number."
+        })
+
+
+    # ---------------------------------
+    # GET SERVICE
+    # ---------------------------------
+
+    service = Service.objects.filter(
+        id=service_id,
+        status="active"
+    ).first()
+
+
+    if not service:
+        return JsonResponse({
+            "status": "0",
+            "msg": "Service not found."
+        })
+
+
+    # ---------------------------------
+    # GET SERVICE OPTION
+    # ---------------------------------
+
+    service_option = None
+
+    if option_id:
+
+        service_option = Service_Option.objects.filter(
+            id=option_id,
+            service=service,
+            is_active=True
+        ).first()
+
+        if not service_option:
+            return JsonResponse({
+                "status": "0",
+                "msg": "Selected service option is invalid."
+            })
+
+
+    # ---------------------------------
+    # GENERATE LEAD ID
+    # ---------------------------------
+
+    lead_id = "SR-" + uuid.uuid4().hex[:10].upper()
+
+
+    # ---------------------------------
+    # SAVE SERVICE LEAD
+    # ---------------------------------
+
+    try:
+
+        with transaction.atomic():
+
+            lead = Service_Lead.objects.create(
+
+                lead_id=lead_id,
+
+                service=service,
+
+                service_option=service_option,
+
+                customer_name=name.strip(),
+
+                customer_phone=phone.strip(),
+
+                customer_email=email.strip() if email else None,
+
+                city=city.strip(),
+
+                area=area.strip() if area else None,
+
+                preferred_callback_time=(
+                    callback_time.strip()
+                    if callback_time
+                    else None
+                ),
+
+                requirement=(
+                    requirement.strip()
+                    if requirement
+                    else None
+                ),
+
+                status="new"
+            )
+
+
+        # ---------------------------------
+        # SUCCESS
+        # ---------------------------------
+
+        return JsonResponse({
+
+            "status": "1",
+
+            "msg": "Service request submitted successfully.",
+
+            "lead_id": lead.lead_id
+        })
+
+
+    except Exception as e:
+
+        print("SERVICE LEAD ERROR:", e)
+
+        return JsonResponse({
+
+            "status": "0",
+
+            "msg": "Unable to submit service request. Please try again."
+        })
+
+

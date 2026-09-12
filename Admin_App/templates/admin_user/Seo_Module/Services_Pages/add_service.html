@@ -42,16 +42,16 @@
 
                 <div class="col-md-4 mb-3">
                     <label style="font-weight: 600; color: #475569;">Service Category <span style="color:red;">*</span></label>
-                    <select name="category" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
-                        <option value="">-- Select Category --</option>
-                        <option value="legal_services">Legal Services</option>
-                        <option value="loan_services">Loan Services</option>
-                        <option value="interior_services">Interior Services</option>
-                        <option value="packers_movers">Packers &amp; Movers</option>
-                        <option value="vastu_services">Vastu Services</option>
-                        <option value="property_valuation">Property Valuation</option>
-                        <option value="property_photography">Property Photography</option>
-                    </select>
+                
+                    <select name="category" class="form-select">
+    <option value="">Select Category</option>
+
+    {% for category in service_categories %}
+        <option value="{{ category.id }}">
+            {{ category.service_name }}
+        </option>
+    {% endfor %}
+</select>
                 </div>
 
                 <div class="col-md-4 mb-3">
@@ -76,7 +76,141 @@
                     <label style="font-weight: 600; color: #475569;">Short Description <span style="color:red;">*</span></label>
                     <textarea name="short_description" class="form-control" rows="3" placeholder="Brief summary of the service..." style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required></textarea>
                 </div>
+
+
+
+
             </div>
+
+
+
+
+            <!-- Pricing & Service Options -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Pricing & Service Options</h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <!-- Price Type -->
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Price Type</label>
+
+                <select name="price_type" class="form-select">
+                    <option value="on_request">On Request</option>
+                    <option value="fixed">Fixed Price</option>
+                    <option value="starting_from">Starting From</option>
+                </select>
+            </div>
+
+            <!-- Base Price -->
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Base Price</label>
+
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input type="number"
+                           name="price"
+                           class="form-control"
+                           placeholder="Enter price"
+                           min="0">
+                </div>
+            </div>
+
+            <!-- Duration -->
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Duration</label>
+
+                <input type="text"
+                       name="duration"
+                       class="form-control"
+                       placeholder="e.g. 2 Hours / 1 Day / 7 Days">
+            </div>
+
+        </div>
+
+
+        <!-- Service Options -->
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <label class="form-label mb-0">
+                    Service Options
+                </label>
+
+                <small class="text-muted d-block">
+                    Add different packages, sizes or service types.
+                </small>
+            </div>
+
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    onclick="addServiceOption()">
+                + Add Option
+            </button>
+        </div>
+
+
+        <div id="service-options-container">
+
+            <!-- First Option -->
+            <div class="service-option border rounded p-3 mb-3">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Option Name</label>
+
+                        <input type="text"
+                               name="option_name[]"
+                               class="form-control"
+                               placeholder="e.g. Basic Package">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Price</label>
+
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+
+                            <input type="number"
+                                   name="option_price[]"
+                                   class="form-control"
+                                   placeholder="Price"
+                                   min="0">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Duration</label>
+
+                        <input type="text"
+                               name="option_duration[]"
+                               class="form-control"
+                               placeholder="e.g. 2 Hours">
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+
+                        <button type="button"
+                                class="btn btn-outline-danger w-100"
+                                onclick="removeServiceOption(this)">
+                            Remove
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
 
             <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
                 <i class="fas fa-image text-success"></i> Media &amp; Content
@@ -155,4 +289,81 @@
             element.classList.toggle('dropdown-open');
         }
     }
+</script>
+
+
+<script>
+
+function addServiceOption() {
+
+    const container = document.getElementById(
+        "service-options-container"
+    );
+
+    const option = document.createElement("div");
+
+    option.className = "service-option border rounded p-3 mb-3";
+
+    option.innerHTML = `
+        <div class="row">
+
+            <div class="col-md-4">
+                <label class="form-label">Option Name</label>
+
+                <input type="text"
+                       name="option_name[]"
+                       class="form-control"
+                       placeholder="e.g. Standard Package">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Price</label>
+
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+
+                    <input type="number"
+                           name="option_price[]"
+                           class="form-control"
+                           placeholder="Price"
+                           min="0">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Duration</label>
+
+                <input type="text"
+                       name="option_duration[]"
+                       class="form-control"
+                       placeholder="e.g. 4 Hours">
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+
+                <button type="button"
+                        class="btn btn-outline-danger w-100"
+                        onclick="removeServiceOption(this)">
+                    Remove
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    container.appendChild(option);
+}
+
+
+function removeServiceOption(button) {
+
+    const option = button.closest(".service-option");
+
+    if (option) {
+        option.remove();
+    }
+
+}
+
 </script>

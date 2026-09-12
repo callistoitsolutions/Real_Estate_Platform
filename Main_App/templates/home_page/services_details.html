@@ -95,6 +95,201 @@ a { color: inherit; }
 .info-val { color: var(--text-dark); font-weight: 700; }
 .info-val.verified { color: #16a34a; }
 
+
+/* =========================================
+   SERVICE INQUIRY MODAL
+========================================= */
+
+.service-inquiry-modal {
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 70px rgba(0,0,0,.18);
+}
+
+.service-inquiry-modal .modal-header {
+    background: #0f172a;
+    color: #fff;
+    padding: 24px 28px;
+    border-bottom: 0;
+}
+
+.service-inquiry-modal .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: .8;
+}
+
+.inquiry-small-title {
+    display: block;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #f59e0b;
+    margin-bottom: 5px;
+}
+
+.service-inquiry-modal .modal-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.inquiry-subtitle {
+    margin: 5px 0 0;
+    font-size: .82rem;
+    color: rgba(255,255,255,.7);
+}
+
+.service-inquiry-modal .modal-body {
+    padding: 28px;
+}
+
+.selected-service-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 24px;
+}
+
+.selected-service-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.selected-service-box small {
+    display: block;
+    color: var(--text-muted);
+    font-size: .7rem;
+    margin-bottom: 2px;
+}
+
+.selected-service-box strong {
+    display: block;
+    color: var(--text-dark);
+    font-size: .9rem;
+}
+
+.form-section {
+    margin-bottom: 20px;
+}
+
+.service-inquiry-modal .form-label {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 7px;
+}
+
+.service-inquiry-modal .form-label span {
+    color: #dc2626;
+}
+
+.service-inquiry-modal .form-control,
+.service-inquiry-modal .form-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: .84rem;
+}
+
+.service-inquiry-modal .form-control:focus,
+.service-inquiry-modal .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0,108,228,.1);
+}
+
+.inquiry-note {
+    display: flex;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 13px;
+    margin-top: 8px;
+}
+
+.inquiry-note > i {
+    color: #16a34a;
+    font-size: 1.2rem;
+}
+
+.inquiry-note strong {
+    display: block;
+    color: var(--text-dark);
+    font-size: .78rem;
+}
+
+.inquiry-note p {
+    margin: 3px 0 0;
+    font-size: .72rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.service-inquiry-modal .modal-footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 28px;
+}
+
+.btn-cancel {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text-body);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.btn-submit-inquiry {
+    border: 0;
+    background: var(--primary);
+    color: #fff;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.btn-submit-inquiry:hover {
+    background: var(--primary-dark);
+}
+
+.btn-submit-inquiry:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
+@media(max-width:576px) {
+
+    .service-inquiry-modal .modal-header,
+    .service-inquiry-modal .modal-body,
+    .service-inquiry-modal .modal-footer {
+        padding: 20px;
+    }
+
+    .service-inquiry-modal .modal-footer {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancel,
+    .btn-submit-inquiry {
+        width: 100%;
+    }
+}
+
 .cta-box { background: linear-gradient(135deg,#4338ca,#4f46e5); border-radius: var(--radius); padding: 26px; text-align: center; color: #fff; }
 .cta-box h5 { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
 .cta-box p { font-size: .85rem; color: rgba(255,255,255,.8); margin-bottom: 18px; }
@@ -187,23 +382,320 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
                     </div>
                 </div>
 
+               
+
                 <div class="cta-box">
-                    <h5>Need This Service?</h5>
-                    <p>Talk to a PropCRM expert and get a callback within 24 hours.</p>
-                    <a href="{% url 'Contact_Us' %}" class="btn-cta">{{ service.cta_text|default:'Request a Callback' }}</a>
-                    <a href="{% url 'services' %}" class="btn-cta-ghost">Explore All Services</a>
-                </div>
+    <h5>Need This Service?</h5>
+
+    <p>
+        Tell us what you need and our service team will contact you shortly.
+    </p>
+
+    <button type="button"
+            class="btn-cta"
+            onclick="openServiceInquiry()">
+        <i class="bi bi-send"></i>
+        {{ service.cta_text|default:'Request This Service' }}
+    </button>
+
+    <a href="{% url 'services' %}" class="btn-cta-ghost">
+        Explore All Services
+    </a>
+</div>
             </div>
         </aside>
 
     </div>
 </div>
 
+
+
+<!-- =========================================
+     SERVICE INQUIRY MODAL
+========================================= -->
+
+<div class="modal fade" id="serviceInquiryModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content service-inquiry-modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <span class="inquiry-small-title">
+                        SERVICE REQUEST
+                    </span>
+
+                    <h4 class="modal-title">
+                        Request {{ service.title }}
+                    </h4>
+
+                    <p class="inquiry-subtitle">
+                        Share your requirement and our RM will contact you.
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <form id="serviceInquiryForm">
+
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <!-- Hidden Service -->
+                    <input type="hidden"
+                           name="service_id"
+                           value="{{ service.id }}">
+
+
+                    <!-- Selected Option -->
+                    <div class="selected-service-box">
+
+                        <div class="selected-service-icon">
+                            <i class="{{ service.icon|default:'bi bi-building' }}"></i>
+                        </div>
+
+                        <div>
+                            <small>Service Selected</small>
+
+                            <strong>
+                                {{ service.title }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <!-- OPTION -->
+                    {% if service.options.all %}
+
+                    <div class="form-section">
+
+                        <label class="form-label">
+                            Select Service Option
+                        </label>
+
+                        <select name="option_id"
+                                id="service_option"
+                                class="form-select">
+
+                            <option value="">
+                                Select an option
+                            </option>
+
+                            {% for option in service.options.all %}
+
+                                {% if option.is_active %}
+
+                                <option value="{{ option.id }}">
+
+                                    {{ option.option_name }}
+
+                                    {% if option.price %}
+                                        — ₹{{ option.price|floatformat:0 }}
+                                    {% else %}
+                                        — Price on Request
+                                    {% endif %}
+
+                                </option>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <div class="row">
+
+                        <!-- NAME -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Full Name <span>*</span>
+                            </label>
+
+                            <input type="text"
+                                   name="name"
+                                   class="form-control"
+                                   placeholder="Enter your name"
+                                   required>
+
+                        </div>
+
+
+                        <!-- PHONE -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Mobile Number <span>*</span>
+                            </label>
+
+                            <input type="tel"
+                                   name="phone"
+                                   class="form-control"
+                                   placeholder="Enter 10 digit mobile number"
+                                   maxlength="10"
+                                   required>
+
+                        </div>
+
+
+                        <!-- EMAIL -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Email Address
+                            </label>
+
+                            <input type="email"
+                                   name="email"
+                                   class="form-control"
+                                   placeholder="Enter email address">
+
+                        </div>
+
+
+                        <!-- CITY -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                City <span>*</span>
+                            </label>
+
+                            <input type="text"
+                                   name="city"
+                                   class="form-control"
+                                   placeholder="Enter your city"
+                                   required>
+
+                        </div>
+
+
+                        <!-- AREA -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Area / Locality
+                            </label>
+
+                            <input type="text"
+                                   name="area"
+                                   class="form-control"
+                                   placeholder="Enter area or locality">
+
+                        </div>
+
+
+                        <!-- PREFERRED CALLBACK -->
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Preferred Callback Time
+                            </label>
+
+                            <select name="callback_time"
+                                    class="form-select">
+
+                                <option value="">
+                                    Select preferred time
+                                </option>
+
+                                <option value="Morning">
+                                    Morning (9 AM - 12 PM)
+                                </option>
+
+                                <option value="Afternoon">
+                                    Afternoon (12 PM - 3 PM)
+                                </option>
+
+                                <option value="Evening">
+                                    Evening (3 PM - 7 PM)
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- REQUIREMENT -->
+                        <div class="col-12 mb-3">
+
+                            <label class="form-label">
+                                Tell Us About Your Requirement
+                            </label>
+
+                            <textarea name="requirement"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Please describe what you need..."></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="inquiry-note">
+
+                        <i class="bi bi-shield-check"></i>
+
+                        <div>
+                            <strong>Your details are safe with us.</strong>
+
+                            <p>
+                                Our RM will verify your requirement and connect
+                                you with the appropriate service professional.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn-cancel"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn-submit-inquiry"
+                            id="submitInquiryBtn">
+
+                        <i class="bi bi-send"></i>
+                        Submit Request
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
 <footer>
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
-                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-brand">🏠 KANISHKAIMPERIA</div>
                 <div class="fl-desc">Empowering the real estate industry with verified listings and end-to-end property services in Nagpur.</div>
             </div>
             <div>
@@ -218,6 +710,98 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
             </div>
         </div>
     </div>
-    <div class="footer-bottom">© 2026 PropCRM Platform. All Rights Reserved.</div>
+    <div class="footer-bottom">© 2026 KANISHKAIMPERIA Platform. All Rights Reserved.</div>
 </footer>
+
+
+<script>
+
+function openServiceInquiry() {
+
+    const modalElement = document.getElementById(
+        'serviceInquiryModal'
+    );
+
+    const modal = new bootstrap.Modal(modalElement);
+
+    modal.show();
+}
+
+
+$("#serviceInquiryForm").on("submit", function(e) {
+
+    e.preventDefault();
+
+    const form = this;
+
+    const submitBtn = $("#submitInquiryBtn");
+
+    const phone = $('input[name="phone"]').val().trim();
+
+    // Basic phone validation
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+
+        alert("Please enter a valid 10 digit mobile number.");
+
+        return;
+    }
+
+
+    submitBtn.prop("disabled", true);
+
+    submitBtn.html(
+        '<span class="spinner-border spinner-border-sm me-1"></span> Submitting...'
+    );
+
+
+    $.ajax({
+
+        url: "{% url 'service_inquiry' %}",
+
+        type: "POST",
+
+        data: $(form).serialize(),
+
+        success: function(response) {
+
+            if (response.status == "1") {
+
+                $("#serviceInquiryModal").modal("hide");
+
+                form.reset();
+
+                alert(
+                    "Your service request has been submitted successfully. Our RM will contact you shortly."
+                );
+
+            } else {
+
+                alert(
+                    response.msg || "Unable to submit your request."
+                );
+            }
+        },
+
+        error: function() {
+
+            alert(
+                "Something went wrong. Please try again."
+            );
+        },
+
+        complete: function() {
+
+            submitBtn.prop("disabled", false);
+
+            submitBtn.html(
+                '<i class="bi bi-send"></i> Submit Request'
+            );
+
+        }
+
+    });
+
+});
+
+</script>
 {% endblock %}

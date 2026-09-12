@@ -121,15 +121,30 @@
           <div class="section-header"><i class="fas fa-briefcase"></i> Step 3: Professional Details</div>
           <div class="section-body">
             <div class="row">
+             
               <div class="col-md-4">
-                <label class="form-label">Service Type <span style="color:red;">*</span></label>
-                <select class="form-control" id="user_service_type" name="user_service_type" required>
-                  <option value="SelectService" selected disabled>Select a service...</option>
-                  {% for service in services_obj %}
-                    <option value="{{service.service_name}}">{{service.service_name}}</option>
-                  {% endfor %}
-                </select>
-              </div>
+    <label class="form-label">
+        Services Provided <span style="color:red;">*</span>
+    </label>
+
+    <select class="form-control"
+            id="vendor_services"
+            name="services"
+            multiple
+            required>
+
+        {% for service in services_obj %}
+            <option value="{{ service.id }}">
+                {{ service.title }}
+            </option>
+        {% endfor %}
+
+    </select>
+
+    <small class="text-muted">
+        Select all services this vendor provides.
+    </small>
+</div>
               <div class="col-md-4">
                 <label class="form-label">Company Name <span style="color:red;">*</span></label>
                 <input type="text" class="form-control" id="user_company_name" name="user_company_name" required>
@@ -195,6 +210,10 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert/dist/sweetalert.min.js"></script>
 
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
 
   $("#Teams").addClass("active");
@@ -213,6 +232,16 @@
       sidebar.classList.toggle('collapsed');
     }
   }
+
+
+  $(document).ready(function () {
+
+    $('#vendor_services').select2({
+        placeholder: "Select Services",
+        width: "100%"
+    });
+
+});
 
   // Close Sidebar (Mobile)
   function closeSidebar() {
@@ -390,7 +419,13 @@
     fd.append('user_city', $("#user_city").val());
     fd.append('user_address', $("#user_address").val());
     fd.append('user_password', $("#user_password").val());
-    fd.append('user_service_type', $("#user_service_type").val());
+  
+
+    var selectedServices = $("#vendor_services").val() || [];
+
+selectedServices.forEach(function(serviceId) {
+    fd.append('services[]', serviceId);
+});
     fd.append('user_company_name', $("#user_company_name").val());
     fd.append('user_pan_number', $("#user_pan_number").val());
     fd.append('user_gstin_number', $("#user_gstin_number").val());

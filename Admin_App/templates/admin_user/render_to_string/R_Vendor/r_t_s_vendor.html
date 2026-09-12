@@ -58,6 +58,10 @@
             <th>Operational Scope</th>
             <th>Services regions</th>
             <th>Register Date</th>
+
+            <th>Service Type</th>
+<th>Selected Services</th>   <!-- NEW -->
+<th>Name</th>
         </tr>
     </thead>
 
@@ -122,6 +126,22 @@
             <td>{{ vendor.user_operational_scope }}</td>
             <td>{{ vendor.selected_regions }}</td>
             <td>{{ vendor.user_register_date }}</td>
+
+            <td>
+    {{ vendor.user_service_type }}
+</td>
+
+<td>
+    {% for vs in vendor.vendor_services.all %}
+        <span class="badge bg-primary" style="margin:2px;">
+            {{ vs.service.title }}
+        </span>
+    {% empty %}
+        <span class="text-muted">No services selected</span>
+    {% endfor %}
+</td>
+
+<td>{{ vendor.user_name }}</td>
 
         </tr>
 

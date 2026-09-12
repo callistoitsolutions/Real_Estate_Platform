@@ -4297,64 +4297,255 @@ def Update_RM(request,id):
 
 ########## Views start for ajax for add/update rm functionality #################4
 
+
+
+
 @csrf_exempt
 def User_Ajax(request):
+
+    if request.method != "POST":
+        return JsonResponse({
+            "status": "0",
+            "msg": "Invalid request method"
+        })
+
+    # Convert POST data into dictionary
     data = request.POST.dict()
 
-    # --- HANDLE NEW FIELDS ---
-    # 1. Handle Checkboxes: .dict() fails on lists, so we use .getlist
+    # --------------------------------------------------
+    # GET SELECTED SERVICES SEPARATELY
+    # --------------------------------------------------
+    selected_services = request.POST.getlist('services[]')
+
+    # These fields are not User_Details model fields
+    data.pop('services[]', None)
+    data.pop('csrfmiddlewaretoken', None)
+
+    # --------------------------------------------------
+    # HANDLE OPERATIONAL SCOPE
+    # --------------------------------------------------
     user_operational_scope = data.get('user_operational_scope')
+
     if user_operational_scope == 'all':
+
         data['selected_regions'] = "All Over India"
+
     else:
-        # We sent it as a JSON string from AJAX
+
         regions_raw = request.POST.get('selected_regions')
+
         try:
+
             regions_list = json.loads(regions_raw)
+
             data['selected_regions'] = ", ".join(regions_list)
+
         except (json.JSONDecodeError, TypeError):
+
             data['selected_regions'] = ""
 
+    # ==================================================
+    # ADD NEW VENDOR
+    # ==================================================
     if data.get('id') == "":
+
+        # Remove ID before creating new record
         data.pop("id", None)
-        data['user_profile'] = request.FILES.get('user_profile')        
+
+        # Remove fields that should not be passed to model
+        data.pop('services[]', None)
+        data.pop('csrfmiddlewaretoken', None)
+
+        # Profile image
+        data['user_profile'] = request.FILES.get('user_profile')
+
+        # Registration date/time
         data['user_register_date'] = datetime.today()
         data['user_register_time'] = datetime.now()
-        if User_Details.objects.filter(user_phone=data['user_phone']).exists():
-            return JsonResponse({"status":"0", "msg" : f"User with this phone number already exists"})
-        elif User_Details.objects.filter(user_email=data['user_email']).exists():
-            return JsonResponse({"status":"0", "msg" : f"User with this email address already exists"})
+
+        # --------------------------------------------------
+        # CHECK DUPLICATE PHONE
+        # --------------------------------------------------
+        if User_Details.objects.filter(
+            user_phone=data.get('user_phone')
+        ).exists():
+
+            return JsonResponse({
+                "status": "0",
+                "msg": "User with this phone number already exists"
+            })
+
+        # --------------------------------------------------
+        # CHECK DUPLICATE EMAIL
+        # --------------------------------------------------
+        elif User_Details.objects.filter(
+            user_email=data.get('user_email')
+        ).exists():
+
+            return JsonResponse({
+                "status": "0",
+                "msg": "User with this email address already exists"
+            })
+
         else:
+
+            # --------------------------------------------------
+            # CREATE USER
+            # --------------------------------------------------
             current_year = datetime.now().year
             year_suffix = str(current_year)[-2:]
+
             new_user = User_Details.objects.create(**data)
+
+            # --------------------------------------------------
+            # GENERATE USER ID
+            # --------------------------------------------------
             user_id = f"EF-{new_user.id}-{year_suffix}"
+
             new_user.user_id = user_id
             new_user.save()
 
-            return JsonResponse({"status":"1", "msg" : f"User Details added successfully"})
+            # ==================================================
+            # SAVE SELECTED SERVICES
+            # ==================================================
+            for service_id in selected_services:
 
-    # UPDATE MODE
+                service_obj = Service.objects.filter(
+                    id=service_id,
+                    status="active"
+                ).first()
+
+                if service_obj:
+
+                    Vendor_Service.objects.get_or_create(
+
+                        vendor=new_user,
+
+                        service=service_obj,
+
+                        defaults={
+                            "is_active": True,
+                            "is_verified": False,
+                        }
+
+                    )
+
+            # --------------------------------------------------
+            # SUCCESS RESPONSE
+            # --------------------------------------------------
+            return JsonResponse({
+                "status": "1",
+                "msg": "User Details added successfully",
+                "user_id": new_user.user_id
+            })
+
+    # ==================================================
+    # UPDATE EXISTING VENDOR
+    # ==================================================
     else:
+
         try:
-            rm = User_Details.objects.get(id=data['id'])
+
+            rm = User_Details.objects.get(
+                id=data['id']
+            )
+
         except User_Details.DoesNotExist:
-            return JsonResponse({'status': '0', 'msg': 'User Details not found'})
-       
-        data['user_profile'] = request.FILES.get('user_profile')
 
+            return JsonResponse({
+                'status': '0',
+                'msg': 'User Details not found'
+            })
+
+        # --------------------------------------------------
+        # PROFILE IMAGE
+        # --------------------------------------------------
         if request.FILES.get('user_profile'):
-            data['user_profile'] = request.FILES.get('user_profile')
+
+            data['user_profile'] = request.FILES.get(
+                'user_profile'
+            )
+
         else:
-            data.pop('user_profile', None)
 
+            data.pop(
+                'user_profile',
+                None
+            )
 
-        # Update withdraw fields (unchanged)
+        # --------------------------------------------------
+        # REMOVE NON-MODEL FIELDS
+        # --------------------------------------------------
+        data.pop(
+            'services[]',
+            None
+        )
+
+        data.pop(
+            'csrfmiddlewaretoken',
+            None
+        )
+
+        # Remove ID so it is not updated
+        data.pop(
+            'id',
+            None
+        )
+
+        # --------------------------------------------------
+        # UPDATE USER DETAILS
+        # --------------------------------------------------
         for key, value in data.items():
-            setattr(rm, key, value)
+
+            setattr(
+                rm,
+                key,
+                value
+            )
 
         rm.save()
-        return JsonResponse({"status":"1", "msg" : f"User Details updated successfully"})
+
+        # ==================================================
+        # UPDATE VENDOR SERVICES
+        # ==================================================
+
+        # Remove old service mappings
+        Vendor_Service.objects.filter(
+            vendor=rm
+        ).delete()
+
+        # Add currently selected services
+        for service_id in selected_services:
+
+            service_obj = Service.objects.filter(
+                id=service_id,
+                status="active"
+            ).first()
+
+            if service_obj:
+
+                Vendor_Service.objects.get_or_create(
+
+                    vendor=rm,
+
+                    service=service_obj,
+
+                    defaults={
+                        "is_active": True,
+                        "is_verified": False,
+                    }
+
+                )
+
+        # --------------------------------------------------
+        # SUCCESS RESPONSE
+        # --------------------------------------------------
+        return JsonResponse({
+            "status": "1",
+            "msg": "User Details updated successfully",
+            "user_id": rm.user_id
+        })
+
 
 ########### Views end for ajax for add/update rm functionality ###################
 
@@ -6707,55 +6898,85 @@ def Update_Agency(request,id):
 
 ########## Views start for display vendors list ##################
 
+
 @csrf_exempt
 def Vendor_List(request):
 
+    if request.method == "POST":
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
 
-    if request.method=="POST":
-        start_date= request.POST.get('start_date')
-        end_date= request.POST.get('end_date')
-        vendor_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Vendor").order_by("-id")
-        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Vendor").exists():
-            vendor_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Vendor").count()
+        vendor_obj = User_Details.objects.filter(
+            user_register_date__gte=start_date,
+            user_register_date__lte=end_date,
+            user_role="Vendor"
+        ).prefetch_related('vendor_services__service').order_by("-id")
 
-            rendered = render_to_string("admin_user/render_to_string/R_Vendor/r_t_s_vendor.html",{'vendor_obj':vendor_obj,'vendor_obj_count':vendor_obj_count,'Role':'Vendor'})
+        if vendor_obj.exists():
+            vendor_obj_count = vendor_obj.count()
 
+            rendered = render_to_string(
+                "admin_user/render_to_string/R_Vendor/r_t_s_vendor.html",
+                {'vendor_obj': vendor_obj, 'vendor_obj_count': vendor_obj_count, 'Role': 'Vendor'}
+            )
             return HttpResponse(rendered)
         else:
             return HttpResponse("error")
-
 
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        vendor_obj = User_Details.objects.filter(user_role="Vendor").order_by('-user_register_date')
-        vendor_obj_count = User_Details.objects.filter(user_role="Vendor").count()
+        vendor_obj = User_Details.objects.filter(
+            user_role="Vendor"
+        ).prefetch_related('vendor_services__service').order_by('-user_register_date')
 
-        rendered = render_to_string("admin_user/render_to_string/R_Vendor/r_t_s_vendor.html",{'vendor_obj':vendor_obj,'vendor_obj_count':vendor_obj_count,'Role':'Vendor'})
+        vendor_obj_count = vendor_obj.count()
 
-        context = {'admin_obj':admin_obj,'vendors_list':rendered}
+        rendered = render_to_string(
+            "admin_user/render_to_string/R_Vendor/r_t_s_vendor.html",
+            {'vendor_obj': vendor_obj, 'vendor_obj_count': vendor_obj_count, 'Role': 'Vendor'}
+        )
 
-        return render(request,'admin_user/Vendor/vendor_list.html',context)
+        context = {'admin_obj': admin_obj, 'vendors_list': rendered}
+        return render(request, 'admin_user/Vendor/vendor_list.html', context)
     else:
-        return render(request,'home_page/Adminlogin.html')
+        return render(request, 'home_page/Adminlogin.html')
+
+
 
 ######### Views end for display vendors list ######################
 
 
 ########### Views start for add vendor #####################
 
+
 def Add_Vendor(request):
     session_id = request.session.get('Admin_id')
+
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        services_obj = Service_Type_Details.objects.all()
+        services_obj = Service.objects.filter(
+            status="active"
+        ).order_by("title")
 
-        context = {'admin_obj':admin_obj,'services_obj':services_obj}
-        return render(request,'admin_user/Vendor/add_vendor.html',context)
+        context = {
+            'admin_obj': admin_obj,
+            'services_obj': services_obj,
+        }
+
+        return render(
+            request,
+            'admin_user/Vendor/add_vendor.html',
+            context
+        )
+
     else:
-        return render(request,'home_page/Adminlogin.html')
+        return render(
+            request,
+            'home_page/Adminlogin.html'
+        )
 
 ############### Views end for add vendor #######################
 
@@ -7221,53 +7442,127 @@ def commision_release_cycle(request):
 
 from django.core.files.images import get_image_dimensions
 
-def hero_section(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        subtitle = request.POST.get("subtitle")
-        title_font_size = request.POST.get("title_font_size")
-        subtitle_font_size = request.POST.get("subtitle_font_size")
-        text_color = request.POST.get("text_color")
-        overlay_color = request.POST.get("overlay_color")
-        is_active = True if request.POST.get("is_active") == "on" else False
+    
 
-        background_image = request.FILES.get("background_image")
 
-        # Validate image
-        if background_image:
-            # File size (max 2MB)
-            if background_image.size > 2 * 1024 * 1024:
-                messages.error(request, "Image size must be under 2MB")
-                return redirect("hero_section_form")
 
-            # Resolution (min 1200x600)
-            width, height = get_image_dimensions(background_image)
-            if width < 1200 or height < 600:
-                messages.error(request, "Image resolution must be at least 1200x600 pixels")
-                return redirect("hero_section_form")
 
-        # Save to DB
-        HeroSection.objects.create(
-            title=title,
-            subtitle=subtitle,
-            title_font_size=title_font_size,
-            subtitle_font_size=subtitle_font_size,
-            text_color=text_color,
-            overlay_color=overlay_color,
-            background_image=background_image,
-            is_active=is_active
+
+def header_settings(request):
+
+    settings = HeaderSettings.objects.filter(
+        is_active=True
+    ).first()
+
+    if not settings:
+
+        settings = HeaderSettings.objects.create(
+            is_active=True
         )
 
-        messages.success(request, "Hero section saved successfully!")
-       # return redirect("home")
 
-    return render(request, "admin_user/hero_section.html")
+    if request.method == "POST":
+
+        if request.FILES.get("logo"):
+            settings.logo = request.FILES["logo"]
+
+
+        settings.logo_alt = request.POST.get(
+            "logo_alt",
+            "EstateFlow"
+        )
+
+
+        settings.logo_width = int(
+            request.POST.get(
+                "logo_width",
+                180
+            )
+        )
+
+
+        settings.transparent_header = (
+            request.POST.get(
+                "transparent_header"
+            ) == "on"
+        )
+
+
+        settings.sticky_header = (
+            request.POST.get(
+                "sticky_header"
+            ) == "on"
+        )
+
+
+        settings.header_background = request.POST.get(
+            "header_background",
+            "#ffffff"
+        )
+
+
+        settings.header_text_color = request.POST.get(
+            "header_text_color",
+            "#16233A"
+        )
+
+
+        settings.save()
+
+        return redirect("header_settings")
+
+
+    return render(
+        request,
+        "admin_user/header_settings.html",
+        {
+            "settings": settings
+        }
+    )
+
+  
+def hero_section_form(request, pk=None):
+    instance = get_object_or_404(HeroSection, pk=pk) if pk else None
+
+    if request.method == 'POST':
+        eyebrow     = request.POST.get('eyebrow', '').strip()
+        title_line1 = request.POST.get('title_line1', '').strip()
+        title_line2 = request.POST.get('title_line2', '').strip()
+        description = request.POST.get('description', '').strip()
+        cta_text    = request.POST.get('cta_text', '').strip()
+        cta_url     = request.POST.get('cta_url', '').strip()
+        is_active   = request.POST.get('is_active') == 'on'
+        bg_image    = request.FILES.get('bg_image')  # None if nothing uploaded
+
+        if not instance:
+            instance = HeroSection()
+
+        instance.eyebrow     = eyebrow or instance.eyebrow
+        instance.title_line1 = title_line1 or instance.title_line1
+        instance.title_line2 = title_line2 or instance.title_line2
+        instance.description = description or instance.description
+        instance.cta_text    = cta_text or instance.cta_text
+        instance.cta_url     = cta_url or instance.cta_url
+        instance.is_active   = is_active
+
+        if bg_image:
+            instance.bg_image = bg_image
+
+        instance.save()
+        messages.success(request, "Hero section saved successfully.")
+        return redirect('hero_section_list')
+
+    return render(request, 'admin_user/hero_section.html', {'instance': instance})
+
+  
 
 
 
 def hero_section_list(request):
-    heros = HeroSection.objects.all().order_by("-id")
-    return render(request, "admin_user/hero_section_list.html", {"heros": heros})
+    heroes = HeroSection.objects.all().order_by('-updated_at')
+    return render(request, 'admin_user/hero_section_list.html', {'heroes': heroes})
+
+
 
 
 def hero_section_edit(request, pk):
@@ -7547,7 +7842,7 @@ def edit_seo_page(request, pk):
 
 
 def services_list1(request):
-    services = LocationSEO.objects.filter(page_type="service", is_active=True)
+    services = LocationSEO.objects.filter(pagetype="service", is_active=True)
     return render(request, "admin_user/services_list1.html", {"services": services})
 
 
@@ -10511,7 +10806,7 @@ def import_residential_excel(request):
     
     'address',
     'city',
-    'locality',
+    'locality_area',
     'state',
     'pincode',
    
@@ -29890,45 +30185,6 @@ def view_agricultural_property(request, pk):
 
 
 
-def seo_list(request):
-    # --- Handle Bulk Action Logic ---
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        selected_ids = request.POST.getlist('ids[]')
-        action = request.POST.get('action')
-        
-        if action == 'active':
-            LocationSEO.objects.filter(id__in=selected_ids).update(is_active=True)
-        elif action == 'pause':
-            LocationSEO.objects.filter(id__in=selected_ids).update(is_active=False)
-            
-        return JsonResponse({'status': 'success', 'message': f'Items updated to {action}'})
-
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return render(request, 'home_page/Adminlogin.html')
-    
-    # --- Regular List Logic ---
-    # Retrieve all pages ordered by type for consistent grouping
-
-    seo_pages = LocationSEO.objects.all().order_by('pagetype', '-id')
-
-    # Get distinct page types and their counts for the menu/cards
-    type_counts = LocationSEO.objects.values('pagetype').annotate(total=Count('id')).order_by('pagetype')
-
-    
-
-    admin_obj = Admin_Login.objects.get(id=session_id)
-
-    context = {
-        "seo_pages": seo_pages,
-        "type_counts": type_counts,
-        'admin_obj':admin_obj
-    }
-    return render(request, "admin_user/Seo_Module/seo_list.html", context)
-
-
-
-
 
 
 
@@ -30252,24 +30508,91 @@ def download_blog_sample(request):
 
 
 
+
 def add_service(request):
+
     if request.method == "POST":
-        # Extract fields matching the new Service model
+
+        # -----------------------------
+        # SERVICE BASIC INFORMATION
+        # -----------------------------
+
         title = request.POST.get("title")
         icon = request.POST.get("icon")
-        category = request.POST.get("category")
-        status = request.POST.get("status", "active")
-        cta_text = request.POST.get("cta_text", "Request Callback")
-        
-        # Handle sort_order safely (fallback to 0 if empty)
+
+        category_id = request.POST.get("category")
+
+        status = request.POST.get(
+            "status",
+            "active"
+        )
+
+        cta_text = request.POST.get(
+            "cta_text",
+            "Request Callback"
+        )
+
+        # -----------------------------
+        # SORT ORDER
+        # -----------------------------
+
         sort_order = request.POST.get("sort_order")
-        sort_order = int(sort_order) if sort_order and sort_order.isdigit() else 0
 
-        short_description = request.POST.get("short_description")
-        content = request.POST.get("content")   # CKEditor sends HTML
-        featured_image = request.FILES.get("featured_image")
+        try:
+            sort_order = int(sort_order)
+        except (TypeError, ValueError):
+            sort_order = 0
 
-        service = Service(
+        # -----------------------------
+        # SERVICE DESCRIPTION
+        # -----------------------------
+
+        short_description = request.POST.get(
+            "short_description"
+        )
+
+        content = request.POST.get(
+            "content"
+        )
+
+        featured_image = request.FILES.get(
+            "featured_image"
+        )
+
+        # -----------------------------
+        # PRICING
+        # -----------------------------
+
+        price_type = request.POST.get(
+            "price_type",
+            "on_request"
+        )
+
+        price = request.POST.get("price")
+
+        if not price:
+            price = None
+
+        duration = request.POST.get(
+            "duration"
+        )
+
+        # -----------------------------
+        # CATEGORY
+        # -----------------------------
+
+        category = None
+
+        if category_id:
+            category = Service_Type_Details.objects.filter(
+                id=category_id
+            ).first()
+
+        # -----------------------------
+        # CREATE SERVICE
+        # -----------------------------
+
+        service = Service.objects.create(
             title=title,
             icon=icon,
             category=category,
@@ -30279,18 +30602,90 @@ def add_service(request):
             short_description=short_description,
             content=content,
             featured_image=featured_image,
+
+            price=price,
+            price_type=price_type,
+            duration=duration,
         )
-        service.save()
-        return redirect("services_list")  # Uncommented to redirect after save
 
-    session_id = request.session.get('Admin_id')
+        # -----------------------------
+        # SAVE SERVICE OPTIONS
+        # -----------------------------
+
+        option_names = request.POST.getlist(
+            "option_name[]"
+        )
+
+        option_prices = request.POST.getlist(
+            "option_price[]"
+        )
+
+        option_durations = request.POST.getlist(
+            "option_duration[]"
+        )
+
+        for index, option_name in enumerate(option_names):
+
+            option_name = option_name.strip()
+
+            if not option_name:
+                continue
+
+            option_price = (
+                option_prices[index]
+                if index < len(option_prices)
+                else None
+            )
+
+            option_duration = (
+                option_durations[index]
+                if index < len(option_durations)
+                else ""
+            )
+
+            if not option_price:
+                option_price = None
+
+            Service_Option.objects.create(
+                service=service,
+                option_name=option_name,
+                price=option_price,
+                duration=option_duration,
+                sort_order=index
+            )
+
+        return redirect("services_list")
+
+    # -----------------------------
+    # GET REQUEST
+    # -----------------------------
+
+    session_id = request.session.get(
+        "Admin_id"
+    )
+
     if not session_id:
-        return render(request, 'home_page/Adminlogin.html')
+        return render(
+            request,
+            "home_page/Adminlogin.html"
+        )
 
-    admin_obj = Admin_Login.objects.get(id=session_id)
-    context = {'admin_obj': admin_obj}
+    admin_obj = Admin_Login.objects.get(
+        id=session_id
+    )
 
-    return render(request, "admin_user/Seo_Module/Services_Pages/add_service.html", context)
+    service_categories = Service_Type_Details.objects.all()
+
+    context = {
+        "admin_obj": admin_obj,
+        "service_categories": service_categories,
+    }
+
+    return render(
+        request,
+        "admin_user/Seo_Module/Services_Pages/add_service.html",
+        context
+    )
 
 
 
@@ -30438,6 +30833,22 @@ def download_service_sample(request):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+   
+    
+       
+
+    
 
 #######################END View SERVICES LANDING PAGE  MODULE SECTION###################################
 

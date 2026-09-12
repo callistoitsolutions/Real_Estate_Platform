@@ -4,13 +4,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{% if listing_type == 'sale' %}Properties for Sale{% else %}Properties for Rent{% endif %} in {{ city|default:"Nagpur" }} — PropCRM</title>
+<title>{% if listing_type == 'sale' %}Properties for Sale{% else %}Properties for Rent{% endif %} in {{ city|default:"Nagpur" }} — KANISHKAIMPERIA</title>
 
 <!-- Existing Libraries -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <!-- Tailwind CSS -->
@@ -20,108 +20,113 @@
         corePlugins: { preflight: false },
         theme: {
             extend: {
-                fontFamily: { sans: ['Inter', 'Poppins', 'sans-serif'] },
-                colors: { brand: { dark: '#1e293b', blue: '#6C3CF4', yellow: '#f59e0b', footer: '#0f172a', text: '#334155', lightbg: '#f8fafc' } }
+                fontFamily: { sans: ['DM Sans', 'Poppins', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+                colors: { brand: { dark: '#0b1730', blue: '#c9a227', yellow: '#c9a227', footer: '#0b1730', text: '#556070', lightbg: '#f7f7f5' } }
             }
         }
     }
 </script>
 
 <style>
-/* ── CORE VARIABLES & RESETS ── */
+/* ── CORE VARIABLES & RESETS — EstateFlow navy / gold palette ── */
 :root {
-  --primary: #6C3CF4;
-  --primary-dark: #5429d6;
-  --primary-light: #ede8fe;
-  --sec: #11142d;
-  --body-text: #5e6670;
-  --muted: #9098a9;
-  --border: #e4e7ed;
-  --bg: #f5f6fa;
+  --primary: #c9a227;
+  --primary-dark: #a5811c;
+  --primary-light: rgba(199,154,85,.12);
+  --sec: #12202c;
+  --body-text: #556070;
+  --muted: #64748b;
+  --border: rgba(11,23,48,.10);
+  --bg: #f5f6f8;
+  --navy: #0b1730;
+  --navy-2: #101f3d;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--body-text);}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--body-text);}
 a{text-decoration:none;color:inherit;}
+.font-serif, .pc-title, .pc-price, .shorts-head h2, .ss-price, .lux-page-title { font-family:'Playfair Display',serif; }
+
+/* ── LISTING SEARCH SUB-HEADER (sits under the shared site header) ── */
+.listing-subheader{ background:linear-gradient(180deg,#0e1c33,var(--navy)); border-bottom:1px solid rgba(199,154,85,.22); position:sticky; top:0; z-index:395; }
+.listing-subheader-inner{ max-width:1340px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:12px; }
+.lsh-trigger{ background:rgba(255,255,255,.06); border:1px solid rgba(199,154,85,.35); color:#f1d888; font-weight:700; font-size:.78rem; padding:9px 16px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif; transition:.15s; }
+.lsh-trigger:hover{ background:rgba(199,154,85,.16); }
+
+.lsh-searchbar {
+  flex: 1;
+  max-width: 550px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: .85rem;
+  transition: .15s;
+}
+
+@media(max-width: 768px) {
+  .lsh-searchbar {
+    max-width: 100%;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}
+.lsh-searchbar:hover{ box-shadow:0 0 0 2px rgba(199,154,85,.35); }
+.lsh-searchbar i{ color:var(--primary); }
+.lsh-searchbar span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#334155; font-weight:500; }
+.lsh-post-btn{ border:1.5px solid rgba(199,154,85,.55); color:#f1d888; font-weight:700; font-size:.78rem; padding:9px 16px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; transition:.2s; }
+.lsh-post-btn:hover{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#0b1730; border-color:transparent; }
+@media(max-width:700px){ .lsh-post-btn{ display:none; } .lsh-trigger span{ display:none; } }
+
+/* Gold curtain hero for the expandable search overlay (was flat brand-blue) */
+.ef-search-hero{ background:linear-gradient(135deg,var(--navy),var(--navy-2)); border-bottom:1px solid rgba(199,154,85,.25); }
 
 /* ── AUTOCOMPLETE DROPDOWN ── */
-.autocomplete-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:9999;overflow:hidden;}
+.autocomplete-drop{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(11,23,48,.16);z-index:9999;overflow:hidden;}
+
 .autocomplete-drop.open{display:block;}
 .ac-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:0.88rem;color:var(--sec);font-weight:500;transition:background .1s;}
-.ac-item:hover,.ac-item.hl{background:#f5f0fe;}
+.ac-item:hover,.ac-item.hl{background:var(--primary-light);}
 .ac-item+.ac-item{border-top:1px solid #f4f5f8;}
-.ac-icon{width:30px;height:30px;border-radius:8px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
+.ac-icon{width:30px;height:30px;border-radius:8px;background:var(--primary-light);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
 .ac-icon.city-ic{background:#fef3c7;color:#d97706;}
-.ac-badge{margin-left:auto;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--primary-light);color:var(--primary);text-transform:uppercase;}
+.ac-badge{margin-left:auto;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--primary-light);color:var(--primary-dark);text-transform:uppercase;}
 .ac-badge.city{background:#fef3c7;color:#d97706;}
 .ac-empty{padding:12px 14px;font-size:0.85rem;color:var(--muted);text-align:center;}
 
 /* ── FILTER STRIP ── */
-.filter-strip{background:white;border-bottom:1px solid var(--border);position:sticky;top:64px;z-index:290;}
+.filter-strip{background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:290;}
 .filter-strip-inner{max-width:1340px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;height:56px;}
 .filter-strip-inner::-webkit-scrollbar{display:none;}
-.fpill{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);background:white;color:var(--sec);cursor:pointer;white-space:nowrap;transition:.15s;font-family:'Poppins',sans-serif;flex-shrink:0;}
-.fpill:hover{border-color:var(--primary);color:var(--primary);}
-.fpill.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
+.fpill{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);background:white;color:var(--sec);cursor:pointer;white-space:nowrap;transition:.15s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.fpill:hover{border-color:var(--primary);color:var(--primary-dark);}
+.fpill.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark);}
 .fpill .chevron{font-size:0.7rem;}
 .fpill .dot{width:7px;height:7px;background:var(--primary);border-radius:50%;flex-shrink:0;}
 .fs-divider{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 4px;}
 
-
-
- .btn-nav-outline, 
- .btn-nav-pr { 
-    padding: 8px 18px; 
-    border-radius: 8px; 
-    font-weight: 700; 
-    font-size: 0.85rem; 
-    cursor: pointer; 
-    text-decoration: none; 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 6px; 
-    transition: .2s; 
-    white-space: nowrap; 
-}
- .btn-nav-outline { 
-    border: 1.5px solid #006ce4; 
-    color: #006ce4; 
-    background: transparent; 
-}
- .btn-nav-outline:hover { 
-    background: #006ce4; 
-    color: white; 
-}
- .btn-nav-pr { 
-    background: #f97316; 
-    color: white; 
-    border: none; 
-}
- .btn-nav-pr:hover { 
-    background: #ea580c; 
-    color: white; 
-    transform: translateY(-1px); 
-}
-
-
-
 /* ── SHORTS RAIL ── */
 .shorts-section{max-width:1340px;margin:0 auto;padding:4px 4px 18px;}
-.shorts-head h2{font-size:1rem;font-weight:800;color:var(--sec);display:flex;align-items:center;gap:8px;}
+.shorts-head h2{font-size:1.15rem;font-weight:700;color:var(--sec);display:flex;align-items:center;gap:8px;}
 .shorts-head h2 i{color:var(--primary);}
 .shorts-head p{font-size:0.75rem;color:var(--muted);margin-top:2px;margin-bottom:10px;}
 .shorts-track{display:flex;gap:12px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding-bottom:4px;}
 .shorts-track::-webkit-scrollbar{display:none;}
-.short-card{position:relative;flex:0 0 128px;width:128px;height:210px;border-radius:14px;overflow:hidden;cursor:pointer;background:#111;box-shadow:0 3px 10px rgba(0,0,0,.15);border:2px solid transparent;transition:transform .15s;}
+.short-card{position:relative;flex:0 0 128px;width:128px;height:210px;border-radius:14px;overflow:hidden;cursor:pointer;background:#111;box-shadow:0 3px 10px rgba(11,23,48,.18);border:2px solid transparent;transition:transform .15s;}
 .short-card:hover{transform:translateY(-3px);border-color:var(--primary);}
 .short-card .sc-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;}
 .short-card .sc-img.active{opacity:1;}
 .short-card .sc-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 0%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.75) 100%);}
-.short-card .sc-avatar{position:absolute;top:8px;left:8px;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;border:2px solid #fff;z-index:2;}
+.short-card .sc-avatar{position:absolute;top:8px;left:8px;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#0b1730;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;border:2px solid #fff;z-index:2;}
 .short-card .sc-play{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--sec);z-index:2;}
 .short-card .sc-info{position:absolute;left:8px;right:8px;bottom:8px;color:#fff;z-index:2;}
 .short-card .sc-info .sc-price{font-size:.78rem;font-weight:800;line-height:1.1;}
 .short-card .sc-info .sc-sub{font-size:.62rem;font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.short-card .sc-badge{position:absolute;top:8px;left:38px;background:rgba(0,0,0,.5);color:#fff;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:2;text-transform:uppercase;letter-spacing:.3px;}
+.short-card .sc-badge{position:absolute;top:8px;left:38px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:10px;z-index:2;text-transform:uppercase;letter-spacing:.3px;}
 
 /* ── SHORTS FULL-SCREEN PLAYER ── */
 .shorts-overlay{display:none;position:fixed;inset:0;background:#000;z-index:99999;align-items:center;justify-content:center;}
@@ -130,10 +135,10 @@ a{text-decoration:none;color:inherit;}
 @media(min-width:640px){.shorts-stage{max-height:92vh;border-radius:16px;margin-top:4vh;box-shadow:0 20px 60px rgba(0,0,0,.5);}}
 .shorts-progress-row{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:4px;z-index:40;}
 .shorts-progress-row .sp-bar{flex:1;height:3px;background:rgba(255,255,255,.35);border-radius:3px;overflow:hidden;}
-.shorts-progress-row .sp-bar .sp-fill{height:100%;width:0%;background:#fff;transition:width linear;}
+.shorts-progress-row .sp-bar .sp-fill{height:100%;width:0%;background:var(--primary);transition:width linear;}
 .shorts-topbar{position:absolute;top:22px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;z-index:40;color:#fff;}
 .shorts-topbar .st-owner{display:flex;align-items:center;gap:8px;}
-.shorts-topbar .st-avatar{width:30px;height:30px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;border:2px solid #fff;}
+.shorts-topbar .st-avatar{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#0b1730;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;border:2px solid #fff;}
 .shorts-topbar .st-name{font-size:.78rem;font-weight:700;}
 .shorts-topbar .st-name small{display:block;font-size:.62rem;font-weight:500;opacity:.75;}
 .shorts-topbar .st-actions{display:flex;gap:10px;align-items:center;}
@@ -154,27 +159,27 @@ a{text-decoration:none;color:inherit;}
 .shorts-sheet.expanded{transform:translateY(0);}
 .shorts-sheet .ss-handle{width:40px;height:4px;background:#e2e5eb;border-radius:4px;margin:0 auto 10px;cursor:pointer;}
 .shorts-sheet .ss-price-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
-.shorts-sheet .ss-price{font-size:1.15rem;font-weight:800;color:var(--sec);}
+.shorts-sheet .ss-price{font-size:1.15rem;font-weight:800;color:var(--primary-dark);}
 .shorts-sheet .ss-title{font-size:.85rem;font-weight:700;color:var(--sec);margin-top:2px;}
 .shorts-sheet .ss-loc{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:2px;}
 .shorts-sheet .ss-stats{display:flex;gap:18px;margin:12px 0;padding:12px 0;border-top:1px solid #f0f1f4;border-bottom:1px solid #f0f1f4;}
 .shorts-sheet .ss-stat b{display:block;font-size:.85rem;color:var(--sec);}
 .shorts-sheet .ss-stat span{font-size:.65rem;color:var(--muted);text-transform:uppercase;}
 .shorts-sheet .ss-amenities{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
-.shorts-sheet .ss-amenities span{background:#f5f0fe;color:var(--primary);font-size:.68rem;font-weight:600;padding:4px 10px;border-radius:20px;}
+.shorts-sheet .ss-amenities span{background:var(--primary-light);color:var(--primary-dark);font-size:.68rem;font-weight:600;padding:4px 10px;border-radius:20px;}
 .shorts-sheet .ss-actions{display:flex;gap:10px;margin-top:14px;}
 .shorts-sheet .ss-actions button{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:.82rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .shorts-sheet .ss-know{background:#f1f2f6;color:var(--sec);}
-.shorts-sheet .ss-call{background:var(--primary);color:#fff;}
+.shorts-sheet .ss-call{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;}
 
 /* ── PILL DROPDOWN PANEL ── */
-.pill-panel{display:none;position:fixed;top:0;left:0;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.14);padding:16px;z-index:99999;min-width:240px;font-size:0.88rem;color:var(--sec);}
+.pill-panel{display:none;position:fixed;top:0;left:0;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 30px rgba(11,23,48,0.16);padding:16px;z-index:99999;min-width:240px;font-size:0.88rem;color:var(--sec);}
 .pill-panel.open{display:block;}
 .pp-title{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
 .pp-options{display:flex;flex-wrap:wrap;gap:8px;}
-.pp-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;color:var(--sec);}
-.pp-btn:hover{border-color:var(--primary);color:var(--primary);}
-.pp-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary);font-weight:600;}
+.pp-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;color:var(--sec);}
+.pp-btn:hover{border-color:var(--primary);color:var(--primary-dark);}
+.pp-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark);font-weight:600;}
 
 /* Budget slider panel */
 .budget-panel{min-width:300px;}
@@ -185,149 +190,141 @@ a{text-decoration:none;color:inherit;}
 .range-fill{position:absolute;height:100%;background:var(--primary);border-radius:4px;}
 .range-inputs{position:relative;margin-top:-10px;}
 .range-inputs input[type=range]{position:absolute;width:100%;-webkit-appearance:none;appearance:none;height:4px;background:transparent;pointer-events:none;outline:none;}
-.range-inputs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:white;border:2.5px solid var(--primary);cursor:pointer;pointer-events:all;box-shadow:0 2px 6px rgba(108,60,244,.3);}
+.range-inputs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:white;border:2.5px solid var(--primary);cursor:pointer;pointer-events:all;box-shadow:0 2px 6px rgba(199,162,39,.35);}
 .budget-vals{display:flex;gap:8px;margin-top:18px;align-items:center;}
 .bval-box{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:0.8rem;font-weight:600;color:var(--sec);text-align:center;}
-.pp-apply{margin-top:14px;width:100%;padding:9px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;}
+.pp-apply{margin-top:14px;width:100%;padding:9px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;}
 
 /* ── MORE FILTERS DRAWER ── */
-.mf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;backdrop-filter:blur(2px);}
+.mf-overlay{display:none;position:fixed;inset:0;background:rgba(11,23,48,.45);z-index:1000;backdrop-filter:blur(2px);}
 .mf-overlay.open{display:block;}
 .mf-drawer{position:fixed;top:0;right:-500px;width:460px;max-width:96vw;height:100vh;background:white;z-index:1001;display:flex;flex-direction:column;transition:right .3s ease;}
 .mf-drawer.open{right:0;}
 .mf-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);}
-.mf-head h3{font-size:1rem;font-weight:700;color:var(--sec);}
+.mf-head h3{font-size:1rem;font-weight:700;color:var(--sec);font-family:'Playfair Display',serif;}
 .mf-close{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .mf-layout{display:flex;flex:1;overflow:hidden;}
 .mf-sidebar{width:170px;border-right:1px solid var(--border);overflow-y:auto;background:#fafbfc;}
 .mf-sidebar-item{padding:12px 16px;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;border-left:3px solid transparent;}
-.mf-sidebar-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary);}
+.mf-sidebar-item.active{background:var(--primary-light);color:var(--primary-dark);border-left-color:var(--primary);}
 .mf-content{flex:1;overflow-y:auto;padding:20px;}
 .mf-section{display:none;}
 .mf-section.active{display:block;}
 .mf-section-title{font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;}
 .mf-options{display:flex;flex-wrap:wrap;gap:8px;}
 .mf-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;}
-.mf-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary);font-weight:600;}
+.mf-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark);font-weight:600;}
 .mf-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);}
 .mf-clear-btn{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:white;font-weight:700;}
-.mf-apply-btn{flex:2;padding:10px;border-radius:8px;background:var(--primary);color:white;font-weight:700;}
+.mf-apply-btn{flex:2;padding:10px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-weight:700;}
+
+/* ── LUXURY PROPERTY CARDS ── */
+.pc-luxury{border:1px solid var(--border);border-radius:16px;box-shadow:0 2px 12px rgba(11,23,48,.05);transition:.3s ease;}
+.pc-luxury:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(11,23,48,.14);border-color:rgba(199,162,39,.45);}
+.pc-title{letter-spacing:.2px;}
+.pc-price{font-weight:800;color:var(--primary-dark);}
+.pc-eyebrow{font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--primary-dark);margin-bottom:2px;display:block;}
+
+/* ── PAGE INTRO ── */
+.lux-page-title{color:#12202c;}
+.lux-page-sub{font-size:.8rem;color:var(--muted);margin-top:4px;max-width:640px;line-height:1.5;}
 
 /* ── FOOTER STYLES ── */
-footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; font-family: "Poppins", sans-serif; }
+footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto; font-family: "DM Sans", sans-serif; }
 .footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
 .footer-newsletter-inner { max-width: 1340px; margin: 0 auto; padding: 24px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.footer-newsletter-inner h3 { color: #fff; font-size: 1.05rem; font-weight: 800; }
+.footer-newsletter-inner h3 { color: #fff; font-size: 1.05rem; font-weight: 800; font-family:'Playfair Display',serif; }
 .footer-newsletter-inner p { font-size: .82rem; color: rgba(255,255,255,.55); }
-.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: .9rem; text-decoration: none; transition: .2s; }
-.footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.08); border: 1px solid rgba(199,154,85,.25); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-size: .9rem; text-decoration: none; transition: .2s; }
+.footer-social a:hover { background: var(--primary); color:#0b1730; transform: translateY(-2px); }
 .footer-inner { max-width: 1340px; margin: 0 auto; padding: 40px 20px; }
 .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 30px; }
 @media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
 @media(max-width:580px) { .footer-grid { grid-template-columns: 1fr; } }
-.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; }
+.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; font-family:'Playfair Display',serif; }
 .fl-desc { font-size: .85rem; line-height: 1.7; margin-bottom: 14px; }
-.fl-title { font-size: .85rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.fl-title { font-size: .78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 .fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: .2s; }
-.fl-link:hover { color: white; padding-left: 4px; }
+.fl-link:hover { color: var(--primary); padding-left: 4px; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1340px; margin: 0 auto; }
 </style>
 </head>
 
 <body class="flex flex-col min-h-screen">
 
-<!-- ── UNIFIED HOUSING.COM STYLE TOP NAV ── -->
-<nav class="bg-white border-b border-gray-200 sticky top-0 z-[400] flex items-center px-4 md:px-6 h-16 w-full justify-between shadow-sm">
-    <div class="flex items-center h-full gap-2 md:gap-4">
-        <a href="/" class="text-xl md:text-2xl font-bold text-brand-dark flex items-center gap-2 tracking-tight shrink-0">
-            <i class="fa-solid fa-house-chimney text-brand-blue"></i> PropCRM
-        </a>
-        <button onclick="toggleSearchOverlay()" class="bg-brand-dark text-white h-10 px-3 md:px-5 font-semibold text-xs md:text-sm flex items-center gap-2 hover:bg-gray-800 transition rounded-md cursor-pointer">
-            {% if listing_type == 'rent' %}Rent{% else %}Buy/Resale{% endif %} in {{ city|default:"Nagpur"|title }} <i class="bi bi-chevron-down text-[10px]"></i>
+<!-- ── SHARED SITE HEADER (navy / gold, dropdown nav, profile panel, AI chat + WhatsApp fab) ── -->
+{% include 'home_page/header.html' %}
+
+<!-- ── LISTING SEARCH SUB-HEADER — opens the same location/category overlay used across the site ── -->
+<div class="listing-subheader">
+    <div class="listing-subheader-inner">
+        <button type="button" class="lsh-trigger" onclick="toggleSearchOverlay()">
+            <i class="bi bi-sliders"></i>
+            <span>{% if listing_type == 'rent' %}Rent{% else %}Buy/Resale{% endif %} in {{ city|default:"Nagpur"|title }}</span>
+            <i class="bi bi-chevron-down"></i>
         </button>
-    </div>
-
-    <!-- Clickable Search Bar -->
-    <div class="hidden lg:flex flex-1 max-w-2xl mx-6 cursor-pointer group" onclick="toggleSearchOverlay()">
-        <div class="flex items-center w-full border border-gray-300 rounded-md overflow-hidden bg-white h-10 group-hover:border-brand-blue transition relative">
-            <div class="flex items-center gap-2 px-3 text-sm text-gray-500 bg-gray-50 h-full border-r border-gray-200">
-                <i class="bi bi-search"></i>
-            </div>
-            <div class="flex items-center gap-2 px-3 flex-1 overflow-hidden">
-                {% if areas_list %}
-                    <span class="text-gray-800 text-sm font-medium truncate">{{ areas_list|join:", "|title }}</span>
-                {% else %}
-                    <span class="text-gray-400 text-sm font-medium">Search Locality, Project or Builder...</span>
-                {% endif %}
-            </div>
-            <div class="bg-brand-blue text-white px-6 h-full flex items-center justify-center font-semibold text-xs">Search</div>
+        <div class="lsh-searchbar" onclick="toggleSearchOverlay()">
+            <i class="bi bi-search"></i>
+            <span>
+                {% if areas_list %}{{ areas_list|join:", "|title }}{% else %}Search Locality, Project or Builder...{% endif %}
+            </span>
         </div>
+    
     </div>
-
-    <!-- Right Actions -->
-   <div class="flex items-center gap-2 md:gap-3 shrink-0">
-    <a href="{% url 'post_property' %}" class="hidden md:inline-flex btn-nav-outline">
-        <i class="bi bi-plus-lg"></i> Post Property FREE
-    </a>
-    <a href="{% url 'post_property' %}" class="md:hidden w-9 h-9 rounded-full bg-brand-blue text-white flex items-center justify-center text-lg">
-        <i class="bi bi-plus-lg"></i>
-    </a>
-    <button onclick="toggleSearchOverlay()" class="md:hidden w-9 h-9 rounded-full bg-gray-100 text-brand-dark flex items-center justify-center border border-gray-300">
-        <i class="bi bi-search"></i>
-    </button>
-    <button class="w-8 h-8 rounded-full bg-gray-100 text-brand-dark flex items-center justify-center border border-gray-300 hover:bg-gray-200">
-        <i class="bi bi-person-fill"></i>
-    </button>
 </div>
-</nav>
 
 <!-- ── EXPANDED SEARCH OVERLAY ── -->
-<div id="expandedSearchOverlay" class="fixed inset-0 bg-black/60 z-[500] hidden flex-col">
-    <div class="w-full bg-brand-blue pt-8 pb-12 px-4 relative flex flex-col items-center shadow-lg animate-fade-in-down">
-        <button onclick="toggleSearchOverlay()" class="absolute top-4 right-6 bg-white text-brand-blue w-8 h-8 flex items-center justify-center rounded-sm shadow-md hover:bg-gray-100 transition">
-            <i class="bi bi-x text-2xl"></i>
+<!-- ── EXPANDED SEARCH OVERLAY ── -->
+<div id="expandedSearchOverlay" class="fixed inset-x-0 bottom-0 top-[72px] bg-black/60 z-[500] hidden flex-col">
+    <div class="w-full ef-search-hero py-5 px-4 relative flex flex-col items-center shadow-xl animate-fade-in-down border-b border-amber-500/20">
+        <button onclick="toggleSearchOverlay()" class="absolute top-3 right-4 bg-white/10 text-white hover:bg-white/20 w-7 h-7 flex items-center justify-center rounded-full transition">
+            <i class="bi bi-x text-lg"></i>
         </button>
 
-        
-
-            <div class="w-full flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 md:gap-3 text-white mb-6 sm:mb-8 text-sm font-medium sm:justify-center mt-4 px-1">
-        <span class="font-bold tracking-wide text-base mb-1 sm:mb-0 sm:mr-2 self-start sm:self-auto">I'm Looking to</span>
-
-        <div class="flex flex-wrap gap-2 justify-center w-full sm:w-auto">
-            <button class="px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if listing_type == 'sale' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchType('sale')">Buy/Resale</button>
-            <button class="px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if listing_type == 'rent' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchType('rent')">Rent</button>
-
-            <span class="mx-1 text-white/50 hidden md:inline self-center">|</span>
-
-            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'residential' or category == 'all' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('residential')">Residential</button>
-            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'commercial' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('commercial')">Commercial</button>
-            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'pg' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('pg')">PG/Co-Living</button>
-            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition {% if category == 'plot' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('plot')">Plots</button>
-            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition hidden md:block {% if category == 'industrial' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('industrial')">Industrial</button>
-            <button class="px-3 py-1.5 sm:px-5 sm:py-2 text-xs sm:text-sm rounded-full border border-white/40 transition hidden md:block {% if category == 'agricultural' %}bg-white text-brand-blue shadow-md font-bold{% else %}hover:bg-white/20{% endif %}" onclick="switchCategory('agricultural')">Agricultural</button>
-        </div>
-    </div>
-
-    <div class="flex flex-col sm:flex-row w-full max-w-4xl bg-white rounded-2xl sm:rounded-full sm:h-14 p-1 shadow-2xl relative">
-        <div class="flex items-center px-4 sm:px-6 py-3 sm:py-0 border-b sm:border-b-0 sm:border-r border-gray-200 cursor-pointer text-gray-800 font-bold sm:min-w-[140px] justify-between hover:bg-gray-50 rounded-t-xl sm:rounded-t-none sm:rounded-l-full transition shrink-0">
-            {{ city|default:"Nagpur"|title }} <i class="bi bi-chevron-down text-sm text-gray-500 ml-2"></i>
-        </div>
-
-        <div class="flex-1 flex items-center px-4 py-2 sm:py-0 relative min-w-0">
-            <div class="flex items-center gap-2 mr-2 flex-wrap">
-                 {% for area in areas_list %}
-                    <span class="bg-gray-100 text-gray-800 border border-gray-200 text-xs px-3 py-1.5 rounded-full flex items-center gap-1 font-semibold whitespace-nowrap shadow-sm">{{ area|title }} <i class="bi bi-x-lg cursor-pointer hover:text-red-500" onclick="removeAreaChip('{{ area }}')"></i></span>
-                {% endfor %}
+        <!-- Toggle Row: I'm Looking to & Category Pills -->
+        <div class="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-3 text-white mb-4 text-xs font-medium">
+            <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
+                <span class="font-bold text-amber-300 uppercase tracking-wider text-[11px] shrink-0">Action:</span>
+                <button class="px-3 py-1 rounded-full border border-white/30 transition text-xs whitespace-nowrap {% if listing_type == 'sale' %}bg-white text-brand-dark shadow font-bold border-white{% else %}hover:bg-white/10{% endif %}" onclick="switchType('sale')">Buy/Resale</button>
+                <button class="px-3 py-1 rounded-full border border-white/30 transition text-xs whitespace-nowrap {% if listing_type == 'rent' %}bg-white text-brand-dark shadow font-bold border-white{% else %}hover:bg-white/10{% endif %}" onclick="switchType('rent')">Rent</button>
             </div>
-            <input type="text" id="locInput" class="w-full h-full outline-none text-gray-800 text-sm bg-transparent font-medium min-w-0" placeholder="Search Locality, Builder or Project..." autocomplete="off" oninput="fetchAC(this.value)" onkeydown="handleACKey(event)">
+
+            <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
+                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'residential' or category == 'all' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('residential')">Residential</button>
+                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'commercial' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('commercial')">Commercial</button>
+                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'pg' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('pg')">PG</button>
+                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'plot' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('plot')">Plots</button>
+                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap hidden lg:block {% if category == 'industrial' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('industrial')">Industrial</button>
+                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap hidden lg:block {% if category == 'agricultural' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('agricultural')">Agricultural</button>
+            </div>
         </div>
 
-        <button onclick="applyLocSearch(); toggleSearchOverlay();" class="bg-brand-blue text-white h-11 sm:h-full px-6 sm:px-8 m-1 sm:m-0 rounded-xl sm:rounded-full font-bold hover:bg-brand-dark transition shadow-md shrink-0">Search</button>
-
-        <div class="autocomplete-drop w-full !top-[calc(100%+8px)] !rounded-xl !shadow-2xl !border-0" id="acDrop"></div>
+        <!-- Search Bar Input Row -->
+       <!-- Search Bar Input Row (Modified Styling) -->
+      <!-- ── SEARCH BAR INPUT ROW (Decreased Width) ── -->
+<div class="flex flex-col sm:flex-row w-full max-w-2xl bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-full h-auto sm:h-14 p-1.5 shadow-2xl border border-amber-500/30 relative items-center transition-all focus-within:ring-2 focus-within:ring-amber-400">
+    <div class="flex items-center px-4 py-2 sm:py-0 border-b sm:border-b-0 sm:border-r border-gray-200 text-gray-900 font-bold text-sm sm:min-w-[140px] justify-between w-full sm:w-auto cursor-pointer">
+        <span class="flex items-center gap-2"><i class="bi bi-geo-alt-fill text-amber-600"></i> {{ city|default:"Nagpur"|title }}</span> 
+        <i class="bi bi-chevron-down text-xs text-gray-500 ml-1"></i>
     </div>
 
+    <div class="flex-1 flex items-center px-4 py-2 sm:py-0 relative min-w-0 w-full">
+        <div class="flex items-center gap-1.5 mr-2 flex-wrap">
+             {% for area in areas_list %}
+                <span class="bg-amber-100/80 text-amber-900 border border-amber-300 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 font-semibold whitespace-nowrap shadow-sm">
+                    {{ area|title }} <i class="bi bi-x-lg cursor-pointer hover:text-red-600 transition-colors" onclick="removeAreaChip('{{ area }}')"></i>
+                </span>
+            {% endfor %}
+        </div>
+        <input type="text" id="locInput" class="w-full h-full outline-none text-gray-900 text-sm bg-transparent font-medium placeholder-gray-400 min-w-0 py-1 sm:py-0" placeholder="Search Locality, Builder or Project..." autocomplete="off" oninput="fetchAC(this.value)" onkeydown="handleACKey(event)">
+    </div>
 
+    <button onclick="applyLocSearch(); toggleSearchOverlay();" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white h-11 sm:h-full px-8 w-full sm:w-auto rounded-xl sm:rounded-full font-bold text-sm transition-all shadow-md shrink-0 flex items-center justify-center gap-2">
+        <i class="bi bi-search"></i> Search
+    </button>
+
+    <div class="autocomplete-drop w-full !top-[calc(100%+8px)] !rounded-2xl !shadow-2xl !border-0 text-sm overflow-hidden" id="acDrop"></div>
+</div>
 
     </div>
     <div class="flex-1 bg-transparent cursor-pointer" onclick="toggleSearchOverlay()"></div>
@@ -436,7 +433,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
       {% if filter_pet %}<span class="dot"></span>{% endif %} 🐾 Pet Friendly
     </div>
 
-    <div class="fpill" onclick="openMoreFilters()" style="{% if active_more_count > 0 %}background:var(--primary-light);border-color:var(--primary);color:var(--primary);{% endif %}">
+    <div class="fpill" onclick="openMoreFilters()" style="{% if active_more_count > 0 %}background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark);{% endif %}">
       {% if active_more_count > 0 %}<span class="dot"></span>{% endif %}
       <i class="bi bi-sliders" style="font-size:0.85rem;"></i> More Filters{% if active_more_count > 0 %} ({{ active_more_count }}){% endif %}
     </div>
@@ -476,7 +473,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
         <div>
           <div class="ss-price" id="ssPrice">₹—</div>
           <div class="ss-title" id="ssTitle">Property Title</div>
-          <div class="ss-loc"><i class="fa-solid fa-location-dot text-brand-blue"></i><span id="ssLoc">Location</span></div>
+          <div class="ss-loc"><i class="fa-solid fa-location-dot" style="color:var(--primary-dark);"></i><span id="ssLoc">Location</span></div>
         </div>
       </div>
       <div class="ss-stats" id="ssStats"></div>
@@ -545,17 +542,18 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                 {% if filter_verified %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('verified')">Verified <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
                 {% if filter_pet %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('pet')">Pet Friendly <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
                 {% if filter_lease %}<span class="af-chip bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5" onclick="removeFilterParam('lease')">{{ filter_lease }} <i class="fas fa-times cursor-pointer hover:text-red-500"></i></span>{% endif %}
-                <span class="af-clear text-[11px] font-bold text-brand-blue ml-1 cursor-pointer hover:underline" onclick="resetAllFilters()">Clear All</span>
+                <span class="af-clear text-[11px] font-bold ml-1 cursor-pointer hover:underline" style="color:var(--primary-dark);" onclick="resetAllFilters()">Clear All</span>
             </div>
             {% endif %}
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                 <div>
                     <div class="text-xs text-gray-500 font-medium mb-1">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of <strong class="text-gray-800">{{ total|default:"0" }}</strong> properties</div>
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
+                    <h1 class="lux-page-title text-xl md:text-2xl font-bold leading-snug">
                         {% if listing_type == 'rent' %}Properties for Rent{% else %}Properties for Sale{% endif %}
                         {% for area in areas_list %}{% if forloop.first %} in {% else %}, {% endif %}{{ area|title }}{% endfor %}{% if not areas_list %} in {{ city|title }}{% endif %}
                     </h1>
+                    <p class="lux-page-sub">Every listing below is filtered to match what you've selected above — refine the filters anytime to narrow it further, or open "More Filters" for amenities, age and parking.</p>
                 </div>
                 <div class="flex items-center gap-2 text-sm shrink-0">
                     <span class="text-gray-500 whitespace-nowrap font-medium hidden sm:block">Sort by:</span>
@@ -583,7 +581,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
 {% endif %}
         <div>
             {% for p in properties %}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6 flex flex-col md:flex-row hover:shadow-md transition">
+            <div class="pc-luxury bg-white overflow-hidden mb-6 flex flex-col md:flex-row">
                 
                 <!-- Image Slider -->
                 <div class="relative w-full md:w-[280px] h-48 md:h-auto bg-gray-100 shrink-0 overflow-hidden group">
@@ -595,9 +593,9 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                         {% elif p.image_url %}
                             <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy" class="w-full h-full object-cover shrink-0 min-w-full">
                         {% else %}
-                            <div class="w-full h-full min-w-full min-h-[200px] flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-indigo-50 to-purple-100 shrink-0">
-                                <i class="bi {% if p.property_type == 'commercial' %}bi-building{% elif p.property_type == 'pg' %}bi-people-fill{% else %}bi-house-door-fill{% endif %} text-4xl text-brand-blue opacity-50"></i>
-                                <span class="text-[10px] font-bold text-brand-blue opacity-60 uppercase tracking-widest">{{ p.property_type|default:"Property" }}</span>
+                            <div class="w-full h-full min-w-full min-h-[200px] flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-amber-50 to-yellow-100 shrink-0">
+                                <i class="bi {% if p.property_type == 'commercial' %}bi-building{% elif p.property_type == 'pg' %}bi-people-fill{% else %}bi-house-door-fill{% endif %} text-4xl text-brand-blue opacity-60"></i>
+                                <span class="text-[10px] font-bold text-brand-blue opacity-70 uppercase tracking-widest">{{ p.property_type|default:"Property" }}</span>
                             </div>
                         {% endif %}
                     </div>
@@ -611,9 +609,9 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
 
                     <!-- Badges -->
                     <div class="absolute top-10 left-2 flex gap-1 flex-wrap z-10">
-                        {% if p.is_new %}<span class="bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">New</span>{% endif %}
+                        {% if p.is_new %}<span class="bg-brand-dark text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">New</span>{% endif %}
                         {% if p.is_verified %}<span class="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">✓ Verified</span>{% endif %}
-                        {% if p.is_featured %}<span class="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase">Featured</span>{% endif %}
+                        {% if p.is_featured %}<span class="text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase" style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));">Featured</span>{% endif %}
                     </div>
 
                     <!-- Navigation Arrows -->
@@ -639,21 +637,22 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                 <!-- Card Details -->
                 <div class="p-4 md:p-5 flex-1 flex flex-col justify-between min-w-0">
                     <div>
+                        <span class="pc-eyebrow">{{ p.property_type|default:"Property" }} · {{ p.listing_type|title }}</span>
                        <a href="{% url 'property_detail' listing_type=p.listing_type|lower category=p.url_category|slugify slug=p.title|slugify pk=p.id %}">
-    <h2 class="text-lg font-bold text-gray-900 mb-1 hover:text-brand-blue cursor-pointer transition truncate">
+    <h2 class="pc-title text-lg font-bold text-gray-900 mb-1 hover:text-brand-blue cursor-pointer transition truncate">
         {{ p.title }}
     </h2>
 </a>
-                        <p class="text-xs text-gray-500 mb-3 font-medium flex items-center gap-1 truncate"><i class="fa-solid fa-location-dot text-brand-blue"></i> {{ p.location }}</p>
+                        <p class="text-xs text-gray-500 mb-3 font-medium flex items-center gap-1 truncate"><i class="fa-solid fa-location-dot" style="color:var(--primary-dark);"></i> {{ p.location }}</p>
                         
                         <!-- Grid Stats & Price Breakup -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3 border-b border-gray-100 pb-3 relative">
                             
                             <!-- PRICE BREAKDOWN COLUMN -->
                             <div>
-                                <div class="text-[1.1rem] font-bold text-gray-900 leading-tight">{{ p.price_display|default:"Price on Request" }}</div>
+                                <div class="pc-price text-[1.15rem] leading-tight">{{ p.price_display|default:"Price on Request" }}</div>
                                 
-                                <a href="javascript:void(0);" onclick="togglePriceBreakup(event, 'pb-{{ p.id }}')" class="text-[10px] text-brand-blue font-medium hover:underline block mt-0.5">see price breakup</a>
+                                <a href="javascript:void(0);" onclick="togglePriceBreakup(event, 'pb-{{ p.id }}')" class="text-[10px] font-medium hover:underline block mt-0.5" style="color:var(--primary-dark);">see price breakup</a>
                                 {% if p.listing_type == 'rent' %}<div class="text-[9px] text-gray-500 mt-1 uppercase tracking-wide">per month</div>{% endif %}
 
                                 <!-- HOUSING.COM STYLE POPOVER -->
@@ -709,7 +708,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
 
                                     <div class="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
                                         <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Total Move-in Cost</span>
-                                        <span class="text-lg font-bold text-brand-blue">{{ p.total_movein_display|default:"-" }}</span>
+                                        <span class="text-lg font-bold" style="color:var(--primary-dark);">{{ p.total_movein_display|default:"-" }}</span>
                                     </div>
                                 </div>
                                 <!-- END POPOVER -->
@@ -759,9 +758,11 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                             Updated<br><span class="font-bold text-gray-700 mt-0.5 inline-block normal-case text-xs">Recently</span>
                         </div>
                         <div class="flex items-center gap-2 md:gap-3">
-                            <button onclick="event.preventDefault();toggleSave('{{ p.id }}',this)" class="w-9 h-9 border border-gray-300 rounded flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition shadow-sm bg-white">
-                                <i class="fa-regular fa-heart text-base"></i>
-                            </button>
+
+                        <button onclick="event.preventDefault();toggleSave('{{ p.id }}','{{ p.listing_type }}','{{ p.url_category }}',this)" class="w-9 h-9 border border-gray-300 rounded flex items-center justify-center {% if p.id in wishlisted_ids %}text-red-500 border-red-500{% else %}text-gray-400{% endif %} hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition shadow-sm bg-white {% if p.id in wishlisted_ids %}saved{% endif %}">
+    <i class="fa-{% if p.id in wishlisted_ids %}solid{% else %}regular{% endif %} fa-heart text-base"></i>
+</button>
+
                             <button onclick="event.preventDefault();whatsappListing('{{ p.phone|escapejs }}','{{ p.title|escapejs }}')" class="w-9 h-9 border border-green-500 bg-green-50 text-green-600 rounded flex items-center justify-center hover:bg-green-500 hover:text-white transition shadow-sm">
                                 <i class="fa-brands fa-whatsapp text-lg"></i>
                             </button>
@@ -795,7 +796,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
 
             {% for num in page_obj.paginator.page_range %}
                 {% if page_obj.number == num %}
-                <span class="w-10 h-10 border border-brand-blue rounded bg-brand-blue flex items-center justify-center text-white font-bold shadow-sm">{{ num }}</span>
+                <span class="w-10 h-10 border rounded flex items-center justify-center text-white font-bold shadow-sm" style="border-color:var(--primary);background:linear-gradient(135deg,var(--primary),var(--primary-dark));">{{ num }}</span>
                 {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
                 <a class="w-10 h-10 border border-gray-300 rounded bg-white flex items-center justify-center text-gray-600 hover:border-brand-blue hover:text-brand-blue transition font-medium" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
                 {% endif %}
@@ -816,13 +817,13 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
     <div class="hidden lg:block w-1/3 max-w-[340px] shrink-0 space-y-5">
         
         <!-- Platform Lead Promo Banner -->
-        <div class="bg-gradient-to-br from-brand-dark to-indigo-900 rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-hidden text-white">
+        <div class="bg-gradient-to-br from-brand-dark to-[#152a4a] rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-hidden text-white">
             <div class="relative z-10 w-4/5">
-                <h3 class="text-lg font-bold leading-snug mb-2">
+                <h3 class="lux-page-title text-lg font-bold leading-snug mb-2" style="color:#fff;">
                     Need Expert Assistance?
                 </h3>
-                <p class="text-xs text-indigo-200 mb-4">Let our Property Advisors handle the search, negotiation, and paperwork for you.</p>
-                <button class="bg-brand-yellow text-brand-dark font-bold text-sm px-4 py-2 rounded shadow-sm hover:bg-yellow-500 transition">Talk to Advisor</button>
+                <p class="text-xs mb-4" style="color:rgba(255,255,255,.75);">Let our Property Advisors handle the search, negotiation, and paperwork for you.</p>
+                <button class="bg-brand-yellow text-brand-dark font-bold text-sm px-4 py-2 rounded shadow-sm hover:brightness-105 transition">Talk to Advisor</button>
             </div>
             <div class="absolute right-[-20px] bottom-[-20px] w-32 h-32 opacity-20 pointer-events-none">
                 <i class="fa-solid fa-headset text-9xl text-white"></i>
@@ -832,12 +833,12 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
         <!-- Property Services Promo Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center gap-2 mb-4">
-                <h3 class="text-base font-bold text-gray-900">Platform Services</h3>
+                <h3 class="lux-page-title text-base font-bold">Platform Services</h3>
             </div>
 
             <div class="space-y-4">
-                <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-indigo-50 transition cursor-pointer">
-                    <div class="w-10 h-10 bg-indigo-100 text-brand-blue rounded flex items-center justify-center shrink-0">
+                <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 transition cursor-pointer" style="background:transparent;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='transparent'">
+                    <div class="w-10 h-10 rounded flex items-center justify-center shrink-0" style="background:var(--primary-light);color:var(--primary-dark);">
                         <i class="fa-regular fa-file-lines text-lg"></i>
                     </div>
                     <div>
@@ -846,7 +847,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                     </div>
                 </div>
                 
-                <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-indigo-50 transition cursor-pointer">
+                <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 transition cursor-pointer" style="background:transparent;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='transparent'">
                     <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-truck-fast text-lg"></i>
                     </div>
@@ -857,14 +858,14 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                 </div>
             </div>
 
-           <a href="{% url 'services' %}" class="w-full mt-5 border border-brand-blue text-brand-blue text-sm font-semibold rounded py-2 hover:bg-indigo-50 transition text-center inline-block">
+           <a href="{% url 'services' %}" class="w-full mt-5 border border-brand-blue text-brand-blue text-sm font-semibold rounded py-2 transition text-center inline-block" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='transparent'">
     Explore All Services
 </a>
         </div>
     </div>
 </main>
 
-<!-- ── RESTORED FULL FOOTER FROM HOME PAGE ── -->
+<!-- ── SHARED SITE FOOTER (navy / gold) ── -->
 <footer>
     <div class="footer-newsletter">
         <div class="footer-newsletter-inner">
@@ -883,7 +884,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
-                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-brand">🏠 KANISHKAIMPERIA</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
                 <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
                 <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
@@ -906,7 +907,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
                 <div class="fl-title">For Owners</div>
                 <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
                 <a href="#" class="fl-link">Agent Registration</a>
-                <a href="#plansSection" class="fl-link">PropCRM Plans</a>
+                <a href="#plansSection" class="fl-link">KANISHKAIMPERIA Plans</a>
                 <a href="#" class="fl-link">Contact Support</a>
             </div>
             <div>
@@ -919,7 +920,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; fon
         </div>
     </div>
     <div class="footer-bottom">
-        <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+        <span>© 2026 KANISHKAIMPERIA · Nagpur, Maharashtra</span>
         <span>Privacy Policy · Terms · Sitemap</span>
     </div>
 </footer>
@@ -1038,10 +1039,6 @@ document.addEventListener('DOMContentLoaded', renderCategoryPills);
 
 
 // ════════════════════════════════════════
-// AMENITIES SPLIT & RENDER (fixes character-splitting bug)
-// ════════════════════════════════════════
-
-// ════════════════════════════════════════
 // AMENITIES SPLIT & RENDER (with expandable "+N More")
 // ════════════════════════════════════════
 function renderAmenityChips(holder, list, expanded) {
@@ -1052,9 +1049,9 @@ function renderAmenityChips(holder, list, expanded) {
     });
     if (list.length > 4) {
         if (expanded) {
-            html += `<span class="text-brand-blue font-medium cursor-pointer ml-1 hover:underline text-[11px]" onclick="toggleAmenitiesExpand(this)">Show Less</span>`;
+            html += `<span class="font-medium cursor-pointer ml-1 hover:underline text-[11px]" style="color:var(--primary-dark);" onclick="toggleAmenitiesExpand(this)">Show Less</span>`;
         } else {
-            html += `<span class="text-brand-blue font-medium cursor-pointer ml-1 hover:underline text-[11px]" onclick="toggleAmenitiesExpand(this)">+ ${list.length - 4} More</span>`;
+            html += `<span class="font-medium cursor-pointer ml-1 hover:underline text-[11px]" style="color:var(--primary-dark);" onclick="toggleAmenitiesExpand(this)">+ ${list.length - 4} More</span>`;
         }
     }
     holder.innerHTML = html;
@@ -1517,15 +1514,44 @@ function applySorting(val) {
   window.location.href = window.location.pathname + '?' + p.toString();
 }
 
-function toggleSave(id, btn) {
-  btn.classList.toggle('saved');
-  if (btn.classList.contains('saved')) {
-      btn.querySelector('i').classList.replace('fa-regular', 'fa-solid');
-      btn.classList.replace('text-gray-400', 'text-red-500');
-  } else {
-      btn.querySelector('i').classList.replace('fa-solid', 'fa-regular');
-      btn.classList.replace('text-red-500', 'text-gray-400');
-  }
+
+function toggleSave(id, listingType, category, btn) {
+    const formData = new URLSearchParams();
+    formData.append('property_id', id);
+    formData.append('listing_type', listingType);
+    formData.append('category', category);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch("{% url 'Wishlist_Ajax' %}", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(response => {
+        console.log("Wishlist response:", response);
+        if (response.status === "1") {
+            const saved = response.action === 'added';
+            const icon = btn.querySelector('i');
+            if (saved) {
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+                btn.classList.remove('text-gray-400');
+                btn.classList.add('text-red-500', 'border-red-500', 'saved');
+            } else {
+                icon.classList.remove('fa-solid');
+                icon.classList.add('fa-regular');
+                btn.classList.remove('text-red-500', 'border-red-500', 'saved');
+                btn.classList.add('text-gray-400');
+            }
+        } else {
+            Swal.fire({ icon: 'error', title: 'Error', text: response.msg || 'Something went wrong.' });
+        }
+    })
+    .catch(err => {
+        console.error("Wishlist fetch failed:", err);
+        Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not update wishlist. Check console for details.' });
+    });
 }
 
 function callListing(phone, ownerName) {
@@ -1533,11 +1559,11 @@ function callListing(phone, ownerName) {
     title: 'Contact ' + (ownerName || 'Owner'),
     html: `
       <div style="text-align:center;padding:10px 0;">
-        <div style="width:60px;height:60px;background:#ede8fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;">📞</div>
-        <div style="font-size:1.6rem;font-weight:800;color:#6C3CF4;margin-bottom:4px;">${phone || 'N/A'}</div>
-        <p style="font-size:0.82rem;color:#9098a9;">Please mention you found this on PropCRM</p>
+        <div style="width:60px;height:60px;background:rgba(199,154,85,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;">📞</div>
+        <div style="font-size:1.6rem;font-weight:800;color:#a5811c;margin-bottom:4px;">${phone || 'N/A'}</div>
+        <p style="font-size:0.82rem;color:#9098a9;">Please mention you found this on KANISHKAIMPERIA</p>
       </div>`,
-    confirmButtonColor: '#6C3CF4',
+    confirmButtonColor: '#a5811c',
     confirmButtonText: '<i class="bi bi-telephone-fill" style="margin-right:6px;"></i>Call Now',
     showCancelButton: true,
     cancelButtonText: 'Close'
@@ -1548,7 +1574,7 @@ function callListing(phone, ownerName) {
 
 function whatsappListing(phone, title) {
   if (!phone) return;
-  const msg = encodeURIComponent(`Hi, I found your property "${title}" on PropCRM. Is it still available?`);
+  const msg = encodeURIComponent(`Hi, I found your property "${title}" on KANISHKAIMPERIA. Is it still available?`);
   window.open(`https://wa.me/91${phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
 }
 

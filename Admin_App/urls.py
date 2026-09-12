@@ -562,11 +562,16 @@ urlpatterns = [
   
     ######## urls for website section######
     
-     path("hero-sections/add/", views.hero_section, name="hero_section"),
+     path('hero-sections/hero/add/', views.hero_section_form, name='hero_section_form'),
      path("hero-sections/", views.hero_section_list, name="hero_section_list"),
      path("hero-sections/<int:pk>/edit/", views.hero_section_edit, name="hero_section_edit"),
      path("hero-sections/<int:pk>/delete/", views.hero_section_delete, name="hero_section_delete"),
      path("hero-sections/<int:pk>/toggle/", views.hero_section_toggle, name="hero_section_toggle"),
+     path(
+    "header-settings/",
+    views.header_settings,
+    name="header_settings"
+    ),
      
      
   
@@ -1060,8 +1065,10 @@ urlpatterns = [
      path("services-list/", views.services_list, name="services_list"),
      path("delete-service/<int:service_id>/", views.delete_service, name="delete_service"),
      path("services/", views.services_list1, name="services_list1"),
-     path('<str:seo_key>/', views.seo_url_redirect, name='seo_redirect'),
+     
     
+    
+    path('<str:seo_key>/', views.seo_url_redirect, name='seo_redirect'),
     
     
     

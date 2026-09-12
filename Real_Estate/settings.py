@@ -146,6 +146,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'Admin_App.context_processors.admin_alerts',
                 'Main_App.context_processors.global_seo',
+                "Admin_App.header_context.header_settings",
                 
             ],
         },

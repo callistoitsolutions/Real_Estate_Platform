@@ -4,124 +4,171 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Property Services in Nagpur — Legal, Home Loans, Verification & More | PropCRM</title>
-<meta name="description" content="Legal documentation, home loan assistance, property verification, interior design, packers & movers, Vastu, valuation and photography — all property services under one roof with a dedicated Relationship Manager.">
+<title>Property Services in Nagpur — Legal, Home Loans, Verification & More | KANISHKAIMPERIA</title>
+<meta name="description" content="Legal documentation, home loan assistance, property verification, interior design, packers & movers, Vastu, valuation and photography — all property services under one roof.">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
-    --primary: #006ce4;
-    --primary-dark: #0050a8;
-    --pr: #f97316;
-    --pr2: #ea580c;
-    --accent: #f59e0b;
-    --text-dark: #1e293b;
-    --text-body: #475569;
-    --text-muted: #64748b;
-    --border: #e2e8f0;
-    --bg: #f8fafc;
+    --primary: #c9a227;
+    --primary-dark: #a5811c;
+    --navy: #0b1730;
+    --navy-2: #101f3d;
+    --navy-3: #16294d;
+    --gold: #d4af37;
+    --gold-light: #f1d888;
+    --pr: #c9a227;
+    --pr2: #a5811c;
+    --text-dark: #14213d;
+    --text-body: #4b5568;
+    --text-muted: #6b7385;
+    --border: #e4e6ee;
+    --bg: #f7f7f5;
     --card-bg: #ffffff;
-    --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
-    --shadow-2: 0 12px 30px rgba(0,0,0,0.1);
+    --shadow-1: 0 4px 12px rgba(11,23,48,0.07);
+    --shadow-2: 0 16px 34px rgba(11,23,48,0.14);
     --radius: 12px;
+    --serif: "Playfair Display", serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "Poppins", sans-serif; background: var(--bg); color: var(--text-body); overflow-x: hidden; }
-a { color: inherit; }
+a { color: inherit; text-decoration: none; }
 
 .section-wrap { max-width: 1300px; margin: 0 auto; padding: 50px 20px; }
-.section-title { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
 .section-subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
 .sec-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
 
-.top-util-bar { background: #0f172a; color: rgba(255,255,255,.75); font-size: .78rem; padding: 8px 24px; }
+.top-util-bar { background: var(--navy); color: rgba(255,255,255,.75); font-size: .78rem; padding: 8px 24px; border-bottom: 1px solid rgba(212,175,55,.15); }
 .top-util-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
 .top-util-inner .tu-left, .top-util-inner .tu-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
-.top-util-inner i { margin-right: 6px; color: rgba(255,255,255,.5); }
+.top-util-inner i { margin-right: 6px; color: var(--gold); }
 .top-util-inner a { color: inherit; text-decoration: none; }
 @media(max-width:768px) { .top-util-bar { display: none; } }
 
 .breadcrumb-bar { background: #fff; border-bottom: 1px solid var(--border); }
-.breadcrumb-bar .bb-inner { max-width: 1300px; margin: 0 auto; padding: 12px 20px; font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+.breadcrumb-bar .bb-inner { max-width: 1300px; margin: 0 auto; padding: 12px 20px; font-size: .82rem; color: var(--text-muted); font-weight: 500; }
 .breadcrumb-bar a { color: var(--text-muted); text-decoration: none; }
-.breadcrumb-bar a:hover { color: var(--primary); }
-.breadcrumb-bar .bb-current { color: var(--text-dark); }
+.breadcrumb-bar a:hover { color: var(--pr2); }
+.breadcrumb-bar .bb-current { color: var(--navy); font-weight: 700; }
 
-.inner-hero { background: linear-gradient(to right, rgba(15,23,42,.88), rgba(15,23,42,.72)), url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80'); background-size: cover; background-position: center; padding: 56px 20px 48px; text-align: center; }
-.inner-hero h1 { font-size: 2.3rem; font-weight: 900; line-height: 1.25; color: #fff; margin-bottom: 10px; }
-.inner-hero h1 span { color: var(--accent); }
-.inner-hero p.hero-sub { font-size: 1rem; color: rgba(255,255,255,.85); margin: 0 auto; max-width: 640px; font-weight: 500; }
-@media(max-width:768px) { .inner-hero { padding: 40px 16px 36px; } .inner-hero h1 { font-size: 1.6rem; } }
+.inner-hero { 
+    background: linear-gradient(135deg, rgba(11,23,48,0.95) 0%, rgba(16,31,61,0.85) 60%, rgba(22,41,77,0.78) 100%), 
+                url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=80'); 
+    background-size: cover; 
+    background-position: center; 
+    padding: 65px 20px 55px; 
+    text-align: center; 
+}
+.inner-hero h1 { font-family: var(--serif); font-size: 2.6rem; font-weight: 800; line-height: 1.25; color: #fff; margin-bottom: 12px; }
+.inner-hero h1 span { color: var(--gold-light); }
+.inner-hero p.hero-sub { font-size: 1rem; color: rgba(255,255,255,.85); margin: 0 auto; max-width: 660px; font-weight: 400; line-height: 1.6; }
+@media(max-width:768px) { .inner-hero { padding: 45px 16px 40px; } .inner-hero h1 { font-size: 1.8rem; } }
 
-.hiw-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: -60px; position: relative; z-index: 5; }
-@media(max-width:768px) { .hiw-grid { grid-template-columns: 1fr; margin-top: -40px; } }
-.hiw-card { text-align: center; padding: 28px 20px; background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-2); }
-.hiw-num { width: 52px; height: 52px; background: rgba(0,108,228,.1); color: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 16px; }
-.hiw-title { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.hiw-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: -45px; position: relative; z-index: 5; }
+@media(max-width:768px) { .hiw-grid { grid-template-columns: 1fr; margin-top: -30px; } }
+.hiw-card { text-align: center; padding: 28px 22px; background: white; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-2); }
+.hiw-num { width: 52px; height: 52px; background: #fbf4de; color: var(--pr2); border: 1px solid #e9d9a8; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; margin: 0 auto 16px; }
+.hiw-title { font-size: 1.05rem; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
 .hiw-desc { font-size: .85rem; color: var(--text-body); line-height: 1.6; }
 
-.service-grid-home { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.service-grid-home { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
 @media(max-width:1100px) { .service-grid-home { grid-template-columns: repeat(2,1fr); } }
 @media(max-width:640px) { .service-grid-home { grid-template-columns: 1fr; } }
-.pcard-svc { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: .3s; box-shadow: var(--shadow-1); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
-.pcard-svc:hover { box-shadow: var(--shadow-2); }
-.pcard-svc:hover img { transform: scale(1.06); }
-.pc-img-svc { height: 180px; position: relative; overflow: hidden; background: linear-gradient(135deg,#e0f2fe,#dbeafe); display: flex; align-items: center; justify-content: center; }
+.pcard-svc { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: .3s; box-shadow: var(--shadow-1); display: flex; flex-direction: column; }
+.pcard-svc:hover { box-shadow: var(--shadow-2); transform: translateY(-6px); border-color: var(--gold); }
+.pc-img-svc { height: 190px; position: relative; overflow: hidden; background: #e7e9ee; display: flex; align-items: center; justify-content: center; }
 .pc-img-svc img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; position: absolute; inset: 0; }
-.pc-img-svc::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,.65), transparent); }
-.pc-img-svc i.pc-fallback-icon { font-size: 2.2rem; color: #93c5fd; position: relative; z-index: 1; }
-.pc-img-svc i.pc-corner-icon { position: absolute; bottom: 12px; left: 14px; color: #fff; font-size: 1.5rem; z-index: 2; }
-.pc-body-svc { padding: 22px; flex: 1; display: flex; flex-direction: column; }
-.pc-body-svc h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
-.pc-body-svc p { font-size: .85rem; color: var(--text-body); margin-bottom: 16px; flex: 1; }
-.pc-body-svc button, .pc-body-svc .pc-btn-svc { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--primary); color: var(--primary); background: none; font-weight: 700; font-size: .85rem; cursor: pointer; transition: .2s; text-align: center; text-decoration: none; display: block; }
-.pc-body-svc button:hover, .pc-body-svc .pc-btn-svc:hover { background: var(--primary); color: #fff; }
+.pcard-svc:hover .pc-img-svc img { transform: scale(1.08); }
+.pc-img-svc::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,23,48,.75), transparent); }
+.pc-img-svc i.pc-fallback-icon { font-size: 2.5rem; color: var(--gold); position: relative; z-index: 1; }
+.pc-img-svc i.pc-corner-icon { position: absolute; bottom: 14px; left: 16px; color: var(--gold-light); font-size: 1.5rem; z-index: 2; }
+.pc-body-svc { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+.pc-body-svc h3 { font-size: 1.15rem; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+.pc-body-svc p { font-size: .86rem; color: var(--text-body); line-height: 1.6; margin-bottom: 20px; flex: 1; }
+.pc-body-svc .pc-btn-svc { width: 100%; padding: 11px; border-radius: 8px; border: 1.5px solid var(--pr2); color: var(--pr2); background: none; font-weight: 700; font-size: .86rem; cursor: pointer; transition: .2s; text-align: center; display: block; }
+.pc-body-svc .pc-btn-svc:hover { background: linear-gradient(135deg,var(--gold),var(--pr2)); color: var(--navy); border-color: transparent; }
 
 .banner-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 @media(max-width:768px) { .banner-split { grid-template-columns: 1fr; } }
-.bs-card { border-radius: 18px; padding: 30px; position: relative; overflow: hidden; }
-.bs-card.bs-blue { background: #eff6ff; }
-.bs-card.bs-indigo { background: #eef2ff; }
-.bs-card p.bs-eyebrow { font-size: .85rem; color: var(--text-muted); margin-bottom: 4px; }
-.bs-card h3 { font-size: 1.3rem; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; }
-.bs-card p.bs-desc { font-size: .88rem; color: var(--text-body); margin-bottom: 18px; }
+.bs-card { border-radius: 18px; padding: 32px; position: relative; overflow: hidden; border: 1px solid var(--border); }
+.bs-card.bs-blue { background: #fbf4de; border-color: #e9d9a8; }
+.bs-card.bs-indigo { background: #f0f1ee; border-color: #e4e6ee; }
+.bs-card p.bs-eyebrow { font-size: .85rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+.bs-card h3 { font-family: var(--serif); font-size: 1.35rem; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+.bs-card p.bs-desc { font-size: .88rem; color: var(--text-body); margin-bottom: 18px; line-height: 1.6; }
 .bs-card ul { list-style: none; margin-bottom: 22px; }
-.bs-card ul li { font-size: .85rem; color: var(--text-body); margin-bottom: 8px; }
-.bs-card ul li i { color: #22c55e; margin-right: 8px; }
-.bs-card .bs-icon-bg { position: absolute; right: -10px; bottom: -14px; font-size: 8rem; opacity: .12; color: var(--primary); }
-.bs-btn { background: var(--text-dark); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; text-decoration: none; display: inline-block; }
+.bs-card ul li { font-size: .85rem; color: var(--text-body); margin-bottom: 8px; display: flex; align-items: center; }
+.bs-card ul li i { color: var(--pr2); margin-right: 8px; font-size: 1rem; }
+.bs-card .bs-icon-bg { position: absolute; right: -10px; bottom: -14px; font-size: 8rem; opacity: .08; color: var(--navy); }
+.bs-btn { background: var(--navy); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; display: inline-block; transition: .2s; }
 .bs-btn:hover { background: #000; color: #fff; }
+
+
+.service-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.service-card-meta div {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--pr2);
+    background: #fbf4de;
+    border: 1px solid #e9d9a8;
+    border-radius: 6px;
+    padding: 6px 9px;
+}
+
+.service-card-meta i {
+    margin-right: 4px;
+}
+
+.service-option-count {
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.service-option-count i {
+    color: var(--pr2);
+    margin-right: 5px;
+}
 
 .knowledge-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start; }
 @media(max-width:900px) { .knowledge-grid { grid-template-columns: 1fr; } }
-.kh-sidebar { background: #eff6ff; border-radius: 14px; padding: 22px; }
-.kh-sidebar .kh-eyebrow { font-size: .72rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: .5px; }
-.kh-sidebar h4 { font-size: 1rem; font-weight: 800; color: var(--text-dark); margin: 8px 0 12px; }
-.filter-chip-static { border: 1px solid #dbeafe; border-radius: 999px; padding: 8px 14px; background: #fff; color: var(--primary); font-size: .78rem; font-weight: 600; cursor: pointer; transition: .2s; display: inline-block; margin: 3px; text-decoration:none; }
-.filter-chip-static:hover { background: #eff6ff; color: var(--primary); }
+.kh-sidebar { background: #fbf4de; border-radius: 14px; padding: 22px; border: 1px solid #e9d9a8; }
+.kh-sidebar .kh-eyebrow { font-size: .72rem; font-weight: 800; color: var(--pr2); text-transform: uppercase; letter-spacing: .5px; }
+.kh-sidebar h4 { font-family: var(--serif); font-size: 1.05rem; font-weight: 800; color: var(--navy); margin: 8px 0 12px; }
+.filter-chip-static { border: 1px solid #e9d9a8; border-radius: 999px; padding: 8px 14px; background: #fff; color: var(--pr2); font-size: .78rem; font-weight: 600; cursor: pointer; transition: .2s; display: inline-block; margin: 3px; }
+.filter-chip-static:hover { background: #fbf4de; color: var(--navy); }
+
 .accordion-item { background: white; border: 1px solid var(--border) !important; border-radius: 12px !important; overflow: hidden; margin-bottom: 12px; box-shadow: var(--shadow-1); }
-.accordion-button { background: white; color: var(--text-dark); font-weight: 700; font-size: .95rem; padding: 18px 20px; font-family: "Poppins", sans-serif; }
-.accordion-button:not(.collapsed) { background: #f8fafc; color: var(--primary); box-shadow: none; }
+.accordion-button { background: white; color: var(--navy); font-weight: 700; font-size: .95rem; padding: 18px 20px; font-family: "Poppins", sans-serif; }
+.accordion-button:not(.collapsed) { background: #fbf4de; color: var(--pr2); box-shadow: none; }
 .accordion-body { background: white; color: var(--text-body); font-size: .9rem; line-height: 1.7; padding: 0 20px 20px; }
 
-footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
-.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
+footer { background: var(--navy); color: rgba(255,255,255,.7); margin-top: auto; }
+.footer-newsletter { border-bottom: 1px solid rgba(212,175,55,.14); }
 .footer-newsletter-inner { max-width: 1300px; margin: 0 auto; padding: 24px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.footer-newsletter-inner h3 { color: #fff; font-size: 1.05rem; font-weight: 800; }
-.footer-newsletter-inner p { font-size: .82rem; color: rgba(255,255,255,.55); }
-.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: .9rem; text-decoration: none; transition: .2s; }
-.footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+.footer-newsletter-inner h3 { font-family: var(--serif); color: #fff; font-size: 1.05rem; font-weight: 800; }
+.footer-newsletter-inner p { font-size: .82rem; color: rgba(255,255,255,.55); margin: 0; }
+.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.08); border: 1px solid rgba(212,175,55,.25); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--gold-light); font-size: .9rem; text-decoration: none; transition: .2s; }
+.footer-social a:hover { background: var(--gold); color: var(--navy); transform: translateY(-2px); }
 .footer-inner { max-width: 1300px; margin: 0 auto; padding: 40px 20px; }
 .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 30px; }
 @media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
 @media(max-width:580px) { .footer-grid { grid-template-columns: 1fr; } }
-.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; }
+.fl-brand { font-family: var(--serif); font-size: 1.35rem; font-weight: 800; color: white; margin-bottom: 14px; }
 .fl-desc { font-size: .85rem; line-height: 1.7; margin-bottom: 14px; }
-.fl-title { font-size: .85rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.fl-title { font-size: .85rem; font-weight: 700; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 .fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: .2s; }
-.fl-link:hover { color: white; padding-left: 4px; }
-.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1300px; margin: 0 auto; }
+.fl-link:hover { color: var(--gold-light); padding-left: 4px; }
+.footer-bottom { border-top: 1px solid rgba(212,175,55,.14); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1300px; margin: 0 auto; }
 </style>
 </head>
 <body>
@@ -151,20 +198,35 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
 
 <div class="section-wrap" style="padding-bottom:0;">
     <div class="hiw-grid">
-        <div class="hiw-card"><div class="hiw-num"><i class="bi bi-shield-check"></i></div><div class="hiw-title">Verified Partners</div><div class="hiw-desc">All service providers are strictly vetted for quality, reliability, and market reputation.</div></div>
-        <div class="hiw-card"><div class="hiw-num"><i class="bi bi-person-badge"></i></div><div class="hiw-title">Dedicated RM Support</div><div class="hiw-desc">A dedicated Relationship Manager oversees your service delivery from start to finish.</div></div>
-        <div class="hiw-card"><div class="hiw-num"><i class="bi bi-file-earmark-text"></i></div><div class="hiw-title">Transparent Pricing</div><div class="hiw-desc">No hidden charges. Get clear quotations upfront before you commit to any service.</div></div>
+        <div class="hiw-card">
+            <div class="hiw-num"><i class="bi bi-shield-check"></i></div>
+            <div class="hiw-title">Verified Partners</div>
+            <div class="hiw-desc">All service providers are strictly vetted for quality, reliability, and market reputation.</div>
+        </div>
+        <div class="hiw-card">
+            <div class="hiw-num"><i class="bi bi-person-badge"></i></div>
+            <div class="hiw-title">Dedicated RM Support</div>
+            <div class="hiw-desc">A dedicated Relationship Manager oversees your service delivery from start to finish.</div>
+        </div>
+        <div class="hiw-card">
+            <div class="hiw-num"><i class="bi bi-file-earmark-text"></i></div>
+            <div class="hiw-title">Transparent Pricing</div>
+            <div class="hiw-desc">No hidden charges. Get clear quotations upfront before you commit to any service.</div>
+        </div>
     </div>
 </div>
 
-<!-- Services grid — loops over Service.objects.all(), passed from the view as `services` -->
-<div class="section-wrap" style="padding-top:40px;">
-    <div class="sec-header"><div><div class="section-title">Explore Our Services</div><div class="section-subtitle">Select a service to get a callback from our experts</div></div></div>
+<!-- Services grid -->
+<div class="section-wrap" style="padding-top:48px;">
+    <div class="sec-header">
+        <div>
+            <div class="section-title">Explore Our Services</div>
+            <div class="section-subtitle">Select a service to get a callback from our certified experts</div>
+        </div>
+    </div>
     <div class="service-grid-home">
         {% for service in services %}
-  
         <a href="{% url 'services_details' slug=service.seo_slug %}" class="pcard-svc">
-
             <div class="pc-img-svc">
                 {% if service.featured_image %}
                     <img src="{{ service.featured_image.url }}" alt="{{ service.title }}">
@@ -173,11 +235,59 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
                 {% endif %}
                 <i class="{{ service.icon|default:'bi bi-briefcase' }} pc-corner-icon"></i>
             </div>
+         
             <div class="pc-body-svc">
-                <h3>{{ service.title }}</h3>
-                <p>{{ service.short_description|truncatewords:20 }}</p>
-              <span class="pc-btn-svc">{{ service.cta_text|default:'Request Callback' }}</span>
+
+    <h3>{{ service.title }}</h3>
+
+    <p>
+        {{ service.short_description|truncatewords:20 }}
+    </p>
+
+    <!-- Price -->
+    <div class="service-card-meta">
+
+        {% if service.price_type == "fixed" and service.price %}
+            <div>
+                <i class="bi bi-currency-rupee"></i>
+                ₹{{ service.price|floatformat:0 }}
             </div>
+
+        {% elif service.price_type == "starting_from" and service.price %}
+            <div>
+                <i class="bi bi-currency-rupee"></i>
+                Starting From ₹{{ service.price|floatformat:0 }}
+            </div>
+
+        {% else %}
+            <div>
+                <i class="bi bi-chat-dots"></i>
+                Price on Request
+            </div>
+        {% endif %}
+
+        {% if service.duration %}
+            <div>
+                <i class="bi bi-clock"></i>
+                {{ service.duration }}
+            </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Options count -->
+    {% if service.options.all %}
+        <div class="service-option-count">
+            <i class="bi bi-grid"></i>
+            Multiple service options available
+        </div>
+    {% endif %}
+
+    <span class="pc-btn-svc">
+        {{ service.cta_text|default:'Request a Callback' }}
+    </span>
+
+</div>
         </a>
         {% empty %}
         <p style="color:var(--text-muted);grid-column:1/-1;">No services added yet.</p>
@@ -259,7 +369,7 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
-                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-brand">KANISHKAIMPERIA</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
                 <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
                 <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
@@ -267,33 +377,32 @@ footer { background: #0f172a; color: rgba(255,255,255,.7); margin-top: auto; }
             <div>
                 <div class="fl-title">Services</div>
                 {% for service in services|slice:":4" %}
-              <a href="{% url 'services_details' slug=service.seo_slug %}" class="fl-link">{{ service.title }}</a>
+                <a href="{% url 'services_details' slug=service.seo_slug %}" class="fl-link">{{ service.title }}</a>
                 {% endfor %}
             </div>
             <div>
                 <div class="fl-title">More Services</div>
                 {% for service in services|slice:"4:8" %}
-              <a href="{% url 'services_details' slug=service.seo_slug %}" class="fl-link">{{ service.title }}</a>
+                <a href="{% url 'services_details' slug=service.seo_slug %}" class="fl-link">{{ service.title }}</a>
                 {% endfor %}
             </div>
             <div>
                 <div class="fl-title">For Owners</div>
                 <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
                 <a href="#" class="fl-link">Agent Registration</a>
-                <a href="#" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Plans &amp; Pricing</a>
                 <a href="#" class="fl-link">Contact Support</a>
             </div>
             <div>
                 <div class="fl-title">Company</div>
                 <a href="{% url 'blog' %}" class="fl-link">Guides</a>
-                
                 <a href="#faqs" class="fl-link">FAQs</a>
                 <a href="#" class="fl-link">Contact Us</a>
             </div>
         </div>
     </div>
     <div class="footer-bottom">
-        <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+        <span>© 2026 KANISHKAIMPERIA · Nagpur, Maharashtra</span>
         <span>Privacy Policy · Terms · Sitemap</span>
     </div>
 </footer>

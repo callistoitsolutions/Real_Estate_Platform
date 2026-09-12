@@ -1,6 +1,7 @@
 {% load static %}
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -9,76 +10,211 @@
 <style>
 /* ============================================
    ISOLATED HEADER CSS (NO CONFLICTS)
+   Self-contained navy / gold palette so this
+   partial looks right on every page it's
+   included on, independent of the host page's
+   own :root variables.
 ============================================ */
+
+
 .premium-header {
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+     --ph-navy: #16233a;
+    --ph-navy-2: #1f2f47;
+    --ph-navy-3: #263a54;
+    --ph-gold: #c9a227;
+    --ph-gold-light: #f1d888;
+    --ph-pr2: #a5811c;
+    --ph-border: #e4e6ee;
+    --ph-text-body: #4b5568;
+    --ph-bg: #f7f7f5;
+
+    background: linear-gradient(180deg, var(--ph-navy), var(--ph-navy-2));
     padding: 0 25px;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: none;
     position: sticky;
     top: 0;
-    z-index: 9999; /* High z-index to sit above listing page filters */
+    z-index: 9999; 
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 70px;
-    font-family: "Poppins", sans-serif;
+    height: 78px;
+    font-family: "DM Sans", sans-serif;
     box-sizing: border-box;
+    transition: background .25s ease, box-shadow .25s ease, height .25s ease;
 }
+
+.premium-header.ph-scrolled {
+    background: #0b1730;
+    box-shadow: 0 6px 22px rgba(11, 23, 48, 0.28);
+    height: 66px;
+}
+.premium-header.ph-scrolled .logo img { height: 42px; }
+
 
 .premium-header * {
     box-sizing: border-box;
 }
 
-.premium-header .logo { 
-    font-size: 1.5rem; 
-    font-weight: 900; 
-    color: #006ce4; 
-    text-decoration: none; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-}
-.premium-header .logo span { color: #f97316; }
-.premium-header .logo-badge { 
-    background: #f97316; 
-    color: white; 
-    font-size: 0.55rem; 
-    padding: 3px 8px; 
-    border-radius: 6px; 
-    font-weight: 800; 
-    letter-spacing: 0.5px; 
+
+.premium-header .logo {
+    font-family: "Playfair Display", serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: .2px;
 }
 
-.premium-header .desktop-menu { 
-    display: flex; 
-    align-items: center; 
-    gap: 4px; 
+
+.ef-breadcrumb-bar { background:#f7f7f5; border-bottom:1px solid #e4e6ee; padding:10px 25px; }
+.ef-breadcrumb-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:8px; font-size:.8rem; flex-wrap:wrap; }
+.ef-breadcrumb-inner a { color:#4b5568; font-weight:600; display:inline-flex; align-items:center; gap:5px; }
+.ef-breadcrumb-inner a:hover { color:#a5811c; }
+.ef-breadcrumb-inner .ef-bc-sep { font-size:.65rem; color:#b7bcc4; }
+.ef-breadcrumb-inner .ef-bc-current { color:#0b1730; font-weight:700; }
+
+
+
+
+.premium-header .logo img {
+    height: 58px; 
+    width: auto;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
 }
+.premium-header .logo span { color: var(--ph-gold-light); }
+.premium-header .logo-badge {
+    background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
+    color: var(--ph-navy);
+    font-size: 0.55rem;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    font-family: "Poppins", sans-serif;
+}
+
+.premium-header .desktop-menu {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+
+.premium-header {
+    --header-bg: #ffffff;
+    --header-text: #16233A;
+
+    background: var(--header-bg);
+    color: var(--header-text);
+
+    width: 100%;
+    z-index: 1000;
+
+    transition:
+        background .3s ease,
+        color .3s ease,
+        box-shadow .3s ease;
+}
+
+
+
+/* ==========================================
+   DYNAMIC HEADER
+========================================== */
+
+.premium-header.header-transparent {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.premium-header.header-transparent .nav-link,
+.premium-header.header-transparent .brand-logo,
+.premium-header.header-transparent .header-icon,
+.premium-header.header-transparent .header-user-name {
+    color: #ffffff !important;
+}
+
+.premium-header.header-transparent .dynamic-header-logo {
+    filter: none;
+}
+
+.premium-header.header-transparent .header-action {
+    border-color: rgba(255,255,255,.5);
+    color: #ffffff;
+}
+
+
+/* Sticky */
+
+.premium-header.header-sticky {
+    position: sticky;
+    top: 0;
+}
+
+
+/* Transparent + sticky */
+
+.premium-header.header-transparent.header-sticky {
+    position: absolute;
+}
+
+
+/* Logo */
+
+.dynamic-header-logo {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    transition: width .25s ease;
+}
+
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .dynamic-header-logo {
+        max-width: 160px;
+    }
+
+}
+
 .premium-header .desktop-menu > a,
-.premium-header .desktop-menu .nav-dropdown > a { 
-    padding: 8px 16px; 
-    border-radius: 8px; 
-    font-size: 0.88rem; 
-    font-weight: 600; 
-    color: #475569; 
-    text-decoration: none; 
-    transition: .2s; 
-    white-space: nowrap; 
+.premium-header .desktop-menu .nav-dropdown > a {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    transition: .2s;
+    white-space: nowrap;
     display: inline-block;
-}
-.premium-header .desktop-menu a:hover { 
-    background: #f1f5f9; 
-    color: #006ce4; 
-}
-.premium-header .desktop-menu a.active { 
-    color: #006ce4; 
-    background: rgba(0, 108, 228, 0.08); 
+    border-bottom: 2px solid transparent;
 }
 
-/* 🟢 ADDED: MAIN NAVIGATION DROPDOWN FIXES */
+.premium-header .desktop-menu a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ph-gold-light);
+}
+.premium-header .desktop-menu a.active {
+    color: var(--ph-gold-light);
+    background: rgba(212, 175, 55, 0.12);
+    border-bottom-color: var(--ph-gold);
+}
+
+/* MAIN NAVIGATION DROPDOWN */
 .nav-dropdown {
     position: relative;
     display: inline-block;
@@ -89,29 +225,28 @@
     position: absolute;
     top: 100%;
     left: 0;
-    background: white;
+    background: #ffffff;
     min-width: 220px;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 16px 34px rgba(11, 23, 48, 0.18);
+    border: 1px solid var(--ph-border);
     z-index: 10000;
     padding: 8px 0;
-    margin-top: 5px; /* Add slight gap before dropdown */
+    margin-top: 8px;
 }
 
-/* Show on hover */
 .nav-dropdown:hover .nav-dropdown-menu {
     display: block;
 }
 
-/* Style the links inside the dropdown */
 .premium-header .desktop-menu .nav-dropdown-menu a {
     display: block;
     padding: 10px 20px;
     border-radius: 0;
+    border-bottom: none;
     font-weight: 500;
     font-size: 0.9rem;
-    color: #475569;
+    color: var(--ph-text-body);
     text-decoration: none;
     transition: 0.2s;
     width: 100%;
@@ -119,118 +254,215 @@
 }
 
 .premium-header .desktop-menu .nav-dropdown-menu a:hover {
-    background: #f8fafc;
-    color: #006ce4;
+    background: #fbf4de;
+    color: var(--ph-pr2);
 }
 
-.premium-header .nav-right { 
-    display: flex; 
-    gap: 10px; 
-    align-items: center; 
-}
-.premium-header .btn-nav-outline, 
-.premium-header .btn-nav-pr { 
-    padding: 8px 18px; 
-    border-radius: 8px; 
-    font-weight: 700; 
-    font-size: 0.85rem; 
-    cursor: pointer; 
-    text-decoration: none; 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 6px; 
-    transition: .2s; 
-    white-space: nowrap; 
-}
-.premium-header .btn-nav-outline { 
-    border: 1.5px solid #006ce4; 
-    color: #006ce4; 
-    background: transparent; 
-}
-.premium-header .btn-nav-outline:hover { 
-    background: #006ce4; 
-    color: white; 
-}
-.premium-header .btn-nav-pr { 
-    background: #f97316; 
-    color: white; 
-    border: none; 
-}
-.premium-header .btn-nav-pr:hover { 
-    background: #ea580c; 
-    color: white; 
-    transform: translateY(-1px); 
+.premium-header .nav-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
-.premium-header .mobile-menu-btn { 
-    display: none; 
-    background: none; 
-    border: none; 
-    cursor: pointer; 
+
+.premium-header .btn-nav-outline,
+.premium-header .btn-nav-pr {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: .2s;
+    white-space: nowrap;
+    font-family: "DM Sans", sans-serif;
 }
-.premium-header .mobile-menu-btn i { 
-    font-size: 1.8rem; 
-    color: #006ce4; 
+.premium-header .btn-nav-outline {
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    background: transparent;
+}
+.premium-header .btn-nav-outline:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+.premium-header .btn-nav-pr {
+    background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
+    color: var(--ph-navy);
+    border: none;
+}
+.premium-header .btn-nav-pr:hover {
+    filter: brightness(1.06);
+    color: var(--ph-navy);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(201, 162, 39, 0.35);
+}
+
+.premium-header .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.premium-header .mobile-menu-btn i {
+    font-size: 1.8rem;
+    color: var(--ph-gold-light);
 }
 
 /* Mobile Dropdown scoped class */
-.hdr-mobile-menu { 
-    position: absolute; 
-    top: 76px; 
-    right: 16px; 
-    width: 250px; 
-    padding: 16px; 
-    background: white; 
-    border-radius: 12px; 
-    box-shadow: 0 12px 30px rgba(0,0,0,0.1); 
-    border: 1px solid #e2e8f0; 
-    text-align: center; 
-    z-index: 10000; 
-    font-family: "Poppins", sans-serif;
-    display: none; /* Hidden by default */
+
+
+
+.hdr-mobile-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(11,23,48,.35);
+    z-index: 10099;
+}
+.hdr-mobile-overlay.show { display: block; }
+
+.hdr-mobile-menu {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    width: 300px;
+    max-width: 85vw;
+    padding: 0;
+    background: #ffffff;
+    box-shadow: -18px 0 40px rgba(11,23,48,.25);
+    border: none;
+    text-align: left;
+    z-index: 10100;
+    font-family: "DM Sans", sans-serif;
+    display: block;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .3s ease;
 }
 .hdr-mobile-menu.show {
-    display: block;
+    transform: translateX(0);
 }
-.hdr-mobile-menu a { 
-    display: block; 
-    padding: 12px 0; 
-    font-weight: 600; 
-    font-size: 0.9rem; 
-    color: #1e293b; 
-    text-decoration: none; 
-    border-bottom: 1px solid #e2e8f0; 
+.hdr-mobile-head {
+    background: linear-gradient(135deg, var(--ph-navy,#0b1730), var(--ph-navy-2,#101f3d));
+    padding: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.hdr-mobile-head span { color: #f1d888; font-weight: 800; font-size: 1rem; }
+.hdr-mobile-close {
+    background: rgba(255,255,255,.12); border: none; color: #fff;
+    width: 30px; height: 30px; min-width: 30px; max-width: 30px;
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; padding: 0; flex-shrink: 0;
+}
+.hdr-mobile-close:hover { background: rgba(255,255,255,.25); }
+
+.hdr-mobile-menu a {
+    display: block;
+    padding: 14px 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #0b1730;
+    text-decoration: none;
+    border-bottom: 1px solid #e4e6ee;
 }
 .hdr-mobile-menu a:last-child { border-bottom: none; }
-.hdr-mobile-menu a:hover { color: #006ce4; background: #f8fafc; }
+.hdr-mobile-menu a:hover { color: #a5811c; background: #fbf4de; }
 
-/* 🟢 BULLETPROOF DROPDOWN UTILITY (Profile Dropdown) */
-.custom-dropdown-menu {
+
+
+
+/* PROFILE DROPDOWN */
+
+
+
+/* PROFILE PANEL — slides in from the right, like housing.com */
+.custom-dropdown-overlay {
     display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: white;
-    min-width: 200px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    position: fixed; inset: 0;
+    background: rgba(11,23,48,.35);
+    z-index: 10000;
+}
+.custom-dropdown-overlay.show { display: block; }
+
+.custom-dropdown-menu {
+    display: block;
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    width: 360px;
+    max-width: 88vw;
+    background: #ffffff;
+    box-shadow: -18px 0 40px rgba(11,23,48,.25);
     z-index: 10001;
-    padding: 8px 0;
-    margin-top: 10px;
-    border: 1px solid #e2e8f0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform .3s ease;
 }
 .custom-dropdown-menu.show {
-    display: block;
+    transform: translateX(0);
+}
+
+
+.custom-dropdown-head {
+    background: linear-gradient(135deg, var(--ph-navy,#0b1730), var(--ph-navy-2,#101f3d));
+    padding: 24px 20px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.custom-dropdown-head .cdh-user {
+    display: flex; align-items: center; gap: 12px;
+    flex: 1 1 auto; min-width: 0;
+}
+.custom-dropdown-head .cdh-avatar {
+    width: 46px; height: 46px; min-width: 46px; max-width: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#c9a227,#a5811c);
+    display: flex; align-items: center; justify-content: center;
+    color: #0b1730; font-weight: 800; font-size: 1.05rem;
+    flex-shrink: 0; flex-grow: 0;
+    box-sizing: border-box;
+}
+.custom-dropdown-head .cdh-name {
+    color: #fff; font-weight: 700; font-size: .95rem;
+    line-height: 1.3; word-break: break-word;
+}
+.custom-dropdown-head .cdh-role { color: #f1d888; font-size: .74rem; margin-top: 2px; }
+
+.custom-dropdown-close {
+    background: rgba(255,255,255,.12);
+    border: none; color: #fff;
+    width: 30px; height: 30px;
+    min-width: 30px; max-width: 30px;
+    min-height: 30px; max-height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem;
+    flex-shrink: 0; flex-grow: 0;
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1;
+}
+.custom-dropdown-close:hover { background: rgba(255,255,255,.25); }
+
+.custom-dropdown-menu nav {
+    padding: 10px 0 20px;
 }
 .custom-dropdown-menu a,
 .custom-dropdown-menu button {
     display: flex;
     align-items: center;
-    padding: 10px 20px;
-    color: #475569;
+    padding: 14px 22px;
+    color: #33404f;
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.92rem;
     background: transparent;
     border: none;
     width: 100%;
@@ -239,25 +471,26 @@
 }
 .custom-dropdown-menu a:hover,
 .custom-dropdown-menu button:hover {
-    background: #f8fafc;
-    color: #006ce4;
+    background: #fbf4de;
+    color: #a5811c;
 }
 .custom-dropdown-menu a i,
 .custom-dropdown-menu button i {
-    margin-right: 10px;
-    color: #006ce4;
-    font-size: 1.1rem;
+    margin-right: 14px;
+    color: #a5811c;
+    font-size: 1.15rem;
+    width: 20px;
 }
-
 /* ============================================
-   RESPONSIVE ADJUSTMENTS 
+   RESPONSIVE ADJUSTMENTS
 ============================================ */
 @media(max-width:900px) {
-    .premium-header { padding: 0 15px; } 
+    .premium-header { padding: 0 15px; height: 68px; }
+    .premium-header .logo img { height: 42px; }
     .premium-header .desktop-menu { display: none; }
     .premium-header .mobile-menu-btn { display: block; }
     .premium-header .nav-right .btn-nav-outline { display: none; }
-    
+
     .premium-header .btn-nav-pr {
         max-width: 180px;
         overflow: hidden;
@@ -266,31 +499,169 @@
     }
 }
 
+
 @media(max-width: 500px) {
-    .premium-header { padding: 0 10px; } 
-    .premium-header .logo { font-size: 1.2rem; gap: 4px; }
-    .premium-header .logo-badge { display: none; } 
-    
+    .premium-header { padding: 0 10px; }
+    .premium-header .logo { font-size: 1.15rem; gap: 4px; }
+    .premium-header .logo-badge { display: none; }
+
     .premium-header .btn-nav-pr {
-        max-width: 140px; 
-        padding: 6px 12px;
+        max-width: 140px;
+        padding: 7px 12px;
         font-size: 0.75rem;
     }
-    
+
     .premium-header .mobile-menu-btn i { font-size: 1.6rem; }
     .premium-header .nav-right { gap: 6px; }
 }
+
+/* ============================================
+   AI CHATBOT LAUNCHER + PANEL
+   Scoped under .ef-chat-* — recolored to the
+   navy / gold identity, structure untouched.
+============================================ */
+
+.ef-chat-fab{
+    position:fixed; right:22px; bottom:22px; z-index:10050;
+    width:60px; height:60px; border-radius:50%;
+    background:linear-gradient(135deg,#c9a227,#a5811c);
+    color:#0b1730; border:none; box-shadow:0 10px 25px rgba(201,162,39,.4);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; cursor:pointer; transition:.2s;
+}
+.ef-chat-fab:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(201,162,39,.5); }
+.ef-chat-fab .ef-chat-dot{
+    position:absolute; top:6px; right:6px; width:10px; height:10px; border-radius:50%;
+    background:#22c55e; border:2px solid #fff;
+}
+
+.ef-wa-fab {
+    position: fixed; right: 22px; bottom: 96px; z-index: 10050;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #22c55e; color: #fff; border: none;
+    box-shadow: 0 10px 24px rgba(34,197,94,.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.45rem; cursor: pointer; text-decoration: none; transition: .2s;
+}
+.ef-wa-fab:hover { background: #16a34a; color: #fff; transform: translateY(-2px); box-shadow: 0 14px 30px rgba(34,197,94,.5); }
+
+@media(max-width:500px){
+    .ef-wa-fab{ right:16px; bottom:82px; width:50px; height:50px; font-size:1.3rem; }
+}
+
+
+.ef-chat-panel{
+    position:fixed; right:22px; bottom:96px; z-index:10050;
+    width:360px; max-width:92vw; height:520px; max-height:75vh;
+    background:#fff; border-radius:18px; overflow:hidden;
+    box-shadow:0 20px 50px rgba(11,23,48,.3);
+    font-family:"DM Sans",sans-serif;
+    display:none; flex-direction:column;
+    border:1px solid #e4e6ee;
+}
+.ef-chat-panel.show{ display:flex; }
+
+.ef-chat-head{
+    background:linear-gradient(90deg,#0b1730,#16294d); color:#fff;
+    padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom: 1px solid rgba(212,175,55,.25);
+}
+.ef-chat-head .ef-chat-title{ font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:8px; color: #f1d888; }
+.ef-chat-head .ef-chat-sub{ font-size:.72rem; opacity:.8; font-weight:400; color: #fff; }
+.ef-chat-head button{ background:transparent; border:none; color:#fff; font-size:1.2rem; cursor:pointer; line-height:1; }
+
+.ef-chat-body{ flex:1; overflow-y:auto; padding:14px; background:#f7f7f5; }
+.ef-chat-msg{ max-width:86%; padding:9px 12px; border-radius:14px; margin-bottom:8px; font-size:.85rem; line-height:1.4; white-space:pre-wrap; }
+.ef-chat-msg.bot{ background:#fff; border:1px solid #e4e6ee; border-top-left-radius:4px; color:#1a2338; }
+.ef-chat-msg.user{ background:linear-gradient(135deg,#c9a227,#a5811c); color:#0b1730; margin-left:auto; border-top-right-radius:4px; font-weight:600; }
+.ef-chat-msg.sys{ background:#fef2f2; border:1px solid #fecaca; color:#991b1b; font-size:.78rem; }
+.ef-chat-opts{ margin-top:6px; }
+.ef-chat-opts button{
+    border:1px solid #e9d9a8; background:#fff; color:#a5811c; border-radius:10px;
+    padding:6px 10px; margin:3px 4px 0 0; font-weight:600; font-size:.76rem; cursor:pointer;
+}
+.ef-chat-opts button:hover{ background:#fbf4de; }
+.ef-chat-typing{ font-size:.75rem; color:#94a3b8; padding:0 4px 6px; }
+
+.ef-chat-foot{ padding:10px 12px; border-top:1px solid #e4e6ee; background:#fff; display:flex; gap:8px; }
+.ef-chat-foot input{
+    flex:1; border:1px solid #e4e6ee; border-radius:10px; padding:9px 12px; font-size:.85rem; outline:none;
+}
+.ef-chat-foot input:focus{ border-color:#c9a227; }
+.ef-chat-foot button{
+    background:#0b1730; color:#f1d888; border:none; border-radius:10px; padding:0 14px; font-weight:700; cursor:pointer;
+}
+.ef-chat-foot button:hover{ background:#16294d; }
+
+@media(max-width:500px){
+    .ef-chat-panel{ right:10px; left:10px; width:auto; bottom:88px; }
+    .ef-chat-fab{ right:16px; bottom:16px; }
+}
+
+
+
+
+
 </style>
 
-<header class="premium-header">
-    <a href="{% url 'index' %}" class="logo">
-        🏠 Prop<span>CRM</span>
-        <span class="logo-badge">PORTAL</span>
-    </a>
 
+<header
+    class="
+        premium-header
+
+        {% if header_settings and header_settings.sticky_header %}
+            header-sticky
+        {% endif %}
+
+        {% if header_settings and header_settings.transparent_header %}
+            header-transparent
+        {% endif %}
+    "
+    style="
+        --header-bg:
+        {% if header_settings %}
+            {{ header_settings.header_background }}
+        {% else %}
+            #ffffff
+        {% endif %};
+
+        --header-text:
+        {% if header_settings %}
+            {{ header_settings.header_text_color }}
+        {% else %}
+            #16233A
+        {% endif %};
+    "
+>
+
+    <a href="{% url 'index' %}" class="logo">
+ 
+        <a href="/" class="brand-logo">
+
+    {% if header_settings and header_settings.logo %}
+
+        <img
+            src="{{ header_settings.logo.url }}"
+            alt="{{ header_settings.logo_alt }}"
+            class="dynamic-header-logo"
+            style="width: {{ header_settings.logo_width }}px;"
+        >
+
+    {% else %}
+
+        <img
+            src="{% static 'assets/img/kanishka_imperia_logo_original_size.png' %}"
+            alt="KANISHKAIMPERIA"
+            class="dynamic-header-logo"
+        >
+
+    {% endif %}
+
+</a>
+</a>
     <nav class="desktop-menu">
         <a href="{% url 'index' %}" hidden class="{% if request.path == '/' %}active{% endif %}">Home</a>
-        
+
         <div class="nav-dropdown">
             <a href="#">For Rent</a>
             <div class="nav-dropdown-menu">
@@ -313,29 +684,44 @@
 
         <a href="{% url 'services' %}">Services</a>
         <a href="{% url 'blog' %}">News/Guide</a>
-  
+
     {% comment %} <a href="{% url 'dynamic_property_faq' %}">FAQs</a> {% endcomment %}
 </li>
 
         <a href="{% url 'Adminlogin' %}">Admin</a>
         <a href="{% url 'Contact_Us' %}">Contact Us</a>
+
+
     </nav>
 
     <div class="nav-right">
         <a href="{% url 'post_property' %}" class="btn-nav-outline">
             <i class="bi bi-plus-lg"></i> Post Property FREE
         </a>
-        
+
         {% if user_obj %}
         <div class="dropdown d-inline-block" style="position: relative;">
-            
+
             <a href="#" class="btn-nav-pr text-decoration-none" id="loginDropdown" onclick="toggleProfileMenu(event)">
                 <i class="bi bi-person"></i> Hello {{user_obj.user_name}}-{{user_obj.user_role}}
                 <i class="bi bi-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
             </a>
 
+                                            <div class="custom-dropdown-overlay" id="profileOverlay" onclick="toggleProfileMenu(event)"></div>
             <div class="custom-dropdown-menu" id="profileMenu">
+                <div class="custom-dropdown-head">
+                    <div class="cdh-user">
+                        <div class="cdh-avatar">{{ user_obj.user_name|slice:":1"|upper }}</div>
+                        <div>
+                            <div class="cdh-name">{{ user_obj.user_name }}</div>
+                            <div class="cdh-role">{{ user_obj.user_role }}</div>
+                        </div>
+                    </div>
+                    <button class="custom-dropdown-close" onclick="toggleProfileMenu(event)" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <nav>
                 {% if user_obj.user_role == "Landlord" %}
+
                     <a href="{% url 'landlord_dashboard' %}" target="_blank">
                 {% elif user_obj.user_role == "Tenant" %}
                     <a href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank">
@@ -360,12 +746,17 @@
                 <a href="#">
                     <i class="bi bi-search"></i> Searched Properties
                 </a>
-                
-                <button onclick="User_Logout()">
+
+
+
+                             <button onclick="User_Logout()">
                     <i class="bi bi-door-closed"></i> Logout
                 </button>
+                </nav>
             </div>
         </div>
+
+
 
         {% else %}
             <a href="{% url 'login' %}" class="btn-nav-pr">
@@ -374,12 +765,18 @@
         {% endif %}
     </div>
 
-    <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)">
+    
+        <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)">
         <i class="bi bi-list"></i>
     </button>
 
+    <div class="hdr-mobile-overlay" id="hdrMobileOverlay" onclick="toggleHdrMenu(event)"></div>
     <div id="hdrMobileMenu" class="hdr-mobile-menu">
-        <a href="{% url 'index' %}" hidden>Home</a>
+        <div class="hdr-mobile-head">
+            <span>Menu</span>
+            <button class="hdr-mobile-close" onclick="toggleHdrMenu(event)" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <a href="{% url 'index' %}">Home</a>
         <a href="/listingpage/?type=rent">For Rent</a>
         <a href="/listingpage/?type=sale">For Sale</a>
         <a href="{% url 'services' %}">Services</a>
@@ -391,50 +788,128 @@
     </div>
 </header>
 
+
+{% if breadcrumbs %}
+<div class="ef-breadcrumb-bar">
+    <div class="ef-breadcrumb-inner">
+        <a href="{% url 'index' %}"><i class="bi bi-house-door-fill"></i> Home</a>
+        {% for crumb in breadcrumbs %}
+            <i class="bi bi-chevron-right ef-bc-sep"></i>
+            {% if forloop.last %}
+                <span class="ef-bc-current">{{ crumb.label }}</span>
+            {% else %}
+                <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+
+<a class="ef-wa-fab" href="https://wa.me/919000000000?text={{ 'Hi Kanishka Imperia, I would like to know more about your properties.'|urlencode }}" target="_blank" rel="noopener" aria-label="Chat with Kanishka Imperia on WhatsApp">
+    <i class="bi bi-whatsapp"></i>
+</a>
+
+<!-- =========================================================
+     AI CHATBOT LAUNCHER BUTTON + PANEL
+     Sits outside <header> so it stays fixed to the viewport
+     on every page that includes this partial.
+========================================================= -->
+<button class="ef-chat-fab" id="efChatFab" onclick="toggleEfChat()" aria-label="Open KANISHKAIMPERIA AI Assistant">
+    <i class="bi bi-chat-dots-fill"></i>
+    <span class="ef-chat-dot"></span>
+</button>
+
+<div class="ef-chat-panel" id="efChatPanel">
+    <div class="ef-chat-head">
+        <div>
+            <div class="ef-chat-title"><i class="bi bi-robot"></i> KANISHKAIMPERIA AI</div>
+            <div class="ef-chat-sub">Property Search &amp; Assistance • ● Online</div>
+        </div>
+        <button onclick="toggleEfChat()" aria-label="Close chat"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="ef-chat-body" id="efChatBody"></div>
+    <div class="ef-chat-foot">
+        <input type="text" id="efChatInput" placeholder="Ask about rent, buy, visit, documents..." onkeydown="if(event.key==='Enter'){efChatSend();}">
+        <button onclick="efChatSend()"><i class="bi bi-send-fill"></i></button>
+    </div>
+</div>
+
 <script>
 // Mobile Menu Script
-function toggleHdrMenu(e) { 
+
+function toggleHdrMenu(e) {
     e.preventDefault();
     e.stopPropagation();
-    document.getElementById("hdrMobileMenu").classList.toggle("show"); 
-    
+    document.getElementById("hdrMobileMenu").classList.toggle("show");
+    document.getElementById("hdrMobileOverlay").classList.toggle("show");
+
     // Close profile menu if it is currently open
     const profileMenu = document.getElementById("profileMenu");
-    if(profileMenu) profileMenu.classList.remove("show");
+    if(profileMenu) {
+        profileMenu.classList.remove("show");
+        const profileOverlay = document.getElementById("profileOverlay");
+        if (profileOverlay) profileOverlay.classList.remove("show");
+    }
 }
-
 //  Profile Dropdown Script
-function toggleProfileMenu(e) { 
+function toggleProfileMenu(e) {
     e.preventDefault();
     e.stopPropagation();
-    document.getElementById("profileMenu").classList.toggle("show"); 
-    
+    document.getElementById("profileMenu").classList.toggle("show");
+    document.getElementById("profileOverlay").classList.toggle("show");
+
     // Close mobile menu if it is currently open
     const mobileMenu = document.getElementById("hdrMobileMenu");
     if(mobileMenu) mobileMenu.classList.remove("show");
 }
-
 //  Close menus when clicking outside
 document.addEventListener('click', function(e) {
     const mobileMenu = document.getElementById('hdrMobileMenu');
     const profileMenu = document.getElementById('profileMenu');
     const profileBtn = document.getElementById('loginDropdown');
     const mobileBtn = document.querySelector('.mobile-menu-btn');
-    
+
     // Handle mobile menu close
     if (mobileMenu && mobileMenu.classList.contains('show')) {
         if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
             mobileMenu.classList.remove('show');
         }
     }
-    
+
     // Handle profile menu close
-    if (profileMenu && profileMenu.classList.contains('show')) {
-        if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
-            profileMenu.classList.remove('show');
+   
+
+        // Handle profile menu close
+   
+
+            // Handle mobile menu close
+    if (mobileMenu && mobileMenu.classList.contains('show')) {
+        if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+            mobileMenu.classList.remove('show');
+            const mobileOverlay = document.getElementById("hdrMobileOverlay");
+            if (mobileOverlay) mobileOverlay.classList.remove('show');
         }
     }
 });
+
+// User Logout Script using SweetAlert2
+
+
+// Header background change on scroll (like housing.com)
+(function() {
+    const headerEl = document.querySelector('.premium-header');
+    if (!headerEl) return;
+    function onScroll() {
+        if (window.scrollY > 40) {
+            headerEl.classList.add('ph-scrolled');
+        } else {
+            headerEl.classList.remove('ph-scrolled');
+        }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
 
 // User Logout Script using SweetAlert2
 function User_Logout() {
@@ -443,13 +918,13 @@ function User_Logout() {
         text: "Are you sure you want to logout from the user panel?",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#ef4444", 
-        cancelButtonColor: "#64748b",  
+        confirmButtonColor: "#a5811c",
+        cancelButtonColor: "#64748b",
         confirmButtonText: "Yes, Logout",
         cancelButtonText: "No, Cancel",
         allowOutsideClick: false
     }).then((result) => {
-        if (result.isConfirmed) {   
+        if (result.isConfirmed) {
             $.ajax({
                 type: "POST",
                 url: "{% url 'User_Logout' %}",
@@ -504,11 +979,11 @@ function checkEmailExists(_this) {
 
     $.ajax({
         type: "POST",
-        url: "{% url 'Check_Email_Api' %}", 
+        url: "{% url 'Check_Email_Api' %}",
         data: { 'email': email },
         success: function(response) {
             $(_this).prop("disabled", false).html(btnText);
-            
+
             if(response.exists) {
                 // Email exists -> Go to Login
                 goToStep('step-2-login');
@@ -528,7 +1003,7 @@ function checkEmailExists(_this) {
 function processProgLogin(_this) {
     let email = $('#flow_email').val();
     let password = $('#flow_password').val();
-    
+
     if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
 
     let btnText = _this.innerHTML;
@@ -536,16 +1011,16 @@ function processProgLogin(_this) {
 
     $.ajax({
         type: "POST",
-        url: "{% url 'Prop_Login_Api' %}", 
-        data: { 
-            'email': email, 
+        url: "{% url 'Prop_Login_Api' %}",
+        data: {
+            'email': email,
             'password': password,
         },
         success: function(response) {
             if(response.status == '1') {
                 $('#authModal').modal('hide');
                 Swal.fire("Success", "Logged in successfully!", "success").then(() => {
-                    location.reload(); 
+                    location.reload();
                 });
             } else {
                 $(_this).prop("disabled", false).html(btnText);
@@ -563,10 +1038,10 @@ function processProgLogin(_this) {
 function sendOTP(email) {
     $('#display_otp_email').text(email);
     goToStep('step-2-otp');
-    
+
     $.ajax({
         type: "POST",
-        url: "{% url 'Send_Otp_Api' %}", 
+        url: "{% url 'Send_Otp_Api' %}",
         data: { 'email': email}
     });
 }
@@ -574,7 +1049,7 @@ function sendOTP(email) {
 function verifyOTP(_this) {
     let otp = "";
     $('.otp-input').each(function() { otp += $(this).val(); });
-    
+
     if(otp.length < 4) return Swal.fire("Wait", "Please enter the full 4-digit OTP.", "info");
 
     let btnText = _this.innerHTML;
@@ -582,9 +1057,9 @@ function verifyOTP(_this) {
 
     $.ajax({
         type: "POST",
-        url: "{% url 'Verify_Otp_Api' %}", 
-        data: { 
-            'email': $('#flow_email').val(), 
+        url: "{% url 'Verify_Otp_Api' %}",
+        data: {
+            'email': $('#flow_email').val(),
             'otp': otp,
         },
         success: function(response) {
@@ -618,8 +1093,8 @@ function processProgRegistration(_this) {
 
     $.ajax({
         type: "POST",
-        url: "{% url 'Prop_Register_Api' %}", 
-        data: { 
+        url: "{% url 'Prop_Register_Api' %}",
+        data: {
             'email': email,
             'name': name,
             'mobile': mobile,
@@ -629,7 +1104,7 @@ function processProgRegistration(_this) {
             if(response.status == '1') {
                 $('#authModal').modal('hide');
                 Swal.fire("Success", "Account created and logged in!", "success").then(() => {
-                    location.reload(); 
+                    location.reload();
                 });
             } else {
                 $(_this).prop("disabled", false).html(btnText);
@@ -656,8 +1131,8 @@ function Add_Wishlist(propertyId, category,listingtype,user, btnElement) {
 
     // 2. Setup the dynamic alert text
     let alertTitle = isAlreadySaved ? 'Remove from Wishlist?' : 'Wishlist this Property?';
-    let alertText = isAlreadySaved 
-        ? "Do you want to remove this property from your saved list?" 
+    let alertText = isAlreadySaved
+        ? "Do you want to remove this property from your saved list?"
         : "Do you want to save this property to view it later?";
     let confirmBtnText = isAlreadySaved ? 'Yes, remove it' : 'Yes, save it!';
 
@@ -667,27 +1142,27 @@ function Add_Wishlist(propertyId, category,listingtype,user, btnElement) {
         text: alertText,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#f97316', 
-        cancelButtonColor: '#64748b',  
+        confirmButtonColor: '#c9a227',
+        cancelButtonColor: '#64748b',
         confirmButtonText: confirmBtnText,
         cancelButtonText: 'Cancel',
         background: '#fff',
-        color: '#1e293b',
+        color: '#0b1730',
         borderRadius: '16px'
     }).then((result) => {
-        
+
         // 4. If the user clicks "Yes"
         if (result.isConfirmed) {
-            
+
             // --- PUT YOUR AJAX CALL HERE ---
-            
+
             $.ajax({
                 type: "POST",
                 url: "{% url 'Wishlist_Ajax' %}",
                 data: { 'property_id': propertyId, 'category': category,'listing_type':listingtype,'user_id':user },
                 success: function(response) {
-            
-            
+
+
                     // Toggle the visual heart icon immediately
                     if (isAlreadySaved) {
                         icon.classList.remove('bi-heart-fill');
@@ -705,5 +1180,124 @@ function Add_Wishlist(propertyId, category,listingtype,user, btnElement) {
     });
 }
 
+</script>
 
+
+
+<script>
+const EF_BACKEND_READY = true;                                   // <-- now real
+const EF_CHAT_ENDPOINT = "{% url 'chatbot_query_api' %}";
+
+// Persistent per-browser session id so the lead/requirement accumulates
+// across page loads instead of resetting every time the widget opens.
+function efGetSessionId(){
+    let sid = localStorage.getItem('ef_chat_session_id');
+    if(!sid){
+        sid = 'ef-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('ef_chat_session_id', sid);
+    }
+    return sid;
+}
+
+let efChatState = { opened:false, history:[] };
+
+function toggleEfChat(){
+    const panel = document.getElementById('efChatPanel');
+    efChatState.opened = !efChatState.opened;
+    panel.classList.toggle('show', efChatState.opened);
+    if(efChatState.opened && efChatState.history.length===0){
+        efBotSay("👋 Hi! I'm KANISHKAIMPERIA AI Property Assistant. What can I help you with?",
+            [["🏠 Rent a Property","I want to rent a property"],
+             ["🏡 Buy a Property","I want to buy a property"],
+             ["🔍 Search Property","search properties"],
+             ["📅 Arrange Property Visit","I want to visit a property"],
+             ["🤝 Talk to an RM","talk to an RM"],
+             ["⭐ KANISHKAIMPERIA Services","show me services"]]);
+    }
+}
+
+function efUserSay(text){
+    const body = document.getElementById('efChatBody');
+    const d = document.createElement('div');
+    d.className = 'ef-chat-msg user';
+    d.textContent = text;
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+}
+
+function efBotSay(text, options, cls){
+    const body = document.getElementById('efChatBody');
+    const d = document.createElement('div');
+    d.className = 'ef-chat-msg ' + (cls || 'bot');
+    d.textContent = text;
+    if(options && options.length){
+        const wrap = document.createElement('div');
+        wrap.className = 'ef-chat-opts';
+        options.forEach(o=>{
+            const b = document.createElement('button');
+            b.textContent = o[0];
+            b.onclick = ()=>{ efUserSay(o[0]); efSendToBackend(o[1]); };
+            wrap.appendChild(b);
+        });
+        d.appendChild(wrap);
+    }
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+}
+
+function efShowTyping(){
+    const body = document.getElementById('efChatBody');
+    const d = document.createElement('div');
+    d.className = 'ef-chat-typing';
+    d.id = 'efTypingIndicator';
+    d.textContent = 'KANISHKAIMPERIA AI is typing…';
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+}
+function efHideTyping(){
+    const el = document.getElementById('efTypingIndicator');
+    if(el) el.remove();
+}
+
+function efChatSend(){
+    const inp = document.getElementById('efChatInput');
+    const text = inp.value.trim();
+    if(!text) return;
+    efUserSay(text);
+    inp.value = '';
+    efSendToBackend(text);
+}
+
+function efSendToBackend(message){
+    efChatState.history.push({role:'user', text:message});
+    efShowTyping();
+
+    if(!EF_BACKEND_READY){
+        efHideTyping();
+        efBotSay("KANISHKAIMPERIA AI is temporarily unavailable. Please try again shortly, or request an RM callback.",
+            [["📞 Request RM callback", "talk to an RM"]], "sys");
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: EF_CHAT_ENDPOINT,
+        data: {
+            message: message,
+            session_id: efGetSessionId(),
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response){
+            efHideTyping();
+            // response shape from chatbot_views.chatbot_query_api:
+            // { reply, options, intent, lead_id, lead_score, lead_classification, risk, next_best_action, results? }
+            efBotSay(response.reply, response.options || []);
+        },
+        error: function(){
+            efHideTyping();
+            efBotSay("I'm having trouble reaching KANISHKAIMPERIA's servers right now. I can try again, or you can request an RM callback.",
+                [["🔁 Try again", message], ["📞 Request RM callback", "talk to an RM"]], "sys");
+        }
+    });
+}
 </script>

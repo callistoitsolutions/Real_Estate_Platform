@@ -1,9 +1,79 @@
 import json
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
 
 from seo.models import LocationSEO
+
+
+# =========================================================
+# SITE DOMAIN (used to build canonical_url — set SITE_URL in settings.py)
+# =========================================================
+
+def site_url():
+    return getattr(settings, "SITE_URL", "https://estateflow.nedient.co.in").rstrip("/")
+
+
+# =========================================================
+# NEW: single source of truth for the REAL, working public URL of
+# each page_type. Must match Main_App/urls.py exactly.
+#
+# The previous build_canonical_url() built "/listing/<page_type>/<id>/"
+# (e.g. /listing/rental_residential/EFPRR-34AF4D78/) which does not
+# match ANY route Main_App/urls.py actually defines:
+#
+#   path('listing/<str:listing_type>/<str:category>/<str:slug>/<str:pk>/',
+#        views.property_detail_view, name='property_detail')
+#   path('listing/<str:listing_type>/<str:category>/<str:pk>/',
+#        views.property_detail_view, name='property_detail_legacy')
+#   path('blogs/<slug:slug>/', views.blog_details, name='blog_details')
+#   path('services/<slug:slug>/', views.services_details, name='services_details')
+#
+# Every canonical_url saved before this fix, and every sitemap.xml URL
+# built from it, 404s. This function builds the URL Main_App/urls.py
+# actually resolves. Main_App/sitemaps.py reads canonical_url straight
+# off the saved LocationSEO record instead of reconstructing it a
+# second time, so the two can never drift apart again.
+# =========================================================
+
+PAGE_TYPE_URL_INFO = {
+    "rental_residential":       ("rent", "residential"),
+    "commercial_rental":        ("rent", "commercial"),
+    "pg_coliving":               ("rent", "pg"),
+    "resale_residential":       ("sale", "residential"),
+    "commercial_resale":        ("sale", "commercial"),
+    "plot_sale":                 ("sale", "plot"),          # legacy PlotSaleProperty model
+    "industrial_sale":          ("sale", "industrial"),
+    "agriculture_sale":         ("sale", "agriculture"),
+    "residential_plot_resale":  ("sale", "plot"),
+    "commercial_plot_resale":   ("sale", "plot"),
+    "industrial_plot_resale":   ("sale", "plot"),
+    "agricultural_plot_resale": ("sale", "plot"),
+}
+
+
+def build_public_path(page_type, object_id, slug=None):
+    """Relative path only (no domain) -- used by build_canonical_url()
+    below, and importable by Main_App/sitemaps.py as a fallback for any
+    row that hasn't been backfilled with a LocationSEO record yet."""
+
+    if page_type == "blog":
+        return f"/blogs/{slug}/" if slug else f"/blogs/{object_id}/"
+    if page_type == "service":
+        return f"/services/{slug}/" if slug else f"/services/{object_id}/"
+
+    listing_type, category = PAGE_TYPE_URL_INFO.get(page_type, (None, None))
+    if not listing_type:
+        # Unknown page_type (e.g. "subscription", which has no public
+        # page of its own) -- keep the old shape rather than crash.
+        return f"/listing/{page_type}/{object_id}/"
+
+    if slug:
+        return f"/listing/{listing_type}/{category}/{slug}/{object_id}/"
+    # No slug available -- use the legacy 3-segment route, which
+    # property_detail_view resolves identically to the slugged one.
+    return f"/listing/{listing_type}/{category}/{object_id}/"
 
 
 # =========================================================
@@ -19,7 +89,7 @@ def safe(value):
 
 
 # =========================================================
-# FORMAT PRICE
+# FORMAT PRICE (display string, e.g. "12.5 Lakh")
 # =========================================================
 
 def format_price(value):
@@ -44,6 +114,18 @@ def format_price(value):
 
 
 # =========================================================
+# RAW NUMBER (real numeric price for schema "offers.price" — schema.org
+# wants a plain number, NOT "12.5 Lakh")
+# =========================================================
+
+def raw_number(value):
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+# =========================================================
 # LIMIT SEO DESCRIPTION
 # =========================================================
 
@@ -55,6 +137,87 @@ def seo_limit(text, limit=155):
         return text
 
     return text[:limit].rsplit(" ", 1)[0] + "..."
+
+
+# =========================================================
+# NEW: FAQ SCHEMA — pulled from instance.faqs (every property model in
+# Main_App already has this related_name, auto-generated on save()).
+# This is the single biggest AEO win: without this, Google/AI Overviews
+# have no idea your FAQ content is Q&A at all.
+# =========================================================
+
+def get_faq_schema(instance):
+    faqs_rel = getattr(instance, "faqs", None)
+    if faqs_rel is None:
+        return None
+    try:
+        faqs = list(faqs_rel.all()[:15])
+    except Exception:
+        return None
+    if not faqs:
+        return None
+
+    import re
+    def strip_html(v):
+        return re.sub(r"<[^>]+>", " ", str(v or "")).strip()
+
+    return {
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": strip_html(f.question)[:300],
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": strip_html(f.answer)[:2000],
+                },
+            }
+            for f in faqs
+        ],
+    }
+
+
+# =========================================================
+# NEW: first property image, absolute URL — for schema "image"
+# =========================================================
+
+def get_image_url(instance):
+    images_rel = getattr(instance, "images", None)
+    if images_rel is None:
+        return None
+    try:
+        first = images_rel.first()
+        if first and getattr(first, "image", None):
+            return f"{site_url()}{first.image.url}"
+    except Exception:
+        pass
+    return None
+
+
+# =========================================================
+# NEW: canonical URL — was declared on the model but never populated.
+# Uses ONE consistent pattern shared with seo/sitemaps.py so the two
+# never drift apart: /listing/<page_type>/<id>/
+# =========================================================
+
+def build_canonical_url(page_type, object_id, slug=None):
+    return f"{site_url()}{build_public_path(page_type, object_id, slug)}"
+
+
+# =========================================================
+# NEW: wrap the main entity schema + FAQ schema together as one
+# JSON-LD block using @graph — one <script> tag, both schemas valid.
+# =========================================================
+
+def combine_schema(entity_schema, faq_schema):
+    graph = [entity_schema]
+    if faq_schema:
+        graph.append(faq_schema)
+    if len(graph) == 1:
+        out = {"@context": "https://schema.org"}
+        out.update(entity_schema)
+        return out
+    return {"@context": "https://schema.org", "@graph": graph}
 
 
 # =========================================================
@@ -72,6 +235,10 @@ def create_dynamic_seo(instance, page_type):
         intro_html = ""
         schema = {}
 
+        # values used across many property types for the schema block
+        price_raw = None
+        image_url = get_image_url(instance)
+
         # =====================================================
         # RENTAL RESIDENTIAL
         # =====================================================
@@ -83,6 +250,7 @@ def create_dynamic_seo(instance, page_type):
             locality_area = safe(instance.locality_area)
             city = safe(instance.city)
             rent = format_price(instance.monthly_rent)
+            price_raw = raw_number(instance.monthly_rent)
 
             title = f"{bhk} {property_type} for Rent in {locality_area}, {city}"
 
@@ -109,11 +277,18 @@ def create_dynamic_seo(instance, page_type):
             </p>
             """
 
+            # FIXED: "Residence" -> "RealEstateListing" (valid schema.org type
+            # for a listing), added address + offers (price) + image.
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Residence",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality_area,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -123,9 +298,10 @@ def create_dynamic_seo(instance, page_type):
         elif page_type == "commercial_rental":
 
             property_type = safe(instance.property_type)
-            locality = safe(instance.locality) # FIXED: Changed from area_locality to locality
+            locality = safe(instance.locality)
             city = safe(instance.city)
-            rent = format_price(instance.monthly_rent) # FIXED: Changed from expected_rent to monthly_rent
+            rent = format_price(instance.monthly_rent)
+            price_raw = raw_number(instance.monthly_rent)
 
             title = f"{property_type} for Rent in {locality}, {city}"
 
@@ -150,11 +326,17 @@ def create_dynamic_seo(instance, page_type):
             </p>
             """
 
+            # FIXED: "Office" -> "RealEstateListing"
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Office",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -163,9 +345,10 @@ def create_dynamic_seo(instance, page_type):
 
         elif page_type == "pg_coliving":
 
-            pg_name = safe(instance.property_title) # FIXED: Changed from pg_name to property_title
+            pg_name = safe(instance.property_title)
             locality = safe(instance.locality)
             city = safe(instance.city)
+            price_raw = raw_number(getattr(instance, "monthly_rent", None))
 
             title = f"{pg_name} PG in {city}"
 
@@ -190,11 +373,17 @@ def create_dynamic_seo(instance, page_type):
             </p>
             """
 
+            # FIXED: "Hostel" -> "RealEstateListing"
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Hostel",
+                "@type": "RealEstateListing",
                 "name": pg_name,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -203,12 +392,13 @@ def create_dynamic_seo(instance, page_type):
 
         elif page_type == "resale_residential":
 
-            property_title = safe(instance.property_title) # FIXED: Changed from title to property_title
+            property_title = safe(instance.property_title)
             property_type = safe(instance.property_type)
             locality = safe(instance.locality)
             city = safe(instance.city)
             bhk = safe(instance.bhk)
-            price = format_price(instance.selling_price) # FIXED: Changed from expected_price to selling_price
+            price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
 
             title = f"{bhk} {property_type} for Sale in {locality}, {city}"
 
@@ -236,16 +426,15 @@ def create_dynamic_seo(instance, page_type):
             """
 
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Residence",
+                "@type": "RealEstateListing",
                 "name": property_title,
                 "description": description,
                 "address": {
                     "@type": "PostalAddress",
                     "addressLocality": locality,
                     "addressRegion": city,
-                    "addressCountry": "India"
-                }
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -257,7 +446,8 @@ def create_dynamic_seo(instance, page_type):
             property_type = safe(instance.property_type)
             locality = safe(instance.locality)
             city = safe(instance.city)
-            price = format_price(instance.selling_price) # FIXED: expected_price to selling_price
+            price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
 
             title = f"{property_type} Commercial Property for Sale in {city}"
 
@@ -282,11 +472,17 @@ def create_dynamic_seo(instance, page_type):
             </p>
             """
 
+            # FIXED: "Office" -> "RealEstateListing"
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Office",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -299,6 +495,7 @@ def create_dynamic_seo(instance, page_type):
             locality = safe(instance.plot_locality)
             city = safe(instance.plot_city)
             price = format_price(instance.plot_price)
+            price_raw = raw_number(instance.plot_price)
 
             title = f"Residential Plot for Sale in {locality}, {city}"
 
@@ -322,11 +519,18 @@ def create_dynamic_seo(instance, page_type):
             </p>
             """
 
+            # FIXED: "Landform" -> "RealEstateListing" (Landform is for
+            # geographic features like mountains, not a sellable listing type)
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Landform",
+                "@type": "RealEstateListing",
                 "name": plot_title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -338,7 +542,8 @@ def create_dynamic_seo(instance, page_type):
             property_type = safe(instance.property_type)
             locality = safe(instance.locality)
             city = safe(instance.city)
-            price = format_price(instance.selling_price) # FIXED: expected_price to selling_price
+            price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
 
             title = f"{property_type} Industrial Property in {city}"
 
@@ -363,11 +568,18 @@ def create_dynamic_seo(instance, page_type):
             </p>
             """
 
+            # NOTE: "IndustrialEstablishment" (a business, e.g. a running
+            # factory) isn't right for a listing being sold either.
             schema = {
-                "@context": "https://schema.org",
-                "@type": "IndustrialEstablishment",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -378,7 +590,8 @@ def create_dynamic_seo(instance, page_type):
 
             locality = safe(instance.village)
             city = safe(instance.city)
-            price = format_price(instance.selling_price) # FIXED: expected_price to selling_price
+            price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
 
             title = f"Agricultural Land for Sale in {locality}, {city}"
 
@@ -404,10 +617,15 @@ def create_dynamic_seo(instance, page_type):
             """
 
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Landform",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -420,6 +638,7 @@ def create_dynamic_seo(instance, page_type):
             locality = safe(instance.locality)
             city = safe(instance.city)
             price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
             plot_area = safe(instance.plot_area)
 
             title = f"Residential Plot for Sale in {locality}, {city}"
@@ -447,10 +666,15 @@ def create_dynamic_seo(instance, page_type):
             """
 
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Landform",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -463,6 +687,7 @@ def create_dynamic_seo(instance, page_type):
             locality = safe(instance.locality)
             city = safe(instance.city)
             price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
             zone_type = safe(instance.commercial_zone_type)
 
             title = f"Commercial Plot for Sale in {locality}, {city}"
@@ -490,10 +715,15 @@ def create_dynamic_seo(instance, page_type):
             """
 
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Landform",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -506,6 +736,7 @@ def create_dynamic_seo(instance, page_type):
             locality = safe(instance.locality)
             city = safe(instance.city)
             price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
             estate_name = safe(instance.industrial_estate_name)
 
             title = f"Industrial Plot for Sale in {locality}, {city}"
@@ -533,10 +764,15 @@ def create_dynamic_seo(instance, page_type):
             """
 
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Landform",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
 
         # =====================================================
@@ -549,6 +785,7 @@ def create_dynamic_seo(instance, page_type):
             locality = safe(instance.locality)
             city = safe(instance.city)
             price = format_price(instance.selling_price)
+            price_raw = raw_number(instance.selling_price)
             area_unit = safe(instance.agr_area_unit)
 
             title = f"Agricultural Land for Sale in {locality}, {city}"
@@ -576,15 +813,16 @@ def create_dynamic_seo(instance, page_type):
             """
 
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Landform",
+                "@type": "RealEstateListing",
                 "name": title,
                 "description": description,
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": locality,
+                    "addressRegion": city,
+                    "addressCountry": "IN",
+                },
             }
-
-        # =====================================================
-        # BLOG
-        # =====================================================
 
         # =====================================================
         # BLOG
@@ -598,11 +836,9 @@ def create_dynamic_seo(instance, page_type):
             short_desc = safe(instance.short_description)
             pub_date = safe(instance.published_date)
 
-            # Dynamically add category to the title if it exists
             title_suffix = f" - {category}" if category else ""
             title = f"{blog_title}{title_suffix} | Real Estate Blog"
 
-            # Use the newly added short_description for better SEO
             description = seo_limit(
                 short_desc if short_desc else f"Read expert insights about {blog_title}."
             )
@@ -615,9 +851,8 @@ def create_dynamic_seo(instance, page_type):
             <h1>{title}</h1>
             """
 
-            # Enrich the schema with author and publish date for rich search results
+            # BlogPosting is a valid, correct schema type — kept as-is.
             schema = {
-                "@context": "https://schema.org",
                 "@type": "BlogPosting",
                 "headline": blog_title,
                 "description": description,
@@ -626,7 +861,7 @@ def create_dynamic_seo(instance, page_type):
                     "name": author if author else "PropCRM Team"
                 }
             }
-            
+
             if pub_date:
                 schema["datePublished"] = str(pub_date)
 
@@ -635,21 +870,19 @@ def create_dynamic_seo(instance, page_type):
         # =====================================================
 
         elif page_type == "service":
-            
+
             service_title = safe(instance.title)
             short_desc = safe(instance.short_description)
             category = safe(instance.category)
 
             title = f"{service_title} Property Service"
 
-            # Use the newly added short_description for better SEO
             description = seo_limit(
                 short_desc if short_desc else f"Professional {service_title} services."
             )
 
             keyword = service_title
 
-            # Include category in secondary keywords
             cat_keyword = f", {category.replace('_', ' ')}" if category else ""
             secondary_keywords = f"property services{cat_keyword}"
 
@@ -657,13 +890,13 @@ def create_dynamic_seo(instance, page_type):
             <h1>{title}</h1>
             """
 
+            # Service is a valid, correct schema type — kept as-is.
             schema = {
-                "@context": "https://schema.org",
                 "@type": "Service",
                 "name": service_title,
                 "description": description,
             }
-            
+
             if category:
                 schema["category"] = category
 
@@ -674,6 +907,9 @@ def create_dynamic_seo(instance, page_type):
         elif page_type == "subscription":
 
             title = f"{safe(instance.package_name)} Subscription Plan"
+            price_raw = raw_number(
+                getattr(instance, "plan_offer_price", None) or getattr(instance, "plan_base_price", None)
+            )
 
             description = seo_limit(
                 f"Choose {safe(instance.package_name)} subscription plan."
@@ -687,9 +923,10 @@ def create_dynamic_seo(instance, page_type):
             <h1>{title}</h1>
             """
 
+            # FIXED: bare "Offer" as top-level @type isn't standard usage —
+            # "Product" with a nested "offers" is the correct schema.org pattern.
             schema = {
-                "@context": "https://schema.org",
-                "@type": "Offer",
+                "@type": "Product",
                 "name": safe(instance.package_name),
                 "description": description,
             }
@@ -698,10 +935,42 @@ def create_dynamic_seo(instance, page_type):
             return
 
         # =====================================================
+        # NEW: attach image + price/offers to schema where applicable
+        # (kept out of each block above to avoid repeating this 14 times)
+        # =====================================================
+
+        if image_url:
+            schema["image"] = image_url
+
+        if price_raw:
+            schema["offers"] = {
+                "@type": "Offer",
+                "price": price_raw,
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+            }
+
+        # =====================================================
+        # NEW: FAQ schema + canonical URL
+        # =====================================================
+
+        faq_schema = get_faq_schema(instance)
+
+        # NEW: instance.id crashes for any model whose real primary key
+        # field is named something else -- PlotSaleProperty's PK is
+        # plot_property_id, not id, so this line previously raised
+        # AttributeError for every plot-sale property (silently caught
+        # by the try/except in signals.py, meaning those rows have
+        # NEVER gotten an SEO record). instance.pk always resolves to
+        # the correct primary key value regardless of its field name.
+        canonical_url = build_canonical_url(page_type, instance.pk, slugify(title))
+        final_schema = combine_schema(schema, faq_schema)
+
+        # =====================================================
         # SAVE SEO
         # =====================================================
 
-        key = f"{page_type}-{instance.id}"
+        key = f"{page_type}-{instance.pk}"
 
         LocationSEO.objects.update_or_create(
 
@@ -713,7 +982,7 @@ def create_dynamic_seo(instance, page_type):
 
                 "content_type": ContentType.objects.get_for_model(instance),
 
-                "object_id": str(instance.id), # ensuring object_id is saved as a string to accommodate character-based UUIDs
+                "object_id": str(instance.pk),
 
                 "meta_title": title[:255],
 
@@ -725,7 +994,11 @@ def create_dynamic_seo(instance, page_type):
 
                 "slug": slugify(title),
 
-                "schema_json": json.dumps(schema),
+                # NEW: was always blank before
+                "canonical_url": canonical_url,
+
+                # NOW includes FAQPage schema via @graph when FAQs exist
+                "schema_json": json.dumps(final_schema),
 
                 "intro_html": intro_html,
 
