@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password | PropCRM[cite: 3]</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    :root {
+      --primary: #006ce4;
+      --primary-dark: #0050a8;
+      --accent: #f97316;
+      --accent-dark: #ea580c;
+      --bg-main: #f8fafc;
+      --text-dark: #1e293b;
+      --text-body: #475569;
+      --border: #e2e8f0;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    /* BODY */
+    body {
+      min-height: 100vh;
+      background: var(--bg-main);
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: var(--text-body);
+      overflow-x: hidden;
+    }
+
+    /* BRAND LOGO */
+    .brand-logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 24px;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-logo span {
+      color: var(--accent);
+    }
+
+    /* LOGIN CARD */
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 440px;
+      padding: 40px 32px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .form-title {
+      font-weight: 800;
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+    
+    .form-subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-body);
+      margin-bottom: 28px;
+    }
+
+    /* INPUT STYLES */
+    .form-control, .form-select {
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 15px;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      font-family: "Poppins", sans-serif;
+      box-shadow: none !important;
+      transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1) !important;
+    }
+    
+    .form-floating label {
+      color: var(--text-body);
+      font-size: 0.9rem;
+      padding-left: 15px;
+    }
+    .form-label-top {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    /* LOGIN BUTTON */
+    .btn-login {
+      width: 100%;
+      font-weight: 800;
+      font-size: 1rem;
+      background: var(--primary);
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      color: white;
+      transition: 0.2s;
+      margin-top: 10px;
+    }
+    .btn-login:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 108, 228, 0.25);
+    }
+    .btn-login:disabled {
+      background: #cbd5e1;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* LINKS */
+    .bottom-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .bottom-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+    .bottom-link a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    /* PROGRESSIVE FLOW UTILS */
+    .auth-step { display: none; }
+
+    .auth-step.active-step { display: block; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .back-btn { background: none; border: none; color: var(--text-body); font-size: 0.85rem; font-weight: 600; padding: 0; margin-bottom: 15px; transition: 0.2s; }
+    .back-btn:hover { color: var(--primary); }
+
+    .otp-container { display: flex; gap: 12px; justify-content: center; margin: 20px 0; }
+    .otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--border); color: var(--text-dark); background: white; }
+
+    .otp-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+
+    /* OTP TIMER & RESEND */
+    .otp-timer-box {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-body);
+      margin-bottom: 15px;
+    }
+    .resend-link {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .resend-link:hover {
+      text-decoration: underline;
+    }
+    .resend-link.disabled {
+      color: #cbd5e1;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-card">
+    
+    <div class="brand-logo">
+      🏠 Prop<span>CRM</span>
+    </div>
+
+    <div class="form-title">Forgot Password</div>
+
+    <form method="post" onsubmit="return false;">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+      <!-- STEP 1: IDENTIFIER INPUT -->
+      <!-- STEP 1: IDENTIFIER INPUT -->
+      <div id="step-1-email" class="auth-step active-step">
+        <label class="form-label-top"><span id="identifierLabelText">Email Address</span> <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input type="email" id="forgot_email" class="form-control" placeholder="name@example.com" required>
+          <label id="floatingLabelText">Email Address</label>
+        </div>
+
+        <!-- Channel Selection Options -->
+        <label class="form-label-top">Send OTP Via <span class="required">*</span></label>
+        <div class="d-flex gap-4 mb-4">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="otp_channel" id="channel_email" value="email" checked onchange="switchInputType()">
+            <label class="form-check-label fw-medium text-dark" for="channel_email">Email</label>
+          </div>
+          {% comment %} <div class="form-check">
+            <input class="form-check-input" type="radio" name="otp_channel" id="channel_whatsapp" value="whatsapp" onchange="switchInputType()">
+            <label class="form-check-label fw-medium text-dark" for="channel_whatsapp">WhatsApp</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="otp_channel" id="channel_sms" value="sms" onchange="switchInputType()">
+            <label class="form-check-label fw-medium text-dark" for="channel_sms">SMS</label>
+          </div> {% endcomment %}
+        </div>
+
+        <button type="button" class="btn-login" onclick="checkEmailExists(this)">Continue</button>
+        
+      </div>
+
+      <!-- STEP 2: OTP VERIFICATION -->
+      <div id="step-2-otp" class="auth-step">
+        <button type="button" class="back-btn" onclick="goToStepAuth('step-1-email')"><i class="bi bi-arrow-left"></i> Change Identifier</button>
+        <div class="form-subtitle text-start mb-2">We've sent a 4-digit verification code to <strong id="display_otp_email" class="text-dark"></strong>.</div>
+        
+        <div class="otp-container">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+        </div>
+
+        <div class="otp-timer-box">
+          <span id="timerText">Resend OTP in <strong id="countdown">40</strong>s</span>
+          <a id="resendBtn" class="resend-link disabled" onclick="resendOTPAction()">Resend OTP</a>
+        </div>
+
+        <button type="button" class="btn-login" onclick="verifyOTP(this)" style="background: var(--accent);">Verify OTP</button>
+      </div>
+
+      <!-- STEP 3: RESET PASSWORD -->
+      <div id="step-3-details" class="auth-step">
+        <div class="form-subtitle text-start text-success fw-bold mb-3"><i class="bi bi-check-circle-fill"></i> Verified! Update your password.</div>
+        
+        <label class="form-label-top">Password <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input type="password" id="forgot_pass" class="form-control" placeholder="Enter Password">
+          <label>Password</label>
+        </div>
+
+        <label class="form-label-top">Confirm Password <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input type="password" id="forgot_com_pass" class="form-control" placeholder="Enter Confirm Password">
+          <label>Confirm Password</label>
+        </div>
+
+        <button type="button" class="btn-login" onclick="processProgRegistration(this)" style="background: #10b981;">Update Password</button>
+
+      </div>
+
+      <div class="bottom-link">
+        Remember Password? <a href="{% url 'login' %}">Return to Login</a>
+      </div>
+    </form>
+
+  </div>
+
+<script>
+  
+    let otpTimerInterval = null;
+
+    // Tab switching engine
+
+    function goToStepAuth(stepId) {
+        $('.auth-step').removeClass('active-step');
+        $('#' + stepId).addClass('active-step');
+    }
+
+    // Auto-tab assistant for verification boxes
+
+    function moveToNext(current, event) {
+        if (current.value.length >= current.maxLength) {
+            let next = $(current).next('.otp-input');
+            if (next.length) next.focus();
+        }
+        if (event.key === "Backspace" && current.value.length === 0) {
+            let prev = $(current).prev('.otp-input');
+            if (prev.length) prev.focus();
+        }
+    }
+
+    // Switch input field type, placeholder, and label dynamically based on selected channel
+
+    function switchInputType() {
+        let channel = $('input[name="otp_channel"]:checked').val();
+        let $input = $('#forgot_email');
+        
+        $input.val(''); 
+
+        if (channel === 'email') {
+            $input.attr('type', 'email').attr('placeholder', 'name@example.com').removeAttr('maxlength');
+            $('#identifierLabelText').text('Email Address');
+            $('#floatingLabelText').text('Email Address');
+        } else {
+            $input.attr('type', 'tel').attr('placeholder', '10-digit mobile number').attr('maxlength', '10');
+            let channelName = channel === 'whatsapp' ? 'WhatsApp' : 'Mobile';
+            $('#identifierLabelText').text(`${channelName} Number`);
+            $('#floatingLabelText').text(`${channelName} Number`);
+        }
+    }
+
+    // STEP 1: Verify Profile Existence & Format Check (Email or Mobile)
+
+    function checkEmailExists(_this) {
+        let rawVal = $('#forgot_email').val();
+        let identifier = rawVal.trim();
+        let selectedChannel = $('input[name="otp_channel"]:checked').val();
+        
+        if (!identifier) {
+            return swal({icon: "warning", title: "Missing Input", text: `Please enter your ${selectedChannel === 'email' ? 'email address' : 'mobile number'}.`});
+        }
+
+        if (selectedChannel === 'email') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (rawVal.includes(' ') || !emailRegex.test(identifier)) {
+                return swal({icon: "warning", title: "Invalid Format", text: "Please enter a valid email address without spaces."});
+            }
+        } else {
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(identifier)) {
+                return swal({icon: "warning", title: "Invalid Format", text: "Please enter a valid 10-digit mobile number."});
+            }
+        }
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Checking...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Check_Email_Api' %}", 
+            data: { 'email': identifier, 'channel': selectedChannel, 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+            success: function(response) {
+                $(_this).prop("disabled", false).html(btnText);
+                if(response.exists) {
+                  sendOTP(identifier, selectedChannel); 
+                } else {
+                    swal({icon: "error", title: "Not Found", text: "This identifier is not registered in our records."});
+                }
+            },
+            error: function() {
+                $(_this).prop("disabled", false).html(btnText);
+                swal({icon: "error", title: "Server Error", text: "Could not access profile records."});
+            }
+        });
+    }
+
+    // STEP 2B (Trigger): Request Verification Token & Start 40s Timer
+    
+    function sendOTP(identifier, channel) {
+        $('#display_otp_email').text(identifier + ` (via ${channel.toUpperCase()})`);
+        $('.otp-input').val(''); 
+        goToStepAuth('step-2-otp');
+        startOtpCountdown();
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Send_Otp_Forgot_Api' %}",
+            data: { 'email': identifier, 'channel': channel, 'csrfmiddlewaretoken': '{{ csrf_token }}' }
+        });
+    }
+
+    // 40 Seconds Countdown Logic
+
+    function startOtpCountdown() {
+        let timeLeft = 40;
+        $('#countdown').text(timeLeft);
+        $('#timerText').show();
+        $('#resendBtn').addClass('disabled').removeAttr('onclick');
+
+        if (otpTimerInterval) clearInterval(otpTimerInterval);
+
+        otpTimerInterval = setInterval(() => {
+            timeLeft--;
+            $('#countdown').text(timeLeft);
+            if (timeLeft <= 0) {
+                clearInterval(otpTimerInterval);
+                $('#timerText').hide();
+                $('#resendBtn').removeClass('disabled').attr('onclick', 'resendOTPAction()');
+            }
+        }, 1000);
+    }
+
+    // Resend OTP Trigger Option
+
+    function resendOTPAction() {
+        let identifier = $('#forgot_email').val().trim();
+        let selectedChannel = $('input[name="otp_channel"]:checked').val();
+        
+        swal({
+            icon: "info",
+            title: "Resending OTP",
+            text: `A new verification code has been sent via ${selectedChannel.toUpperCase()}.`,
+            timer: 2000,
+            button: false
+        });
+        startOtpCountdown();
+        
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Send_Otp_Forgot_Api' %}",
+            data: { 'email': identifier, 'channel': selectedChannel, 'csrfmiddlewaretoken': '{{ csrf_token }}' }
+        });
+    }
+
+    // STEP 2B (Execution): Code Validation Path
+
+    function verifyOTP(_this) {
+        let otp = "";
+        $('.otp-input').each(function() { otp += $(this).val(); });
+        if(otp.length < 4) return swal({icon: "warning", title: "Incomplete Code", text: "Please enter the full otp."});
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Checking...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Verify_Otp_Forgot_Api' %}", 
+            data: { 'email': $('#forgot_email').val(), 'otp': otp, 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+            success: function(response) {
+                $(_this).prop("disabled", false).html(btnText);
+                if(response.valid) {
+                    if (otpTimerInterval) clearInterval(otpTimerInterval);
+                    goToStepAuth('step-3-details');
+                } else {
+                    swal({icon: "error", title: "Validation Failed", text: "OTP mismatch. Check again."});
+                }
+            }
+        });
+    }
+
+    // STEP 3 (Execution): Account Onboarding Path
+
+    function processProgRegistration(_this) {
+        let identifier = $('#forgot_email').val();
+        let password = $('#forgot_pass').val();
+        let com_password = $('#forgot_com_pass').val();
+
+        if(password != com_password) {
+            return swal({icon: "warning", title: "Password mismatch.", text: "Passwords do not match"});
+        }
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Provisioning...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Update_Pass_Forgot_Api' %}", 
+            data: { 'email': identifier, 'password': password, 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+            success: function(response) {
+                if(response.status == '1' || response.status == 'success') {
+                  swal({
+                        icon: "success",
+                        title: "Password Updated!",
+                        text: response.msg || "Your password has been changed successfully.",
+                        button: "OK"
+                    }).then(() => {
+                        window.location.href = "{% url 'login' %}";
+                    });
+                } else {
+                    $(_this).prop("disabled", false).html(btnText);
+                    swal({icon: "error", title: "Update Password Failed", text: response.msg || "Registration rejected."});
+                }
+            },
+            error: function() {
+                $(_this).prop("disabled", false).html(btnText);
+                swal({icon: "error", title: "Server Error", text: "Onboarding tracking encountered a failure."});
+            }
+        });
+    }
+
+  </script>
+
+</body>
+</html>   

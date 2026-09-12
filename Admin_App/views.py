@@ -655,38 +655,38 @@ def Payments_List_Admin(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord")
+        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").order_by('-id')
         landlord_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").count()
         landlord_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Done").count()
         landlord_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Cancel").count()
         landlord_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status__in=['Pending','Hold']).count()
 
-        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent")
+        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").order_by('-id')
         agent_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").count()
         agent_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Done").count()
         agent_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Cancel").count()
         agent_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status__in=['Pending','Hold']).count()
 
 
-        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder")
+        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").order_by('-id')
         agency_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").count()
         agency_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Done").count()
         agency_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Cancel").count()
         agency_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status__in=['Pending','Hold']).count()
 
-        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant")
+        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").order_by('-id')
         tenant_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").count()
         tenant_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Done").count()
         tenant_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Cancel").count()
         tenant_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status__in=['Pending','Hold']).count()
 
-        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer")
+        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").order_by('-id')
         buyer_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").count()
         buyer_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Done").count()
         buyer_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Cancel").count()
         buyer_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status__in=['Pending','Hold']).count()
 
-        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor")
+        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").order_by('-id')
         vendor_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").count()
         vendor_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Done").count()
         vendor_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Cancel").count()
@@ -2725,7 +2725,7 @@ def commercial_list(request):
     )
 
     # ════════════════════════════════════════════════
-    # ⛔ EXCEL / CSV DOWNLOAD BLOCK REMOVED
+    #  EXCEL / CSV DOWNLOAD BLOCK REMOVED
     # (the openpyxl / csv export code that used to live here has been
     #  deleted per request — this view no longer serves file downloads)
     # ════════════════════════════════════════════════

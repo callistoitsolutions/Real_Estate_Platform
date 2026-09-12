@@ -3514,7 +3514,7 @@ def import_residential_excel_agency(request):
                 "missing_fields": [
                     "This row still contains the example/sample data from the "
                     "downloaded template. Replace it with your actual property "
-                    "details (or delete the row) before uploading."
+                     "details (or delete the row) before uploading."
                 ],
             })
             continue
@@ -8883,6 +8883,87 @@ def pg_coliving_delete_agency(request, pk):
             'message': str(e)
         })
 
+############# Views start for subscription for boost property for agency ##############
+
+def Boost_Property_Agency(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    subscriptions_obj = Subscription_Details.objects.filter(plan_for="Agents/Agency")
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'subscriptions_obj':subscriptions_obj
+    }
+    
+    return render(request, "agency_panel/Boost_Property/boost_property.html", context)
+
+############ Views end for subscription for boost property for agency #################
+
+
+############ Views start for buy plan for agency/builder #######################
+
+def Buy_Plan_Agency(request,id):
+    
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+    subscription = Subscription_Details.objects.get(id=id)
+
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'subscription':subscription
+    }
+    
+    return render(request, "agency_panel/Boost_Property/buy_package.html", context)
+
+
+########### Views end for buy plan for agency/builder #############################
 
 @require_POST
 def pg_bulk_delete_agency(request):
@@ -9020,7 +9101,7 @@ def pg_bulk_delete_agency(request):
 
 
 def industrial_plot_resale_agency(request):
-   # 1. Retrieve BOTH possible session IDs from the browser
+    # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')

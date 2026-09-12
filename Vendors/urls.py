@@ -14,6 +14,14 @@ urlpatterns = [
 
     path('Update_Profile_Vendor',views.Update_Profile_Vendor,name='Update_Profile_Vendor'),
 
+    ############## urls for vendor subscriptions ###############################
+
+    path('Subscriptions_Vendor',views.Subscriptions_Vendor,name='Subscriptions_Vendor'),
+
+    ########## urls for buy plan for vendor #######################
+
+    path('Buy_Plan_Vendor/<int:id>', views.Buy_Plan_Vendor, name='Buy_Plan_Vendor'),
+    
 ]
 
     

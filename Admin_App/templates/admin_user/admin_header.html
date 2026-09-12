@@ -1546,13 +1546,22 @@
                 </a>
             </li>
 
+            <li class="menu-section-title" style="color:white;">Property Analytics</li>
+
+            <li class="menu-item">
+                <a href="{% url "property_analytics" %}" class="menu-link" id="FAQ">
+                    <i class="fas fa-question-circle menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Property Analytics</span>
+                </a>
+            </li>
+
             <li class="menu-section-title" style="color:white;">NOTIFICATION DETAILS</li>
             
             <li class="menu-item">
                 <a href="{% url "Listing_Approval_Admin" %}" class="menu-link" id="List_Approve">
                     <i class="fas fa-archive menu-icon"></i>
                     <span class="menu-text" style="color:white;">Listing Approval 
-                        {% if total_count == 0 %}
+                        {% if total_count_alert == 0 %}
                         
                         {% else %}
                             <span class="badge bg-danger" style="animation: pulseGlow 1.5s infinite ease-in-out; font-weight: bold; display: inline-block;">{{total_count}}</span>
@@ -1722,14 +1731,7 @@
 
 
 
-            <li class="menu-section-title" style="color:white;">Property Analytics</li>
-
-            <li class="menu-item">
-                <a href="{% url "property_analytics" %}" class="menu-link" id="FAQ">
-                    <i class="fas fa-question-circle menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Property Analytics</span>
-                </a>
-            </li>
+            
             
 
             <li class="menu-section-title" style="color:white;">SEO & MARKETING</li>

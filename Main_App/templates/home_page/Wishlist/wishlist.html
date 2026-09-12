@@ -124,14 +124,14 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
         
         <div class="pc-badges">
           {% if p.property_object.is_ai_match %}
-          <span class="badge" style="background: linear-gradient(45deg, #6366f1, #a855f7); color: white;">
+          <span class="badge" style="back   ground: linear-gradient(45deg, #6366f1, #a855f7); color: white;">
             <i class="bi bi-robot"></i> AI Match
           </span>
           {% endif %}
 
           {% if p.property_object.is_new %}<span class="badge b-new">🆕 New</span>{% endif %}
           
-          <span class="badge b-feat">{{ p.property_object.category }}</span>
+          <span class="badge b-feat">{{ .property_object.category }}</span>
         </div>
 
         {% if user_obj %}

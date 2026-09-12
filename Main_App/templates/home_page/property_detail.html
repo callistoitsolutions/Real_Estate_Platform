@@ -1113,7 +1113,6 @@ a { text-decoration: none; color: inherit; }
   {% endif %}
 
 
-
   <div class="prop-section" id="sec-pricing">
     <div class="prop-section-title"><div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div> Pricing Details</div>
     <div class="spec-grid">
@@ -1185,6 +1184,7 @@ a { text-decoration: none; color: inherit; }
       {% endif %}
     </div>
   </div>
+
   {% endif %}
 
   {% if category == 'commercial' %}
@@ -2157,6 +2157,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 <!-- ═══ HOUSING.COM STYLE MEDIA VIEWER MODAL ═══ -->
+ 
 <div class="modal fade housing-media-modal" id="housingMediaModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -2301,7 +2302,6 @@ document.addEventListener('DOMContentLoaded', function () {
                <option value="Landlord">Landlord</option>
                <option value="Agent">Agent</option>
                <option value="Agency/Builder">Agencies / Builder</option>
-               <option value="Vendor">Vendor</option>
              </select>
           </div>
           <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background:#10b981;color:white;font-weight:700;padding:12px;border-radius:10px;">Create Account &amp; Continue</button>
@@ -2577,8 +2577,15 @@ function Send_Enquiry(_this) {
   var enquiry_phone = $("#enquiry_phone").val().trim();
   var country_code = $("#country_code").val();
   var whatsapp_consent = $("#whatsappConsent").is(":checked");
-  if (enquiry_name === "" || enquiry_phone === "") { Swal.fire({title: 'Error', text: 'Please fill the required fields.', icon: 'error'}); return; }
-  if (!whatsapp_consent) { Swal.fire({title: 'Consent Required', text: 'You must agree to the consent to proceed.', icon: 'warning'}); return; }
+  
+  if (enquiry_name === "" || enquiry_phone === "") { 
+      Swal.fire({title: 'Error', text: 'Please fill the required fields.', icon: 'error'}); 
+      return; 
+  }
+  if (!whatsapp_consent) { 
+      Swal.fire({title: 'Consent Required', text: 'You must agree to the consent to proceed.', icon: 'warning'}); 
+      return; 
+  }
 
   var fd = new FormData();
   fd.append('enquiry_name', enquiry_name);
@@ -2586,19 +2593,40 @@ function Send_Enquiry(_this) {
   fd.append('enquiry_phone', enquiry_phone);
   fd.append('whatsapp_consent', whatsapp_consent ? 'yes' : 'no');
   fd.append('property_group', '{{ property_group }}');
-  fd.append('category', '{{ category }}');
+  fd.append('listing_type', '{{ listing_type }}');
+  fd.append('category', '{{ p.category }}');
+  fd.append('sub_category', '{{ original.sub_category }}');
   fd.append('property_id', '{{ p.id }}');
   fd.append('user_id', '{{ user_obj.id }}');
 
+  // Append UTM parameters from hidden inputs
+  fd.append('utm_source', $('#enquiry_utm_source').val());
+  fd.append('utm_medium', $('#enquiry_utm_medium').val());
+  fd.append('utm_campaign', $('#enquiry_utm_campaign').val());
+  fd.append('utm_term', $('#enquiry_utm_term').val());
+  fd.append('utm_content', $('#enquiry_utm_content').val());
+  fd.append('utm_path', $('#enquiry_utm_path').val());
+  fd.append('page_url', $('#enquiry_page_url').val());
+
   $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
   $.ajax({
-    method: "POST", url: "{% url 'Send_Property_Enquiry' %}", data: fd, processData: false, contentType: false,
+    method: "POST", 
+    url: "{% url 'Send_Property_Enquiry' %}", 
+    data: fd, 
+    processData: false, 
+    contentType: false,
     success: function (response) {
       $(_this).prop("disabled", false).html(`Get Contact Details`);
-      if (response.status == '1') { Swal.fire({title: 'Success!', text: response.msg, icon: 'success'}).then((r) => { if (r.isConfirmed) location.reload(); }); }
-      else { Swal.fire({title: 'Error', text: response.msg, icon: 'error'}); }
+      if (response.status == '1') { 
+          Swal.fire({title: 'Success!', text: response.msg, icon: 'success'}).then((r) => { if (r.isConfirmed) location.reload(); }); 
+      } else { 
+          Swal.fire({title: 'Error', text: response.msg, icon: 'error'}); 
+      }
     },
-    error: function() { $(_this).prop("disabled", false).html(`Get Contact Details`); Swal.fire({title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error'}); }
+    error: function() { 
+        $(_this).prop("disabled", false).html(`Get Contact Details`); 
+        Swal.fire({title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error'}); 
+    }
   });
 }
 

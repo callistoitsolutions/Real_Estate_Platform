@@ -666,8 +666,8 @@ class RentalResidentialProperty(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     # =====================================================
     # BROKERAGE LABEL — computed, never stored.
@@ -1328,8 +1328,8 @@ class CommercialRentalProperty(models.Model):
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     BROKERAGE_LABEL_MAP = {
         "admin": "EstateFlow Service Fee",
@@ -1827,8 +1827,8 @@ class PGColivingProperty(models.Model):
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     # ═══════════════════════════════════════════════════════════════════════
     #  BROKERAGE LOGIC

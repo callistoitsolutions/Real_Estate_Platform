@@ -1416,7 +1416,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="action-buttons" style="display: flex; gap: 4px;">
                         <a href="{% url 'pg_coliving_view_agent' prop.id %}" class="btn-action btn-view" title="View Property"><i class="fas fa-eye"></i></a>
                         <button class="btn-action btn-edit" onclick="window.location.href='{% url 'pg_agent_edit' prop.id %}'"><i class="fas fa-edit"></i></button>
-<button class="btn-action btn-delete" onclick="deletePG('{{ prop.id }}', '{% url "pg_coliving_delete_agent" prop.id %}')" title="Delete Property"><i class="fas fa-trash"></i></button>
+                        <button class="btn-action btn-delete" onclick="deletePG('{{ prop.id }}', '{% url "pg_coliving_delete_agent" prop.id %}')" title="Delete Property"><i class="fas fa-trash"></i></button>
+
+                        <a href="{% url "Boost_Property_Agent" %}" class="btn-action btn-edit" title="Boost Property" style="background-color:green;">
+                            <i class="fas fa-rocket"></i>
+                        </a>
+
                     </div>
                 </td>
             </tr>

@@ -1401,6 +1401,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         <a href="{% url 'pg_coliving_view_agency' prop.id %}" class="btn-action btn-view" title="View Property"><i class="fas fa-eye"></i></a>
                         <button class="btn-action btn-edit" onclick="window.location.href='{% url 'pg_agency_edit' prop.id %}'"><i class="fas fa-edit"></i></button>
                         <button class="btn-action btn-delete" onclick="deletePG('{{ prop.id }}')" title="Delete Property"><i class="fas fa-trash"></i></button>
+
+                        <a href="{% url "Boost_Property_Agency" %}" class="btn-action btn-edit" title="Boost Property" style="background-color:green;">
+                            <i class="fas fa-rocket"></i>
+                        </a>
+                        
                     </div>
                 </td>
             </tr>

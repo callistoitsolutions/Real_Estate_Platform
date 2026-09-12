@@ -5,24 +5,24 @@ from Admin_App.models import *
 
 def admin_alerts(request):
 
-    rental_count = RentalResidentialProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    commercial_count = CommercialRentalProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    pg_count= PGColivingProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    resale_count = ResaleResidentialProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    commercial_resale_count = CommercialResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    rental_count_alert = RentalResidentialProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    commercial_count_alert = CommercialRentalProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    pg_count_alert = PGColivingProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    resale_count_alert = ResaleResidentialProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    commercial_resale_count_alert = CommercialResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
         
-    industrial_resale_count = IndustrialResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    agricultural_resale_count = AgriculturalResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    industrial_resale_count_alert = IndustrialResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    agricultural_resale_count_alert = AgriculturalResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
         
     # ── NEW: Plot Resale modules (Residential Plot/ Commercial Plot/ Industrial Plot / Agricultural Plot) ──
 
-    residential_plot_count = ResidentialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    commercial_plot_count = CommercialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    industrial_plot_count = IndustrialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
-    agricultural_plot_count = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    residential_plot_count_alert = ResidentialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    commercial_plot_count_alert = CommercialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    industrial_plot_count_alert = IndustrialPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
+    agricultural_plot_count_alert = AgriculturalPlotResaleProperty.objects.filter(is_deleted=False,approval_status="Pending").count()
 
 
-    total_count = rental_count + commercial_count + pg_count + resale_count +   commercial_resale_count + industrial_resale_count + agricultural_resale_count + residential_plot_count + commercial_plot_count + industrial_plot_count + agricultural_plot_count
+    total_count_alert = rental_count_alert + commercial_count_alert + pg_count_alert + resale_count_alert +   commercial_resale_count_alert + industrial_resale_count_alert + agricultural_resale_count_alert + residential_plot_count_alert + commercial_plot_count_alert + industrial_plot_count_alert + agricultural_plot_count_alert
 
     landlord_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Pending").count()
     agent_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Pending").count()
@@ -35,7 +35,7 @@ def admin_alerts(request):
 
 
     return {
-        'total_count':total_count,
+        'total_count':total_count_alert,
         'total_pending_count':total_pending_count
     }
 

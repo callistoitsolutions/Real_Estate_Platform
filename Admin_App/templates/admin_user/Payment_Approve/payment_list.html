@@ -400,7 +400,7 @@
                                         </a>
 
                                         {% if prop.plan_status == "Done" %}
-                                            <a href=""{% url "Payment_Invoice_Admin" prop.id %} class="btn-action btn-edit" title="Download Invoice">
+                                            <a href="{% url "Payment_Invoice_Admin" prop.id %}" class="btn-action btn-edit" title="Download Invoice">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                         {% endif %}

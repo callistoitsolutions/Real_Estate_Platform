@@ -271,6 +271,9 @@
       <div class="bottom-link">
         Need assistance? <a href="{% url 'index' %}">Return to Home</a>
       </div>
+      <div class="bottom-link">
+        Don't Remember Password? <a href="{% url "Forgot_Password" %}">Forgot Password</a>
+      </div>
     </form>
 
   </div>
@@ -348,6 +351,7 @@
     }
 
     // STEP 2A (Execution): Password Login Path
+    
     function processProgLogin(_this) {
         let email = $('#flow_email').val();
         let password = $('#flow_password').val();
