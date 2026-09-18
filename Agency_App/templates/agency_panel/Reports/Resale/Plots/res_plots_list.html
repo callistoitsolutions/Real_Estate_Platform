@@ -506,6 +506,11 @@
                             <a href="{% url 'residential_plot_resale_agency_update' p.id %}" class="action-btn edit" title="Edit {{ p.id }}"><i class="fas fa-edit"></i></a>
                             <button type="button" class="action-btn del" onclick="confirmPlotDelete('{{ p.id }}')" title="Move to Recycle Bin"><i class="fas fa-trash"></i></button>
                             <a href="{% url 'residential_plot_resale_agency_view' p.id %}" class="action-btn view" title="View Property"><i class="fas fa-eye"></i></a>
+
+                            <a href="{% url "Boost_Property_Agency" %}" class="btn-action btn-edit" title="Boost Property" style="background-color:green;">
+                                <i class="fas fa-rocket"></i>
+                            </a>
+
                         </div>
                     </td>
                 </tr>

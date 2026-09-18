@@ -1,414 +1,600 @@
-
-
 {% block content %}
-
-<div class="container-fluid py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <h3 class="fw-bold mb-1">
-                Header Settings
-            </h3>
-
-            <p class="text-muted mb-0">
-                Manage website logo and header appearance.
-            </p>
-        </div>
-
-    </div>
-
-
-    <div class="card border-0 shadow-sm">
-
-        <div class="card-body p-4">
-
-            <form method="POST"
-                  enctype="multipart/form-data">
-
-                {% csrf_token %}
-
-
-                <!-- =====================
-                     LOGO
-                ====================== -->
-
-                <h5 class="fw-bold mb-4">
-                    <i class="bi bi-image me-2"></i>
-                    Logo Settings
-                </h5>
-
-
-                <div class="row g-4">
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Website Logo
-                        </label>
-
-                        <input
-                            type="file"
-                            name="logo"
-                            class="form-control"
-                            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                        >
-
-                        <small class="text-muted">
-                            Recommended: PNG/WebP with transparent background.
-                        </small>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Current Logo
-                        </label>
-
-                        <div class="logo-preview">
-
-                            {% if settings.logo %}
-
-                                <img
-                                    src="{{ settings.logo.url }}"
-                                    alt="{{ settings.logo_alt }}"
-                                    id="logoPreview"
-                                >
-
-                            {% else %}
-
-                                <span class="text-muted">
-                                    No custom logo uploaded
-                                </span>
-
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Logo Alt Text
-                        </label>
-
-                        <input
-                            type="text"
-                            name="logo_alt"
-                            class="form-control"
-                            value="{{ settings.logo_alt }}"
-                        >
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Logo Width
-                        </label>
-
-                        <div class="input-group">
-
-                            <input
-                                type="number"
-                                name="logo_width"
-                                class="form-control"
-                                value="{{ settings.logo_width }}"
-                                min="80"
-                                max="400"
-                            >
-
-                            <span class="input-group-text">
-                                px
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <hr class="my-5">
-
-
-                <!-- =====================
-                     HEADER APPEARANCE
-                ====================== -->
-
-                <h5 class="fw-bold mb-4">
-                    <i class="bi bi-palette me-2"></i>
-                    Header Appearance
-                </h5>
-
-
-                <div class="row g-4">
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Header Background
-                        </label>
-
-                        <div class="input-group">
-
-                            <input
-                                type="text"
-                                name="header_background"
-                                id="headerBackground"
-                                class="form-control"
-                                value="{{ settings.header_background }}"
-                            >
-
-                            <input
-                                type="color"
-                                id="backgroundPicker"
-                                class="form-control form-control-color"
-                                value="{{ settings.header_background }}"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Header Text Color
-                        </label>
-
-                        <div class="input-group">
-
-                            <input
-                                type="text"
-                                name="header_text_color"
-                                id="headerTextColor"
-                                class="form-control"
-                                value="{{ settings.header_text_color }}"
-                            >
-
-                            <input
-                                type="color"
-                                id="textPicker"
-                                class="form-control form-control-color"
-                                value="{{ settings.header_text_color }}"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <div class="setting-box">
-
-                            <div>
-
-                                <strong>
-                                    Transparent Header
-                                </strong>
-
-                                <small>
-                                    Header overlays the homepage hero image.
-                                </small>
-
-                            </div>
-
-                            <div class="form-check form-switch">
-
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="transparent_header"
-                                    {% if settings.transparent_header %}
-                                        checked
-                                    {% endif %}
-                                >
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-6">
-
-                        <div class="setting-box">
-
-                            <div>
-
-                                <strong>
-                                    Sticky Header
-                                </strong>
-
-                                <small>
-                                    Keep header visible while scrolling.
-                                </small>
-
-                            </div>
-
-                            <div class="form-check form-switch">
-
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="sticky_header"
-                                    {% if settings.sticky_header %}
-                                        checked
-                                    {% endif %}
-                                >
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="text-end mt-5">
-
-                    <button
-                        type="submit"
-                        class="btn btn-dark px-4 py-2"
-                    >
-
-                        <i class="bi bi-check-circle me-2"></i>
-
-                        Save Header Settings
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-</div>
-
-
 <style>
-
-.logo-preview {
-    height: 100px;
-    border: 1px dashed #d9dee7;
-    border-radius: 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 15px;
-
-    background: #fafafa;
-}
-
-.logo-preview img {
-    max-height: 70px;
-    max-width: 100%;
-    object-fit: contain;
-}
-
-.setting-box {
-
-    border: 1px solid #e2e8f0;
-
-    border-radius: 12px;
-
-    padding: 18px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-}
-
-.setting-box strong {
-    display: block;
-    color: #16233A;
-}
-
-.setting-box small {
-    display: block;
-    color: #64748b;
-    margin-top: 4px;
-}
-
+    :root {
+        --ph-navy: #0b1730;
+        --ph-navy-2: #1f2f47;
+        --ph-gold: #c9a227;
+        --ph-gold-light: #f1d888;
+        --ph-pr2: #a5811c;
+    }
+    .admin-settings-wrapper {
+        background: #f7f8fc;
+        padding: 40px 20px;
+        font-family: 'DM Sans', sans-serif;
+        min-height: 100vh;
+    }
+    .admin-settings-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #e7eaf2;
+        border-radius: 20px;
+        box-shadow: 0 10px 35px rgba(25, 31, 56, 0.06);
+        overflow: hidden;
+    }
+    .admin-settings-header {
+        background: linear-gradient(135deg, var(--ph-navy), var(--ph-navy-2));
+        color: #ffffff;
+        padding: 24px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    .admin-settings-header h3 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 800;
+        font-size: 1.4rem;
+        color: var(--ph-gold-light);
+        margin-bottom: 4px;
+    }
+    .admin-settings-header p {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0;
+    }
+    .admin-hero-badge {
+        background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
+        color: var(--ph-navy);
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 6px 14px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+    }
+    .admin-settings-body {
+        padding: 35px 30px;
+    }
+    .admin-section-title {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: var(--ph-navy);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .admin-section-title i {
+        color: var(--ph-gold);
+    }
+    .admin-form-label {
+        font-weight: 700;
+        font-size: 0.84rem;
+        color: #344054;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .admin-form-control, .admin-form-select {
+        background: #f8fafc;
+        border: 1px solid #dfe3ec;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.92rem;
+        color: #172033;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+    .admin-form-control:focus, .admin-form-select:focus {
+        background: #ffffff;
+        border-color: var(--ph-gold);
+        box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+        outline: none;
+    }
+    .logo-preview {
+        height: 180px;
+        border: 1px dashed #d9dee7;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: #fafafa;
+        overflow: hidden;
+    }
+    .logo-preview img {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 140px;
+        object-fit: contain;
+        display: block;
+    }
+    .setting-box {
+        border: 1px solid #dfe3ec;
+        border-radius: 12px;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fafc;
+    }
+    .setting-box strong {
+        display: block;
+        color: #172033;
+        font-size: 0.9rem;
+    }
+    .setting-box small {
+        display: block;
+        color: #68738a;
+        margin-top: 4px;
+        font-size: 0.78rem;
+    }
+    .input-group > .form-control-color {
+        max-width: 60px !important;
+        flex: 0 0 60px !important;
+        padding: 5px !important;
+        cursor: pointer;
+        height: auto;
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+    .btn-group-label {
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: var(--ph-pr2);
+        margin-bottom: -6px;
+    }
+    .hdr-btn-preview {
+        background: linear-gradient(180deg, var(--ph-navy), var(--ph-navy-2));
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .preview-btn-outline, .preview-btn-solid {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: .82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: default;
+    }
+    .preview-btn-outline {
+        border: 1.5px solid rgba(255,255,255,.4);
+        color: #ffffff;
+        background: transparent;
+    }
+    .preview-btn-solid {
+        background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
+        color: #ffffff;
+        border: none;
+    }
+    .hdr-badge-preview {
+        background: var(--ph-navy);
+        border-radius: 10px;
+        padding: 14px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: .9rem;
+    }
+    .ph-menu-badge-preview {
+        display: inline-block;
+        font-size: .62rem;
+        font-weight: 800;
+        letter-spacing: .4px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        color: #172033;
+        vertical-align: middle;
+    }
+    .admin-btn-save {
+        background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
+        color: var(--ph-navy);
+        font-weight: 800;
+        padding: 12px 28px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+    .admin-btn-save:hover {
+        filter: brightness(1.08);
+        box-shadow: 0 6px 16px rgba(201, 162, 39, 0.35);
+    }
 </style>
 
+<div class="admin-settings-wrapper">
+    <div class="admin-settings-container">
+        <div class="admin-settings-header">
+            <div>
+                <h3>Header Settings</h3>
+                <p>Manage website logo, navigation styling, actions, and header layout configurations.</p>
+            </div>
+                <a href="{% url 'admin_page' %}" class="admin-btn-add"><i class="bi bi-plus-lg"></i> Back To Admin Dashboard</a>
+            <span class="admin-hero-badge">Admin Portal</span>
+        </div>
+
+        <div class="admin-settings-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- ===================== LOGO SETTINGS ====================== -->
+                <h5 class="admin-section-title">
+                    <i class="bi bi-image"></i> Logo Settings
+                </h5>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Website Logo</label>
+                        <input type="file" name="logo" class="admin-form-control" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                        <small class="text-muted">Recommended: PNG/WebP with transparent background.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Current Logo Preview</label>
+                        <div class="logo-preview" id="logoPreviewBox">
+                            {% if settings.logo %}
+                                <img src="{{ settings.logo.url }}" alt="{{ settings.logo_alt }}" id="logoPreview">
+                            {% else %}
+                                <span class="text-muted">No custom logo uploaded</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Logo Alt Text</label>
+                        <input type="text" name="logo_alt" class="admin-form-control" value="{{ settings.logo_alt }}" placeholder="EstateFlow Logo">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Logo Position</label>
+                        <select name="logo_position" class="admin-form-select">
+                            <option value="left" {% if settings.logo_position == "left" %}selected{% endif %}>Left</option>
+                            <option value="center" {% if settings.logo_position == "center" %}selected{% endif %}>Center</option>
+                            <option value="right" {% if settings.logo_position == "right" %}selected{% endif %}>Right</option>
+                        </select>
+                        <small class="text-muted">Controls where the logo appears inside the header.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Logo Width</label>
+                        <div class="input-group">
+                            <input type="number" name="logo_width" id="logoWidth" class="admin-form-control" value="{{ settings.logo_width|default:180 }}" min="80" max="400">
+                            <span class="input-group-text bg-light border-0">px</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Logo Height</label>
+                        <div class="input-group">
+                            <input type="number" name="logo_height" id="logoHeight" class="admin-form-control" value="{{ settings.logo_height|default:80 }}" min="40" max="180">
+                            <span class="input-group-text bg-light border-0">px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-5" style="border-color: #e7eaf2;">
+
+                <!-- ===================== HEADER APPEARANCE ====================== -->
+                <h5 class="admin-section-title">
+                    <i class="bi bi-palette"></i> Header Appearance
+                </h5>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Header Background</label>
+                        <div class="input-group">
+                            <input type="text" name="header_background" id="headerBackground" class="admin-form-control" value="{{ settings.header_background }}">
+                            <input type="color" id="backgroundPicker" class="form-control form-control-color" value="{{ settings.header_background }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Header Text Color</label>
+                        <div class="input-group">
+                            <input type="text" name="header_text_color" id="headerTextColor" class="admin-form-control" value="{{ settings.header_text_color }}">
+                            <input type="color" id="textPicker" class="form-control form-control-color" value="{{ settings.header_text_color }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Menu Text Color</label>
+                        <div class="input-group">
+                            <input type="text" name="menu_text_color" id="menuTextColor" class="admin-form-control" value="{{ settings.menu_text_color|default:'#ffffff' }}">
+                            <input type="color" id="menuTextPicker" class="form-control form-control-color" value="{{ settings.menu_text_color|default:'#ffffff' }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Menu Hover Color</label>
+                        <div class="input-group">
+                            <input type="text" name="menu_hover_color" id="menuHoverColor" class="admin-form-control" value="{{ settings.menu_hover_color|default:'#d4af37' }}">
+                            <input type="color" id="menuHoverPicker" class="form-control form-control-color" value="{{ settings.menu_hover_color|default:'#d4af37' }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="setting-box">
+                            <div>
+                                <strong>Transparent Header</strong>
+                                <small>Header overlays the homepage hero image.</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="transparent_header" {% if settings.transparent_header %}checked{% endif %} style="cursor: pointer; width: 2.5rem; height: 1.25rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="setting-box">
+                            <div>
+                                <strong>Sticky Header</strong>
+                                <small>Keep header visible while scrolling.</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="sticky_header" {% if settings.sticky_header %}checked{% endif %} style="cursor: pointer; width: 2.5rem; height: 1.25rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-5" style="border-color: #e7eaf2;">
+
+                <!-- ===================== HEADER BUTTONS ====================== -->
+                <h5 class="admin-section-title">
+                    <i class="bi bi-toggle2-on"></i> Header Buttons
+                </h5>
+
+                <div class="hdr-btn-preview mb-4" id="hdrBtnPreview">
+                    <a href="#" class="preview-btn-outline" id="previewPrimaryBtn" onclick="return false;">
+                        <i class="bi bi-plus-lg"></i> <span id="previewPrimaryText">{{ settings.primary_btn_text|default:"Post Property FREE" }}</span>
+                    </a>
+                    <a href="#" class="preview-btn-solid" id="previewSecondaryBtn" onclick="return false;">
+                        <i class="bi bi-box-arrow-in-right"></i> <span id="previewSecondaryText">{{ settings.secondary_btn_text|default:"Login" }}</span>
+                    </a>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12"><div class="btn-group-label">Primary Button (Outlined Style)</div></div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Primary Button Text</label>
+                        <input type="text" name="primary_btn_text" id="primaryBtnText" class="admin-form-control" value="{{ settings.primary_btn_text|default:'Post Property FREE' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Primary Button Link</label>
+                        <input type="text" name="primary_btn_url" class="admin-form-control" value="{{ settings.primary_btn_url }}" placeholder="/post-property/">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="admin-form-label">Background Color</label>
+                        <div class="input-group">
+                            <input type="text" name="primary_btn_bg" id="primaryBtnBg" class="admin-form-control" value="{{ settings.primary_btn_bg|default:'transparent' }}">
+                            <input type="color" id="primaryBtnBgPicker" class="form-control form-control-color" value="#c9a227">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="admin-form-label">Text Color</label>
+                        <div class="input-group">
+                            <input type="text" name="primary_btn_text_color" id="primaryBtnTextColor" class="admin-form-control" value="{{ settings.primary_btn_text_color|default:'#ffffff' }}">
+                            <input type="color" id="primaryBtnTextPicker" class="form-control form-control-color" value="#ffffff">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-box h-100">
+                            <div>
+                                <strong>Show Primary Button</strong>
+                                <small>Display this button in the navigation header.</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="show_primary_btn" id="showPrimaryBtn" {% if settings.show_primary_btn|default_if_none:True %}checked{% endif %} style="cursor: pointer; width: 2.5rem; height: 1.25rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12"><hr class="my-2" style="border-color: #e7eaf2;"></div>
+
+                    <div class="col-12"><div class="btn-group-label">Secondary Button (Solid Style)</div></div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Secondary Button Text</label>
+                        <input type="text" name="secondary_btn_text" id="secondaryBtnText" class="admin-form-control" value="{{ settings.secondary_btn_text|default:'Login' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Secondary Button Link</label>
+                        <input type="text" name="secondary_btn_url" class="admin-form-control" value="{{ settings.secondary_btn_url }}" placeholder="/login/">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Secondary Button Color</label>
+                        <div class="input-group">
+                            <input type="text" name="secondary_btn_color" id="secondaryBtnColor" class="admin-form-control" value="{{ settings.secondary_btn_color|default:'#ffffff' }}">
+                            <input type="color" id="secondaryBtnColorPicker" class="form-control form-control-color" value="#c9a227">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-box h-100">
+                            <div>
+                                <strong>Show Secondary Button</strong>
+                                <small>Display when user is not logged in.</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="show_secondary_btn" id="showSecondaryBtn" {% if settings.show_secondary_btn|default_if_none:True %}checked{% endif %} style="cursor: pointer; width: 2.5rem; height: 1.25rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-5" style="border-color: #e7eaf2;">
+
+                <!-- ===================== MENU BADGE ====================== -->
+                <h5 class="admin-section-title">
+                    <i class="bi bi-patch-exclamation"></i> Menu Highlight Badge
+                </h5>
+
+                <div class="hdr-badge-preview mb-4">
+                    <span id="previewBadgeLabel">{{ settings.badge_menu_label|default:"Dubai Properties" }}</span>
+                    <span class="ph-menu-badge-preview" id="previewBadge" style="background:{{ settings.badge_color|default:'#c9a227' }};">{{ settings.badge_text|default:"NEW" }}</span>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Menu Item to Highlight</label>
+                        <input type="text" name="badge_menu_label" id="badgeMenuLabel" class="admin-form-control" value="{{ settings.badge_menu_label|default:'Dubai Properties' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="admin-form-label">Badge Text</label>
+                        <input type="text" name="badge_text" id="badgeText" class="admin-form-control" value="{{ settings.badge_text|default:'NEW' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="admin-form-label">Badge Color</label>
+                        <div class="input-group">
+                            <input type="text" name="badge_color" id="badgeColor" class="admin-form-control" value="{{ settings.badge_color|default:'#c9a227' }}">
+                            <input type="color" id="badgeColorPicker" class="form-control form-control-color" value="#c9a227">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-box">
+                            <div>
+                                <strong>Show Badge</strong>
+                                <small>Enable or disable the highlight tag.</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="show_badge" id="showBadge" {% if settings.show_badge|default_if_none:True %}checked{% endif %} style="cursor: pointer; width: 2.5rem; height: 1.25rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end pt-3 border-top" style="border-color: #e7eaf2 !important;">
+                    <button type="submit" class="admin-btn-save">
+                        <i class="bi bi-check-circle me-2"></i> Save Header Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
+function bindColorPicker(pickerId, inputId) {
+    const picker = document.getElementById(pickerId);
+    const input = document.getElementById(inputId);
+    if (picker && input) {
+        picker.addEventListener("input", function () {
+            input.value = this.value;
+            input.dispatchEvent(new Event("input"));
+        });
+    }
+}
 
-document.getElementById("backgroundPicker")
-.addEventListener("input", function() {
+bindColorPicker("backgroundPicker", "headerBackground");
+bindColorPicker("textPicker", "headerTextColor");
+bindColorPicker("menuTextPicker", "menuTextColor");
+bindColorPicker("menuHoverPicker", "menuHoverColor");
+bindColorPicker("primaryBtnBgPicker", "primaryBtnBg");
+bindColorPicker("primaryBtnTextPicker", "primaryBtnTextColor");
+bindColorPicker("secondaryBtnColorPicker", "secondaryBtnColor");
+bindColorPicker("badgeColorPicker", "badgeColor");
 
-    document.getElementById("headerBackground").value =
-        this.value;
+// Logo Preview Script
+const logoInput = document.querySelector('input[name="logo"]');
+if (logoInput) {
+    logoInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            let preview = document.getElementById("logoPreview");
+            const previewBox = document.getElementById("logoPreviewBox");
+            if (!preview) {
+                preview = document.createElement("img");
+                preview.id = "logoPreview";
+                previewBox.innerHTML = "";
+                previewBox.appendChild(preview);
+            }
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
+const logoWidth = document.getElementById("logoWidth");
+const logoHeight = document.getElementById("logoHeight");
+function updateLogoPreviewSize() {
+    const preview = document.getElementById("logoPreview");
+    if (!preview) return;
+    if (logoWidth) preview.style.maxWidth = logoWidth.value + "px";
+    if (logoHeight) preview.style.maxHeight = logoHeight.value + "px";
+}
+if (logoWidth) logoWidth.addEventListener("input", updateLogoPreviewSize);
+if (logoHeight) logoHeight.addEventListener("input", updateLogoPreviewSize);
+
+// Live Preview Buttons Wiring
+const previewPrimaryBtn = document.getElementById("previewPrimaryBtn");
+const previewPrimaryText = document.getElementById("previewPrimaryText");
+const previewSecondaryBtn = document.getElementById("previewSecondaryBtn");
+const previewSecondaryText = document.getElementById("previewSecondaryText");
+
+function updateBtnPreview() {
+    const pText = document.getElementById("primaryBtnText").value || "Post Property FREE";
+    const pBg = document.getElementById("primaryBtnBg").value || "transparent";
+    const pColor = document.getElementById("primaryBtnTextColor").value || "#ffffff";
+    const pShow = document.getElementById("showPrimaryBtn").checked;
+
+    const sText = document.getElementById("secondaryBtnText").value || "Login";
+    const sColor = document.getElementById("secondaryBtnColor").value || "#c9a227";
+    const sShow = document.getElementById("showSecondaryBtn").checked;
+
+    previewPrimaryText.textContent = pText;
+    previewPrimaryBtn.style.background = (pBg && pBg !== "transparent") ? pBg : "transparent";
+    previewPrimaryBtn.style.color = pColor;
+    previewPrimaryBtn.style.display = pShow ? "inline-flex" : "none";
+
+    previewSecondaryText.textContent = sText;
+    previewSecondaryBtn.style.background = sColor;
+    previewSecondaryBtn.style.display = sShow ? "inline-flex" : "none";
+}
+
+["primaryBtnText", "primaryBtnBg", "primaryBtnTextColor", "showPrimaryBtn", "secondaryBtnText", "secondaryBtnColor", "showSecondaryBtn"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateBtnPreview);
 });
+updateBtnPreview();
 
+// Live Preview Badge Wiring
+const previewBadgeLabel = document.getElementById("previewBadgeLabel");
+const previewBadge = document.getElementById("previewBadge");
 
-document.getElementById("textPicker")
-.addEventListener("input", function() {
+function updateBadgePreview() {
+    const label = document.getElementById("badgeMenuLabel").value || "Dubai Properties";
+    const text = document.getElementById("badgeText").value || "NEW";
+    const color = document.getElementById("badgeColor").value || "#c9a227";
+    const show = document.getElementById("showBadge").checked;
 
-    document.getElementById("headerTextColor").value =
-        this.value;
+    previewBadgeLabel.textContent = label;
+    previewBadge.textContent = text;
+    previewBadge.style.background = color;
+    previewBadge.style.display = show ? "inline-block" : "none";
+}
 
+["badgeMenuLabel", "badgeText", "badgeColor", "showBadge"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateBadgePreview);
 });
-
-
-document.querySelector('input[name="logo"]')
-.addEventListener("change", function(event) {
-
-    const file = event.target.files[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-
-        let preview =
-            document.getElementById("logoPreview");
-
-        if (!preview) {
-
-            preview = document.createElement("img");
-
-            preview.id = "logoPreview";
-
-            document.querySelector(".logo-preview")
-                .innerHTML = "";
-
-            document.querySelector(".logo-preview")
-                .appendChild(preview);
-
-        }
-
-        preview.src = e.target.result;
-
-    };
-
-    reader.readAsDataURL(file);
-
-});
-
+updateBadgePreview();
 </script>
-
 {% endblock %}

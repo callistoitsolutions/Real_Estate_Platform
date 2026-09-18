@@ -277,9 +277,9 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
 <!-- ── EXPANDED SEARCH OVERLAY ── -->
 <div id="expandedSearchOverlay" class="fixed inset-x-0 bottom-0 top-[72px] bg-black/60 z-[500] hidden flex-col">
     <div class="w-full ef-search-hero py-5 px-4 relative flex flex-col items-center shadow-xl animate-fade-in-down border-b border-amber-500/20">
-        <button onclick="toggleSearchOverlay()" class="absolute top-3 right-4 bg-white/10 text-white hover:bg-white/20 w-7 h-7 flex items-center justify-center rounded-full transition">
-            <i class="bi bi-x text-lg"></i>
-        </button>
+       <button onclick="toggleSearchOverlay()" class="absolute top-3 right-4 bg-white text-brand-dark hover:bg-gray-100 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition">
+    <i class="bi bi-x text-xl font-bold"></i>
+</button>
 
         <!-- Toggle Row: I'm Looking to & Category Pills -->
         <div class="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-3 text-white mb-4 text-xs font-medium">
@@ -762,11 +762,11 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
                         <button onclick="event.preventDefault();toggleSave('{{ p.id }}','{{ p.listing_type }}','{{ p.url_category }}',this)" class="w-9 h-9 border border-gray-300 rounded flex items-center justify-center {% if p.id in wishlisted_ids %}text-red-500 border-red-500{% else %}text-gray-400{% endif %} hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition shadow-sm bg-white {% if p.id in wishlisted_ids %}saved{% endif %}">
     <i class="fa-{% if p.id in wishlisted_ids %}solid{% else %}regular{% endif %} fa-heart text-base"></i>
 </button>
-
-                            <button onclick="event.preventDefault();whatsappListing('{{ p.phone|escapejs }}','{{ p.title|escapejs }}')" class="w-9 h-9 border border-green-500 bg-green-50 text-green-600 rounded flex items-center justify-center hover:bg-green-500 hover:text-white transition shadow-sm">
+<button onclick="event.preventDefault();whatsappListing('9175791501','{{ p.title|escapejs }}')" class="w-9 h-9 border border-green-500 bg-green-50 text-green-600 rounded flex items-center justify-center hover:bg-green-500 hover:text-white transition shadow-sm">
                                 <i class="fa-brands fa-whatsapp text-lg"></i>
                             </button>
-                            <button onclick="event.preventDefault();callListing('{{ p.phone|escapejs }}','{{ p.uploaded_by_name|escapejs }}')" class="bg-brand-blue hover:bg-brand-dark text-white font-semibold rounded px-4 md:px-6 py-2 transition shadow-sm flex items-center gap-2 text-sm">
+                            
+                          <button onclick="event.preventDefault();callListing('9175791501','{{ p.uploaded_by_name|escapejs }}')" class="bg-brand-blue hover:bg-brand-dark text-white font-semibold rounded px-4 md:px-6 py-2 transition shadow-sm flex items-center gap-2 text-sm">
                                 <i class="fa-solid fa-phone"></i> Contact
                             </button>
                         </div>
@@ -885,9 +885,9 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
         <div class="footer-grid">
             <div>
                 <div class="fl-brand">🏠 KANISHKAIMPERIA</div>
-                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
-                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
-                <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since</div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 9175791501</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> kanishkaimperia@gmail.com</div>
             </div>
             <div>
                 <div class="fl-title">For Tenants</div>
@@ -1723,7 +1723,7 @@ const SHORTS = [
     ownerName: "{{ p.listed_by_name|default:p.uploaded_by_name|default:"Owner"|escapejs }}",
     ownerRole: "{{ p.listed_by_role|default:p.uploaded_by_role|default:"Listed by"|escapejs }}",
 
-    phone: "{{ p.phone|escapejs }}",
+    phone: "9175791501",
     propertyType: "{{ p.property_type|default:""|escapejs }}",
     amenities: "{{ p.amenities|default:""|escapejs }}",
     images: [

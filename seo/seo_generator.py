@@ -7,6 +7,7 @@ from django.utils.text import slugify
 from seo.models import LocationSEO
 
 
+
 # =========================================================
 # SITE DOMAIN (used to build canonical_url — set SITE_URL in settings.py)
 # =========================================================
@@ -1011,3 +1012,4 @@ def create_dynamic_seo(instance, page_type):
     except Exception as e:
 
         print("SEO ERROR :", str(e))
+        raise

@@ -1398,8 +1398,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td style="position: sticky; right: 0; background: white; z-index: 2; box-shadow: -2px 0 5px rgba(0,0,0,0.05);">
                     <div class="action-buttons" style="display: flex; gap: 4px;">
                         <a href="{% url 'pg_coliving_view_landlord' prop.id %}" class="btn-action btn-view" title="View Property"><i class="fas fa-eye"></i></a>
+                        
                         <button class="btn-action btn-edit" onclick="window.location.href='{% url 'pg_landlord_edit' prop.id %}'"><i class="fas fa-edit"></i></button>
+
                         <button class="btn-action btn-delete" onclick="deletePG('{{ prop.id }}')" title="Delete Property"><i class="fas fa-trash"></i></button>
+
+                        <a href="{% url "Boost_Property_Landlord" %}" class="btn-action btn-edit" title="Boost Property" style="background-color:green;">
+                            <i class="fas fa-rocket"></i>
+                        </a>
                     </div>
                 </td>
             </tr>

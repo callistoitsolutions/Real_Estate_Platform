@@ -116,55 +116,80 @@ class HeroSection(models.Model):
 
 
 
+
 class HeaderSettings(models.Model):
     logo = models.ImageField(
         upload_to="site/header/",
         blank=True,
         null=True
     )
-
     logo_alt = models.CharField(
         max_length=150,
         default="EstateFlow"
     )
-
     logo_width = models.PositiveIntegerField(
         default=180
     )
-
+    logo_height = models.PositiveIntegerField(
+        default=80
+    )
+    logo_position = models.CharField(
+        max_length=20,
+        default="left"
+    )
     transparent_header = models.BooleanField(
         default=False
     )
-
     header_background = models.CharField(
         max_length=100,
         default="#ffffff"
     )
-
     header_text_color = models.CharField(
         max_length=100,
         default="#16233A"
     )
-
+    menu_text_color = models.CharField(
+        max_length=20,
+        default="#ffffff"
+    )
+    menu_hover_color = models.CharField(
+        max_length=20,
+        default="#d4af37"
+    )
     sticky_header = models.BooleanField(
         default=True
     )
 
+    # ===== NEW: Header Buttons =====
+    primary_btn_text = models.CharField(max_length=100, default="Post Property FREE")
+    primary_btn_url = models.CharField(max_length=255, blank=True, default="")
+    primary_btn_bg = models.CharField(max_length=20, default="transparent")
+    primary_btn_text_color = models.CharField(max_length=20, default="#ffffff")
+    show_primary_btn = models.BooleanField(default=True)
+
+    secondary_btn_text = models.CharField(max_length=100, default="Login")
+    secondary_btn_url = models.CharField(max_length=255, blank=True, default="")
+    secondary_btn_color = models.CharField(max_length=20, default="#ffffff")
+    show_secondary_btn = models.BooleanField(default=True)
+
+    # ===== NEW: Menu Highlight Badge =====
+    badge_menu_label = models.CharField(max_length=100, blank=True, default="")
+    badge_text = models.CharField(max_length=30, blank=True, default="NEW")
+    badge_color = models.CharField(max_length=20, default="#c9a227")
+    show_badge = models.BooleanField(default=False)
+
     is_active = models.BooleanField(
         default=True
     )
-
     updated_at = models.DateTimeField(
         auto_now=True
     )
 
     def save(self, *args, **kwargs):
-
         if self.is_active:
             HeaderSettings.objects.exclude(
                 pk=self.pk
             ).update(is_active=False)
-
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -980,8 +1005,8 @@ class RentalResidentialProperty(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     # =====================================================
     # BROKERAGE LABEL — computed, never stored.
@@ -1642,8 +1667,8 @@ class CommercialRentalProperty(models.Model):
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     BROKERAGE_LABEL_MAP = {
         "admin": "EstateFlow Service Fee",
@@ -2141,8 +2166,8 @@ class PGColivingProperty(models.Model):
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     # ═══════════════════════════════════════════════════════════════════════
     #  BROKERAGE LOGIC

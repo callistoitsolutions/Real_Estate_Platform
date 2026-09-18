@@ -783,6 +783,28 @@
                         <div class="col-md-4 mt-2">
                             <div class="form-group">
                                 <label class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Site Visit Date
+                                </label>
+                                <input type="text" class="form-control" 
+                                    value="{{ enquiry.enquiry_visit_date|date:'d-m-Y' }}" disabled>
+                               <small class="form-text">Datez when site visit is going to happen</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Site Visit Time
+                                </label>
+                                <input type="text" class="form-control" 
+                                    value="{{ enquiry.enquiry_visit_time }}" disabled>
+                                <small class="form-text">Time when site visit is going to happen</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                            <div class="form-group">
+                                <label class="form-label">
                                     <i class="fas fa-calendar-alt"></i> Enquiry Date
                                 </label>
                                 <input type="text" class="form-control" 
@@ -790,6 +812,7 @@
                                 <small class="form-text">Date when enquiry was received</small>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>

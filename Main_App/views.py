@@ -568,12 +568,11 @@ import math
 
 ########### Views start for ajax for send property enquiry ########################
 
-
 @csrf_exempt
 def Send_Property_Enquiry(request):
     if request.method == "POST":
         data = request.POST.dict()
-        
+
         print("=" * 50)
         print("Send_Property_Enquiry called")
         print("Received data:", data)
@@ -583,9 +582,32 @@ def Send_Property_Enquiry(request):
         property_id = data.get('property_id')
         listing_type = data.get('listing_type', '')
         category = data.get('category', '')
+        sub_category = data.get('sub_category', '')
         country_code = data.get('country_code', '+91')
         whatsapp_consent = data.get('whatsapp_consent', 'no') == 'yes'
         
+        # Extract visit date and time from form submission
+        raw_visit_date = data.get('enquiry_visit_date', '').strip()
+        raw_visit_time = data.get('enquiry_visit_time', '').strip()
+
+        # Parse visit date (expects YYYY-MM-DD from HTML5 date input)
+        visit_date = None
+        if raw_visit_date:
+            try:
+                visit_date = datetime.strptime(raw_visit_date, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
+        # Parse visit time (expects HH:MM or HH:MM:SS from HTML5 time input)
+        visit_time = None
+        if raw_visit_time:
+            for fmt in ('%H:%M', '%H:%M:%S'):
+                try:
+                    visit_time = datetime.strptime(raw_visit_time, fmt).time()
+                    break
+                except ValueError:
+                    pass
+
         # Get UTM parameters
         utm_source = data.get('utm_source', '').strip()
         utm_medium = data.get('utm_medium', '').strip()
@@ -595,87 +617,103 @@ def Send_Property_Enquiry(request):
         utm_path = data.get('utm_path', '').strip()
         page_url = data.get('page_url', '').strip()
         
-
         # 2. Find the property
         real_property = None
         
         try:
-            if listing_type == "rent" and category == "residential-data":
+            if listing_type == "Rental" and category == "Residential":
                 real_property = RentalResidentialProperty.objects.get(id=property_id)
-            elif listing_type == "rent" and category == "pg-data":
+            elif listing_type == "Rental" and category == "PG/Co-living":
                 real_property = PGColivingProperty.objects.get(id=property_id)
-            elif listing_type == "rent" and category == "commercial-data":
+            elif listing_type == "Rental" and category == "Commercial":
                 real_property = CommercialRentalProperty.objects.get(id=property_id)
-            elif listing_type == "sale" and category == "resale-residential":
+
+            elif listing_type == "Resale" and category == "Residential":
                 real_property = ResaleResidentialProperty.objects.get(id=property_id)
-            elif listing_type == "sale" and category == "commercial-resale":
+            elif listing_type == "Resale" and category == "Commercial":
                 real_property = CommercialResaleProperty.objects.get(id=property_id)
-            elif listing_type == "sale" and category == "plot-resale":
-                real_property = PlotSaleProperty.objects.get(id=property_id)
-            elif listing_type == "sale" and category == "industrial-resale":
+            elif listing_type == "Resale" and category == "Industrial":
                 real_property = IndustrialResaleProperty.objects.get(id=property_id)
-            elif listing_type == "sale" and category == "agricultural-data":
+            elif listing_type == "Resale" and category == "Agricultural":
                 real_property = AgriculturalResaleProperty.objects.get(id=property_id)
+
+            elif listing_type == "Resale" and category == "Plot" and sub_category == "Residential":
+                real_property = ResidentialPlotResaleProperty.objects.get(id=property_id)
+
+            elif listing_type == "Resale" and category == "Plot" and sub_category == "Commercial":
+                real_property = CommercialPlotResaleProperty.objects.get(id=property_id)
+
+            elif listing_type == "Resale" and category == "Plot" and sub_category == "Industrial":
+                real_property = IndustrialPlotResaleProperty.objects.get(id=property_id)
+
+            elif listing_type == "Resale" and category == "Plot" and sub_category == "Agricultural":
+                real_property = AgriculturalPlotResaleProperty.objects.get(id=property_id)
+
         except ObjectDoesNotExist:
             return JsonResponse({"status": "0", "msg": "Property not found."})
         
         if not real_property:
             return JsonResponse({"status": "0", "msg": "Invalid property type."})
         
-        # 3. Get or Create UTMLink using get()
+        # 3. Get or Create UTMLink with fallback for normal/direct traffic
         property_content_type = ContentType.objects.get_for_model(real_property)
         utm_link = None
         
-        if utm_source and utm_medium:
-            try:
-                # ✅ Try to get existing UTMLink
-                utm_link = UTMLink.objects.get(
-                    utm_source=utm_source,
-                    utm_medium=utm_medium,
-                    utm_campaign=utm_campaign if utm_campaign else '',
-                    utm_term=utm_term if utm_term else '',
-                    utm_content=utm_content if utm_content else '',
-                    content_type=property_content_type,
-                    object_id=real_property.id,
-                    listing_type=listing_type,
-                    category=category,
-                )
-                print(f"✅ Found existing UTMLink: {utm_link.link_id}")
-            except UTMLink.DoesNotExist:
-                # ✅ Create new UTMLink if not exists
-                import uuid
-                link_id = str(uuid.uuid4())[:8]
-                property_title = getattr(real_property, 'title', None) or getattr(real_property, 'property_title', str(real_property))
-                
-                utm_link = UTMLink.objects.create(
-                    link_id=link_id,
-                    content_type=property_content_type,
-                    object_id=real_property.id,
-                    property_title=property_title,
-                    listing_type=listing_type,
-                    category=category,
-                    utm_path=utm_path or f"/listing/{listing_type}/{category}/{property_id}/",
-                    utm_url=page_url,
-                    utm_source=utm_source,
-                    utm_medium=utm_medium,
-                    utm_campaign=utm_campaign,
-                    utm_term=utm_term,
-                    utm_content=utm_content,
-                    total_clicks=0,
-                    total_enquiries=0
-                )
-                print(f"✅ Created new UTMLink: {utm_link.link_id}")
-            except UTMLink.MultipleObjectsReturned:
-                # If multiple found, get the first one (should not happen with unique_together)
-                utm_link = UTMLink.objects.filter(
-                    utm_source=utm_source,
-                    utm_medium=utm_medium,
-                    content_type=property_content_type,
-                    object_id=real_property.id,
-                ).first()
-                print(f"⚠️ Multiple UTMLinks found, using first: {utm_link.link_id}")
+        if not utm_source:
+            utm_source = 'direct'
+        if not utm_medium:
+            utm_medium = 'organic'
+
+        try:
+            utm_link = UTMLink.objects.get(
+                utm_source=utm_source,
+                utm_medium=utm_medium,
+                utm_campaign=utm_campaign if utm_campaign else '',
+                utm_term=utm_term if utm_term else '',
+                utm_content=utm_content if utm_content else '',
+                content_type=property_content_type,
+                object_id=real_property.id,
+                listing_type=listing_type,
+                category=category,
+                sub_category = sub_category
+            )
+            print(f" Found existing UTMLink: {utm_link.link_id}")
+            
+        except UTMLink.DoesNotExist:
+            import uuid
+            link_id = str(uuid.uuid4())[:8]
+            property_title = getattr(real_property, 'title', None) or getattr(real_property, 'property_title', str(real_property))
+            
+            utm_link = UTMLink.objects.create(
+                link_id=link_id,
+                content_type=property_content_type,
+                object_id=real_property.id,
+                property_title=property_title,
+                listing_type=listing_type,
+                category=category,
+                sub_category = sub_category,
+                utm_path=utm_path or f"/listing/{listing_type}/{category}/{property_id}/",
+                utm_url=page_url,
+                utm_source=utm_source,
+                utm_medium=utm_medium,
+                utm_campaign=utm_campaign,
+                utm_term=utm_term,
+                utm_content=utm_content,
+                total_clicks=0,
+                total_enquiries=0
+            )
+            print(f" Created new default UTMLink: {utm_link.link_id}")
+            
+        except UTMLink.MultipleObjectsReturned:
+            utm_link = UTMLink.objects.filter(
+                utm_source=utm_source,
+                utm_medium=utm_medium,
+                content_type=property_content_type,
+                object_id=real_property.id,
+            ).first()
+            print(f" Multiple UTMLinks found, using first: {utm_link.link_id}")
         
-        # 4. Save Enquiry with ONLY utm_link foreign key
+        # 4. Save Enquiry with extracted visit date & time
         try:
             enquiry = PropertyEnquiry.objects.create(
                 content_type=property_content_type,
@@ -684,35 +722,36 @@ def Send_Property_Enquiry(request):
                 country_code=country_code,
                 enquiry_phone=data.get('enquiry_phone', '').strip(),
                 whatsapp_consent=whatsapp_consent,
-                utm_link=utm_link,  # ✅ Only the foreign key
-                enquiry_date=datetime.now().date(),
-                enquiry_time=datetime.now().time()
+                utm_link=utm_link,
+                enquiry_visit_date=visit_date,
+                enquiry_visit_time=visit_time,
+                enquiry_date=datetime.today(),
+                enquiry_time=datetime.now()
             )
             
-            print(f"✅ Enquiry saved - ID: {enquiry.id}")
+            print(f" Enquiry saved - ID: {enquiry.id}")
             
             if utm_link:
-                print(f"   ✅ Linked to UTMLink: {utm_link.link_id}")
+                print(f" Linked to UTMLink: {utm_link.link_id}")
                 utm_link.total_enquiries = models.F('total_enquiries') + 1
                 utm_link.save()
                 print(f"   UTMLink total enquiries: {utm_link.total_enquiries + 1}")
             else:
-                print(f"⚠️ No UTM tracking for this enquiry")
+                print(f" No UTM tracking for this enquiry")
             
             return JsonResponse({
                 "status": "1", 
-                "msg": "Enquiry submitted successfully!"
+                "msg": "Enquiry submitted successfully our RM will be contact you soon !"
             })
             
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
             return JsonResponse({
                 "status": "0", 
                 "msg": "Could not save enquiry. Please try again."
             })
     
-    return JsonResponse({"status": "0", "msg": "Invalid request."})
-    
+    return JsonResponse({"status": "0", "msg": "Invalid request."})    
 
 ########### Views end for ajax for send property enquiry ######################
 
@@ -1132,7 +1171,7 @@ def _safe_parse_pg_room_prices(pg_obj):
             for key, field in price_map.items():
                 if key in rtype:
                     try:
-                        result[field] = float(room.room_rent)
+                         result[field] = float(room.room_rent)
                     except (ValueError, TypeError):
                         pass
                     break
@@ -1234,6 +1273,7 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
 
     # ── 2. Fetch the object ──────────────────────────────────
     obj = get_object_or_404(property_model, pk=pk)
+
 
     from collections import defaultdict
     p = defaultdict(lambda: None)   # missing keys resolve to None instead of raising in templates
@@ -1826,6 +1866,8 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
     p['uploaded_by_contact'] = getattr(obj, 'uploaded_by_contact', None)
     p['uploaded_by_role']    = getattr(obj, 'uploaded_by_role',    'Owner')
 
+    listing_type  = getattr(obj, 'listing_type')
+
     property_images = []
     if hasattr(obj, 'images'):
         property_images = list(obj.images.all())
@@ -2035,15 +2077,13 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
     print("DEBUG TREND:", price_trend)
 
     context = {
-        'p':               p,
-       
-        'original':        obj,
+        'p': p,
+        'original': obj,
         'locality_insight': locality_insight,
         'price_trend': price_trend,
         'nearby_localities': nearby_localities,
         'listing_type':    listing_type,
         'category':        category,
-        'sub_category' :   sub_category,
         'property_group':  property_group,
         'seo_page_type':   seo_page_type,
         'property_images': property_images,
@@ -3673,9 +3713,142 @@ from django.db.models import Q
 
 @csrf_exempt
 def login_view(request):
-    
     return render(request, 'home_page/login.html')
 
+
+############ Views start for forgot password page ######################
+
+def Forgot_Password(request):
+    return render(request,'home_page/forgot_pass.html')
+
+############## Views end for forgot password page ########################
+
+
+########## Views start for check email already exists or not for forgot ##############
+
+@csrf_exempt
+def Check_Email_Forgot_Api(request):
+    if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        # Check database for email
+        user_exists = User_Details.objects.filter(user_email=email).exists()
+        return JsonResponse({'exists': user_exists})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+######### Views end for check email already exists or not for forgot #################
+
+
+######### Views start for send otp for forgot password ########################
+
+@csrf_exempt
+def Send_Otp_Forgot_Api(request):
+
+    if request.method == "POST":
+        # 'email' key comes from the frontend AJAX data parameter name
+        user_identifier = request.POST.get('email', '').strip()
+        channel = request.POST.get('channel', 'email').strip()
+        otp = str(random.randint(1000, 9999))
+        
+        request.session['auth_otp'] = otp
+        request.session['auth_identifier'] = user_identifier
+        request.session.modified = True 
+        
+        # 1. Handle Email Channel
+        if channel == 'email' and '@' in user_identifier:
+            try:
+                send_mail(
+                    subject='Your PropCRM Verification Code',
+                    message=f'Hello!\n\nYour 4-digit verification code is: {otp}\n\nDo not share this code with anyone.',
+                    from_email=None, 
+                    recipient_list=[user_identifier],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f"Mail Error: {e}")
+
+        # 2. Handle WhatsApp Channel
+        elif channel == 'whatsapp':
+            # TODO: Integrate your WhatsApp API provider here using 'user_identifier' (mobile number)
+            # Example: send_whatsapp_message(user_identifier, f"Your PropCRM code is {otp}")
+            pass
+
+        # 3. Handle SMS Channel
+        elif channel == 'sms':
+            # TODO: Integrate your SMS gateway provider here using 'user_identifier' (mobile number)
+            # Example: send_sms_gateway(user_identifier, f"Your PropCRM code is {otp}")
+            pass
+            
+        # Development Console Log (Handy for free testing across all channels)
+        
+        print(f"==================================================")
+        print(f" OTP ({channel.upper()}) FOR {user_identifier}: {otp}")
+        print(f"==================================================")
+        
+        return JsonResponse({'status': 'success'})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########### Views end for send otp for forgot password ############################
+
+
+############# Views start for verify otp for forgot password ###################
+
+@csrf_exempt
+def Verify_Otp_Forgot_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        submitted_otp = request.POST.get('otp', '').strip()
+        
+        actual_otp = request.session.get('auth_otp')
+        session_identifier = request.session.get('auth_identifier')
+        
+        if submitted_otp == actual_otp and user_identifier == session_identifier:
+            #  CRITICAL FIX: Set a dedicated success flag and save immediately
+            request.session['otp_verified_for'] = user_identifier
+            request.session.modified = True
+
+            return JsonResponse({'valid': True})
+        else:
+            return JsonResponse({'valid': False})
+            
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+############ Views end for verify otp for forgot password ##########################
+
+
+############ Views start for update password for forgot password ################
+
+@csrf_exempt
+def Update_Pass_Forgot_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        #  CRITICAL FIX: Check the new success flag instead of the raw email
+        verified_user = request.session.get('otp_verified_for')
+        if verified_user != user_identifier:
+            return JsonResponse({'status': '0', 'msg': 'Security timeout. Please request a new OTP.'})
+             
+        try:
+            email_val = user_identifier if '@' in user_identifier else ''
+
+            User_Details.objects.filter(user_email=email_val).update(user_password=password)
+            
+            request.session.pop('auth_otp', None)
+            request.session.pop('auth_identifier', None)
+            request.session.pop('otp_verified_for', None)
+            request.session.modified = True
+            
+            return JsonResponse({'status': '1', 'msg': 'Password Updated Successfully!'})
+            
+        except Exception as e:
+            print(traceback.format_exc())
+            return JsonResponse({'status': '0', 'msg': f"Server Error: {str(e)}"})
+            
+    return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
+
+
+############# Views end for update password for forgot password ######################
 
 # ---------------- DASHBOARD ----------------
 @login_required
@@ -3722,11 +3895,11 @@ def Prop_Login_Api(request):
             if user_qs.exists():
                 user_obj = user_qs.first()
                 
-                # 🟢 EXACT MATCH TO YOUR ORIGINAL SESSION LOGIC
+                #  EXACT MATCH TO YOUR ORIGINAL SESSION LOGIC
                 request.session['User_id'] = str(user_obj.id)
                 request.session['user_type'] = user_obj.user_role
                 
-                # 🟢 DYNAMIC REDIRECT LOGIC
+                # DYNAMIC REDIRECT LOGIC
                 if user_obj.user_role == 'Relationship Manager':
                     url = reverse('rm_dashboard') 
                 else:
@@ -3763,7 +3936,7 @@ def Send_Otp_Api(request):
         request.session['auth_otp'] = otp
         request.session['auth_identifier'] = user_identifier
         
-        # 🟢 CRITICAL FIX: Force Django to save the session immediately
+        #  CRITICAL FIX: Force Django to save the session immediately
         request.session.modified = True 
         
         if '@' in user_identifier:

@@ -243,7 +243,7 @@ urlpatterns = [
 
      path('residential_plot_resale',views.residential_plot_resale,name="residential_plot_resale"),
 
-     ######## urls for ajax for add/edit resale residential plot property ################
+     ######## urls for ajax for add/edit resale residential plot property #############
     
      path('Resale_Residential_Plot_Ajax',  views.Resale_Residential_Plot_Ajax,    name='Resale_Residential_Plot_Ajax'),
 
@@ -608,7 +608,7 @@ urlpatterns = [
     path('addons/add/', views.addon_create, name='addon_create'),
     
 
-################## START URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
+################## START URL SECTION OF RENTAL RESIDENTIAL LISTING ###################
 
     path('residential_list/', views.rental_list, name='residential_list'),
 
@@ -666,7 +666,7 @@ urlpatterns = [
    ################## END URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
 
 
-#########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############################
+#########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############
    
     path('Admin_App/commercial/import-excel/', views.import_commercial_rental_excel, name='import_commercial_rental_excel'),
     path('Admin_App/commercial/download-template/', views.download_commercial_rental12_template, name='download_commercial_rental12__template'),

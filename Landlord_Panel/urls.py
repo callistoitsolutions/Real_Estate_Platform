@@ -8,7 +8,11 @@ urlpatterns = [
       ##########urls for Lanlord#####
    
      path('landlord_dashboard',views.landlord_dashboard,name="landlord_dashboard"),
-  
+
+
+     ######### urls for enquiries for property landlord ########################
+
+     path('Property_Enquiry_Landlord',views.Property_Enquiry_Landlord,name="Property_Enquiry_Landlord"),
 
 
      ############# urls for update landlord profile page #####################

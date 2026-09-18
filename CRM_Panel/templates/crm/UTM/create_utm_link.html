@@ -862,7 +862,7 @@
                                             data-url="{{ property.get_absolute_url }}"
                                             data-title="{{ property.title }}"
                                             data-type="{{ property.listing_type }}">
-                                        #{{ property.id }} - {{ property.title|truncatechars:60 }}
+                                        #{{ property.id }} - {{ property.property_title|truncatechars:60 }}
                                     </option>
                                     {% endfor %}
                                 </select>

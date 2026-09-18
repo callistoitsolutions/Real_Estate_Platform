@@ -88,6 +88,14 @@ urlpatterns = [
     views.pg_coliving_delete_agency,
     name='pg_coliving_delete_agency'
     ),
+
+    ############# urls for subscription for boost property agency/builder ################
+
+    path('Boost_Property_Agency', views.Boost_Property_Agency, name='Boost_Property_Agency'),
+
+    ########## urls for buy plan for agency/builder #######################
+    
+    path('Buy_Plan_Agency/<int:id>', views.Buy_Plan_Agency, name='Buy_Plan_Agency'),
     
 
 ################################ urls for Resale Residential Listing ############################

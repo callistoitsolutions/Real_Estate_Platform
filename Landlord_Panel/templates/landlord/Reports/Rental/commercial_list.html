@@ -1138,6 +1138,9 @@ Electricity Included?</th>
                     <button class="btn-action btn-view" onclick="window.location.href='{% url 'commercial_view_landlord' prop.id %}'"><i class="fas fa-eye"></i></button>
                     <button class="btn-action btn-edit" onclick="window.location.href='{% url 'commercial_landlord_edit' prop.id %}'"><i class="fas fa-edit"></i></button>
                     <button class="btn-action btn-delete" onclick="deleteCommercial('{{ prop.id }}')"><i class="fas fa-trash-alt"></i></button>
+                    <a href="{% url "Boost_Property_Landlord" %}" class="btn-action btn-edit" title="Boost Property" style="background-color:green;">
+                        <i class="fas fa-rocket"></i>
+                    </a>
                 </div>
             </td>
         </tr>

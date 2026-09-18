@@ -1,38 +1,134 @@
-
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Hero Sections</h3>
-        <a href="{% url 'hero_section_form' %}" class="btn btn-primary">+ Add New</a>
-    </div>
+<style>
+    :root {
+        --ph-navy: #0b1730;
+        --ph-navy-2: #1f2f47;
+        --ph-gold: #c9a227;
+        --ph-gold-light: #f1d888;
+        --ph-pr2: #a5811c;
+    }
+    .admin-list-wrapper {
+        background: #f7f8fc;
+        padding: 40px 20px;
+        font-family: 'DM Sans', sans-serif;
+        min-height: 100vh;
+    }
+    .admin-list-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #e7eaf2;
+        border-radius: 20px;
+        box-shadow: 0 10px 35px rgba(25, 31, 56, 0.06);
+        overflow: hidden;
+    }
+    .admin-list-header {
+        background: linear-gradient(135deg, var(--ph-navy), var(--ph-navy-2));
+        color: #ffffff;
+        padding: 24px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    .admin-list-header h3 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 800;
+        font-size: 1.4rem;
+        color: var(--ph-gold-light);
+        margin-bottom: 0;
+    }
+    .admin-btn-add {
+        background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
+        color: var(--ph-navy);
+        font-weight: 800;
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: none;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+    .admin-btn-add:hover {
+        filter: brightness(1.08);
+        color: var(--ph-navy);
+        box-shadow: 0 4px 12px rgba(201, 162, 39, 0.35);
+    }
+    .admin-table {
+        margin-bottom: 0;
+        color: #172033;
+    }
+    .admin-table th {
+        background: #f8fafc;
+        color: #344054;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        letter-spacing: 0.5px;
+        padding: 14px 20px;
+        border-bottom: 1px solid #e7eaf2;
+    }
+    .admin-table td {
+        padding: 16px 20px;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #f1f2f7;
+    }
+    .admin-btn-edit {
+        background: rgba(201, 162, 39, 0.12);
+        color: var(--ph-pr2);
+        font-weight: 700;
+        border: 1px solid rgba(201, 162, 39, 0.3);
+        padding: 6px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+    .admin-btn-edit:hover {
+        background: var(--ph-gold);
+        color: var(--ph-navy);
+    }
+</style>
 
-    <table class="table table-bordered align-middle">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Updated</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for h in heroes %}
-            <tr>
-                <td>{{ h.title_line1 }} {{ h.title_line2 }}</td>
-                <td>
-                    {% if h.is_active %}
-                        <span class="badge bg-success">Active</span>
-                    {% else %}
-                        <span class="badge bg-secondary">Inactive</span>
-                    {% endif %}
-                </td>
-                <td>{{ h.updated_at|date:"d M Y, h:i A" }}</td>
-                <td><a href="{% url 'hero_section_edit' h.pk %}" class="btn btn-sm btn-outline-primary">Edit</a></td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4" class="text-center text-muted">No hero sections yet.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="admin-list-wrapper">
+    <div class="admin-list-container">
+        <div class="admin-list-header">
+            <h3>Hero Sections</h3>
+            <a href="{% url 'hero_section_form' %}" class="admin-btn-add"><i class="bi bi-plus-lg"></i> Add New Banner</a>
+            <a href="{% url 'admin_page' %}" class="admin-btn-add"><i class="bi bi-plus-lg"></i> Back To Admin Dashboard</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th>Title Content</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in heroes %}
+                    <tr>
+                        <td class="fw-semibold">{{ h.title_line1 }} <span style="color: var(--ph-pr2);">{{ h.title_line2 }}</span></td>
+                        <td>
+                            {% if h.is_active %}
+                                <span class="badge bg-success px-3 py-1.5 rounded-pill">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary px-3 py-1.5 rounded-pill">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ h.updated_at|date:"d M Y, h:i A" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'hero_section_edit' h.pk %}" class="admin-btn-edit"><i class="bi bi-pencil-square"></i> Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No hero sections registered yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

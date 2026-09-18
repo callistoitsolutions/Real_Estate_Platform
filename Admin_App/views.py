@@ -655,38 +655,38 @@ def Payments_List_Admin(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord")
+        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").order_by('-id')
         landlord_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").count()
         landlord_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Done").count()
         landlord_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Cancel").count()
         landlord_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status__in=['Pending','Hold']).count()
 
-        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent")
+        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").order_by('-id')
         agent_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").count()
         agent_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Done").count()
         agent_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Cancel").count()
         agent_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status__in=['Pending','Hold']).count()
 
 
-        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder")
+        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").order_by('-id')
         agency_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").count()
         agency_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Done").count()
         agency_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Cancel").count()
         agency_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status__in=['Pending','Hold']).count()
 
-        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant")
+        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").order_by('-id')
         tenant_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").count()
         tenant_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Done").count()
         tenant_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Cancel").count()
         tenant_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status__in=['Pending','Hold']).count()
 
-        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer")
+        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").order_by('-id')
         buyer_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").count()
         buyer_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Done").count()
         buyer_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Cancel").count()
         buyer_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status__in=['Pending','Hold']).count()
 
-        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor")
+        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").order_by('-id')
         vendor_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").count()
         vendor_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Done").count()
         vendor_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Cancel").count()
@@ -2725,7 +2725,7 @@ def commercial_list(request):
     )
 
     # ════════════════════════════════════════════════
-    # ⛔ EXCEL / CSV DOWNLOAD BLOCK REMOVED
+    #  EXCEL / CSV DOWNLOAD BLOCK REMOVED
     # (the openpyxl / csv export code that used to live here has been
     #  deleted per request — this view no longer serves file downloads)
     # ════════════════════════════════════════════════
@@ -7447,70 +7447,105 @@ from django.core.files.images import get_image_dimensions
 
 
 
-
 def header_settings(request):
-
     settings = HeaderSettings.objects.filter(
         is_active=True
     ).first()
 
     if not settings:
-
         settings = HeaderSettings.objects.create(
             is_active=True
         )
 
-
     if request.method == "POST":
-
         if request.FILES.get("logo"):
             settings.logo = request.FILES["logo"]
-
 
         settings.logo_alt = request.POST.get(
             "logo_alt",
             "EstateFlow"
         )
-
-
         settings.logo_width = int(
-            request.POST.get(
-                "logo_width",
-                180
-            )
+            request.POST.get("logo_width", 180)
         )
-
+        settings.logo_height = int(
+            request.POST.get("logo_height", 80)
+        )
+        settings.logo_position = request.POST.get(
+            "logo_position",
+            "left"
+        )
 
         settings.transparent_header = (
-            request.POST.get(
-                "transparent_header"
-            ) == "on"
+            request.POST.get("transparent_header") == "on"
         )
-
-
         settings.sticky_header = (
-            request.POST.get(
-                "sticky_header"
-            ) == "on"
+            request.POST.get("sticky_header") == "on"
         )
-
 
         settings.header_background = request.POST.get(
             "header_background",
             "#ffffff"
         )
-
-
         settings.header_text_color = request.POST.get(
             "header_text_color",
             "#16233A"
         )
+        settings.menu_text_color = request.POST.get(
+            "menu_text_color",
+            "#ffffff"
+        )
+        settings.menu_hover_color = request.POST.get(
+            "menu_hover_color",
+            "#d4af37"
+        )
 
+        # ===== NEW: Header Buttons =====
+        settings.primary_btn_text = request.POST.get(
+            "primary_btn_text", "Post Property FREE"
+        )
+        settings.primary_btn_url = request.POST.get(
+            "primary_btn_url", ""
+        )
+        settings.primary_btn_bg = request.POST.get(
+            "primary_btn_bg", "transparent"
+        )
+        settings.primary_btn_text_color = request.POST.get(
+            "primary_btn_text_color", "#ffffff"
+        )
+        settings.show_primary_btn = (
+            request.POST.get("show_primary_btn") == "on"
+        )
+
+        settings.secondary_btn_text = request.POST.get(
+            "secondary_btn_text", "Login"
+        )
+        settings.secondary_btn_url = request.POST.get(
+            "secondary_btn_url", ""
+        )
+        settings.secondary_btn_color = request.POST.get(
+            "secondary_btn_color", "#ffffff"
+        )
+        settings.show_secondary_btn = (
+            request.POST.get("show_secondary_btn") == "on"
+        )
+
+        # ===== NEW: Menu Badge =====
+        settings.badge_menu_label = request.POST.get(
+            "badge_menu_label", ""
+        )
+        settings.badge_text = request.POST.get(
+            "badge_text", "NEW"
+        )
+        settings.badge_color = request.POST.get(
+            "badge_color", "#c9a227"
+        )
+        settings.show_badge = (
+            request.POST.get("show_badge") == "on"
+        )
 
         settings.save()
-
         return redirect("header_settings")
-
 
     return render(
         request,
@@ -7519,7 +7554,6 @@ def header_settings(request):
             "settings": settings
         }
     )
-
   
 def hero_section_form(request, pk=None):
     instance = get_object_or_404(HeroSection, pk=pk) if pk else None
@@ -7566,25 +7600,26 @@ def hero_section_list(request):
 
 
 def hero_section_edit(request, pk):
-    hero = get_object_or_404(HeroSection, pk=pk)
+    instance = get_object_or_404(HeroSection, pk=pk)
 
-    if request.method == "POST":
-        hero.title = request.POST.get("title")
-        hero.subtitle = request.POST.get("subtitle")
-        hero.title_font_size = request.POST.get("title_font_size")
-        hero.subtitle_font_size = request.POST.get("subtitle_font_size")
-        hero.text_color = request.POST.get("text_color")
-        hero.overlay_color = request.POST.get("overlay_color")
-        hero.is_active = True if request.POST.get("is_active") == "on" else False
+    if request.method == 'POST':
+        instance.eyebrow     = request.POST.get('eyebrow', '').strip()
+        instance.title_line1 = request.POST.get('title_line1', '').strip()
+        instance.title_line2 = request.POST.get('title_line2', '').strip()
+        instance.description = request.POST.get('description', '').strip()
+        instance.cta_text    = request.POST.get('cta_text', '').strip()
+        instance.cta_url     = request.POST.get('cta_url', '').strip()
+        instance.is_active   = request.POST.get('is_active') == 'on'
+        
+        bg_image = request.FILES.get('bg_image')
+        if bg_image:
+            instance.bg_image = bg_image
 
-        if "background_image" in request.FILES:
-            hero.background_image = request.FILES["background_image"]
+        instance.save()
+        messages.success(request, "Hero section updated successfully.")
+        return redirect('hero_section_list')
 
-        hero.save()
-        messages.success(request, "Hero section updated successfully!")
-        return redirect("hero_section_list")
-
-    return render(request, "admin_user/hero_section_edit.html", {"hero": hero})
+    return render(request, 'admin_user/hero_section.html', {'instance': instance})
 
 
 def hero_section_delete(request, pk):
