@@ -21,7 +21,8 @@ class UTMLink(models.Model):
     # Denormalized fields for quick access (optional - keep for performance)
     property_title = models.CharField(max_length=500, blank=True, null=True)
     listing_type = models.CharField(max_length=50, default='rent')
-    category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    category = models.CharField(max_length=100, blank=True, null=True)
+    sub_category = models.CharField(max_length=100, blank=True, null=True)
     
     # The actual UTM URL
     utm_path = models.CharField(max_length=500, default='/')

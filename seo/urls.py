@@ -85,12 +85,103 @@ urlpatterns = [
     ),
 
     # =========================================================
+    # COMMERCIAL — RENT
+    # /commercial-space-for-rent/nagpur/
+    # /commercial-space-for-rent/nagpur/besa/
+    # =========================================================
+    path(
+        "commercial-space-for-rent/<str:city>/",
+        landing_views.property_search_landing,
+        {"page_type": "commercial_rental"},
+        name="commercial_for_rent_city",
+    ),
+    path(
+        "commercial-space-for-rent/<str:city>/<str:locality>/",
+        landing_views.property_search_landing,
+        {"page_type": "commercial_rental"},
+        name="commercial_for_rent",
+    ),
+
+    # =========================================================
+    # COMMERCIAL — SALE
+    # /commercial-property-for-sale/nagpur/
+    # /commercial-property-for-sale/nagpur/besa/
+    # =========================================================
+    path(
+        "commercial-property-for-sale/<str:city>/",
+        landing_views.property_search_landing,
+        {"page_type": "commercial_resale"},
+        name="commercial_for_sale_city",
+    ),
+    path(
+        "commercial-property-for-sale/<str:city>/<str:locality>/",
+        landing_views.property_search_landing,
+        {"page_type": "commercial_resale"},
+        name="commercial_for_sale",
+    ),
+
+    # =========================================================
+    # PG / CO-LIVING
+    # /pg-coliving/nagpur/
+    # NOTE: kept generic for now — property_search_landing() does not
+    # currently accept a gender filter, so no /pg-for-boys//pg-for-girls
+    # routes here yet. Add those only after the view function itself is
+    # updated to accept and filter on a pg_for param (separate step).
+    # =========================================================
+    path(
+        "pg-coliving/<str:city>/",
+        landing_views.property_search_landing,
+        {"page_type": "pg_coliving"},
+        name="pg_coliving_city",
+    ),
+
+    # =========================================================
+    # PLOTS — SALE
+    # /plots-for-sale/nagpur/
+    # /plots-for-sale/nagpur/besa/
+    # =========================================================
+    path(
+        "plots-for-sale/<str:city>/",
+        landing_views.property_search_landing,
+        {"page_type": "residential_plot_resale"},
+        name="plots_for_sale_city",
+    ),
+    path(
+        "plots-for-sale/<str:city>/<str:locality>/",
+        landing_views.property_search_landing,
+        {"page_type": "residential_plot_resale"},
+        name="plots_for_sale",
+    ),
+
+    # =========================================================
+    # INDUSTRIAL — SALE
+    # /industrial-property-for-sale/nagpur/
+    # =========================================================
+    path(
+        "industrial-property-for-sale/<str:city>/",
+        landing_views.property_search_landing,
+        {"page_type": "industrial_sale"},
+        name="industrial_for_sale_city",
+    ),
+
+    # =========================================================
+    # AGRICULTURAL — SALE
+    # /agricultural-land-for-sale/nagpur/
+    # =========================================================
+    path(
+        "agricultural-land-for-sale/<str:city>/",
+        landing_views.property_search_landing,
+        {"page_type": "agriculture_sale"},
+        name="agricultural_for_sale_city",
+    ),
+
+    # =========================================================
     # GENERIC TENANT / BUYER SEARCH LANDING PAGES (legacy — kept working)
     # e.g. /find/rental_residential/nagpur/besa/?bhk=2
-    # Also still the route every OTHER page_type uses
-    # (commercial_rental, pg_coliving, commercial_resale, industrial_sale,
-    #  agriculture_sale, the 4 plot-resale types) until each gets its
-    # own friendly slug the same way flats-for-sale/rent did above.
+    # Still the fallback route for any page_type not given its own
+    # friendly slug above (e.g. the 3 plot-resale types other than
+    # residential: commercial_plot_resale, industrial_plot_resale,
+    # agricultural_plot_resale).
     # =========================================================
     path(
         "find/<str:page_type>/<str:city>/",
@@ -111,5 +202,8 @@ urlpatterns = [
         landing_views.quick_locality_enquiry,
         name="quick_locality_enquiry",
     ),
+
+
+    path("search/", landing_views.smart_search_redirect, name="smart_search_redirect")
 
 ]

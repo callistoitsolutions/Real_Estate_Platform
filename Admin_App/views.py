@@ -1,5 +1,6 @@
 from django.shortcuts import render,HttpResponse
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+from Admin_App.location_validator import verify_pincode_location
 # Create your views here.
 from django.shortcuts import render
 from django.contrib import messages
@@ -655,38 +656,38 @@ def Payments_List_Admin(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord")
+        landlord_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").order_by('-id')
         landlord_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord").count()
         landlord_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Done").count()
         landlord_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status="Cancel").count()
         landlord_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Landlord",plan_status__in=['Pending','Hold']).count()
 
-        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent")
+        agent_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").order_by('-id')
         agent_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent").count()
         agent_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Done").count()
         agent_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status="Cancel").count()
         agent_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agent",plan_status__in=['Pending','Hold']).count()
 
 
-        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder")
+        agency_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").order_by('-id')
         agency_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder").count()
         agency_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Done").count()
         agency_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status="Cancel").count()
         agency_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Agency/Builder",plan_status__in=['Pending','Hold']).count()
 
-        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant")
+        tenant_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").order_by('-id')
         tenant_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant").count()
         tenant_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Done").count()
         tenant_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status="Cancel").count()
         tenant_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Tenant",plan_status__in=['Pending','Hold']).count()
 
-        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer")
+        buyer_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").order_by('-id')
         buyer_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer").count()
         buyer_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Done").count()
         buyer_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status="Cancel").count()
         buyer_hold = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Buyer",plan_status__in=['Pending','Hold']).count()
 
-        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor")
+        vendor_pending = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").order_by('-id')
         vendor_count = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor").count()
         vendor_done = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Done").count()
         vendor_cancel = Subscription_Purchase_Details.objects.filter(fk_user__user_role="Vendor",plan_status="Cancel").count()
@@ -2725,7 +2726,7 @@ def commercial_list(request):
     )
 
     # ════════════════════════════════════════════════
-    # ⛔ EXCEL / CSV DOWNLOAD BLOCK REMOVED
+    #  EXCEL / CSV DOWNLOAD BLOCK REMOVED
     # (the openpyxl / csv export code that used to live here has been
     #  deleted per request — this view no longer serves file downloads)
     # ════════════════════════════════════════════════
@@ -7447,70 +7448,105 @@ from django.core.files.images import get_image_dimensions
 
 
 
-
 def header_settings(request):
-
     settings = HeaderSettings.objects.filter(
         is_active=True
     ).first()
 
     if not settings:
-
         settings = HeaderSettings.objects.create(
             is_active=True
         )
 
-
     if request.method == "POST":
-
         if request.FILES.get("logo"):
             settings.logo = request.FILES["logo"]
-
 
         settings.logo_alt = request.POST.get(
             "logo_alt",
             "EstateFlow"
         )
-
-
         settings.logo_width = int(
-            request.POST.get(
-                "logo_width",
-                180
-            )
+            request.POST.get("logo_width", 180)
         )
-
+        settings.logo_height = int(
+            request.POST.get("logo_height", 80)
+        )
+        settings.logo_position = request.POST.get(
+            "logo_position",
+            "left"
+        )
 
         settings.transparent_header = (
-            request.POST.get(
-                "transparent_header"
-            ) == "on"
+            request.POST.get("transparent_header") == "on"
         )
-
-
         settings.sticky_header = (
-            request.POST.get(
-                "sticky_header"
-            ) == "on"
+            request.POST.get("sticky_header") == "on"
         )
-
 
         settings.header_background = request.POST.get(
             "header_background",
             "#ffffff"
         )
-
-
         settings.header_text_color = request.POST.get(
             "header_text_color",
             "#16233A"
         )
+        settings.menu_text_color = request.POST.get(
+            "menu_text_color",
+            "#ffffff"
+        )
+        settings.menu_hover_color = request.POST.get(
+            "menu_hover_color",
+            "#d4af37"
+        )
 
+        # ===== NEW: Header Buttons =====
+        settings.primary_btn_text = request.POST.get(
+            "primary_btn_text", "Post Property FREE"
+        )
+        settings.primary_btn_url = request.POST.get(
+            "primary_btn_url", ""
+        )
+        settings.primary_btn_bg = request.POST.get(
+            "primary_btn_bg", "transparent"
+        )
+        settings.primary_btn_text_color = request.POST.get(
+            "primary_btn_text_color", "#ffffff"
+        )
+        settings.show_primary_btn = (
+            request.POST.get("show_primary_btn") == "on"
+        )
+
+        settings.secondary_btn_text = request.POST.get(
+            "secondary_btn_text", "Login"
+        )
+        settings.secondary_btn_url = request.POST.get(
+            "secondary_btn_url", ""
+        )
+        settings.secondary_btn_color = request.POST.get(
+            "secondary_btn_color", "#ffffff"
+        )
+        settings.show_secondary_btn = (
+            request.POST.get("show_secondary_btn") == "on"
+        )
+
+        # ===== NEW: Menu Badge =====
+        settings.badge_menu_label = request.POST.get(
+            "badge_menu_label", ""
+        )
+        settings.badge_text = request.POST.get(
+            "badge_text", "NEW"
+        )
+        settings.badge_color = request.POST.get(
+            "badge_color", "#c9a227"
+        )
+        settings.show_badge = (
+            request.POST.get("show_badge") == "on"
+        )
 
         settings.save()
-
         return redirect("header_settings")
-
 
     return render(
         request,
@@ -7519,7 +7555,6 @@ def header_settings(request):
             "settings": settings
         }
     )
-
   
 def hero_section_form(request, pk=None):
     instance = get_object_or_404(HeroSection, pk=pk) if pk else None
@@ -7566,25 +7601,26 @@ def hero_section_list(request):
 
 
 def hero_section_edit(request, pk):
-    hero = get_object_or_404(HeroSection, pk=pk)
+    instance = get_object_or_404(HeroSection, pk=pk)
 
-    if request.method == "POST":
-        hero.title = request.POST.get("title")
-        hero.subtitle = request.POST.get("subtitle")
-        hero.title_font_size = request.POST.get("title_font_size")
-        hero.subtitle_font_size = request.POST.get("subtitle_font_size")
-        hero.text_color = request.POST.get("text_color")
-        hero.overlay_color = request.POST.get("overlay_color")
-        hero.is_active = True if request.POST.get("is_active") == "on" else False
+    if request.method == 'POST':
+        instance.eyebrow     = request.POST.get('eyebrow', '').strip()
+        instance.title_line1 = request.POST.get('title_line1', '').strip()
+        instance.title_line2 = request.POST.get('title_line2', '').strip()
+        instance.description = request.POST.get('description', '').strip()
+        instance.cta_text    = request.POST.get('cta_text', '').strip()
+        instance.cta_url     = request.POST.get('cta_url', '').strip()
+        instance.is_active   = request.POST.get('is_active') == 'on'
+        
+        bg_image = request.FILES.get('bg_image')
+        if bg_image:
+            instance.bg_image = bg_image
 
-        if "background_image" in request.FILES:
-            hero.background_image = request.FILES["background_image"]
+        instance.save()
+        messages.success(request, "Hero section updated successfully.")
+        return redirect('hero_section_list')
 
-        hero.save()
-        messages.success(request, "Hero section updated successfully!")
-        return redirect("hero_section_list")
-
-    return render(request, "admin_user/hero_section_edit.html", {"hero": hero})
+    return render(request, 'admin_user/hero_section.html', {'instance': instance})
 
 
 def hero_section_delete(request, pk):
@@ -8221,8 +8257,21 @@ def rental_residential_add(request):
             # ==========================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_building_name = (request.POST.get('building_name') or '').strip()
+
             input_locality = (request.POST.get('locality_area') or request.POST.get('locality') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
+
+# 👇 ADD THIS NEW BLOCK — nothing above this line changes
+            input_state = (request.POST.get('state') or '').strip()
+            input_city = (request.POST.get('city') or '').strip()  # or 'city_field' from the table, per model
+
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                messages.error(request, location_error)
+                return redirect('residential')  # match this view's own redirect target
+# 👆 END OF NEW BLOCK
 
             fingerprint_key = generate_property_fingerprint(
                 input_property_no, 
@@ -8449,6 +8498,42 @@ def rental_residential_add(request):
         'facilities_obj': Facilities_Details.objects.all()
     })
 
+
+
+
+
+
+from django.http import JsonResponse
+
+
+
+
+def ajax_lookup_pincode(request):
+    pincode = request.GET.get('pincode', '').strip()
+    
+    if not pincode or len(pincode) != 6:
+        return JsonResponse({'success': False, 'error': 'Please enter a valid 6-digit pincode.'})
+
+    try:
+        # Calls the function from your location_validator.py source
+        is_valid, error, real_state, real_city, real_localities = verify_pincode_location(pincode)
+        
+        if not is_valid:
+            return JsonResponse({'success': False, 'error': error})
+
+        return JsonResponse({
+            'success': True,
+            'state': real_state,
+            'city': real_city,
+            'localities': real_localities
+        })
+        
+    except Exception as e:
+        print(f"PINCODE LOOKUP ERROR: {str(e)}")
+        return JsonResponse({
+            'success': False, 
+            'error': 'Could not verify pincode right now. Please try again.'
+        }, status=200) # status=200 ensures jQuery/fetch parses the JSON instead of throwing a console 500 error
 
 
 
@@ -11650,12 +11735,6 @@ def rental_residential_edit(request, pk):
 
 
 
-
-
-
-
-
-
 def commercial_rental_add(request):
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -11725,6 +11804,16 @@ def commercial_rental_add(request):
             input_locality = (request.POST.get('locality') or request.POST.get('locality_area') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
+
+# 👇 ADD THIS NEW BLOCK
+            input_state = (request.POST.get('state') or '').strip()
+
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({"status": "error", "message": location_error})
+
 
             # Generate unique fingerprint key
             fingerprint_key = f"{input_property_no}|{input_building_name}|{input_locality}|{input_city}|{input_pincode}".lower().replace(" ", "")
@@ -14551,13 +14640,22 @@ def add_pg(request):
         input_listed_by_role = (request.POST.get('listed_by_role') or uploader_role).strip()
 
         # ---------- CORE LOCATION / IDENTITY FIELDS (used in fingerprint) ----------
+        # ---------- CORE LOCATION / IDENTITY FIELDS (used in fingerprint) ----------
         input_property_no = (request.POST.get('property_no') or '').strip()
         input_building_name = (request.POST.get('building_name') or '').strip()
         input_locality = (request.POST.get('locality') or '').strip()
         input_city = (request.POST.get('city') or '').strip()
         input_address = (request.POST.get('address') or '').strip()
         input_pincode = (request.POST.get('pincode') or '').strip()
+        input_state = (request.POST.get('state') or '').strip()
         input_monthly_rent = _to_int_or_none(request.POST.get('room_rent'))
+
+        # Location verification check
+        is_valid_location, location_error, _, _, _ = verify_pincode_location(
+            input_pincode, input_state, input_city, input_locality
+        )
+        if not is_valid_location:
+            return JsonResponse({"status": "error", "message": location_error}, status=400)
 
         # ---------- DUPLICATE DETECTION (mirrors model.save()'s key + commercial's approach) ----------
         fingerprint_key = build_pg_fingerprint(
@@ -17842,9 +17940,25 @@ def Resale_Industrial_Ajax(request):
             # ============================================================
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # ============================================================
+             # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
+            input_state = (request.POST.get('state') or '').strip()
+            input_city = (request.POST.get('city') or '').strip()
+
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": location_error
+                }, status=400)
             
             fingerprint_key = generate_property_fingerprint(
                 input_property_no, "", input_locality, input_pincode
@@ -17955,9 +18069,12 @@ def Resale_Industrial_Ajax(request):
         # ============================================================
         # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
         # ============================================================
+        # ============================================================
+        # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
+        # ============================================================
         extra_keys_to_remove = [
-            'csrfmiddlewaretoken', 'assigned_to_role', 
-            'video_source'
+            'csrfmiddlewaretoken', 'assigned_to_role',
+            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual'
         ]
         for k in extra_keys_to_remove:
             data.pop(k, None)
@@ -19715,10 +19832,26 @@ def Resale_Resident_Ajax(request):
             # ============================================================
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # ============================================================
+            # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_building_name = (request.POST.get('building_name') or '').strip()
             input_locality = (request.POST.get('locality') or request.POST.get('locality') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
+            input_state = (request.POST.get('state') or '').strip()
+            input_city = (request.POST.get('city') or '').strip()
+
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": location_error
+                }, status=400)
             
             fingerprint_key = generate_property_fingerprint(
                 input_property_no, input_building_name, input_locality, input_pincode
@@ -22116,14 +22249,35 @@ def Resale_Commercial_Ajax(request):
                 # ============================================================
                 # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
                 # ============================================================
+
+                
+                # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
                 input_property_no = (request.POST.get('property_no') or '').strip()
                 input_building_name = (request.POST.get('building_name') or '').strip()
                 input_locality = (request.POST.get('locality') or request.POST.get('locality') or '').strip()
                 input_pincode = (request.POST.get('pincode') or '').strip()
-                
+                input_state = (request.POST.get('state') or '').strip()
+                input_city = (request.POST.get('city') or '').strip()
+
+            # Location validation check
+                is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                    input_pincode, input_state, input_city, input_locality
+                )
+                if not is_valid_location:
+                    return JsonResponse({
+                        "status": "0",
+                        "status_code": "error",
+                        "msg": location_error
+                    }, status=400)
+            
                 fingerprint_key = generate_property_fingerprint(
                     input_property_no, input_building_name, input_locality, input_pincode
                 )
+
+
+
           
                 direct_duplicates = CommercialResaleProperty.objects.filter(
                     is_deleted=False,
@@ -24918,11 +25072,28 @@ def Resale_Agricultural_Ajax(request):
             # Agricultural form has no locality/pincode, so we use
             # property_no + village + district instead.
             # ============================================================
+            # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_village = (request.POST.get('village') or '').strip()
             input_district = (request.POST.get('district') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
- 
+            input_pincode = (request.POST.get('pincode') or '').strip()
+            input_state = (request.POST.get('state') or '').strip()
+            input_city = (request.POST.get('district') or '').strip()  # Fallback to district for agri
+
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_village
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": location_error
+                }, status=400)
+
             fingerprint_key = generate_property_fingerprint(
                 input_property_no, "", input_village, input_district
             )
@@ -25047,7 +25218,19 @@ def Resale_Agricultural_Ajax(request):
         keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
         for k in keys_to_remove:
             data.pop(k, None)
- 
+
+        # ============================================================
+        # 6.5. SAFEGUARD: DROP KEYS THAT AREN'T VALID MODEL FIELDS
+        # Prevents TypeError from stale forms / legacy field names
+        # (e.g. old owner_*, city, expected_price style payloads)
+        # ============================================================
+        valid_field_names = {f.name for f in AgriculturalResaleProperty._meta.get_fields()}
+        unexpected_keys = [k for k in data.keys() if k not in valid_field_names]
+        if unexpected_keys:
+            print(f"[Resale_Agricultural_Ajax] Dropping unexpected keys: {unexpected_keys}")
+        data = {k: v for k, v in data.items() if k in valid_field_names}
+
+      
         # ============================================================
         # 7. CREATE OR UPDATE PROPERTY FIRST
         # ============================================================
@@ -25242,6 +25425,8 @@ def Resale_Agricultural_Ajax(request):
         "status_code": "error",
         "msg": "Invalid request"
     }, status=400)
+
+
 
 ########### Views end for ajax for add/edit agricultural property ####################
 
@@ -26898,6 +27083,7 @@ def residential_plot_resale_list(request):
 
 ############ Views start for ajax for add/edit residential resale plot property #######
 
+
 @csrf_exempt
 def Resale_Residential_Plot_Ajax(request):
     if request.method == 'POST':
@@ -26933,10 +27119,25 @@ def Resale_Residential_Plot_Ajax(request):
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # Uses property_no + locality + city + state instead of village/district.
             # ============================================================
+            # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
             input_state = (request.POST.get('state') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": location_error
+                }, status=400)
 
             fingerprint_key = generate_property_fingerprint(
                 input_property_no, input_locality, input_city, input_state
@@ -27044,7 +27245,7 @@ def Resale_Residential_Plot_Ajax(request):
         # ============================================================
         extra_keys_to_remove = [
             'csrfmiddlewaretoken', 'assigned_to_role',
-            'video_source'
+            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual'
         ]
         for k in extra_keys_to_remove:
             data.pop(k, None)
@@ -27245,6 +27446,9 @@ def Resale_Residential_Plot_Ajax(request):
         "status_code": "error",
         "msg": "Invalid request"
     }, status=400)
+
+
+
 
 ########## Views end for ajax for add/edit residential resale plot property #############
 
@@ -28616,10 +28820,25 @@ def Resale_Commercial_Plot_Ajax(request):
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # Uses property_no + locality + city + state instead of village/district.
             # ============================================================
+            # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
             input_state = (request.POST.get('state') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": location_error
+                }, status=400)
 
             fingerprint_key = generate_property_fingerprint(
                 input_property_no, input_locality, input_city, input_state
@@ -28725,9 +28944,12 @@ def Resale_Commercial_Plot_Ajax(request):
         # ============================================================
         # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
         # ============================================================
+        # ============================================================
+        # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
+        # ============================================================
         extra_keys_to_remove = [
             'csrfmiddlewaretoken', 'assigned_to_role',
-            'video_source'
+            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual'
         ]
         for k in extra_keys_to_remove:
             data.pop(k, None)
@@ -30243,35 +30465,36 @@ def delete_seo_page(request, pk):
 
 
 def seo_url_redirect(request, seo_key):
-    # Find the exact SEO record
     seo_page = get_object_or_404(LocationSEO, key=seo_key)
-    
-    # Extract property ID (e.g., EFPRR-30091A4A)
+
+    # Non-property pagetypes: these already have a real canonical_url —
+    # just send the visitor there instead of guessing a property URL.
+    if seo_page.pagetype in ("service", "owner_listing", "location_category", "blog"):
+        if seo_page.canonical_url:
+            return redirect(seo_page.canonical_url)
+        # fallback if canonical_url somehow isn't set yet
+        return redirect("/")
+
+    # ---- everything below here is UNCHANGED, for real property pagetypes ----
     property_id = seo_page.object_id
-    
-    # Determine if it's rent or sale (Matches your clean_type logic)
     if "rental" in seo_page.pagetype or "pg" in seo_page.pagetype:
         listing_type = "rent"
     else:
         listing_type = "sale"
-        
-    # Determine the category string for the URL (Matches your clean_category logic)
-    category = "residential"  # Default fallback
-    
+
+    category = "residential"
     if "commercial" in seo_page.pagetype:
         category = "commercial"
     elif "pg" in seo_page.pagetype:
-        category = "pg-coliving" 
+        category = "pg-coliving"
     elif "agriculture" in seo_page.pagetype or "agricultural" in seo_page.pagetype:
         category = "agriculture"
     elif "industrial" in seo_page.pagetype:
         category = "industrial"
     elif "plot" in seo_page.pagetype:
         category = "plot"
-        
-    # Redirect to the property_detail route, passing the slug into the URL
-    return redirect('property_detail', listing_type=listing_type, category=category, slug=seo_page.slug, pk=property_id)
 
+    return redirect('property_detail', listing_type=listing_type, category=category, slug=seo_page.slug, pk=property_id)
 
 #######################End View SEO MODULE SECTION###################################
 
@@ -30953,6 +31176,18 @@ def industrial_plot_resale_add(request):
             input_industrial_estate_name = (request.POST.get('industrial_estate_name') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
+            input_state = (request.POST.get('state') or '').strip()
+            input_city = (request.POST.get('city') or '').strip()
+
+        # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "error",
+                    "message": location_error
+                }, status=400)
 
             fingerprint_key = generate_industrial_plot_fingerprint(
                 input_property_no,
@@ -34266,6 +34501,17 @@ def agricultural_plot_resale_add(request):
             input_locality = (request.POST.get('locality') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
+            input_state = (request.POST.get('state') or '').strip()
+
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "error",
+                    "message": location_error
+                }, status=400)
 
             fingerprint_key = generate_agricultural_plot_fingerprint(
                 input_property_no,
@@ -38665,16 +38911,28 @@ def agricultural_plot_resale_add(request):
             # ==========================================================
             # DUPLICATE DETECTION ENGINE
             # ==========================================================
+            # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
+            input_state = (request.POST.get('state') or '').strip()
             input_pincode = (request.POST.get('pincode') or '').strip()
 
-            fingerprint_key = generate_agricultural_plot_fingerprint(
-                input_property_no,
-                input_locality,
-                input_city,
-                input_pincode
+            # Location validation check
+            is_valid_location, location_error, _, _, _ = verify_pincode_location(
+                input_pincode, input_state, input_city, input_locality
+            )
+            if not is_valid_location:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": location_error
+                }, status=400)
+
+            fingerprint_key = generate_property_fingerprint(
+                input_property_no, input_locality, input_city, input_state
             )
 
             direct_duplicates = AgriculturalPlotResaleProperty.objects.filter(

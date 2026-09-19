@@ -13,439 +13,610 @@
 {% endif %}
 <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-{% comment %}
-==========================================================================
- VISITOR-FIRST PROPERTY DETAIL PAGE (v2)
- Decision order: Photos -> What/Where -> Price+Move-in cost -> Quick facts
-                 -> Schedule Visit/Callback -> Trust -> everything else.
-
- Backend contract UNCHANGED from the previous template:
-   property_group : "rental" | "resale" | "resale_plot"
-   category        : "residential" | "commercial" | "pg" | "industrial" | "agricultural"
-   p               : unified dict/object exposing every field used below
-   Same context vars: property_images, selected_video, grouped_images,
-   amenities_list, facilities_list, similar, original.faqs.all,
-   can_view_contact, masked_phone, user_obj, base_emi, raw_price,
-   locality_insight, price_trend, nearby_localities.
-
- REMOVED FROM VISITOR VIEW (still available to you in admin/CRM, just not
- rendered here): Listed By block, Media & Upload Meta-Data, uploader info,
- duplication engine / fingerprint / soft-delete flags. Replaced with a
- clean "EstateFlow Verification" section.
-==========================================================================
-{% endcomment %}
-
 <style>
-:root{
-  --navy:#07162f; --navy-light:#102544;
-  --gold:#c8a43b; --gold-light:#f7f0dc; --gold-border:#e8dfc0;
-  --white:#fff; --cream:#faf9f6;
-  --text:#1d2633; --muted:#737b88; --border:#e8e8e5;
-  --green:#16805b; --green-bg:#eaf7f1;
-  --warn:#ef4444; --warn-bg:#fef2f2;
-  --shadow:0 12px 35px rgba(7,22,47,.08);
-  --shadow-md:0 18px 44px rgba(7,22,47,.14);
-  --radius:4px; --radius-lg:6px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:#f8f8f6;color:var(--text);}
-a{text-decoration:none;color:inherit;}
-button{font-family:inherit;cursor:pointer;}
-.container{width:min(1280px,94%);margin:auto;}
-
-/* ── ICON / SHARE ── */
-.icon-action-btn{background:none;border:1px solid var(--border);color:var(--navy);font-size:1rem;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
-.icon-action-btn:hover{background:var(--gold-light);border-color:var(--gold-border);}
-.icon-action-btn.wished{color:#e11d48;border-color:#f8c9d3;}
-.share-popover-wrap{position:relative;}
-.share-popover{display:none;position:absolute;top:44px;right:0;z-index:1000;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);width:250px;padding:14px;}
-.share-popover.open{display:block;}
-.share-popover-title{font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:10px;}
-.share-popover-item{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;text-align:left;padding:9px 4px;border-radius:4px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--text);}
-.share-popover-item:hover{background:var(--cream);}
-.share-icon-circle{width:34px;height:34px;border-radius:50%;background:var(--cream);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.95rem;}
-
-/* ── BREADCRUMB ── */
-.breadcrumb-bar{padding:18px 0;font-size:12px;color:#858b94;}
-.breadcrumb-bar a{color:var(--navy);font-weight:600;}
-.breadcrumb-bar a:hover{color:var(--gold);}
-.breadcrumb-bar span{margin:0 8px;color:#b5b8bd;}
-
-/* ── GALLERY (unchanged wiring, restyled) ── */
-.prop-gallery-grid{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:5px;height:440px;overflow:hidden;border-radius:var(--radius);margin-bottom:0;}
-.prop-gallery-main{grid-row:1/3;grid-column:1/2;position:relative;overflow:hidden;background:#eee;cursor:pointer;}
-.prop-gallery-thumb{position:relative;overflow:hidden;background:#eee;cursor:pointer;}
-.prop-gallery-thumb img,.prop-gallery-main img,.prop-gallery-thumb video{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease;}
-.prop-gallery-thumb:hover img,.prop-gallery-thumb:hover video,.prop-gallery-main:hover img{transform:scale(1.03);}
-.video-play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;}
-.video-play-btn div{background:rgba(7,22,47,.7);border:2px solid #fff;border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;}
-.video-label{position:absolute;top:12px;left:12px;background:rgba(7,22,47,.85);color:#fff;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:4px;z-index:10;}
-.thumb-more-overlay{position:absolute;inset:0;background:rgba(7,22,47,.55);display:flex;align-items:center;justify-content:center;}
-.thumb-more-overlay span{color:#fff;font-size:1.3rem;font-weight:700;}
-.watermark-container{position:absolute;inset:0;background:#f1f1ee;display:flex;align-items:center;justify-content:center;}
-.watermark-placeholder{font-family:'Playfair Display',serif;color:rgba(7,22,47,.05);font-size:3.2rem;font-weight:800;text-transform:uppercase;letter-spacing:6px;transform:rotate(-25deg);white-space:nowrap;}
-
-/* ── PROPERTY INTRO ── */
-.property-intro{padding:26px 0 24px;border-bottom:1px solid var(--border);}
-.verified-line{display:inline-flex;align-items:center;gap:7px;color:var(--green);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
-.intro-top{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap;}
-.property-title{font-family:'Playfair Display',serif;color:var(--navy);font-size:2rem;line-height:1.2;max-width:800px;}
-.title-row{display:flex;align-items:flex-start;gap:10px;}
-.location-line{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--muted);font-size:14px;}
-.location-line i{color:var(--gold);}
-.property-price{text-align:right;min-width:220px;}
-.price-amount{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--navy);}
-.price-amount small{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);}
-.price-sub{margin-top:4px;color:var(--muted);font-size:12px;}
-
-/* Quick facts strip */
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:22px;border:1px solid var(--border);background:#fff;border-radius:var(--radius);overflow:hidden;}
-.fact{padding:16px 18px;display:flex;align-items:center;gap:12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-.fact i{color:var(--gold);font-size:19px;}
-.fact strong{display:block;color:var(--navy);font-size:13px;}
-.fact span{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;}
-
-/* CTA row (mobile-hidden, sidebar handles desktop CTA; this is the inline row under facts) */
-.intro-cta-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
-.btn-cta{padding:13px 22px;border-radius:var(--radius);font-size:13px;font-weight:700;border:1px solid transparent;display:inline-flex;align-items:center;gap:8px;}
-.btn-cta-primary{background:var(--gold);border-color:var(--gold);color:var(--navy);}
-.btn-cta-primary:hover{background:#b8942f;}
-.btn-cta-outline{background:#fff;border-color:var(--navy);color:var(--navy);}
-.btn-cta-outline:hover{background:var(--navy);color:#fff;}
-.btn-cta-whatsapp{background:#fff;border-color:#1b9568;color:var(--green);}
-.btn-cta-whatsapp:hover{background:var(--green-bg);}
-
-/* ── CONTENT GRID ── */
-.content-grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:40px;margin-top:32px;align-items:start;padding-bottom:60px;}
-.section-block{padding:0 0 34px;margin-bottom:34px;border-bottom:1px solid var(--border);scroll-margin-top:90px;}
-.section-block:last-child{border-bottom:0;}
-.eyebrow{color:var(--gold);text-transform:uppercase;font-size:10px;letter-spacing:1.6px;font-weight:700;margin-bottom:6px;}
-.section-title{font-family:'Playfair Display',serif;color:var(--navy);font-size:1.65rem;margin-bottom:18px;}
-.description-text{color:#626a76;font-size:14px;line-height:1.9;max-width:850px;}
-
-/* Highlights ("Why this property?") */
-.highlights{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.highlight{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;gap:12px;align-items:flex-start;}
-.highlight i{color:var(--gold);font-size:17px;margin-top:2px;}
-.highlight strong{display:block;font-size:13px;color:var(--navy);}
-.highlight span{color:var(--muted);font-size:11px;}
-
-/* Details grid (specs, all 11 variants render into this shared component) */
-.details-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);border-left:1px solid var(--border);background:#fff;border-radius:var(--radius);overflow:hidden;}
-.detail-cell{padding:15px 16px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-.detail-cell.full{grid-column:1/-1;}
-.detail-label{font-size:10.5px;color:#8b919a;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;}
-.detail-value{font-size:13px;font-weight:600;color:var(--navy);}
-
-/* Amenities */
-.amenities-wrap{display:flex;flex-wrap:wrap;gap:9px;}
-.amenity-chip{padding:9px 14px;border:1px solid var(--border);background:#fff;border-radius:var(--radius);font-size:12px;color:#59616c;}
-.amenity-chip i{color:var(--gold);margin-right:6px;}
-.facility-chip{padding:9px 14px;border:1px solid #a7d9c7;background:var(--green-bg);border-radius:var(--radius);font-size:12px;color:#0f5c40;}
-.facility-chip i{margin-right:6px;}
-
-/* Pricing / move-in cost */
-.pricing-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
-.cost-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;}
-.cost-row span{color:var(--muted);}
-.cost-row strong{color:var(--navy);}
-.cost-total{padding-top:18px;display:flex;justify-content:space-between;color:var(--navy);font-size:16px;font-weight:700;}
-
-/* Location / map */
-.map-block{height:280px;border-radius:var(--radius);background:#e9ebe5;position:relative;overflow:hidden;margin-bottom:16px;}
-.map-block::before{content:"";position:absolute;width:120%;height:22px;top:50%;left:-10%;background:#fff;transform:rotate(-12deg);}
-.map-block::after{content:"";position:absolute;width:120%;height:16px;top:30%;left:-10%;background:#fff;transform:rotate(35deg);}
-.map-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50% 50% 50% 0;background:var(--navy);display:grid;place-items:center;color:var(--gold);font-size:19px;box-shadow:0 8px 20px rgba(0,0,0,.18);}
-.address-line{background:var(--cream);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:0 var(--radius) var(--radius) 0;padding:14px;font-size:.85rem;color:var(--text);line-height:1.6;}
-
-/* Verification (replaces admin meta) */
-.verify-panel{background:var(--navy);color:#fff;padding:28px;border-radius:var(--radius-lg);}
-.verify-panel .section-title{color:#fff;}
-.verify-panel .eyebrow{color:var(--gold);}
-.verify-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
-.verify-tile{border:1px solid rgba(255,255,255,.14);padding:16px;background:rgba(255,255,255,.03);border-radius:4px;}
-.verify-tile i{color:var(--gold);font-size:19px;}
-.verify-tile strong{display:block;font-size:12.5px;margin-top:8px;}
-.verify-tile span{display:block;color:#aeb8c7;font-size:10.5px;margin-top:3px;}
-
-/* FAQ */
-.prop-faq .accordion-item{border:1px solid var(--border);border-radius:var(--radius) !important;margin-bottom:10px;overflow:hidden;}
-.prop-faq .accordion-button{font-weight:600;font-size:.88rem;color:var(--navy);background:#fff;padding:15px 17px;box-shadow:none;}
-.prop-faq .accordion-button:not(.collapsed){background:var(--gold-light);color:#8a6d1f;}
-.prop-faq .accordion-body{font-size:.85rem;line-height:1.75;color:var(--text);background:#fff;padding:14px 17px;}
-
-/* Similar */
-.similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-.sim-card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;transition:.2s;display:flex;flex-direction:column;}
-.sim-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
-.sim-img{height:130px;overflow:hidden;position:relative;background:#e2e2de;}
-.sim-img img{width:100%;height:100%;object-fit:cover;}
-.sim-tag{position:absolute;top:8px;left:8px;background:var(--navy);color:var(--gold);font-size:.6rem;font-weight:800;padding:3px 9px;border-radius:4px;text-transform:uppercase;}
-.sim-body{padding:14px;flex:1;display:flex;flex-direction:column;}
-.sim-price{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--navy);}
-.sim-title{font-size:.8rem;font-weight:700;color:var(--navy);margin:4px 0 6px;}
-.sim-loc{font-size:.72rem;color:var(--muted);}
-.sim-footer{border-top:1px solid var(--border);padding-top:10px;margin-top:auto;display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-weight:600;}
-
-/* ── SIDEBAR CONTACT CARD ── */
-.sidebar{position:sticky;top:24px;display:flex;flex-direction:column;gap:16px;}
-.contact-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px;}
-.contact-title{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--navy);margin-bottom:3px;}
-.contact-sub{color:var(--muted);font-size:11px;margin-bottom:18px;}
-.sidebar-price-block{padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:18px;}
-.sidebar-price-block strong{display:block;font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--navy);}
-.sidebar-price-block span{color:var(--muted);font-size:11px;}
-.cta{width:100%;padding:13px;border-radius:var(--radius);font-size:13px;font-weight:700;margin-bottom:9px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;gap:8px;}
-.cta-primary{background:var(--gold);border-color:var(--gold);color:var(--navy);}
-.cta-primary:hover{background:#b8942f;}
-.cta-outline{background:#fff;border-color:var(--navy);color:var(--navy);}
-.cta-outline:hover{background:var(--navy);color:#fff;}
-.cta-whatsapp{background:#fff;border-color:#1b9568;color:var(--green);}
-.cta-whatsapp:hover{background:var(--green-bg);}
-.agent{display:flex;align-items:center;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
-.agent-avatar{width:42px;height:42px;border-radius:50%;background:var(--navy);color:var(--gold);display:grid;place-items:center;font-family:'Playfair Display',serif;flex-shrink:0;}
-.agent strong{display:block;font-size:12px;color:var(--navy);}
-.agent span{font-size:10px;color:var(--muted);}
-.security-note{margin-top:16px;padding:12px;background:var(--green-bg);color:#3c5c4c;font-size:10px;line-height:1.5;border-radius:4px;}
-.masked-phone-block{background:var(--cream);border:1.5px dashed var(--border);border-radius:4px;padding:14px;text-align:center;margin-bottom:12px;}
-.masked-num{font-size:1.05rem;font-weight:800;color:var(--navy);letter-spacing:2px;}
-.masked-hint{font-size:.68rem;color:var(--muted);margin-top:4px;}
-.btn-reveal-phone{font-size:.7rem;color:#8a6d1f;border:1px solid var(--gold-border);background:var(--gold-light);padding:2px 8px;border-radius:4px;cursor:pointer;font-weight:600;}
-.owner-phone-masked{font-size:.8rem;color:var(--text);font-family:monospace;}
-
-.enq-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin:18px 0 12px;padding-top:16px;border-top:1px solid var(--border);}
-.enq-input{width:100%;border:1px solid var(--border);border-radius:4px;padding:11px 14px;font-size:.83rem;margin-bottom:10px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);}
-.enq-input:focus{border-color:var(--gold);background:#fff;}
-.trust-badges{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border);margin-top:14px;}
-.trust-item{text-align:center;}
-.trust-item i{font-size:1.2rem;color:#8a6d1f;}
-.trust-item div{font-size:.63rem;font-weight:700;color:var(--muted);margin-top:3px;}
-
-/* EMI card */
-.emi-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);}
-.emi-label{font-size:.7rem;font-weight:700;color:#8a6d1f;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
-.emi-amount{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--navy);}
-.emi-note{font-size:.72rem;color:var(--muted);margin-top:4px;}
-.emi-adjust-btn{background:#fff;border:1px solid var(--gold-border);color:#8a6d1f;border-radius:4px;padding:9px 18px;font-size:.8rem;font-weight:700;cursor:pointer;margin-top:12px;width:100%;}
-.emi-adjust-btn:hover{background:var(--gold);color:var(--navy);}
-.emi-controls{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:none;}
-.emi-input{width:100%;background:#fff;border:1px solid var(--border);border-radius:4px;padding:9px 12px;color:var(--navy);font-size:.85rem;}
-
-.tag{font-size:.65rem;font-weight:700;padding:5px 12px;border-radius:4px;letter-spacing:.4px;text-transform:uppercase;}
-.tag-rent{background:#eef1f5;color:var(--navy);}
-.tag-sale{background:var(--gold-light);color:#8a6d1f;}
-.tag-cat{background:var(--cream);color:var(--muted);border:1px solid var(--border);}
-.tag-status{background:var(--green-bg);color:#0f5c40;}
-
-/* Sticky quick-jump nav */
-.quickjump{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:900;}
-.quickjump-inner{display:flex;overflow-x:auto;scrollbar-width:none;}
-.quickjump-inner::-webkit-scrollbar{display:none;}
-.qj-link{color:var(--muted);font-size:.76rem;font-weight:600;padding:13px 16px;border-bottom:3px solid transparent;white-space:nowrap;text-transform:uppercase;letter-spacing:.3px;}
-.qj-link.active,.qj-link:hover{color:var(--navy);border-bottom-color:var(--gold);}
-
-/* Media viewer modal (unchanged behaviour) */
-.housing-media-modal .modal-dialog{max-width:100vw;width:100vw;height:100vh;margin:0;}
-.housing-media-modal .modal-content{width:100vw;height:100vh;border-radius:0;border:none;background:var(--navy);color:#fff;overflow:hidden;display:flex;flex-direction:column;}
-.viewer-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;background:var(--navy-light);border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;}
-.viewer-title-box h2{font-family:'Playfair Display',serif;font-size:1rem;display:flex;align-items:center;gap:10px;color:#fff;}
-.viewer-title-box .price-tag{font-size:.8rem;color:#aeb8c7;margin-top:2px;}
-.viewer-actions{display:flex;align-items:center;gap:14px;}
-.viewer-counter{font-size:.78rem;font-weight:700;color:#e5e7eb;}
-.viewer-counter-bar{width:140px;height:4px;background:rgba(255,255,255,.15);border-radius:4px;margin-top:4px;overflow:hidden;}
-.viewer-counter-progress{height:100%;width:0%;background:var(--gold);transition:width .25s ease;}
-.btn-contact-seller-nav{background:var(--gold);color:var(--navy);border:none;border-radius:4px;padding:9px 16px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;}
-.viewer-close-btn{background:rgba(255,255,255,.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:1rem;cursor:pointer;}
-.viewer-cat-bar{display:flex;gap:8px;padding:10px 20px;background:var(--navy-light);border-bottom:1px solid rgba(255,255,255,.08);overflow-x:auto;scrollbar-width:none;}
-.viewer-cat-bar::-webkit-scrollbar{display:none;}
-.viewer-pill{background:rgba(255,255,255,.08);color:#cbd5e0;border:none;border-radius:4px;padding:7px 16px;font-size:.78rem;font-weight:600;white-space:nowrap;cursor:pointer;}
-.viewer-pill.active{background:var(--gold);color:var(--navy);}
-.viewer-stage{position:relative;width:100%;flex:1;min-height:0;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.viewer-slides-container{position:relative;width:100%;height:100%;}
-.viewer-slide{position:absolute;inset:0;display:none;align-items:center;justify-content:center;}
-.viewer-slide.active-slide{display:flex;}
-.viewer-slide img,.viewer-slide video{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;}
-.viewer-slide iframe{width:90%;height:90%;border:none;}
-.slide-caption-tag{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(7,22,47,.75);color:#fff;font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:4px;white-space:nowrap;}
-.viewer-nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
-.viewer-nav-prev{left:20px;}
-.viewer-nav-next{right:20px;}
-
-/* Auth modal */
-.auth-step{display:none;animation:fadeInSlideUp .4s ease forwards;}
-.auth-step.active-step{display:block;}
-@keyframes fadeInSlideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.otp-container{display:flex;gap:10px;justify-content:center;margin-bottom:20px;}
-.otp-input{width:50px;height:55px;text-align:center;font-size:1.5rem;font-weight:700;border-radius:4px;border:2px solid var(--border);background:#fff;}
-.otp-input:focus{border-color:var(--gold);outline:none;}
-
-/* Mobile CTA bar */
-.mobile-bar{display:none;}
-@media(max-width:1000px){
-  .content-grid{grid-template-columns:1fr;}
-  .sidebar{position:static;}
-  .property-price{text-align:left;margin-top:16px;}
-  .intro-top{display:block;}
-}
-@media(max-width:700px){
-  .prop-gallery-grid{height:300px;grid-template-columns:1fr 1fr;grid-template-rows:190px 100px;}
-  .prop-gallery-main{grid-column:span 2;grid-row:auto;}
-  .property-title{font-size:1.5rem;}
-  .highlights{grid-template-columns:1fr;}
-  .details-grid{grid-template-columns:1fr 1fr;}
-  .similar-grid{grid-template-columns:1fr;}
-  .verify-grid{grid-template-columns:1fr 1fr;}
-  body{padding-bottom:68px;}
-  .sidebar{display:none;}
-  .mobile-bar{position:fixed;bottom:0;left:0;right:0;z-index:2000;background:#fff;border-top:1px solid var(--border);padding:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
-  .mobile-bar button,.mobile-bar a{padding:11px 5px;border:0;border-radius:4px;font-size:11px;font-weight:700;text-align:center;}
-  .mobile-call{background:var(--navy);color:#fff;}
-  .mobile-whatsapp{background:var(--green-bg);color:var(--green);}
-  .mobile-visit{background:var(--gold);color:var(--navy);}
+:root {
+  --navy: #091a36;
+  --navy-dark: #040c1a;
+  --navy-light: #12284c;
+  --gold: #cba243;
+  --gold-hover: #b58d32;
+  --gold-subtle: #fcf9ee;
+  --gold-border: #f0e6c8;
+  --emerald: #10b981;
+  --emerald-bg: #ecfdf5;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --surface: #ffffff;
+  --bg-page: #f8fafc;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 8px rgba(9, 26, 54, 0.04);
+  --shadow-md: 0 10px 28px rgba(9, 26, 54, 0.07);
+  --shadow-lg: 0 20px 48px rgba(9, 26, 54, 0.12);
 }
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+tml{max-width:100%;}
+body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; background: var(--bg-page); color: var(--text-main); line-height: 1.5;max-width:100%;overflow-x:hidden; }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; }
+.container-custom { width: min(1280px, 94%); margin: 0 auto; }
 
-/* ── PREMIUM PROPERTY DESCRIPTION UI ── */
-.premium-desc-container {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  border-top: 4px solid var(--gold);
-  box-shadow: var(--shadow);
-  position: relative;
-  margin-top: 32px;
-  overflow: hidden;
+/* ── HEADER BREADCRUMB & UTILS ── */
+.top-nav-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  font-size: 13px;
+  color: var(--text-muted);
 }
+.breadcrumb-links a { color: var(--navy); font-weight: 600; transition: color .2s; }
+.breadcrumb-links a:hover { color: var(--gold); }
+.top-actions { display: flex; gap: 8px; align-items: center; }
 
-.premium-desc-header {
-  padding: 24px 30px 16px;
-  border-bottom: 1px solid var(--cream);
+.icon-action-btn {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  color: var(--navy);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+.icon-action-btn:hover { border-color: var(--gold); transform: translateY(-1px); }
+.icon-action-btn.wished { color: #f43f5e; border-color: #fecdd3; background: #fff1f2; }
+
+.share-popover-wrap { position: relative; }
+.share-popover {
+  display: none;
+  position: absolute;
+  top: 46px;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 260px;
+  padding: 16px;
+}
+.share-popover.open { display: block; }
+.share-popover-title { font-weight: 700; font-size: 14px; color: var(--navy); margin-bottom: 12px; }
+.share-popover-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  transition: background .15s;
 }
-
-.premium-desc-header i {
-  color: var(--gold);
-  font-size: 1.3rem;
-  background: var(--gold-light);
-  width: 42px;
-  height: 42px;
+.share-popover-item:hover { background: #f1f5f9; }
+.share-icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
 }
 
-.premium-desc-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.45rem;
+/* ── MODERN GALLERY GRID ── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 215px 215px;
+  gap: 12px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.gallery-item { position: relative; overflow: hidden; background: #e2e8f0; cursor: pointer; }
+.gallery-item img, .gallery-item video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.gallery-item:hover img, .gallery-item:hover video { transform: scale(1.035); }
+.gallery-item-main { grid-row: 1 / 3; }
+.more-badge {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 26, 54, 0.65);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  gap: 4px;
+}
+.more-badge span { font-size: 12px; font-weight: 500; opacity: .85; letter-spacing: .5px; text-transform: uppercase; }
+.gallery-tag-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(9, 26, 54, 0.82);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 5;
+}
+.video-overlay-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.video-overlay-play div {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(203, 162, 67, 0.95);
+  color: var(--navy);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 18px rgba(0,0,0,.25);
+}
+
+/* ── HEADER CARD & PRICING BAR ── */
+.property-header-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-top: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.badge-verified-glow {
+  background: var(--emerald-bg);
+  border: 1px solid #bbf7d0;
+  color: var(--emerald);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.prop-headline {
+  font-size: 32px;
   color: var(--navy);
   font-weight: 700;
-  margin: 0;
+  line-height: 1.25;
+}
+.prop-subloc {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 6px;
+}
+.prop-subloc i { color: var(--gold); }
+.pricing-hero-wrap { text-align: right; }
+.pricing-val {
+  font-size: 32px;
+  color: var(--navy);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.pricing-val small { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.pricing-sub-meta { display: flex; gap: 10px; justify-content: flex-end; font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+
+/* ── COMPACT QUICK FACTS STRIP ── */
+.compact-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.fact-pill-box {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color .15s;
+}
+.fact-pill-box:hover { border-color: var(--gold-border); }
+.fact-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--gold-subtle);
+  color: var(--gold-hover);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.fact-content strong { display: block; font-size: 14px; color: var(--navy); font-weight: 700; }
+.fact-content span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
+
+/* ── STICKY JUMP BAR ── */
+.sticky-subnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-light);
+  margin-top: 20px;
+  margin-bottom: 24px;
+}
+.subnav-scroll { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.subnav-scroll::-webkit-scrollbar { display: none; }
+.qj-link {
+  padding: 12px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+}
+.qj-link:hover, .qj-link.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+/* ── MAIN 2-COL LAYOUT ── */
+.main-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 370px;
+  gap: 28px;
+  align-items: start;
+  padding-bottom: 60px;
 }
 
-.premium-desc-body {
-  padding: 28px 30px;
+/* ── BENTO CARD WRAPPERS ── */
+.bento-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  scroll-margin-top: 60px;
+}
+.bento-card-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bento-card-title i { color: var(--gold); font-size: 18px; }
+
+/* ── PROPERTY SPECS TILES ── */
+.dense-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.spec-tile {
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.spec-tile.full { grid-column: 1 / -1; }
+.spec-tile-label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: .4px; margin-bottom: 2px; }
+.spec-tile-val { font-size: 14px; font-weight: 700; color: var(--navy); }
+
+/* ── DESCRIPTION MODERN FOLD ── */
+.desc-box-collapsible { position: relative; }
+.desc-content-rendered {
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.desc-collapsed-state {
+  max-height: 150px;
+  overflow: hidden;
   position: relative;
 }
-
-/* Decorative background quote mark */
-.premium-desc-body::before {
-  content: "\201C";
-  font-family: 'Playfair Display', serif;
-  font-size: 7rem;
-  position: absolute;
-  top: 0px;
-  left: 20px;
-  color: var(--cream);
-  line-height: 1;
-  z-index: 0;
-}
-
-.premium-desc-text {
-  color: #475569;
-  font-size: 14.5px;
-  line-height: 1.9;
-  position: relative;
-  z-index: 1;
-}
-
-/* Read More Fade Overlay */
-.desc-fade-overlay {
+.desc-fader {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 100%;
-  height: 90px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1) 80%);
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 24px;
-  z-index: 2;
 }
-
-.btn-read-more {
-  background: var(--navy);
-  color: #fff;
-  border: none;
-  padding: 9px 24px;
-  border-radius: 24px;
+.btn-toggle-read {
+  border: 1px solid var(--border-light);
+  background: #fff;
+  border-radius: 20px;
+  padding: 5px 16px;
   font-size: 12px;
   font-weight: 700;
+  color: var(--navy);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(7,22,47,0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-toggle-read:hover { background: var(--bg-page); border-color: var(--gold); }
+
+/* ── AMENITIES & FACILITIES PILLS ── */
+.tags-cloud-flex { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-badge {
+  background: #f1f5f9;
+  border: 1px solid var(--border-light);
+  border-radius: 30px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.tag-badge i { color: var(--gold-hover); }
+.tag-badge.tag-green { background: var(--emerald-bg); border-color: #a7f3d0; color: #065f46; }
+.tag-badge.tag-green i { color: #059669; }
+
+/* ── PRICING MATRIX ── */
+.charges-table { width: 100%; border-collapse: collapse; }
+.charges-table tr { border-bottom: 1px solid var(--border-light); }
+.charges-table tr:last-child { border-bottom: none; }
+.charges-table td { padding: 10px 0; font-size: 14px; }
+.charges-table td:first-child { color: var(--text-muted); }
+.charges-table td:last-child { text-align: right; font-weight: 700; color: var(--navy); }
+.charges-total-row td { padding-top: 14px; font-size: 16px; color: var(--navy); font-weight: 800; }
+
+/* ── TRUST CARD (COMPACT) ── */
+.trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.trust-chip {
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.trust-chip i { font-size: 20px; color: var(--gold); }
+.trust-chip strong { display: block; font-size: 13px; }
+.trust-chip span { display: block; font-size: 11px; color: #94a3b8; }
+
+/* ── ACCORDION FAQS ── */
+.custom-accordion .accordion-item { border: 1px solid var(--border-light); border-radius: var(--radius-sm) !important; margin-bottom: 8px; overflow: hidden; }
+.custom-accordion .accordion-button { font-size: 14px; font-weight: 700; color: var(--navy); padding: 12px 16px; box-shadow: none !important; }
+.custom-accordion .accordion-button:not(.collapsed) { background: var(--gold-subtle); color: var(--navy); }
+.custom-accordion .accordion-body { font-size: 14px; line-height: 1.7; color: var(--text-muted); padding: 12px 16px; background: #fff; }
+
+/* ── SIMILAR PROPERTIES ── */
+.sim-grid-refined { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.sim-card-refined {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+  display: flex;
+  flex-direction: column;
+}
+.sim-card-refined:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--gold); }
+.sim-thumb { height: 120px; position: relative; background: #cbd5e1; }
+.sim-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sim-content { padding: 12px; display: flex; flex-direction: column; flex: 1; }
+.sim-price-txt { font-weight: 800; color: var(--navy); font-size: 15px; }
+.sim-title-txt { font-weight: 600; font-size: 13px; color: var(--text-main); margin: 3px 0 5px; }
+.sim-loc-txt { font-size: 12px; color: var(--text-muted); }
+
+/* ── STICKY SIDEBAR ENQUIRY CARD ── */
+.sidebar-wrapper { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
+.enquiry-card-lux {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-md);
+}
+.enquiry-card-header { text-align: center; margin-bottom: 14px; }
+.enquiry-card-header h3 { font-size: 20px; font-weight: 700; color: var(--navy); }
+.enquiry-card-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.cta-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 14px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background .2s;
 }
+.cta-gold { background: var(--gold); color: var(--navy); }
+.cta-gold:hover { background: var(--gold-hover); }
+.cta-whatsapp { background: #25d366; color: #fff; margin-bottom: 12px; }
+.cta-whatsapp:hover { background: #1eb956; color: #fff; }
 
-.btn-read-more:hover {
-  background: var(--gold);
-  color: var(--navy);
-}
-
-/* ── UPGRADED DESCRIPTION BOX ── */
-.about-property-box {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  margin-top: 28px;
-  box-shadow: 0 4px 12px rgba(7,22,47,0.02);
-}
-.about-property-box .eyebrow {
-  margin-bottom: 14px;
-}
-.description-text {
-  color: #4a5568;
-  font-size: 14.5px;
-  line-height: 1.85;
-  margin: 0;
-}
-.description-empty {
-  margin-top: 24px;
+.masked-phone-banner {
+  background: var(--gold-subtle);
+  border: 1px dashed var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 10px;
   text-align: center;
-  padding: 32px 20px;
-  background: var(--cream);
-  border-radius: var(--radius-lg);
-  border: 1px dashed #cbd5e1;
-  color: var(--muted);
-  font-size: .85rem;
+  margin-bottom: 12px;
 }
-.description-empty i {
-  font-size: 1.8rem;
-  color: #e2e8f0;
-  display: block;
-  margin-bottom: 10px;
+.masked-phone-banner .num { font-size: 16px; font-weight: 800; color: var(--navy); letter-spacing: 2px; }
+.masked-phone-banner .hint { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.agent-profile-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-light);
+  margin-top: 10px;
+}
+.agent-initial-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold);
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.agent-profile-strip strong { font-size: 13px; display: block; color: var(--navy); }
+.agent-profile-strip span { font-size: 11px; color: var(--text-muted); }
+
+/* ── SIDEBAR FORM FIELDS ── */
+.form-field-group { margin-bottom: 10px; }
+.form-field-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
+.input-lux {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-main);
+  outline: none;
+  transition: all .15s;
+}
+.input-lux:focus { border-color: var(--gold); background: #fff; }
+
+/* ── EMI WIDGET ── */
+.emi-widget-lux {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.emi-result-headline { font-size: 24px; font-weight: 800; color: var(--navy); }
+
+/* ── MEDIA VIEWER MODAL ── */
+.housing-media-modal .modal-dialog { max-width: 100vw; width: 100vw; height: 100vh; margin: 0; }
+.housing-media-modal .modal-content { width: 100vw; height: 100vh; border-radius: 0; border: none; background: var(--navy-dark); color: #fff; overflow: hidden; display: flex; flex-direction: column; }
+.viewer-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; background: var(--navy); border-bottom: 1px solid rgba(255,255,255,.08); flex-wrap: wrap; }
+.viewer-actions { display: flex; align-items: center; gap: 14px; }
+.viewer-counter-bar { width: 120px; height: 4px; background: rgba(255,255,255,.15); border-radius: 4px; margin-top: 4px; overflow: hidden; }
+.viewer-counter-progress { height: 100%; width: 0%; background: var(--gold); transition: width .25s ease; }
+.btn-contact-seller-nav { background: var(--gold); color: var(--navy); border: none; border-radius: 4px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.viewer-close-btn { background: rgba(255,255,255,.1); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; }
+.viewer-cat-bar { display: flex; gap: 8px; padding: 10px 20px; background: var(--navy); border-bottom: 1px solid rgba(255,255,255,.08); overflow-x: auto; scrollbar-width: none; }
+.viewer-cat-bar::-webkit-scrollbar { display: none; }
+.viewer-pill { background: rgba(255,255,255,.08); color: #cbd5e0; border: none; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.viewer-pill.active { background: var(--gold); color: var(--navy); font-weight: 700; }
+.viewer-stage { position: relative; width: 100%; flex: 1; min-height: 0; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.viewer-slides-container { position: relative; width: 100%; height: 100%; }
+.viewer-slide { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; }
+.viewer-slide.active-slide { display: flex; }
+.viewer-slide img, .viewer-slide video { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+.viewer-slide iframe { width: 90%; height: 90%; border: none; }
+.slide-caption-tag { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(9, 26, 54, 0.85); backdrop-filter: blur(4px); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
+.viewer-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff; display: grid; place-items: center; cursor: pointer; z-index: 5; }
+.viewer-nav-prev { left: 18px; }
+.viewer-nav-next { right: 18px; }
+
+/* ── AUTH MODAL STYLING ── */
+.auth-step { display: none; animation: fadeInSlideUp .3s ease forwards; }
+.auth-step.active-step { display: block; }
+@keyframes fadeInSlideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.otp-input { width: 48px; height: 50px; text-align: center; font-size: 22px; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-light); background: #fff; }
+.otp-input:focus { border-color: var(--gold); outline: none; }
+
+/* ── MOBILE ACTIONS & BOTTOM SHEET ── */
+.mobile-bar { display: none; }
+.sheet-close { display: none; }
+.sheet-backdrop { display: none; }
+
+@media (max-width: 1024px) {
+  .main-two-col { grid-template-columns: 1fr; }
+  .property-header-card { flex-direction: column; align-items: flex-start; }
+  .pricing-hero-wrap { text-align: left; }
+  .pricing-sub-meta { justify-content: flex-start; }
+  
+  body { padding-bottom: 74px; }
+  .sidebar-wrapper {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 2100;
+    max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    background: var(--bg-page); padding: 16px 14px 80px; gap: 0;
+    border-radius: 20px 20px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.25);
+    transform: translateY(105%); transition: transform .3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sidebar-wrapper.sheet-open { transform: translateY(0); }
+  .sidebar-wrapper .emi-widget-lux { display: none !important; }
+  .sheet-close {
+    display: flex !important; align-items: center; justify-content: space-between;
+    background: none; border: 0; width: 100%; padding-bottom: 12px;
+    font-size: 14px; font-weight: 700; color: var(--navy);
+  }
+  .sheet-backdrop { position: fixed; inset: 0; background: rgba(9, 26, 54, 0.5); z-index: 2050; display: none; backdrop-filter: blur(2px); }
+  .sheet-backdrop.open { display: block; }
+  
+  .mobile-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 2000; background: #fff;
+    border-top: 1px solid var(--border-light); padding: 10px 16px; display: flex; gap: 10px;
+    box-shadow: 0 -4px 14px rgba(0,0,0,.06);
+  }
+  .mobile-bar button, .mobile-bar a { flex: 1; padding: 12px 6px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
+}
+
+@media (max-width: 768px) {
+  .gallery-grid { grid-template-columns: 1fr; grid-template-rows: 240px 120px; }
+  .gallery-item-main { grid-row: 1; }
+  .prop-headline { font-size: 24px; }
+  .pricing-val { font-size: 28px; }
+  .dense-specs-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -453,412 +624,441 @@ button{font-family:inherit;cursor:pointer;}
 
 {% include 'home_page/header.html' %}
 
-<!-- ═══ BREADCRUMB ═══ -->
-<div class="container breadcrumb-bar">
-  <a href="/"><i class="fas fa-home"></i> Home</a>
-  <span>/</span>
-  <a href="/listingpage/?type={{ listing_type }}">{{ listing_type|title }}</a>
-  <span>/</span>
-  <span>{{ p.category|default:category|title }}{% if p.sub_category_name %} / {{ p.sub_category_name }}{% endif %}</span>
-</div>
+<div class="container-custom">
+  <!-- ═══ TOP NAVBAR STRIP ═══ -->
+  <div class="top-nav-strip">
+    <div class="breadcrumb-links">
+      <a href="/"><i class="fas fa-home"></i> Home</a> /
+      <a href="/listingpage/?type={{ listing_type }}">{{ listing_type|title }}</a> /
+      <span>{{ p.category|default:category|title }}{% if p.sub_category_name %} · {{ p.sub_category_name }}{% endif %}</span>
+    </div>
 
-<div class="container">
+    <div class="top-actions">
+      <div class="share-popover-wrap">
+        <button type="button" class="icon-action-btn" onclick="toggleSharePopover(event)" aria-label="Share">
+          <i class="fas fa-share-nodes"></i>
+        </button>
+        <div class="share-popover" id="sharePopover">
+          <div class="share-popover-title">Share this property</div>
+          <button type="button" class="share-popover-item" onclick="copyPropertyLink(this)">
+            <span class="share-icon-circle"><i class="fas fa-link"></i></span> Copy link
+          </button>
+          <a class="share-popover-item" target="_blank" rel="noopener" href="#" onclick="return openShareWindow(this,'facebook')">
+            <span class="share-icon-circle" style="color:#1877f2;"><i class="fab fa-facebook-f"></i></span> Facebook
+          </a>
+          <a class="share-popover-item" id="shareMailLink" href="#">
+            <span class="share-icon-circle" style="color:#ea4335;"><i class="fas fa-envelope"></i></span> Email
+          </a>
+          <a class="share-popover-item" target="_blank" rel="noopener" href="#" onclick="return openShareWindow(this,'whatsapp')">
+            <span class="share-icon-circle" style="color:#25d366;"><i class="fab fa-whatsapp"></i></span> WhatsApp
+          </a>
+        </div>
+      </div>
+      <button type="button" class="icon-action-btn" onclick="toggleWishlist(this)" aria-label="Save">
+        <i class="far fa-heart"></i>
+      </button>
+    </div>
+  </div>
 
   <!-- ═══ GALLERY ═══ -->
-  <div class="prop-gallery-grid">
-    <div class="prop-gallery-main" onclick="openMediaViewer(0)">
+  <div class="gallery-grid">
+    <div class="gallery-item gallery-item-main" onclick="openMediaViewer(0)">
       {% if property_images %}
         <img src="{{ property_images.0.image.url }}" alt="Property Main Image">
       {% else %}
-        <div class="watermark-container"><div class="watermark-placeholder">KANISKAIMPERIA</div></div>
+        <div style="background:#091a36;color:rgba(255,255,255,0.2);display:grid;place-items:center;height:100%;font-size:32px;font-weight:800;letter-spacing:4px;">KANISHKAIMPERIA</div>
       {% endif %}
+      <span class="gallery-tag-pill"><i class="fas fa-camera"></i> Photos</span>
     </div>
 
-    <div class="prop-gallery-thumb" {% if selected_video %}onclick="openMediaViewer('video')"{% elif property_images|length > 1 %}onclick="openMediaViewer(1)"{% endif %}>
+    <div class="gallery-item" {% if selected_video %}onclick="openMediaViewer('video')"{% elif property_images|length > 1 %}onclick="openMediaViewer(1)"{% endif %}>
       {% if selected_video %}
-        <span class="video-label"><i class="fas fa-video me-1"></i> Video</span>
+        <span class="gallery-tag-pill"><i class="fas fa-video"></i> Video Tour</span>
         {% if selected_video.source == 'rm_assisted' and selected_video.youtube_thumbnail %}
-          <img src="{{ selected_video.youtube_thumbnail }}" alt="Video thumbnail" style="opacity:.85;">
+          <img src="{{ selected_video.youtube_thumbnail }}" alt="Video thumbnail">
         {% elif selected_video.video %}
           <video muted loop playsinline style="pointer-events:none;"><source src="{{ selected_video.video.url }}" type="video/mp4"></video>
-        {% else %}<div style="background:#1f2937;width:100%;height:100%;"></div>{% endif %}
-        <div class="video-play-btn"><div><i class="fas fa-play" style="color:#fff;font-size:1.1rem;margin-left:3px;"></i></div></div>
+        {% else %}<div style="background:#1e293b;width:100%;height:100%;"></div>{% endif %}
+        <div class="video-overlay-play"><div><i class="fas fa-play"></i></div></div>
       {% elif property_images|length > 1 %}
         <img src="{{ property_images.1.image.url }}" alt="Property View 2">
       {% else %}
-        <div class="watermark-container"><div class="watermark-placeholder" style="font-size:1.1rem;">KANISKAIMPERIA</div></div>
+        <div style="background:#f1f5f9;height:100%;"></div>
       {% endif %}
     </div>
 
-    <div class="prop-gallery-thumb" onclick="openMediaViewer(2)">
+    <div class="gallery-item" onclick="openMediaViewer(2)">
       {% if property_images|length > 2 %}
         <img src="{{ property_images.2.image.url }}" alt="Property View 3">
         {% if property_images|length > 3 %}
-          <div class="thumb-more-overlay"><span>+{{ property_images|length|add:"-3" }} more</span></div>
+          <div class="more-badge">
+            +{{ property_images|length|add:"-3" }}
+            <span>View All</span>
+          </div>
         {% endif %}
       {% else %}
-        <div class="watermark-container"><div class="watermark-placeholder" style="font-size:1.6rem;">KANISKAIMPERIA</div></div>
+        <div style="background:#f1f5f9;height:100%;"></div>
       {% endif %}
     </div>
   </div>
 
-  <!-- ═══ PROPERTY INTRO — what / where / price / quick facts / CTA ═══ -->
-  <div class="property-intro">
-    <div class="verified-line"><i class="fas fa-shield-check"></i> KANISHKAIMPERIA Verified {{ property_group|default:"Listing"|title }}</div>
-
-    <div class="intro-top">
-      <div style="flex:1;min-width:260px;">
-        <div class="title-row">
-          <h1 class="property-title">{{ p.title }}</h1>
-          <div class="share-popover-wrap">
-            <button type="button" class="icon-action-btn" onclick="toggleSharePopover(event)" aria-label="Share"><i class="fas fa-share-alt"></i></button>
-            <div class="share-popover" id="sharePopover">
-              <div class="share-popover-title">Share with your family &amp; friends</div>
-              <button type="button" class="share-popover-item" onclick="copyPropertyLink(this)"><span class="share-icon-circle"><i class="fas fa-link"></i></span> Copy to clipboard</button>
-              <a class="share-popover-item" target="_blank" rel="noopener" href="#" onclick="return openShareWindow(this,'facebook')"><span class="share-icon-circle" style="color:#1877f2;"><i class="fab fa-facebook"></i></span> Facebook</a>
-              <a class="share-popover-item" id="shareMailLink" href="#"><span class="share-icon-circle" style="color:#ea4335;"><i class="fas fa-envelope"></i></span> Mail</a>
-              <a class="share-popover-item" target="_blank" rel="noopener" href="#" onclick="return openShareWindow(this,'whatsapp')"><span class="share-icon-circle" style="color:#25d366;"><i class="fab fa-whatsapp"></i></span> WhatsApp</a>
-            </div>
-          </div>
-          <button type="button" class="icon-action-btn" onclick="toggleWishlist(this)" aria-label="Save"><i class="far fa-heart"></i></button>
-        </div>
-        <div class="location-line">
-          <i class="fas fa-location-dot"></i>
-          {% if p.building_name %}{{ p.building_name }}, {% endif %}{{ p.locality|default:p.village|default:'' }}{% if p.city %}, {{ p.city }}{% endif %}{% if p.state %}, {{ p.state }}{% endif %}
-        </div>
+  <!-- ═══ HEADER BAR & PRICING ═══ -->
+  <div class="property-header-card">
+    <div>
+      <span class="badge-verified-glow"><i class="fas fa-certificate"></i> Verified {{ property_group|default:"Listing"|title }}</span>
+      <h1 class="prop-headline">{{ p.title }}</h1>
+      <div class="prop-subloc">
+        <i class="fas fa-location-dot"></i>
+        <span>{% if p.building_name %}{{ p.building_name }}, {% endif %}{{ p.locality|default:p.village|default:'' }}{% if p.city %}, {{ p.city }}{% endif %}{% if p.state %}, {{ p.state }}{% endif %}</span>
       </div>
+    </div>
 
-      <div class="property-price">
-        <div class="price-amount">
-          {% if p.monthly_rent %}₹<span class="price-format">{{ p.monthly_rent }}</span><small>/ month</small>
-          {% elif p.selling_price %}₹<span class="price-format">{{ p.selling_price }}</span>
-          {% elif p.expected_price %}₹<span class="price-format">{{ p.expected_price }}</span>
-          {% else %}<span style="font-size:1.1rem;color:var(--muted);">Price on Request</span>{% endif %}
-        </div>
+    <div class="pricing-hero-wrap">
+      <div class="pricing-val">
+        {% if p.monthly_rent %}₹<span class="price-format">{{ p.monthly_rent }}</span><small>/ month</small>
+        {% elif p.selling_price %}₹<span class="price-format">{{ p.selling_price }}</span>
+        {% elif p.expected_price %}₹<span class="price-format">{{ p.expected_price }}</span>
+        {% else %}<span style="font-size:19px;color:var(--text-muted);">Price on Request</span>{% endif %}
+      </div>
+      <div class="pricing-sub-meta">
         {% if property_group == 'rental' and p.deposit_display %}
-          <div class="price-sub">Security Deposit ₹<span class="price-format">{{ p.deposit_display }}</span></div>
+          <span>Deposit: ₹<span class="price-format">{{ p.deposit_display }}</span></span>
         {% endif %}
         {% if p.total_move_in_cost %}
-          <div class="price-sub" style="color:#0f5c40;font-weight:700;">Move-in ₹<span class="price-format">{{ p.total_move_in_cost }}</span></div>
+          <span style="color:var(--emerald);">Move-in: ₹<span class="price-format">{{ p.total_move_in_cost }}</span></span>
         {% endif %}
         {% if p.price_per_sqft or p.plot_price_per_sqft or p.price_per_acre or p.price_per_sqm or p.price_per_unit %}
-          <div class="price-sub">₹<span class="price-format">{{ p.price_per_sqft|default:p.plot_price_per_sqft|default:p.price_per_acre|default:p.price_per_sqm|default:p.price_per_unit }}</span> / unit</div>
+          <span>₹<span class="price-format">{{ p.price_per_sqft|default:p.plot_price_per_sqft|default:p.price_per_acre|default:p.price_per_sqm|default:p.price_per_unit }}</span>/unit</span>
         {% endif %}
       </div>
     </div>
-
-    <!-- Quick facts -->
-    <div class="facts">
-      {% if p.beds or p.bhk_type or p.bhk %}<div class="fact"><i class="fas fa-bed"></i><div><strong>{{ p.beds|default:p.bhk_type|default:p.bhk }}</strong><span>Bedrooms</span></div></div>{% endif %}
-      {% if p.baths or p.bathrooms %}<div class="fact"><i class="fas fa-bath"></i><div><strong>{{ p.baths|default:p.bathrooms }}</strong><span>Bathrooms</span></div></div>{% endif %}
-      {% if p.area or p.built_up_area or p.builtup_area %}<div class="fact"><i class="fas fa-ruler-combined"></i><div><strong>{{ p.area|default:p.built_up_area|default:p.builtup_area }} sq.ft</strong><span>Built-up Area</span></div></div>{% endif %}
-      {% if p.plot_area %}<div class="fact"><i class="fas fa-vector-square"></i><div><strong>{{ p.plot_area }} {{ p.agr_area_unit|default:"sq.ft" }}</strong><span>Plot Area</span></div></div>{% endif %}
-      {% if p.land_area %}<div class="fact"><i class="fas fa-tractor"></i><div><strong>{{ p.land_area }} Acres</strong><span>Land Area</span></div></div>{% endif %}
-      {% if p.furnished or p.furnishing_status %}<div class="fact"><i class="fas fa-couch"></i><div><strong>{{ p.furnished|default:p.furnishing_status }}</strong><span>Furnishing</span></div></div>{% endif %}
-      {% if p.floor or p.floor_number or p.floor_no %}<div class="fact"><i class="fas fa-layer-group"></i><div><strong>{{ p.floor|default:p.floor_number|default:p.floor_no }}{% if p.total_floors %}/{{ p.total_floors }}{% endif %}</strong><span>Floor</span></div></div>{% endif %}
-      {% if p.facing or p.facing_direction or p.plot_facing %}<div class="fact"><i class="fas fa-compass"></i><div><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }}</strong><span>Facing</span></div></div>{% endif %}
-      {% if p.available_for or p.pg_for %}<div class="fact"><i class="fas fa-users"></i><div><strong>{{ p.available_for|default:p.pg_for }}</strong><span>Available For</span></div></div>{% endif %}
-    </div>
-
-    <!-- Primary conversion actions, right under the facts a visitor just read -->
-    <div class="intro-cta-row">
-      <button type="button" class="btn-cta btn-cta-primary" onclick="document.getElementById('enquiryForm').scrollIntoView({behavior:'smooth'});"><i class="fas fa-calendar-check"></i> Schedule a Visit</button>
-      <button type="button" class="btn-cta btn-cta-outline" onclick="document.getElementById('enquiryForm').scrollIntoView({behavior:'smooth'});"><i class="fas fa-phone"></i> Request Callback</button>
-      {% if can_view_contact %}
-        <a href="https://wa.me/91{{ p.owner_contact|default:p.listed_by_contact }}?text=Hi%2C+I+am+interested+in+{{ p.title|default:p.property_title|urlencode }}" target="_blank" class="btn-cta btn-cta-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-      {% else %}
-
-      {% endif %}
-    </div>
   </div>
 
-  <!-- ═══ QUICK-JUMP NAV ═══ -->
-  <div class="quickjump">
-    <div class="quickjump-inner" id="quickJumpNav">
+  <!-- ═══ COMPACT QUICK FACTS STRIP ═══ -->
+  <div class="compact-facts-grid">
+    {% if p.beds or p.bhk_type or p.bhk %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-bed"></i></div>
+      <div class="fact-content"><strong>{{ p.beds|default:p.bhk_type|default:p.bhk }}</strong><span>Bedrooms</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.baths or p.bathrooms %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-bath"></i></div>
+      <div class="fact-content"><strong>{{ p.baths|default:p.bathrooms }}</strong><span>Bathrooms</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.area or p.built_up_area or p.builtup_area %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-ruler-combined"></i></div>
+      <div class="fact-content"><strong>{{ p.area|default:p.built_up_area|default:p.builtup_area }} sq.ft</strong><span>Built Area</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.plot_area %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-vector-square"></i></div>
+      <div class="fact-content"><strong>{{ p.plot_area }} {{ p.agr_area_unit|default:"sq.ft" }}</strong><span>Plot Area</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.land_area %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-tree"></i></div>
+      <div class="fact-content"><strong>{{ p.land_area }} Acres</strong><span>Land Area</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.furnished or p.furnishing_status %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-couch"></i></div>
+      <div class="fact-content"><strong>{{ p.furnished|default:p.furnishing_status }}</strong><span>Furnishing</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.floor or p.floor_number or p.floor_no %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-layer-group"></i></div>
+      <div class="fact-content"><strong>{{ p.floor|default:p.floor_number|default:p.floor_no }}{% if p.total_floors %}/{{ p.total_floors }}{% endif %}</strong><span>Floor</span></div>
+    </div>
+    {% endif %}
+
+    {% if p.facing or p.facing_direction or p.plot_facing %}
+    <div class="fact-pill-box">
+      <div class="fact-icon-wrap"><i class="fas fa-compass"></i></div>
+      <div class="fact-content"><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }}</strong><span>Facing</span></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ═══ STICKY QUICK JUMP ═══ -->
+  <div class="sticky-subnav">
+    <div class="subnav-scroll" id="quickJumpNav">
       <a href="#sec-overview" class="qj-link active" data-target="sec-overview">Overview</a>
-      <a href="#sec-details" class="qj-link" data-target="sec-details">Details</a>
-      <a href="#sec-pricing" class="qj-link" data-target="sec-pricing">Pricing</a>
+      <a href="#sec-details" class="qj-link" data-target="sec-details">Specifications</a>
+      <a href="#sec-pricing" class="qj-link" data-target="sec-pricing">Pricing &amp; Costs</a>
       <a href="#sec-amenities" class="qj-link" data-target="sec-amenities">Amenities</a>
       <a href="#sec-location" class="qj-link" data-target="sec-location">Location</a>
-      <a href="#sec-verify" class="qj-link" data-target="sec-verify">Trust</a>
+      <a href="#sec-verify" class="qj-link" data-target="sec-verify">Verification</a>
       <a href="#sec-faqs" class="qj-link" data-target="sec-faqs">FAQs</a>
       {% if similar %}<a href="#sec-similar" class="qj-link" data-target="sec-similar">Similar</a>{% endif %}
     </div>
   </div>
 
-  <!-- ═══ MAIN CONTENT ═══ -->
-  <div class="content-grid">
+  <!-- ═══ 2-COLUMN MAIN LAYOUT ═══ -->
+  <div class="main-two-col">
     <div>
 
-      <!-- WHY THIS PROPERTY (highlights) -->
-      <section class="section-block" id="sec-overview">
-        <div class="eyebrow">Property Overview</div>
-        <h2 class="section-title">Why this property?</h2>
-        <div class="highlights">
-          {% if p.facing or p.facing_direction or p.plot_facing %}<div class="highlight"><i class="fas fa-compass"></i><div><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }} Facing</strong><span>Property orientation</span></div></div>{% endif %}
-          {% if p.property_condition %}<div class="highlight"><i class="fas fa-star"></i><div><strong>{{ p.property_condition }}</strong><span>Property condition</span></div></div>{% endif %}
-          {% if p.available_for or p.best_suited_for %}<div class="highlight"><i class="fas fa-people-roof"></i><div><strong>{{ p.available_for|default:p.best_suited_for }}</strong><span>Suitable for</span></div></div>{% endif %}
-          {% if p.available_from %}<div class="highlight"><i class="fas fa-calendar-check"></i><div><strong>Available {{ p.available_from|date:"d M Y" }}</strong><span>Ready for occupancy</span></div></div>{% endif %}
-          {% if p.possession %}<div class="highlight"><i class="fas fa-key"></i><div><strong>{{ p.possession }}</strong><span>Possession status</span></div></div>{% endif %}
-          {% if p.property_age %}<div class="highlight"><i class="fas fa-building-shield"></i><div><strong>{{ p.property_age }} Years</strong><span>Property age</span></div></div>{% endif %}
+      <!-- OVERVIEW & COMPACT DESCRIPTION -->
+      <section class="bento-card" id="sec-overview">
+        <h2 class="bento-card-title"><i class="fas fa-sparkles"></i> Overview &amp; Highlights</h2>
+        
+        <div class="dense-specs-grid" style="margin-bottom: 18px;">
+          {% if p.facing or p.facing_direction or p.plot_facing %}<div class="spec-tile"><div class="spec-tile-label">Orientation</div><div class="spec-tile-val">{{ p.facing|default:p.facing_direction|default:p.plot_facing }} Facing</div></div>{% endif %}
+          {% if p.property_condition %}<div class="spec-tile"><div class="spec-tile-label">Condition</div><div class="spec-tile-val">{{ p.property_condition }}</div></div>{% endif %}
+          {% if p.available_for or p.best_suited_for %}<div class="spec-tile"><div class="spec-tile-label">Suitable For</div><div class="spec-tile-val">{{ p.available_for|default:p.best_suited_for }}</div></div>{% endif %}
+          {% if p.available_from %}<div class="spec-tile"><div class="spec-tile-label">Available From</div><div class="spec-tile-val">{{ p.available_from|date:"d M Y" }}</div></div>{% endif %}
+          {% if p.possession %}<div class="spec-tile"><div class="spec-tile-label">Possession</div><div class="spec-tile-val">{{ p.possession }}</div></div>{% endif %}
+          {% if p.property_age %}<div class="spec-tile"><div class="spec-tile-label">Age of Property</div><div class="spec-tile-val">{{ p.property_age }} Years</div></div>{% endif %}
         </div>
 
-
         {% if p.user_description or p.description or p.property_summary or p.rent_residential_desc or p.property_description or p.desc %}
-        <div class="premium-desc-container">
-          <div class="premium-desc-header">
-            <i class="fas fa-quote-left"></i>
-            <h3 class="premium-desc-title">About the Property</h3>
-          </div>
-          
-          <!-- Note: inline max-height handles the collapse state -->
-          <div class="premium-desc-body" id="descBody" style="max-height: 220px; overflow: hidden;">
-            <div class="premium-desc-text">
-              {% if p.user_description %}{{ p.user_description|safe }}<br><br>{% endif %}
-              {% if property_group == 'rental' and category == 'residential' %}
-                {{ p.description }} {{ p.rent_residential_desc|safe }}
-              {% else %}
-                {{ p.property_summary }} {{ p.property_description|default:p.desc|safe }}
-              {% endif %}
-            </div>
-            
-            <div class="desc-fade-overlay" id="descOverlay">
-              <button class="btn-read-more" onclick="toggleDescription()">Read Full Description <i class="fas fa-chevron-down"></i></button>
+        <div class="desc-box-collapsible">
+          <div class="desc-content-rendered desc-collapsed-state" id="descBody">
+            {% if p.user_description %}{{ p.user_description|safe }}<br><br>{% endif %}
+            {% if property_group == 'rental' and category == 'residential' %}
+              {{ p.description }} {{ p.rent_residential_desc|safe }}
+            {% else %}
+              {{ p.property_summary }} {{ p.property_description|default:p.desc|safe }}
+            {% endif %}
+            <div class="desc-fader" id="descOverlay">
+              <button type="button" class="btn-toggle-read" onclick="toggleDescription()">Read Full Description <i class="fas fa-chevron-down"></i></button>
             </div>
           </div>
         </div>
         {% else %}
-        <div class="empty-state" style="margin-top:24px;text-align:center;padding:32px 20px;background:var(--cream);border-radius:var(--radius-lg);border:1px dashed #cbd5e1;color:var(--muted);font-size:.85rem;">
-          <i class="fas fa-file-alt" style="font-size:1.8rem;color:#e2e8f0;display:block;margin-bottom:12px;"></i>
-          No description provided for this property yet.
-        </div>
-    
-     
-
-
-        <div class="empty-state" style="margin-top:16px;text-align:center;padding:20px;background:var(--cream);border-radius:var(--radius);border:1px dashed var(--border);color:var(--muted);font-size:.82rem;">No description provided yet.</div>
+        <div style="font-size: 13px; color: var(--text-muted); font-style: italic;">No description provided yet.</div>
         {% endif %}
-
-
       </section>
 
-      <!-- PROPERTY DETAILS (all 11 admin-form variants render into one clean grid) -->
-      <section class="section-block" id="sec-details">
-        <div class="eyebrow">Property specifications</div>
-        <h2 class="section-title">Property Details</h2>
-        <div class="details-grid">
-
+      <!-- PROPERTY DETAILS (Dense Specs Grid) -->
+      <section class="bento-card" id="sec-details">
+        <h2 class="bento-card-title"><i class="fas fa-list-check"></i> Property Specifications</h2>
+        <div class="dense-specs-grid">
           {% if property_group == 'rental' and category == 'residential' %}
-            <div class="detail-cell"><div class="detail-label">Property Type</div><div class="detail-value">{{ p.property_type|default:"—" }}</div></div>
-            {% if p.bhk_type %}<div class="detail-cell"><div class="detail-label">BHK Type</div><div class="detail-value">{{ p.bhk_type }}</div></div>{% endif %}
-            {% if p.carpet_area %}<div class="detail-cell"><div class="detail-label">Carpet Area</div><div class="detail-value">{{ p.carpet_area }} sq.ft</div></div>{% endif %}
-            {% if p.balconies %}<div class="detail-cell"><div class="detail-label">Balconies</div><div class="detail-value">{{ p.balconies }}</div></div>{% endif %}
-            {% if p.total_floors %}<div class="detail-cell"><div class="detail-label">Total Floors</div><div class="detail-value">{{ p.total_floors }}</div></div>{% endif %}
-            {% if p.ownership_type %}<div class="detail-cell"><div class="detail-label">Ownership</div><div class="detail-value">{{ p.ownership_type }}</div></div>{% endif %}
-            {% if p.building_name %}<div class="detail-cell full"><div class="detail-label">Building / Society</div><div class="detail-value">{{ p.building_name }}</div></div>{% endif %}
+            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|default:"—" }}</div></div>
+            {% if p.bhk_type %}<div class="spec-tile"><div class="spec-tile-label">BHK</div><div class="spec-tile-val">{{ p.bhk_type }}</div></div>{% endif %}
+            {% if p.carpet_area %}<div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area }} sq.ft</div></div>{% endif %}
+            {% if p.balconies %}<div class="spec-tile"><div class="spec-tile-label">Balconies</div><div class="spec-tile-val">{{ p.balconies }}</div></div>{% endif %}
+            {% if p.total_floors %}<div class="spec-tile"><div class="spec-tile-label">Total Floors</div><div class="spec-tile-val">{{ p.total_floors }}</div></div>{% endif %}
+            {% if p.ownership_type %}<div class="spec-tile"><div class="spec-tile-label">Ownership</div><div class="spec-tile-val">{{ p.ownership_type }}</div></div>{% endif %}
+            {% if p.building_name %}<div class="spec-tile full"><div class="spec-tile-label">Building / Society</div><div class="spec-tile-val">{{ p.building_name }}</div></div>{% endif %}
 
           {% elif property_group == 'rental' and category == 'commercial' %}
-            <div class="detail-cell"><div class="detail-label">Property Type</div><div class="detail-value">{{ p.property_type|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Building / Project</div><div class="detail-value">{{ p.building_name|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Availability</div><div class="detail-value">{{ p.availability_status|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Built-Up Area</div><div class="detail-value">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Carpet Area</div><div class="detail-value">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Ownership Type</div><div class="detail-value">{{ p.ownership_type|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Passenger Lifts</div><div class="detail-value">{{ p.passenger_lifts|default:"0" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Private Parking</div><div class="detail-value">{{ p.private_parking|default:"0" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Seating Capacity</div><div class="detail-value">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Property Type</div><div class="spec-tile-val">{{ p.property_type|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Building / Project</div><div class="spec-tile-val">{{ p.building_name|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Availability</div><div class="spec-tile-val">{{ p.availability_status|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Built-Up Area</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Ownership</div><div class="spec-tile-val">{{ p.ownership_type|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Passenger Lifts</div><div class="spec-tile-val">{{ p.passenger_lifts|default:"0" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Parking</div><div class="spec-tile-val">{{ p.private_parking|default:"0" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Seating</div><div class="spec-tile-val">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
 
           {% elif property_group == 'rental' and category == 'pg' %}
-            <div class="detail-cell"><div class="detail-label">PG For</div><div class="detail-value">{{ p.pg_for|title }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Room Type</div><div class="detail-value">{{ p.room_type|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Furnishing</div><div class="detail-value">{{ p.furnishing_type|default:p.furnishing_status|title }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Meals Available</div><div class="detail-value">{{ p.meals_available|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Minimum Stay</div><div class="detail-value">{{ p.minimum_stay|default:"—" }} months</div></div>
-            <div class="detail-cell"><div class="detail-label">Notice Period</div><div class="detail-value">{{ p.notice_period|default:"0" }} days</div></div>
-            <div class="detail-cell full"><div class="detail-label">Building / Society</div><div class="detail-value">{{ p.building_name|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">PG For</div><div class="spec-tile-val">{{ p.pg_for|title }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Room Type</div><div class="spec-tile-val">{{ p.room_type|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Furnishing</div><div class="spec-tile-val">{{ p.furnishing_type|default:p.furnishing_status|title }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Meals</div><div class="spec-tile-val">{{ p.meals_available|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Min Stay</div><div class="spec-tile-val">{{ p.minimum_stay|default:"—" }} mos</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Notice Period</div><div class="spec-tile-val">{{ p.notice_period|default:"0" }} days</div></div>
+            <div class="spec-tile full"><div class="spec-tile-label">Building / Society</div><div class="spec-tile-val">{{ p.building_name|default:"—" }}</div></div>
 
           {% elif property_group == 'resale' and category == 'residential' %}
-            <div class="detail-cell"><div class="detail-label">Property Type</div><div class="detail-value">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Super Built-up Area</div><div class="detail-value">{{ p.super_builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Carpet Area</div><div class="detail-value">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">BHK</div><div class="detail-value">{{ p.bhk|upper|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Bathrooms</div><div class="detail-value">{{ p.bathrooms|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Floor</div><div class="detail-value">{{ p.floor_no|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Property Age</div><div class="detail-value">{{ p.property_age|default:"0" }} yrs</div></div>
-            <div class="detail-cell"><div class="detail-label">Furnishing</div><div class="detail-value">{{ p.furnishing_status|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Parking</div><div class="detail-value">{{ p.covered_parking|default:"0" }} covered / {{ p.open_parking|default:"0" }} open</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Super Built-up</div><div class="spec-tile-val">{{ p.super_builtup_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">BHK</div><div class="spec-tile-val">{{ p.bhk|upper|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Bathrooms</div><div class="spec-tile-val">{{ p.bathrooms|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Floor</div><div class="spec-tile-val">{{ p.floor_no|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Property Age</div><div class="spec-tile-val">{{ p.property_age|default:"0" }} yrs</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Furnishing</div><div class="spec-tile-val">{{ p.furnishing_status|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Parking</div><div class="spec-tile-val">{{ p.covered_parking|default:"0" }} cov / {{ p.open_parking|default:"0" }} open</div></div>
 
           {% elif property_group == 'resale' and category == 'commercial' %}
-            <div class="detail-cell"><div class="detail-label">Property Type</div><div class="detail-value">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Built-up Area</div><div class="detail-value">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Carpet Area</div><div class="detail-value">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Occupancy</div><div class="detail-value">{{ p.occupancy_status|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Zone Type</div><div class="detail-value">{{ p.zone_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Property Age</div><div class="detail-value">{{ p.property_age|default:"0" }} yrs</div></div>
-            <div class="detail-cell"><div class="detail-label">Cabins / Meeting Rooms</div><div class="detail-value">{{ p.num_cabins|default:"0" }} / {{ p.meeting_rooms|default:"0" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Seating</div><div class="detail-value">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Built-up Area</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Occupancy</div><div class="spec-tile-val">{{ p.occupancy_status|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Zone</div><div class="spec-tile-val">{{ p.zone_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Property Age</div><div class="spec-tile-val">{{ p.property_age|default:"0" }} yrs</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Cabins/Meeting</div><div class="spec-tile-val">{{ p.num_cabins|default:"0" }} / {{ p.meeting_rooms|default:"0" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Seating</div><div class="spec-tile-val">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
 
           {% elif property_group == 'resale' and category == 'industrial' %}
-            <div class="detail-cell"><div class="detail-label">Property Type</div><div class="detail-value">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Land Area</div><div class="detail-value">{{ p.land_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Built-up Area</div><div class="detail-value">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Zone Classification</div><div class="detail-value">{{ p.industrial_zone_classification|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Power Supply</div><div class="detail-value">{% if p.power_supply %}Available{% else %}Not available{% endif %}</div></div>
-            <div class="detail-cell"><div class="detail-label">Water Supply</div><div class="detail-value">{{ p.water_supply|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Road Connectivity</div><div class="detail-value">{{ p.main_road_connectivity|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Land Area</div><div class="spec-tile-val">{{ p.land_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Built-up</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Zone</div><div class="spec-tile-val">{{ p.industrial_zone_classification|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Power</div><div class="spec-tile-val">{% if p.power_supply %}Available{% else %}Unavailable{% endif %}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Water</div><div class="spec-tile-val">{{ p.water_supply|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Road</div><div class="spec-tile-val">{{ p.main_road_connectivity|title|default:"—" }}</div></div>
 
           {% elif property_group == 'resale' and category == 'agricultural' %}
-            <div class="detail-cell"><div class="detail-label">Land Category</div><div class="detail-value">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Land Area</div><div class="detail-value">{{ p.land_area|default:"—" }} Acres</div></div>
-            <div class="detail-cell"><div class="detail-label">Soil Type</div><div class="detail-value">{{ p.soil_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Water Source</div><div class="detail-value">{{ p.water_source|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Irrigation</div><div class="detail-value">{{ p.irrigation_facility|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Village / Taluka</div><div class="detail-value">{{ p.village|default:"—" }} / {{ p.taluka|default:"—" }}</div></div>
-            <div class="detail-cell full"><div class="detail-label">District</div><div class="detail-value">{{ p.district|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Category</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Land Area</div><div class="spec-tile-val">{{ p.land_area|default:"—" }} Acres</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Soil</div><div class="spec-tile-val">{{ p.soil_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Water</div><div class="spec-tile-val">{{ p.water_source|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Irrigation</div><div class="spec-tile-val">{{ p.irrigation_facility|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Location</div><div class="spec-tile-val">{{ p.village|default:"—" }} / {{ p.taluka|default:"—" }}</div></div>
+            <div class="spec-tile full"><div class="spec-tile-label">District</div><div class="spec-tile-val">{{ p.district|default:"—" }}</div></div>
 
           {% elif property_group == 'resale_plot' %}
-            <div class="detail-cell"><div class="detail-label">Plot Area</div><div class="detail-value">{{ p.plot_area|default:"—" }} {{ p.agr_area_unit|default:"sq.m" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Plot Sub-Category</div><div class="detail-value">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Frontage / Depth</div><div class="detail-value">{{ p.plot_frontage|default:"—" }} × {{ p.plot_depth|default:"—" }} ft</div></div>
-            <div class="detail-cell"><div class="detail-label">Facing</div><div class="detail-value">{{ p.plot_facing|default:"—" }}</div></div>
-            <div class="detail-cell"><div class="detail-label">Road Connectivity</div><div class="detail-value">{{ p.plot_road_facing|default:p.road_connectivity|default:"—" }}</div></div>
-            {% if category == 'agricultural' %}<div class="detail-cell"><div class="detail-label">Soil Type</div><div class="detail-value">{{ p.soil_type|default:"—" }}</div></div>{% endif %}
-            {% if category == 'industrial' %}<div class="detail-cell"><div class="detail-label">Power Supply</div><div class="detail-value">{{ p.power_supply|default:"—" }}</div></div>{% endif %}
-            <div class="detail-cell full"><div class="detail-label">Layout / Project Name</div><div class="detail-value">{{ p.layout_name|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Plot Area</div><div class="spec-tile-val">{{ p.plot_area|default:"—" }} {{ p.agr_area_unit|default:"sq.m" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Sub-Category</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Frontage / Depth</div><div class="spec-tile-val">{{ p.plot_frontage|default:"—" }} × {{ p.plot_depth|default:"—" }} ft</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Facing</div><div class="spec-tile-val">{{ p.plot_facing|default:"—" }}</div></div>
+            <div class="spec-tile"><div class="spec-tile-label">Road</div><div class="spec-tile-val">{{ p.plot_road_facing|default:p.road_connectivity|default:"—" }}</div></div>
+            {% if category == 'agricultural' %}<div class="spec-tile"><div class="spec-tile-label">Soil</div><div class="spec-tile-val">{{ p.soil_type|default:"—" }}</div></div>{% endif %}
+            {% if category == 'industrial' %}<div class="spec-tile"><div class="spec-tile-label">Power</div><div class="spec-tile-val">{{ p.power_supply|default:"—" }}</div></div>{% endif %}
+            <div class="spec-tile full"><div class="spec-tile-label">Layout Name</div><div class="spec-tile-val">{{ p.layout_name|default:"—" }}</div></div>
           {% endif %}
 
           {% if p.floor_plan %}
-          <div class="detail-cell full" style="border-right:none;">
-            <div class="detail-label" style="margin-bottom:8px;">Floor Plan</div>
-            <div style="background:var(--navy);border-radius:var(--radius);padding:12px;text-align:center;">
-              <img src="{{ p.floor_plan.url }}" alt="Floor Plan" style="max-width:100%;border-radius:4px;">
+          <div class="spec-tile full" style="margin-top: 10px;">
+            <div class="spec-tile-label" style="margin-bottom: 6px;">Floor Plan</div>
+            <div style="background: var(--navy); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+              <img src="{{ p.floor_plan.url }}" alt="Floor Plan" style="max-height: 280px; width: auto; border-radius: 4px;">
             </div>
           </div>
           {% endif %}
         </div>
       </section>
 
-      <!-- PRICING & MOVE-IN COST -->
-      <section class="section-block" id="sec-pricing">
-        <div class="eyebrow">Transparent pricing</div>
-        <h2 class="section-title">{% if property_group == 'rental' %}Rent &amp; Move-in Cost{% else %}Price &amp; Charges{% endif %}</h2>
-        <div class="pricing-card">
+      <!-- PRICING TABLE -->
+      <section class="bento-card" id="sec-pricing">
+        <h2 class="bento-card-title"><i class="fas fa-file-invoice-dollar"></i> {% if property_group == 'rental' %}Rent Breakdown &amp; Move-in{% else %}Pricing Breakdown{% endif %}</h2>
+        <table class="charges-table">
           {% if property_group == 'rental' %}
-            {% if p.monthly_rent %}<div class="cost-row"><span>Monthly Rent</span><strong>₹<span class="price-format">{{ p.monthly_rent }}</span></strong></div>{% endif %}
-            {% if p.deposit_display %}<div class="cost-row"><span>Security Deposit</span><strong>{% if p.deposit_display == 'Price on Request' %}{{ p.deposit_display }}{% else %}₹<span class="price-format">{{ p.deposit_display }}</span>{% endif %}</strong></div>{% endif %}
-            {% if p.advance_display %}<div class="cost-row"><span>Advance Rent</span><strong>{% if p.advance_display == 'Price on Request' %}{{ p.advance_display }}{% else %}₹<span class="price-format">{{ p.advance_display }}</span>{% endif %}</strong></div>{% endif %}
-            {% if p.maintenance_display %}<div class="cost-row"><span>Maintenance</span><strong>{% if p.maintenance_display == 'Included' %}Included{% else %}₹<span class="price-format">{{ p.maintenance_display }}</span>{% endif %}</strong></div>{% endif %}
-            {% if p.brokerage_percentage %}<div class="cost-row"><span>Brokerage</span><strong>{{ p.brokerage_percentage }}</strong></div>{% endif %}
-            {% if p.total_move_in_cost %}<div class="cost-total"><span>Estimated Move-in Cost</span><strong>₹<span class="price-format">{{ p.total_move_in_cost }}</span></strong></div>{% endif %}
+            {% if p.monthly_rent %}<tr><td>Monthly Rent</td><td>₹<span class="price-format">{{ p.monthly_rent }}</span></td></tr>{% endif %}
+            {% if p.deposit_display %}<tr><td>Security Deposit</td><td>{% if p.deposit_display == 'Price on Request' %}{{ p.deposit_display }}{% else %}₹<span class="price-format">{{ p.deposit_display }}</span>{% endif %}</td></tr>{% endif %}
+            {% if p.advance_display %}<tr><td>Advance Rent</td><td>{% if p.advance_display == 'Price on Request' %}{{ p.advance_display }}{% else %}₹<span class="price-format">{{ p.advance_display }}</span>{% endif %}</td></tr>{% endif %}
+            {% if p.maintenance_display %}<tr><td>Maintenance</td><td>{% if p.maintenance_display == 'Included' %}Included{% else %}₹<span class="price-format">{{ p.maintenance_display }}</span>{% endif %}</td></tr>{% endif %}
+            {% if p.brokerage_percentage %}<tr><td>Brokerage</td><td>{{ p.brokerage_percentage }}</td></tr>{% endif %}
+            {% if p.total_move_in_cost %}<tr class="charges-total-row"><td>Estimated Move-in Cost</td><td style="color:var(--emerald);">₹<span class="price-format">{{ p.total_move_in_cost }}</span></td></tr>{% endif %}
           {% else %}
-            {% if p.selling_price %}<div class="cost-row"><span>Selling Price</span><strong>₹<span class="price-format">{{ p.selling_price }}</span></strong></div>{% endif %}
-            {% if p.price_per_sqft or p.price_per_acre %}<div class="cost-row"><span>Price per {% if p.price_per_acre %}Acre{% else %}Sq.ft{% endif %}</span><strong>₹<span class="price-format">{{ p.price_per_sqft|default:p.price_per_acre }}</span></strong></div>{% endif %}
-            {% if p.brokerage_percentage %}<div class="cost-row"><span>Brokerage</span><strong>{{ p.brokerage_percentage }}</strong></div>{% endif %}
-            {% if p.manual_brokerage %}<div class="cost-row"><span>Fixed Brokerage</span><strong>₹{{ p.manual_brokerage }}</strong></div>{% endif %}
-            <div class="cost-row"><span>Price Negotiable</span><strong>{{ p.price_negotiable|default:"no"|upper }}</strong></div>
+            {% if p.selling_price %}<tr><td>Selling Price</td><td>₹<span class="price-format">{{ p.selling_price }}</span></td></tr>{% endif %}
+            {% if p.price_per_sqft or p.price_per_acre %}<tr><td>Price Rate</td><td>₹<span class="price-format">{{ p.price_per_sqft|default:p.price_per_acre }}</span> / {% if p.price_per_acre %}Acre{% else %}sq.ft{% endif %}</td></tr>{% endif %}
+            {% if p.brokerage_percentage %}<tr><td>Brokerage</td><td>{{ p.brokerage_percentage }}</td></tr>{% endif %}
+            {% if p.manual_brokerage %}<tr><td>Fixed Brokerage</td><td>₹{{ p.manual_brokerage }}</td></tr>{% endif %}
+            <tr><td>Negotiable</td><td>{{ p.price_negotiable|default:"no"|upper }}</td></tr>
           {% endif %}
-        </div>
+        </table>
       </section>
 
-      <!-- AMENITIES -->
-      <section class="section-block" id="sec-amenities">
-        <div class="eyebrow">Comfort &amp; convenience</div>
-        <h2 class="section-title">Amenities &amp; Nearby</h2>
-        <div class="amenities-wrap" style="margin-bottom:16px;">
-          {% for item in amenities_list %}<div class="amenity-chip"><i class="fas fa-circle-check"></i>{{ item }}</div>{% empty %}<div class="empty-state" style="padding:14px;color:var(--muted);font-size:.82rem;">No amenities listed.</div>{% endfor %}
+      <!-- AMENITIES & FACILITIES -->
+      <section class="bento-card" id="sec-amenities">
+        <h2 class="bento-card-title"><i class="fas fa-shield-halved"></i> Amenities &amp; Infrastructure</h2>
+        <div class="tags-cloud-flex" style="margin-bottom: 14px;">
+          {% for item in amenities_list %}
+            <span class="tag-badge"><i class="fas fa-check-circle"></i> {{ item }}</span>
+          {% empty %}
+            <span style="font-size:13px;color:var(--text-muted);">No amenities listed.</span>
+          {% endfor %}
         </div>
+
         {% if facilities_list %}
-        <div class="sub-eyebrow" style="font-size:.7rem;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px;">Nearby Facilities</div>
-        <div class="amenities-wrap">
-          {% for item in facilities_list %}<div class="facility-chip"><i class="fas fa-map-pin"></i>{{ item }}</div>{% endfor %}
+        <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin: 12px 0 8px;">Nearby Convenience</div>
+        <div class="tags-cloud-flex">
+          {% for item in facilities_list %}
+            <span class="tag-badge tag-green"><i class="fas fa-location-arrow"></i> {{ item }}</span>
+          {% endfor %}
         </div>
         {% endif %}
       </section>
 
       <!-- LOCATION -->
-      <section class="section-block" id="sec-location">
-        <div class="eyebrow">Explore the neighbourhood</div>
-        <h2 class="section-title">Location</h2>
-        <div class="map-block"><div class="map-pin"><i class="fas fa-location-dot"></i></div></div>
-        {% if p.address %}<div class="address-line"><i class="fas fa-map-pin me-2"></i>{{ p.address }}</div>{% endif %}
-        <div style="margin-top:14px;">
+      <section class="bento-card" id="sec-location">
+        <h2 class="bento-card-title"><i class="fas fa-map"></i> Location &amp; Surroundings</h2>
+        <div style="height: 280px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-light);">
+          <iframe 
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            loading="lazy" 
+            allowfullscreen 
+            src="https://maps.google.com/maps?q={% if p.latitude and p.longitude %}{{ p.latitude }},{{ p.longitude }}{% else %}{{ p.address|default:p.locality|urlencode }},{{ p.city|urlencode }}{% endif %}&output=embed">
+          </iframe>
+        </div>
+        {% if p.address %}
+        <div style="background: #f8fafc; border-left: 3px solid var(--gold); padding: 10px 14px; font-size: 14px; margin-top: 12px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+          <i class="fas fa-map-pin me-2 text-warning"></i>{{ p.address }}
+        </div>
+        {% endif %}
+        <div style="margin-top: 10px;">
           {% if p.google_maps_link %}
-            <a href="{{ p.google_maps_link }}" target="_blank" style="color:var(--navy);font-size:.82rem;font-weight:700;"><i class="fas fa-external-link-alt me-1"></i> Open in Google Maps</a>
+            <a href="{{ p.google_maps_link }}" target="_blank" style="color:var(--navy);font-size:13px;font-weight:700;"><i class="fas fa-arrow-up-right-from-square me-1"></i> Open in Google Maps</a>
           {% else %}
-            <a href="https://maps.google.com/maps?q={{ p.address|default:p.locality }},{{ p.city }}" target="_blank" style="color:var(--navy);font-size:.82rem;font-weight:700;"><i class="fas fa-external-link-alt me-1"></i> Open in Google Maps</a>
+            <a href="https://maps.google.com/maps?q={{ p.address|default:p.locality }},{{ p.city }}" target="_blank" style="color:var(--navy);font-size:13px;font-weight:700;"><i class="fas fa-arrow-up-right-from-square me-1"></i> Open in Google Maps</a>
           {% endif %}
         </div>
 
-        {% if locality_insight %}
-        <div style="margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;" hidden>
-          <div class="address-line" style="border-left-color:var(--green);">
-            <strong style="color:#0f5c40;display:block;margin-bottom:8px;"><i class="fas fa-check-circle me-1"></i> What's good here</strong>
-            <ul style="margin:0;padding-left:16px;">{% for point in locality_insight.get_good_points %}<li style="margin-bottom:5px;font-size:.82rem;">{{ point }}</li>{% empty %}<li style="color:var(--muted);font-size:.82rem;">No highlights yet.</li>{% endfor %}</ul>
-          </div>
-          <div class="address-line" style="border-left-color:#dc2626;">
-            <strong style="color:#dc2626;display:block;margin-bottom:8px;"><i class="fas fa-triangle-exclamation me-1"></i> What can be better</strong>
-            <ul style="margin:0;padding-left:16px;">{% for point in locality_insight.get_better_points %}<li style="margin-bottom:5px;font-size:.82rem;">{{ point }}</li>{% empty %}<li style="color:var(--muted);font-size:.82rem;">No signals reported yet.</li>{% endfor %}</ul>
-          </div>
-        </div>
-        {% endif %}
-
         {% if price_trend %}
-        <div style="margin-top:22px;">
-          <div class="sub-eyebrow" style="font-size:.7rem;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px;">Price Trends — {{ p.locality }}</div>
+        <div style="margin-top: 18px;">
+          <div style="font-size:11px; text-transform: uppercase; font-weight:700; color:var(--text-muted); margin-bottom:8px;">Locality Rate Trends — {{ p.locality }}</div>
           <canvas id="priceTrendChart" height="90"></canvas>
         </div>
         {% endif %}
       </section>
 
-      <!-- TRUST / VERIFICATION (replaces admin-only Media & Upload Meta / duplication engine) -->
-      <section class="section-block" id="sec-verify" style="border-bottom:none;">
-        <div class="verify-panel">
-          <div class="eyebrow">KANISHKAIMPERIA Trust</div>
-          <h2 class="section-title">Verification Status</h2>
-          <div class="verify-grid">
-            <div class="verify-tile"><i class="fas fa-shield-check"></i><strong>Platform Verified</strong><span>Listing reviewed by KANISHKAIMPERIA</span></div>
-            <div class="verify-tile"><i class="fas fa-house-circle-check"></i><strong>Property Verified</strong><span>Property information reviewed</span></div>
-            <div class="verify-tile"><i class="fas fa-location-dot"></i><strong>Location Verified</strong><span>Address cross-checked</span></div>
-            <div class="verify-tile"><i class="fas fa-user-check"></i><strong>Listing Source Verified</strong><span>Owner / agent identity confirmed</span></div>
-          </div>
-          <div style="margin-top:16px;font-size:.72rem;color:#aeb8c7;">Last verified: {{ p.created_at|date:"d M Y"|default:"Recently updated" }}</div>
+      <!-- VERIFICATION -->
+      <section class="bento-card" id="sec-verify">
+        <h2 class="bento-card-title"><i class="fas fa-circle-check"></i> Trust &amp; Verification</h2>
+        <div class="trust-grid">
+          <div class="trust-chip"><i class="fas fa-shield-check"></i><div><strong>Platform Verified</strong><span>Document checked</span></div></div>
+          <div class="trust-chip"><i class="fas fa-house-circle-check"></i><div><strong>Physical Inspection</strong><span>Property visited</span></div></div>
+          <div class="trust-chip"><i class="fas fa-location-dot"></i><div><strong>Geo Verified</strong><span>Confirmed coordinates</span></div></div>
+          <div class="trust-chip"><i class="fas fa-user-check"></i><div><strong>Direct Ownership</strong><span>Identity screened</span></div></div>
         </div>
       </section>
 
-      <!-- FAQ -->
-      <section class="section-block" id="sec-faqs">
-        <div class="eyebrow">Need more information?</div>
-        <h2 class="section-title">Frequently Asked Questions</h2>
-        <div class="accordion prop-faq" id="faqAccordion">
+      <!-- FAQS -->
+      <section class="bento-card" id="sec-faqs">
+        <h2 class="bento-card-title"><i class="fas fa-circle-question"></i> Frequently Asked Questions</h2>
+        <div class="accordion custom-accordion" id="faqAccordion">
           {% for faq in original.faqs.all %}
           <div class="accordion-item">
             <h2 class="accordion-header">
-              <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">{{ faq.question }}</button>
+              <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                {{ faq.question }}
+              </button>
             </h2>
             <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
               <div class="accordion-body">{{ faq.answer }}</div>
             </div>
           </div>
           {% empty %}
-          <div class="empty-state" style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem;">No FAQs generated for this listing yet.</div>
+          <div style="font-size:14px;color:var(--text-muted);">No FAQs available for this listing.</div>
           {% endfor %}
         </div>
       </section>
 
-      <!-- SIMILAR -->
+      <!-- SIMILAR LISTINGS -->
       {% if similar %}
-      <section class="section-block" id="sec-similar" style="border-bottom:none;">
-        <div class="eyebrow">You may also like</div>
-        <h2 class="section-title">Similar Properties Nearby</h2>
-        <div class="similar-grid">
+      <section class="bento-card" id="sec-similar">
+        <h2 class="bento-card-title"><i class="fas fa-layer-group"></i> Similar Properties Nearby</h2>
+        <div class="sim-grid-refined">
           {% for sp in similar %}
-          <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower }}/{{ sp.id }}/" class="sim-card">
-            <div class="sim-img">{% if sp.image_url %}<img src="{{ sp.image_url }}" alt="{{ sp.title }}">{% else %}<div class="watermark-container"><i class="fas fa-home" style="color:#ccc;font-size:1.6rem;"></i></div>{% endif %}<span class="sim-tag">{{ sp.listing_type|upper }}</span></div>
-            <div class="sim-body">
-              <div class="sim-price">{{ sp.price_display }}</div>
-              <div class="sim-title">{{ sp.title|truncatechars:42 }}</div>
-              <div class="sim-loc"><i class="fas fa-location-dot"></i> {{ sp.location|truncatechars:28 }}</div>
-              <div class="sim-footer"><span>{{ sp.feature }}</span><span style="color:var(--navy);font-weight:800;">View →</span></div>
+          <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower }}/{{ sp.id }}/" class="sim-card-refined">
+            <div class="sim-thumb">
+              {% if sp.image_url %}<img src="{{ sp.image_url }}" alt="{{ sp.title }}">{% else %}<div style="height:100%;display:grid;place-items:center;background:#e2e8f0;color:#94a3b8;"><i class="fas fa-house"></i></div>{% endif %}
+            </div>
+            <div class="sim-content">
+              <div class="sim-price-txt">{{ sp.price_display }}</div>
+              <div class="sim-title-txt">{{ sp.title|truncatechars:34 }}</div>
+              <div class="sim-loc-txt"><i class="fas fa-location-dot"></i> {{ sp.location|truncatechars:22 }}</div>
             </div>
           </a>
           {% endfor %}
@@ -868,37 +1068,29 @@ button{font-family:inherit;cursor:pointer;}
 
     </div>
 
-    <!-- ═══ SIDEBAR — sticky contact card (primary conversion point) ═══ -->
-    <aside class="sidebar">
-      <div class="contact-card">
-        <div class="contact-title">Interested in this property?</div>
-        <div class="contact-sub">Connect with the KANISHKAIMPERIA property team.</div>
+    <!-- ═══ STICKY RIGHT ENQUIRY SIDEBAR ═══ -->
+    <aside class="sidebar-wrapper" id="contactSidebar">
+      <button type="button" class="sheet-close" onclick="closeContactSheet()">
+        <span>Enquire Now</span><i class="fas fa-times"></i>
+      </button>
 
-      
-
-
+      <div class="enquiry-card-lux">
+        <div class="enquiry-card-header">
+          <h3>Connect with Property Team</h3>
+          <p>Schedule a visit or get instant contact details</p>
+        </div>
 
         {% if can_view_contact %}
-          <a href="https://wa.me/91{{ p.owner_contact|default:p.listed_by_contact }}?text=Hi%2C+I+am+interested+in+{{ p.title|default:p.property_title|urlencode }}" target="_blank" class="cta cta-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          <a href="https://wa.me/919175791501?text=Hi%2C+I+am+interested+in+{{ p.title|default:p.property_title|urlencode }}" target="_blank" class="cta-btn cta-whatsapp">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+          </a>
         {% else %}
-          <div class="masked-phone-block">
-            <div class="masked-num">{{ masked_phone }}</div>
-            <div class="masked-hint">Subscribe to view full contact details</div>
+          <div class="masked-phone-banner">
+            <div class="num">{{ masked_phone }}</div>
+            <div class="hint">Verified Number · Complete enquiry to view</div>
           </div>
         {% endif %}
 
-        <div class="agent">
-          <div class="agent-avatar">{{ p.owner_name|default:p.listed_by_name|slice:":1"|upper|default:"E" }}</div>
-          <div>
-            <strong>{{ p.owner_name|default:p.listed_by_name|default:"KANISHKAIMPERIA Property Team" }}</strong>
-            <span>Verified Property Support</span>
-          </div>
-        </div>
-
-        <div class="security-note"><i class="fas fa-shield-halved me-1"></i> Your contact details are handled securely. KANISHKAIMPERIA helps connect you with the property contact.</div>
-
-        <!-- Enquiry form — same backend fields/AJAX as before -->
-        <div class="enq-title">Get Contact Details</div>
         <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
           {% csrf_token %}
           <input type="hidden" name="property_id" value="{{ original.id|default:p.id }}">
@@ -916,66 +1108,84 @@ button{font-family:inherit;cursor:pointer;}
           <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
           <input type="hidden" name="page_url" id="enquiry_page_url" value="">
 
-          <input type="text" name="enquiry_name" id="enquiry_name" class="enq-input" placeholder="Your Name" required value="{{ user_obj.user_name }}">
-          <div class="input-group mb-2">
-            <select name="country_code" id="country_code" class="form-select" style="max-width:100px;border-radius:4px 0 0 4px;">
-              <option value="+91" selected>🇮🇳 +91</option>
-              <option value="+1">🇺🇸 +1</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="+971">🇦🇪 +971</option>
-              <option value="+65">🇸🇬 +65</option>
-              <option value="+61">🇦🇺 +61</option>
-            </select>
-            <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control enq-input" placeholder="Phone Number" required value="{{ user_obj.user_phone }}" style="border-radius:0 4px 4px 0;margin-bottom:0;">
-          </div>
-          <div class="form-check mb-2 text-start">
-            <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked>
-            <label class="form-check-label text-muted" for="whatsappConsent" style="font-size:.75rem;">I consent to receive property alerts and owner details on WhatsApp/SMS.</label>
-          </div>
-          <div class="form-check mb-3 text-start">
-            <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
-            {% if property_group == "rental" %}
-              <label class="form-check-label text-muted" for="agreeTerms" style="font-size:.75rem;">I am interested in vendor services</label>
-            {% else %}
-              <label class="form-check-label text-muted" for="agreeTerms" style="font-size:.75rem;">I am interested in home loan services</label>
-            {% endif %}
+          <div class="form-field-group">
+            <label for="enquiry_name">Your Name <span style="color:red;">*</span></label>
+            <input type="text" name="enquiry_name" id="enquiry_name" class="input-lux" placeholder="Your Name" required>
           </div>
 
-          {% if user_obj %}
-            <button type="button" class="cta cta-primary" onclick="Send_Enquiry(this)">Get Contact Details</button>
-          {% else %}
-            <button type="button" class="cta cta-primary" data-bs-toggle="modal" data-bs-target="#authEnModal">Get Contact Details</button>
-          {% endif %}
+          <div class="form-field-group">
+            <label for="enquiry_phone">Phone Number <span style="color:red;">*</span></label>
+            <div style="display:flex;gap:6px;">
+              <select name="country_code" id="country_code" class="input-lux" style="width:75px;padding:8px 4px;">
+                <option value="+91" selected>+91</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                <option value="+971">+971</option>
+                <option value="+65">+65</option>
+                <option value="+61">+61</option>
+              </select>
+              <input type="tel" name="enquiry_phone" id="enquiry_phone" class="input-lux" style="flex:1;" placeholder="Phone Number" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label text-muted mb-1" style="font-size: 11px; font-weight: 700;">Preferred Visit Date</label>
+              <input type="date" name="enquiry_visit_date" id="enquiry_visit_date" class="input-lux">
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted mb-1" style="font-size: 11px; font-weight: 700;">Visit Time</label>
+              <input type="text" name="enquiry_visit_time" id="enquiry_visit_time" class="input-lux" placeholder="Select Time" readonly>
+            </div>
+          </div>
+
+          <div class="form-check mb-1" style="text-align: left;">
+            <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked>
+            <label class="form-check-label text-muted" for="whatsappConsent" style="font-size:11px;">Receive details on WhatsApp/SMS</label>
+          </div>
+
+          <div class="form-check mb-3" style="text-align: left;">
+            <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+            <label class="form-check-label text-muted" for="agreeTerms" style="font-size:11px;">
+              {% if property_group == "rental" %}Interested in vendor services{% else %}Interested in home loan services{% endif %}
+            </label>
+          </div>
+
+          <button type="button" class="cta-btn cta-gold" onclick="Send_Enquiry(this)">Schedule Visit</button>
         </form>
 
-        <div class="trust-badges">
-          <div class="trust-item"><i class="fas fa-shield-alt"></i><div>Verified</div></div>
-          <div class="trust-item"><i class="fas fa-user-check"></i><div>Direct Owner</div></div>
-          <div class="trust-item"><i class="fas fa-lock"></i><div>Secure</div></div>
+        <div class="agent-profile-strip">
+          <div class="agent-initial-circle">{{ p.owner_name|default:p.listed_by_name|slice:":1"|upper|default:"K" }}</div>
+          <div>
+            <strong>{{ p.owner_name|default:p.listed_by_name|default:"KANISHKAIMPERIA Team" }}</strong>
+            <span>Verified Advisor</span>
+          </div>
         </div>
       </div>
 
-      <!-- EMI (resale only) -->
+      <!-- EMI CALCULATOR (RESALE ONLY) -->
       {% if property_group != 'rental' and base_emi > 0 %}
-      <div class="emi-card">
-        <div class="emi-label">Estimated Monthly EMI (80% Loan)</div>
-        <div class="emi-amount">₹<span id="emiResult">{{ base_emi }}</span></div>
-        <div class="emi-note">Based on 80% loan · 8.5% interest · 20-year tenure</div>
-        <button class="emi-adjust-btn" onclick="document.getElementById('emiCtrl').style.display='block';this.style.display='none'"><i class="fas fa-sliders-h"></i> Adjust Loan Terms</button>
-        <div class="emi-controls" id="emiCtrl">
-          <div style="margin-bottom:10px;">
-            <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:5px;">Property Value (₹)</div>
-            <input type="number" id="emiPrincipal" class="emi-input" value="{{ raw_price|default:p.selling_price|default:'0' }}" oninput="calcEMI()">
+      <div class="emi-widget-lux">
+        <div style="font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Estimated Monthly EMI (80% Loan)</div>
+        <div class="emi-result-headline">₹<span id="emiResult">{{ base_emi }}</span></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Based on 80% loan · 8.5% interest · 20-year tenure</div>
+        <button type="button" class="btn-toggle-read" style="width:100%;justify-content:center;" onclick="document.getElementById('emiCtrl').style.display='block';this.style.display='none'">
+          <i class="fas fa-sliders"></i> Adjust Loan Terms
+        </button>
+
+        <div id="emiCtrl" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light);">
+          <div class="mb-2">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Property Value (₹)</div>
+            <input type="number" id="emiPrincipal" class="input-lux" value="{{ raw_price|default:p.selling_price|default:'0' }}" oninput="calcEMI()">
           </div>
-          <div style="margin-bottom:10px;">
-            <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:5px;">Interest Rate (%)</div>
-            <input type="number" id="emiRate" class="emi-input" value="8.5" step="0.1" oninput="calcEMI()">
+          <div class="mb-2">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Interest Rate (%)</div>
+            <input type="number" id="emiRate" class="input-lux" value="8.5" step="0.1" oninput="calcEMI()">
           </div>
           <div>
-            <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:5px;">Tenure (Years)</div>
-            <input type="number" id="emiYears" class="emi-input" value="20" min="1" max="30" oninput="calcEMI()">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Tenure (Years)</div>
+            <input type="number" id="emiYears" class="input-lux" value="20" min="1" max="30" oninput="calcEMI()">
           </div>
-          <div style="font-size:.7rem;color:var(--muted);margin-top:10px;">Indicative only. Consult a financial advisor for accuracy.</div>
         </div>
       </div>
       {% endif %}
@@ -983,29 +1193,31 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 </div>
 
-<!-- ═══ MEDIA VIEWER MODAL (unchanged behaviour) ═══ -->
+<!-- ═══ MEDIA VIEWER MODAL ═══ -->
 <div class="modal fade housing-media-modal" id="housingMediaModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="viewer-header">
-        <div class="viewer-title-box">
-          <h2>{{ p.title }} <span class="tag tag-status" style="margin-left:6px;"><i class="fas fa-check-circle me-1"></i>Verified</span></h2>
-          <div class="price-tag">{% if p.monthly_rent %}₹{{ p.monthly_rent }} / month{% elif p.selling_price %}₹{{ p.selling_price }}{% else %}Price on Request{% endif %}</div>
+        <div>
+          <h2 style="font-size:16px;margin:0;">{{ p.title }}</h2>
+          <div style="font-size:13px;color:#94a3b8;">{% if p.monthly_rent %}₹{{ p.monthly_rent }}/mo{% elif p.selling_price %}₹{{ p.selling_price }}{% else %}Price on Request{% endif %}</div>
         </div>
         <div class="viewer-actions">
-          <div class="text-end d-none d-md-block">
-            <div class="viewer-counter" id="viewerCounter">1 / 1</div>
+          <div class="viewer-counter-wrap d-none d-md-block text-end">
+            <div style="font-size:13px;font-weight:700;" id="viewerCounter">1 / 1</div>
             <div class="viewer-counter-bar"><div class="viewer-counter-progress" id="viewerProgress"></div></div>
           </div>
-          <button type="button" class="btn-contact-seller-nav" data-bs-dismiss="modal" onclick="document.getElementById('enquiryForm').scrollIntoView({behavior:'smooth'})">Contact Seller</button>
+          <button type="button" class="btn-contact-seller-nav" data-bs-dismiss="modal" onclick="setTimeout(goToEnquiry,320)">Contact Seller</button>
           <button type="button" class="viewer-close-btn" data-bs-dismiss="modal" aria-label="Close"><i class="fas fa-times"></i></button>
         </div>
       </div>
 
       <div class="viewer-cat-bar" id="viewerPills">
         <button type="button" class="viewer-pill active" onclick="filterViewerMedia('all', this)">All</button>
-        {% if selected_video %}<button type="button" class="viewer-pill" onclick="filterViewerMedia('video', this)"><i class="fas fa-video me-1"></i> Videos (1)</button>{% endif %}
-        {% for cat_key, cat_data in grouped_images.items %}<button type="button" class="viewer-pill" onclick="filterViewerMedia('{{ cat_key }}', this)">{{ cat_data.label }} ({{ cat_data.images|length }})</button>{% endfor %}
+        {% if selected_video %}<button type="button" class="viewer-pill" onclick="filterViewerMedia('video', this)"><i class="fas fa-video me-1"></i> Video</button>{% endif %}
+        {% for cat_key, cat_data in grouped_images.items %}
+          <button type="button" class="viewer-pill" onclick="filterViewerMedia('{{ cat_key }}', this)">{{ cat_data.label }} ({{ cat_data.images|length }})</button>
+        {% endfor %}
       </div>
 
       <div class="viewer-stage">
@@ -1019,13 +1231,13 @@ button{font-family:inherit;cursor:pointer;}
             {% elif selected_video.video %}
               <video id="unifiedModalVideo" controls autoplay playsinline><source src="{{ selected_video.video.url }}" type="video/mp4"></video>
             {% endif %}
-            <div class="slide-caption-tag"><i class="fas fa-video me-1"></i> Property Video Walkthrough</div>
+            <div class="slide-caption-tag"><i class="fas fa-video me-1"></i> Video Walkthrough</div>
           </div>
           {% endif %}
           {% for img in property_images %}
           <div class="viewer-slide" data-type="image" data-cat="{{ img.category|default:'all' }}">
             <img src="{{ img.image.url }}" alt="Property Media {{ forloop.counter }}">
-            <div class="slide-caption-tag"><i class="fas fa-camera me-1"></i> {{ img.category|title|default:"Property View" }}</div>
+            <div class="slide-caption-tag"><i class="fas fa-camera me-1"></i> {{ img.category|title|default:"Photo View" }}</div>
           </div>
           {% endfor %}
         </div>
@@ -1034,77 +1246,71 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 </div>
 
-<!-- ═══ AUTH MODAL (unchanged behaviour) ═══ -->
+<!-- ═══ AUTH MODAL ═══ -->
 <div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:6px;border:none;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+    <div class="modal-content" style="border-radius:var(--radius-md);border:none;box-shadow:var(--shadow-lg);">
       <div class="modal-header border-0 pb-0" style="position:relative;">
-        <h5 class="modal-title" style="font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);">Continue to KANISHKAIMPERIA</h5>
+        <h5 class="modal-title" style="font-weight:700;color:var(--navy);">Continue to KANISHKAIMPERIA</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position:absolute;right:20px;top:20px;"></button>
       </div>
       <div class="modal-body pt-3 pb-4 px-4">
         <div id="step-1-email" class="auth-step active-step">
-          <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px;">Enter your email address to login or create a new account.</p>
+          <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">Enter your email address to continue.</p>
           <div class="mb-3">
-            <label style="font-size:.8rem;font-weight:700;">Email Address <span class="text-danger">*</span></label>
-            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius:4px;padding:12px;background:var(--cream);">
+            <label style="font-size:12px;font-weight:700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="input-lux" placeholder="name@example.com">
           </div>
-          <button type="button" class="cta cta-primary" onclick="checkEmailExists(this)">Continue <i class="fas fa-arrow-right ms-1"></i></button>
+          <button type="button" class="cta-btn cta-gold" onclick="checkEmailExists(this)">Continue <i class="fas fa-arrow-right ms-1"></i></button>
         </div>
 
         <div id="step-2-login" class="auth-step">
-          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:var(--muted);font-size:.9rem;font-weight:600;margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
-          <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px;">Welcome back! Please enter your password to continue.</p>
+          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:var(--text-muted);font-size:13px;font-weight:600;margin-bottom:12px;"><i class="fas fa-arrow-left"></i> Back</button>
+          <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">Enter your password to sign in.</p>
           <div class="mb-3">
-            <label style="font-size:.8rem;font-weight:700;margin-bottom:6px;display:block;">Password <span class="text-danger">*</span></label>
-            <div class="input-group" style="position:relative;">
-              <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius:4px;padding:12px;padding-right:45px;background:var(--cream);border:1px solid var(--border);">
-              <button type="button" id="togglePassword" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;z-index:10;cursor:pointer;padding:0;"><i class="fas fa-eye" id="eyeIcon" style="font-size:1.1rem;"></i></button>
+            <label style="font-size:12px;font-weight:700;">Password <span class="text-danger">*</span></label>
+            <div style="position:relative;">
+              <input type="password" id="flow_password" class="input-lux" placeholder="Password" style="padding-right:40px;">
+              <button type="button" id="togglePassword" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;"><i class="fas fa-eye" id="eyeIcon"></i></button>
             </div>
           </div>
-          <button type="button" class="cta cta-primary" onclick="processProgLogin(this)">Secure Login</button>
+          <button type="button" class="cta-btn cta-gold" onclick="processProgLogin(this)">Secure Login</button>
         </div>
 
         <div id="step-2-otp" class="auth-step">
-          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:var(--muted);font-size:.9rem;font-weight:600;margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
-          <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px;">We've sent a 4-digit code to <strong id="display_otp_email" style="color:var(--navy);"></strong>.</p>
+          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:var(--text-muted);font-size:13px;font-weight:600;margin-bottom:12px;"><i class="fas fa-arrow-left"></i> Back</button>
+          <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">We've sent a 4-digit code to <strong id="display_otp_email" style="color:var(--navy);"></strong></p>
           <div class="otp-container">
             <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
             <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
             <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
             <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
           </div>
-          <button type="button" class="cta" style="background:var(--navy);color:#fff;" onclick="verifyOTP(this)">Verify OTP</button>
+          <button type="button" class="cta-btn" style="background:var(--navy);color:#fff;" onclick="verifyOTP(this)">Verify OTP</button>
         </div>
 
         <div id="step-3-details" class="auth-step">
-          <p style="font-size:.9rem;color:var(--green);font-weight:600;margin-bottom:20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
-          <div class="mb-3"><label style="font-size:.8rem;font-weight:700;">Full Name <span class="text-danger">*</span></label><input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius:4px;padding:10px;background:var(--cream);"></div>
-          <div class="mb-3"><label style="font-size:.8rem;font-weight:700;">Mobile Number <span class="text-danger">*</span></label><input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius:4px;padding:10px;background:var(--cream);" maxlength="10"></div>
+          <p style="font-size:14px;color:var(--emerald);font-weight:600;margin-bottom:14px;"><i class="fas fa-check-circle"></i> Email Verified! Enter your details.</p>
+          <div class="mb-2"><label style="font-size:12px;font-weight:700;">Full Name <span class="text-danger">*</span></label><input type="text" id="flow_reg_name" class="input-lux" placeholder="John Doe"></div>
+          <div class="mb-2"><label style="font-size:12px;font-weight:700;">Mobile Number <span class="text-danger">*</span></label><input type="tel" id="flow_reg_mobile" class="input-lux" placeholder="10 Digits" maxlength="10"></div>
           <div class="mb-3">
-            <label style="font-size:.8rem;font-weight:700;">I am a <span class="text-danger">*</span></label>
-            <select id="flow_reg_role" class="form-select" style="border-radius:4px;padding:10px;background:var(--cream);" required>
-              <option value="SelectRole" selected disabled>Choose a role...</option>
+            <label style="font-size:12px;font-weight:700;">Role <span class="text-danger">*</span></label>
+            <select id="flow_reg_role" class="input-lux" required>
+              <option value="SelectRole" selected disabled>Select role...</option>
               <option value="Landlord">Landlord</option>
               <option value="Agent">Agent</option>
               <option value="Agency/Builder">Agencies / Builder</option>
-              <option value="Vendor">Vendor</option>
             </select>
           </div>
-          <button type="button" class="cta" style="background:var(--green);color:#fff;" onclick="processProgRegistration(this)">Create Account &amp; Continue</button>
+          <button type="button" class="cta-btn" style="background:var(--emerald);color:#fff;" onclick="processProgRegistration(this)">Complete Registration</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ SCHEMA (unchanged, required for SEO) ═══ -->
-
-
-
-{% if seo.schema_json %}
-<script type="application/ld+json">{{ seo.schema_json|safe }}</script>
-{% endif %}
+<!-- ═══ SCHEMA DATA ═══ -->
+{% if seo.schema_json %}<script type="application/ld+json">{{ seo.schema_json|safe }}</script>{% endif %}
 {% if p.latitude and p.longitude %}
 <script type="application/ld+json">
 {
@@ -1126,23 +1332,35 @@ button{font-family:inherit;cursor:pointer;}
 }
 </script>
 
-<!-- ═══ MOBILE CTA BAR ═══ -->
+<div class="sheet-backdrop" id="sheetBackdrop" onclick="closeContactSheet()"></div>
+
+<!-- ═══ MOBILE BOTTOM ACTIONS ═══ -->
 <div class="mobile-bar">
-  {% if can_view_contact %}
-    <a href="tel:{{ p.owner_contact|default:p.listed_by_contact }}" class="mobile-call"><i class="fas fa-phone"></i> Call</a>
-    <a href="https://wa.me/91{{ p.owner_contact|default:p.listed_by_contact }}" target="_blank" class="mobile-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-  {% else %}
-    <button type="button" class="mobile-call" onclick="document.getElementById('enquiryForm').scrollIntoView({behavior:'smooth'})"><i class="fas fa-phone"></i> Call</button>
-    <button type="button" class="mobile-whatsapp" onclick="document.getElementById('enquiryForm').scrollIntoView({behavior:'smooth'})"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-  {% endif %}
-  <button type="button" class="mobile-visit" onclick="document.getElementById('enquiryForm').scrollIntoView({behavior:'smooth'})"><i class="fas fa-calendar-check"></i> Visit</button>
+  <button type="button" class="cta-btn cta-gold" onclick="goToEnquiry()">
+    <i class="fas fa-calendar-check"></i> Schedule Visit
+  </button>
 </div>
 
+<!-- ═══ SCRIPTS ═══ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  if (typeof flatpickr !== "undefined") {
+    flatpickr("#enquiry_visit_date", {
+      dateFormat: "d M Y",
+      minDate: "today"
+    });
+    flatpickr("#enquiry_visit_time", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: false
+    });
+  }
+
   const passwordInput = document.getElementById("flow_password");
   const toggleButton = document.getElementById("togglePassword");
   const eyeIcon = document.getElementById("eyeIcon");
@@ -1150,8 +1368,8 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleButton.addEventListener("click", function () {
       const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
       passwordInput.setAttribute("type", type);
-      if (type === "text") { eyeIcon.classList.remove("fa-eye"); eyeIcon.classList.add("fa-eye-slash"); eyeIcon.style.color = "#16805b"; }
-      else { eyeIcon.classList.remove("fa-eye-slash"); eyeIcon.classList.add("fa-eye"); eyeIcon.style.color = "#94a3b8"; }
+      if (type === "text") { eyeIcon.classList.remove("fa-eye"); eyeIcon.classList.add("fa-eye-slash"); }
+      else { eyeIcon.classList.remove("fa-eye-slash"); eyeIcon.classList.add("fa-eye"); }
     });
   }
 });
@@ -1165,7 +1383,7 @@ function moveToNext(current, event) {
 /* ── QUICK-JUMP SCROLL SPY ── */
 document.addEventListener('DOMContentLoaded', function () {
   const navLinks = document.querySelectorAll('.qj-link');
-  const sections = document.querySelectorAll('.section-block[id]');
+  const sections = document.querySelectorAll('.bento-card[id]');
   function updateActiveNav() {
     let activeId = null;
     const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -1181,8 +1399,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
   updateActiveNav();
-  const navTabs = document.getElementById('quickJumpNav');
-  if (navTabs) navTabs.addEventListener('wheel', function (e) { if (e.deltaY !== 0) { e.preventDefault(); this.scrollLeft += e.deltaY; } });
 });
 
 /* ── EMI CALCULATOR ── */
@@ -1200,7 +1416,7 @@ function calcEMI() {
   }
 }
 
-/* ── PROGRESSIVE AUTH API CALLS (unchanged) ── */
+/* ── PROGRESSIVE AUTH AJAX ── */
 function checkEmailExists(_this) {
   let email = $('#flow_email').val().trim();
   if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
@@ -1260,38 +1476,105 @@ function processProgRegistration(_this) {
   });
 }
 
-/* ── SEND ENQUIRY (unchanged) ── */
+/* ── SEND ENQUIRY ── */
 function Send_Enquiry(_this) {
   var enquiry_name = $("#enquiry_name").val().trim();
   var enquiry_phone = $("#enquiry_phone").val().trim();
   var country_code = $("#country_code").val();
+  var enquiry_visit_date = $("#enquiry_visit_date").val();
+  var enquiry_visit_time = $("#enquiry_visit_time").val();
   var whatsapp_consent = $("#whatsappConsent").is(":checked");
-  if (enquiry_name === "" || enquiry_phone === "") { Swal.fire({ title: 'Error', text: 'Please fill the required fields.', icon: 'error' }); return; }
-  if (!whatsapp_consent) { Swal.fire({ title: 'Consent Required', text: 'You must agree to the consent to proceed.', icon: 'warning' }); return; }
+  
+  if (enquiry_name === "" || enquiry_phone === "" ) { 
+    Swal.fire({title: 'Error', text: 'Please fill the required fields.', icon: 'error'}); 
+    return; 
+  }
+  if (!whatsapp_consent) { 
+    Swal.fire({title: 'Consent Required', text: 'You must agree to the consent to proceed.', icon: 'warning'}); 
+    return; 
+  }
 
   var fd = new FormData();
   fd.append('enquiry_name', enquiry_name);
   fd.append('country_code', country_code);
   fd.append('enquiry_phone', enquiry_phone);
+  fd.append('enquiry_visit_date', enquiry_visit_date);
+  fd.append('enquiry_visit_time', enquiry_visit_time);
   fd.append('whatsapp_consent', whatsapp_consent ? 'yes' : 'no');
   fd.append('property_group', '{{ property_group }}');
-  fd.append('category', '{{ category }}');
+  fd.append('listing_type', '{{ listing_type }}');
+  fd.append('category', '{{ p.category }}');
+  fd.append('sub_category', '{{ original.sub_category }}');
   fd.append('property_id', '{{ p.id }}');
-  fd.append('user_id', '{{ user_obj.id }}');
+  fd.append('user_id', '{{ user_obj.id|default:"" }}');
+  fd.append('utm_source', $('#enquiry_utm_source').val());
+  fd.append('utm_medium', $('#enquiry_utm_medium').val());
+  fd.append('utm_campaign', $('#enquiry_utm_campaign').val());
+  fd.append('utm_term', $('#enquiry_utm_term').val());
+  fd.append('utm_content', $('#enquiry_utm_content').val());
+  fd.append('utm_path', $('#enquiry_utm_path').val());
+  fd.append('page_url', $('#enquiry_page_url').val());
 
   $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
   $.ajax({
-    method: "POST", url: "{% url 'Send_Property_Enquiry' %}", data: fd, processData: false, contentType: false,
+    method: "POST", 
+    url: "{% url 'Send_Property_Enquiry' %}", 
+    data: fd, 
+    processData: false, 
+    contentType: false,
     success: function (response) {
-      $(_this).prop("disabled", false).html(`Get Contact Details`);
-      if (response.status == '1') { Swal.fire({ title: 'Success!', text: response.msg, icon: 'success' }).then((r) => { if (r.isConfirmed) location.reload(); }); }
-      else { Swal.fire({ title: 'Error', text: response.msg, icon: 'error' }); }
+      $(_this).prop("disabled", false).html(`Schedule Visit`);
+      if (response.status == '1') { 
+        Swal.fire({
+          title: 'Success!',
+          text: response.msg,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+          confirmButtonColor: '#10b981',
+          cancelButtonColor: '#ef4444',
+          reverseButtons: true,
+          footer: '<span style="color:var(--navy); font-weight:600;">Would you like to create an account for faster bookings?</span>'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "{% url 'login' %}";
+          } else {
+            location.reload();
+          }
+        });
+      } else { 
+        Swal.fire({title: 'Error', text: response.msg, icon: 'error'}); 
+      }
     },
-    error: function () { $(_this).prop("disabled", false).html(`Get Contact Details`); Swal.fire({ title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error' }); }
+    error: function() { 
+      $(_this).prop("disabled", false).html(`Schedule Visit`); 
+      Swal.fire({title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error'}); 
+    }
   });
 }
 
-/* ── SHARE / WISHLIST (unchanged) ── */
+/* ── MOBILE CONTACT SHEET ── */
+function isSheetLayout(){ return window.matchMedia('(max-width:1024px)').matches; }
+function openContactSheet(){
+  document.getElementById('contactSidebar')?.classList.add('sheet-open');
+  document.getElementById('sheetBackdrop')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('enquiry_name')?.focus({preventScroll:true}), 320);
+}
+function closeContactSheet(){
+  document.getElementById('contactSidebar')?.classList.remove('sheet-open');
+  document.getElementById('sheetBackdrop')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function goToEnquiry(){
+  if (isSheetLayout()) openContactSheet();
+  else document.getElementById('enquiryForm')?.scrollIntoView({behavior:'smooth'});
+}
+window.addEventListener('resize', function(){ if (!isSheetLayout()) closeContactSheet(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeContactSheet(); });
+
+/* ── SHARE & WISHLIST ── */
 function toggleSharePopover(e) {
   e.stopPropagation();
   const pop = document.getElementById('sharePopover');
@@ -1315,33 +1598,31 @@ function openShareWindow(el, network) {
 function copyPropertyLink(btn) {
   navigator.clipboard.writeText(window.location.href).then(() => {
     const original = btn.innerHTML;
-    btn.innerHTML = '<span class="share-icon-circle" style="color:#16805b;"><i class="fas fa-check"></i></span> Copied!';
+    btn.innerHTML = '<span class="share-icon-circle" style="color:#10b981;"><i class="fas fa-check"></i></span> Copied!';
     setTimeout(() => { btn.innerHTML = original; }, 1500);
     document.getElementById('sharePopover').classList.remove('open');
   });
 }
-
-
 function toggleWishlist(btn) {
   $.ajax({
-      type: "POST",
-      url: "{% url 'Wishlist_Ajax' %}",
-      data: {
-          property_id: "{{ original.id|default:p.id }}",
-          listing_type: "{{ listing_type }}",
-          category: "{{ category }}",
-          csrfmiddlewaretoken: "{{ csrf_token }}"
-      },
-      success: function (response) {
-          if (response.status === "1") {
-              btn.classList.toggle('wished', response.action === 'added');
-              const icon = btn.querySelector('i');
-              icon.classList.toggle('far', response.action !== 'added');
-              icon.classList.toggle('fas', response.action === 'added');
-          } else {
-              Swal.fire({ icon: 'error', title: 'Error', text: response.msg });
-          }
+    type: "POST",
+    url: "{% url 'Wishlist_Ajax' %}",
+    data: {
+      property_id: "{{ original.id|default:p.id }}",
+      listing_type: "{{ listing_type }}",
+      category: "{{ category }}",
+      csrfmiddlewaretoken: "{{ csrf_token }}"
+    },
+    success: function (response) {
+      if (response.status === "1") {
+        btn.classList.toggle('wished', response.action === 'added');
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('far', response.action !== 'added');
+        icon.classList.toggle('fas', response.action === 'added');
+      } else {
+        Swal.fire({ icon: 'error', title: 'Error', text: response.msg });
       }
+    }
   });
 }
 document.addEventListener('click', function (e) {
@@ -1349,7 +1630,7 @@ document.addEventListener('click', function (e) {
   if (wrap && !wrap.contains(e.target)) { document.getElementById('sharePopover')?.classList.remove('open'); }
 });
 
-/* ── MEDIA VIEWER (unchanged logic) ── */
+/* ── MEDIA VIEWER ── */
 let currentViewerIndex = 0;
 let visibleSlides = [];
 function initViewerSlides(filter = 'all') {
@@ -1406,14 +1687,14 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-/* ── PRICE FORMAT (unchanged) ── */
+/* ── PRICE FORMAT ── */
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('.price-format').forEach(el => {
     let val = el.innerText.replace(/,/g, '').trim();
     let num = parseFloat(val);
     if (!isNaN(num) && num > 0) {
-      if (num >= 10000000) { let cr = (num / 10000000).toFixed(2); if (cr.endsWith('.00')) cr = cr.slice(0, -2) + '0'; el.innerText = cr + " Cr"; }
-      else if (num >= 100000) { let lac = (num / 100000).toFixed(2); if (lac.endsWith('.00')) lac = lac.replace('.00', ''); el.innerText = lac + " Lac"; }
+      if (num >= 10000000) { let cr = (num / 10000000).toFixed(2); if (cr.endsWith('.00')) cr = cr.slice(0, -2); el.innerText = cr + " Cr"; }
+      else if (num >= 100000) { let lac = (num / 100000).toFixed(2); if (lac.endsWith('.00')) lac = lac.slice(0, -2); el.innerText = lac + " Lac"; }
       else { el.innerText = new Intl.NumberFormat('en-IN').format(num); }
     }
   });
@@ -1429,7 +1710,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const seriesData = {{ price_trend.trend_series|default:"[]"|safe }};
     new Chart(ctx, {
       type: 'line',
-      data: { labels: seriesData.map(d => d.month), datasets: [{ label: '{{ p.locality }}', data: seriesData.map(d => d.rate), borderColor: '#c8a43b', backgroundColor: 'rgba(200,164,59,0.08)', tension: 0.35, fill: true, pointRadius: 2 }] },
+      data: { labels: seriesData.map(d => d.month), datasets: [{ label: '{{ p.locality }}', data: seriesData.map(d => d.rate), borderColor: '#cba243', backgroundColor: 'rgba(203,162,67,0.08)', tension: 0.35, fill: true, pointRadius: 2 }] },
       options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '₹' + v } } } }
     });
   };
@@ -1437,28 +1718,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 {% endif %}
 
-
-
 function toggleDescription() {
   const body = document.getElementById('descBody');
   const overlay = document.getElementById('descOverlay');
-  
-  if (body.style.maxHeight === '220px') {
-    // Expand
-    body.style.maxHeight = 'none';
-    overlay.style.background = 'transparent';
+  if (body.classList.contains('desc-collapsed-state')) {
+    body.classList.remove('desc-collapsed-state');
     overlay.style.position = 'relative';
     overlay.style.height = 'auto';
-    overlay.style.paddingTop = '16px';
-    overlay.innerHTML = '<button class="btn-read-more" onclick="toggleDescription()">Read Less <i class="fas fa-chevron-up"></i></button>';
+    overlay.style.background = 'transparent';
+    overlay.innerHTML = '<button type="button" class="btn-toggle-read" onclick="toggleDescription()">Show Less <i class="fas fa-chevron-up"></i></button>';
   } else {
-    // Collapse
-    body.style.maxHeight = '220px';
-    overlay.style.background = 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1) 80%)';
+    body.classList.add('desc-collapsed-state');
     overlay.style.position = 'absolute';
-    overlay.style.height = '90px';
-    overlay.style.paddingTop = '0';
-    overlay.innerHTML = '<button class="btn-read-more" onclick="toggleDescription()">Read Full Description <i class="fas fa-chevron-down"></i></button>';
+    overlay.style.height = '60px';
+    overlay.style.background = 'linear-gradient(to bottom, rgba(255,255,255,0), #fff)';
+    overlay.innerHTML = '<button type="button" class="btn-toggle-read" onclick="toggleDescription()">Read Full Description <i class="fas fa-chevron-down"></i></button>';
   }
 }
 </script>

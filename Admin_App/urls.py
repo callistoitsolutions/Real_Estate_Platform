@@ -212,7 +212,7 @@ urlpatterns = [
      ############# urls for rental property list ########################
 
     # path('residential_list',views.residential_list,name="residential_list"),
-     path('commercial_list',views.commercial_list,name="commercial_list"),
+    # path('commercial_list',views.commercial_list,name="commercial_list"),
       
      path('pg_list',views.pg_list,name="pg_list"),
 
@@ -608,7 +608,7 @@ urlpatterns = [
     path('addons/add/', views.addon_create, name='addon_create'),
     
 
-################## START URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
+################## START URL SECTION OF RENTAL RESIDENTIAL LISTING ###################
 
     path('residential_list/', views.rental_list, name='residential_list'),
 
@@ -617,6 +617,7 @@ urlpatterns = [
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
 
     path('rental/residential/edit/<str:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
+    path('ajax/lookup-pincode/', views.ajax_lookup_pincode, name='ajax_lookup_pincode'),
 
     ############ urls to get user details according to listing by ###############
 
@@ -666,7 +667,7 @@ urlpatterns = [
    ################## END URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
 
 
-#########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############################
+#########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############
    
     path('Admin_App/commercial/import-excel/', views.import_commercial_rental_excel, name='import_commercial_rental_excel'),
     path('Admin_App/commercial/download-template/', views.download_commercial_rental12_template, name='download_commercial_rental12__template'),

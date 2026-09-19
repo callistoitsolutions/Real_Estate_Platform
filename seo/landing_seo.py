@@ -111,7 +111,7 @@ CATEGORY_CONFIG = {
         "city_field": "city", "locality_field": "village",
         "price_field": "selling_price", "pk_field": "id",
         "title_field": "property_title",
-        "url_listing_type": "sale", "url_category": "agriculture",
+        "url_listing_type": "sale", "url_category": "agricultural",
     },
     "residential_plot_resale": {
         "model": "ResidentialPlotResaleProperty",
@@ -160,6 +160,191 @@ OWNER_CATEGORY_CHOICES = [
 ]
 
 
+
+
+
+
+
+
+
+
+# =========================================================
+# SEARCH INTENT PARSER
+# Reads a free-text query (from a search box, or a Google
+# referral query string) and extracts every signal a real
+# property portal uses to route a searcher correctly —
+# not just budget, the full intent picture.
+# =========================================================
+
+import re
+
+RENT_KEYWORDS = {"rent", "rental", "lease", "on rent", "for rent", "pg", "hostel", "coliving", "co-living"}
+SALE_KEYWORDS = {"sale", "buy", "purchase", "resale", "for sale", "investment"}
+
+CATEGORY_KEYWORDS = {
+    "residential": {"flat", "apartment", "house", "home", "bhk", "villa", "residential"},
+    "commercial": {"office", "shop", "showroom", "commercial", "workspace", "retail"},
+    "pg": {"pg", "hostel", "coliving", "co-living", "paying guest"},
+    "plot": {"plot", "land", "site"},
+    "industrial": {"industrial", "warehouse", "factory", "godown"},
+    "agricultural": {"agricultural", "farm", "farmland", "agriculture"},
+}
+
+FURNISHING_KEYWORDS = {
+    "furnished": "Furnished",
+    "semi furnished": "Semi Furnished",
+    "semi-furnished": "Semi Furnished",
+    "unfurnished": "Unfurnished",
+}
+
+NO_BROKERAGE_PHRASES = {"no brokerage", "without brokerage", "zero brokerage", "brokerage free", "direct owner"}
+
+POSSESSION_KEYWORDS = {
+    "ready to move": "Ready to Move",
+    "immediate possession": "Immediate",
+    "under construction": "Under Construction",
+    "new launch": "New Launch",
+}
+
+# Multiplier words — "k"/"thousand" for rent-scale numbers,
+# "lakh"/"lac"/"l" and "cr"/"crore" for sale-scale numbers
+UNIT_MULTIPLIERS = [
+    (r"crore|cr\b", 10000000),
+    (r"lakh|lac\b|\bl\b", 100000),
+    (r"thousand|k\b", 1000),
+]
+
+# Above this monthly figure, a bare number is almost certainly
+# a SALE price, not a rent figure (nobody pays ₹2L/month rent
+# for the property types this platform lists)
+RENT_VS_SALE_THRESHOLD = 200000
+
+
+def _extract_amount(text_chunk):
+    """Turns '20k' / '20,000' / '1.5 lakh' / '2 cr' into a raw number."""
+    text_chunk = text_chunk.strip().lower().replace(",", "")
+    num_match = re.search(r"(\d+(?:\.\d+)?)", text_chunk)
+    if not num_match:
+        return None
+    value = float(num_match.group(1))
+    for pattern, multiplier in UNIT_MULTIPLIERS:
+        if re.search(pattern, text_chunk):
+            return int(value * multiplier)
+    return int(value)
+
+
+def parse_search_intent(query):
+    """
+    Returns a dict of every signal detected in a free-text search
+    query. City/locality are NOT resolved here (that needs a DB
+    lookup against real data) — the caller resolves those against
+    LocalityPriceTrend / known cities.
+    """
+    q = (query or "").strip().lower()
+
+    result = {
+        "raw_query": query,
+        "listing_type": None,       # "rent" / "sale"
+        "category_hint": None,      # "residential" / "commercial" / "pg" / "plot" / "industrial" / "agricultural"
+        "bhk": None,
+        "min_price": None,
+        "max_price": None,
+        "furnishing": None,
+        "no_brokerage": False,
+        "possession": None,
+        "confidence": "low",
+    }
+
+    # ---- transaction type: explicit keywords first ----
+    if any(kw in q for kw in RENT_KEYWORDS):
+        result["listing_type"] = "rent"
+    elif any(kw in q for kw in SALE_KEYWORDS):
+        result["listing_type"] = "sale"
+
+    # ---- category ----
+    for cat, keywords in CATEGORY_KEYWORDS.items():
+        if any(kw in q for kw in keywords):
+            result["category_hint"] = cat
+            break
+
+    # PG queries are always rent, regardless of anything else typed
+    if result["category_hint"] == "pg":
+        result["listing_type"] = "rent"
+
+    # ---- BHK ----
+    bhk_match = re.search(r"(\d)\s*-?\s*bhk", q)
+    if bhk_match:
+        result["bhk"] = f"{bhk_match.group(1)} BHK"
+
+    # ---- budget: "under/below/less than X", "above/over X", "between X and Y" ----
+    between_match = re.search(
+        r"between\s+([\d.,]+\s*(?:k|thousand|lakh|lac|l|cr|crore)?)\s+(?:and|to|-)\s+([\d.,]+\s*(?:k|thousand|lakh|lac|l|cr|crore)?)",
+        q,
+    )
+    under_match = re.search(r"(?:under|below|less than|upto|up to|within)\s+([\d.,]+\s*(?:k|thousand|lakh|lac|l|cr|crore)?)", q)
+    above_match = re.search(r"(?:above|over|more than)\s+([\d.,]+\s*(?:k|thousand|lakh|lac|l|cr|crore)?)", q)
+
+    if between_match:
+        result["min_price"] = _extract_amount(between_match.group(1))
+        result["max_price"] = _extract_amount(between_match.group(2))
+    elif under_match:
+        result["max_price"] = _extract_amount(under_match.group(1))
+    elif above_match:
+        result["min_price"] = _extract_amount(above_match.group(1))
+
+    # ---- if no explicit rent/sale keyword, infer from budget magnitude ----
+    # (a monthly-scale number strongly implies rent; nobody types a
+    # sale-price search without "buy"/"sale" somewhere in the query)
+    if not result["listing_type"] and result["max_price"]:
+        result["listing_type"] = "rent" if result["max_price"] <= RENT_VS_SALE_THRESHOLD else "sale"
+        result["confidence"] = "medium"  # inferred, not explicit
+    elif result["listing_type"]:
+        result["confidence"] = "high"    # explicit keyword found
+
+    # ---- furnishing ----
+    for phrase, label in FURNISHING_KEYWORDS.items():
+        if phrase in q:
+            result["furnishing"] = label
+            break
+
+    # ---- no brokerage ----
+    if any(phrase in q for phrase in NO_BROKERAGE_PHRASES):
+        result["no_brokerage"] = True
+
+    # ---- possession ----
+    for phrase, label in POSSESSION_KEYWORDS.items():
+        if phrase in q:
+            result["possession"] = label
+            break
+
+    return result
+
+
+def resolve_page_type(intent):
+    """Maps parsed intent (listing_type + category_hint) to the
+    exact page_type key CATEGORY_CONFIG already uses."""
+    listing_type = intent.get("listing_type") or "rent"
+    category = intent.get("category_hint") or "residential"
+
+    mapping = {
+        ("rent", "residential"): "rental_residential",
+        ("rent", "commercial"): "commercial_rental",
+        ("rent", "pg"): "pg_coliving",
+        ("sale", "residential"): "resale_residential",
+        ("sale", "commercial"): "commercial_resale",
+        ("sale", "plot"): "residential_plot_resale",
+        ("sale", "industrial"): "industrial_sale",
+        ("sale", "agricultural"): "agriculture_sale",
+    }
+    return mapping.get((listing_type, category), "rental_residential")
+
+
+
+
+
+
+
+
 def get_model(page_type):
     cfg = CATEGORY_CONFIG.get(page_type)
     if not cfg:
@@ -174,7 +359,8 @@ def get_model(page_type):
 # ELIGIBILITY ENGINE + MATCHING PROPERTIES QUERY
 # =========================================================
 
-def get_matching_properties(page_type, city, locality=None, bhk=None, limit=24):
+def get_matching_properties(page_type, city, locality=None, bhk=None, limit=24,
+                             max_price=None, min_price=None, furnishing=None):
     """
     Returns (queryset_count, list_of_serialized_property_dicts).
     This IS the eligibility check — call this before deciding
@@ -198,6 +384,16 @@ def get_matching_properties(page_type, city, locality=None, bhk=None, limit=24):
 
     if bhk and cfg.get("bhk_field") and cfg["bhk_field"] in model_field_names:
         qs = qs.filter(**{f"{cfg['bhk_field']}__iexact": bhk})
+
+    price_field = cfg.get("price_field")
+    if price_field and price_field in model_field_names:
+        if max_price:
+            qs = qs.filter(**{f"{price_field}__lte": max_price})
+        if min_price:
+            qs = qs.filter(**{f"{price_field}__gte": min_price})
+
+    if furnishing and "furnishing_status" in model_field_names:
+        qs = qs.filter(furnishing_status__icontains=furnishing)
 
     # status filtering (same pattern as Main_App/sitemaps.py)
     results = []
@@ -249,7 +445,7 @@ def generate_location_category_seo(page_type, city, locality=None, bhk=None, pro
     title = build_location_category_title(page_type, city, locality, bhk)
     description = seo_limit(
         f"Browse {property_count}+ verified {cfg['label'].lower()} in {place}. "
-        f"Compare prices, photos and amenities. Enquire directly with owners/agents on EstateFlow."
+        f"Compare prices, photos and amenities. Enquire directly with owners/agents on KANISHKAIMPERIA."
     )
     keyword = f"{cfg['label'].lower()} in {place}"
 
@@ -299,10 +495,10 @@ def generate_location_category_seo(page_type, city, locality=None, bhk=None, pro
 
 def generate_owner_listing_seo(city, locality=None):
     place = f"{locality}, {city}" if locality else city
-    title = f"List Your Property in {place} | EstateFlow"
+    title = f"List Your Property in {place} | KANISHKAIMPERIA"
     description = seo_limit(
         f"List your flat, PG, plot, commercial or agricultural property for rent or sale "
-        f"in {place} for free on EstateFlow. Reach verified tenants and buyers directly."
+        f"in {place} for free on KANISHKAIMPERIA. Reach verified tenants and buyers directly."
     )
     keyword = f"list property in {place}"
 
@@ -320,7 +516,7 @@ def generate_owner_listing_seo(city, locality=None):
         "name": title,
         "description": description,
         "areaServed": place,
-        "provider": {"@type": "Organization", "name": "EstateFlow"},
+        "provider": {"@type": "Organization", "name": "KANISHKAIMPERIA"},
     }
 
     LocationSEO.objects.update_or_create(

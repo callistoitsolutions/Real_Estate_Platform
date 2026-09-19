@@ -16,6 +16,27 @@ urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
     
     path('login', views.login_view, name='login'),
+
+    ############ urls for forgot password page ###########################
+
+    path('Forgot_Password', views.Forgot_Password, name='Forgot_Password'),
+
+    ######### urls for check email already exists or not for forgot ######################
+
+    path('Check_Email_Forgot_Api', views.Check_Email_Forgot_Api, name='Check_Email_Forgot_Api'),
+
+    ######### urls for send otp for forgot password ##############################
+
+    path('Send_Otp_Forgot_Api', views.Send_Otp_Forgot_Api, name='Send_Otp_Forgot_Api'),
+
+    ######### urls for verify otp for forgot password ####################
+
+    path('Verify_Otp_Forgot_Api', views.Verify_Otp_Forgot_Api, name='Verify_Otp_Forgot_Api'),
+
+    ########## urls for update password for forgot password ###############
+    
+    path('Update_Pass_Forgot_Api', views.Update_Pass_Forgot_Api, name='Update_Pass_Forgot_Api'),
+
     path('dashboard/', views.dashboard_view, name='dashboard12'),
   
 
@@ -120,10 +141,10 @@ urlpatterns = [
     
     
     # 1. SEO-friendly URL (with slug)
-    path('listing/<str:listing_type>/<str:category>/<str:slug>/<str:pk>/', views.property_detail_view, name='property_detail'),
+    path('listins/<str:listing_type>/<str:category>/<str:slug>/<str:pk>/', views.property_detail_view, name='property_detail'),
 
 # 2. Legacy fallback (so old links without slug still work)
-    path('listing/<str:listing_type>/<str:category>/<str:pk>/', views.property_detail_view, name='property_detail_legacy'),
+    path('listings/<str:listing_type>/<str:category>/<str:pk>/', views.property_detail_view, name='property_detail_legacy'),
 
     # urls.py
     path('api/track-interaction/', views.track_interaction, name='track_interaction'),

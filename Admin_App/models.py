@@ -116,55 +116,80 @@ class HeroSection(models.Model):
 
 
 
+
 class HeaderSettings(models.Model):
     logo = models.ImageField(
         upload_to="site/header/",
         blank=True,
         null=True
     )
-
     logo_alt = models.CharField(
         max_length=150,
-        default="EstateFlow"
+        default="KANISHKAIMPERIA"
     )
-
     logo_width = models.PositiveIntegerField(
         default=180
     )
-
+    logo_height = models.PositiveIntegerField(
+        default=80
+    )
+    logo_position = models.CharField(
+        max_length=20,
+        default="left"
+    )
     transparent_header = models.BooleanField(
         default=False
     )
-
     header_background = models.CharField(
         max_length=100,
         default="#ffffff"
     )
-
     header_text_color = models.CharField(
         max_length=100,
         default="#16233A"
     )
-
+    menu_text_color = models.CharField(
+        max_length=20,
+        default="#ffffff"
+    )
+    menu_hover_color = models.CharField(
+        max_length=20,
+        default="#d4af37"
+    )
     sticky_header = models.BooleanField(
         default=True
     )
 
+    # ===== NEW: Header Buttons =====
+    primary_btn_text = models.CharField(max_length=100, default="Post Property FREE")
+    primary_btn_url = models.CharField(max_length=255, blank=True, default="")
+    primary_btn_bg = models.CharField(max_length=20, default="transparent")
+    primary_btn_text_color = models.CharField(max_length=20, default="#ffffff")
+    show_primary_btn = models.BooleanField(default=True)
+
+    secondary_btn_text = models.CharField(max_length=100, default="Login")
+    secondary_btn_url = models.CharField(max_length=255, blank=True, default="")
+    secondary_btn_color = models.CharField(max_length=20, default="#ffffff")
+    show_secondary_btn = models.BooleanField(default=True)
+
+    # ===== NEW: Menu Highlight Badge =====
+    badge_menu_label = models.CharField(max_length=100, blank=True, default="")
+    badge_text = models.CharField(max_length=30, blank=True, default="NEW")
+    badge_color = models.CharField(max_length=20, default="#c9a227")
+    show_badge = models.BooleanField(default=False)
+
     is_active = models.BooleanField(
         default=True
     )
-
     updated_at = models.DateTimeField(
         auto_now=True
     )
 
     def save(self, *args, **kwargs):
-
         if self.is_active:
             HeaderSettings.objects.exclude(
                 pk=self.pk
             ).update(is_active=False)
-
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -206,7 +231,7 @@ class Blog(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES,
                                default="published")                                # name="status"
     author = models.CharField(max_length=100, null=True, blank=True,
-                               default="PropCRM Team")                             # name="author"
+                               default="KANISHKAIMPERIA Team")                             # name="author"
     published_date = models.DateField(null=True, blank=True)                       # name="published_date"
     short_description = models.CharField(max_length=180, null=True, blank=True)    # name="short_description"
     featured_image = models.ImageField(upload_to="blog_images/", null=True, blank=True)  # name="featured_image"
@@ -980,8 +1005,8 @@ class RentalResidentialProperty(models.Model):
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     # =====================================================
     # BROKERAGE LABEL — computed, never stored.
@@ -989,7 +1014,7 @@ class RentalResidentialProperty(models.Model):
     # =====================================================
 
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Service Fee",
         "landlord": "Tenant Service Fee",
         "agent": "Brokerage",
@@ -1208,39 +1233,13 @@ class RentalResidentialProperty(models.Model):
 
     def save(self, *args, **kwargs):
 
-        title_parts = []
-
-        if self.furnishing_status:
-            title_parts.append(self.furnishing_status)
-
-        if self.property_type:
-            title_parts.append(self.property_type)
-        else:
-            title_parts.append("Property")
-
-        if self.renting_option:
-            title_parts.append(f"({self.renting_option})")
-
-        title_parts.append("for Rent")
-
-        # property_no is deliberately NOT included — internal only.
-
-        location = ""
-        if self.building_name:
-            location = f"in {self.building_name}"
-        if self.locality_area:
-            location = f"{location}, {self.locality_area}" if location else f"in {self.locality_area}"
+        title_parts = [self.bhk_type or "", self.property_type or "Property", "for Rent in"]
+        location = self.locality_area or ""
         if self.city:
-            location = f"{location}, {self.city}" if location else f"in {self.city}"
-        if location:
-            title_parts.append(location)
+            location = f"{location}, {self.city}" if location else self.city
+        title_parts.append(location)
 
-        if self.built_up_area:
-            title_parts.append(
-            f"({self.format_area(self.built_up_area)} sq.ft.)"
-    )
-
-        self.property_title = " ".join(title_parts).strip()[:255]
+        self.property_title = " ".join(filter(bool, title_parts)).strip()[:255]
 
            
 
@@ -1642,11 +1641,11 @@ class CommercialRentalProperty(models.Model):
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Service Fee",
         "landlord": "Tenant Service Fee",
         "agent": "Brokerage",
@@ -1812,11 +1811,7 @@ class CommercialRentalProperty(models.Model):
         area_str = f"({self.format_area(self.builtup_area)} sq.ft.)" if self.builtup_area else ""
 
         # Auto-generate title without skipping
-        title_parts = [p_type, "for Rent"]
-        if b_name: title_parts.append(b_name)
-        if loc or city_name: title_parts.append(f"{loc}{city_name}".strip())
-        if area_str: title_parts.append(area_str)
-        self.property_title = " ".join(title_parts).strip()[:255]
+        self.property_title = f"{p_type} for Rent in {loc}{city_name}".strip()[:255]
 
         # Enforce Backend Calculations & Descriptions
         self.calculate_move_in_cost()
@@ -2141,14 +2136,14 @@ class PGColivingProperty(models.Model):
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    listing_status = models.CharField(max_length=150, blank=True, null=True)
-    approval_status = models.CharField(max_length=150, blank=True, null=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True,default="Draft")
+    approval_status = models.CharField(max_length=150, blank=True, null=True,default="Pending")
 
     # ═══════════════════════════════════════════════════════════════════════
     #  BROKERAGE LOGIC
     # ═══════════════════════════════════════════════════════════════════════
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Service Fee",
         "landlord": "Tenant Service Fee",
         "agent": "Brokerage",
@@ -2307,7 +2302,7 @@ class PGColivingProperty(models.Model):
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = " ".join(filter(bool, [f"Premium {gender} PG", b_name, loc + city_name]))[:255]
+        self.property_title = f"{gender} PG for Rent in {loc}{city_name}".strip()[:255]
 
         # Enforce Backend Calculations & Descriptions
         self.calculate_move_in_cost()
@@ -2519,9 +2514,6 @@ class PGColivingActivityLog(models.Model):
 
 
 ############### Models Starts for Resale Resindential  Property  model ############################ 
-
-
-
 
 
 # Helper function to generate the custom primary key
@@ -2801,15 +2793,12 @@ class ResaleResidentialProperty(models.Model):
                 pass
 
         # 2. Automated Title Generation
-        if not self.property_title:
-            bhk_string = str(self.bhk).upper() if self.bhk else ""
-            type_string = str(self.property_type).capitalize() if self.property_type else "Property"
-            project_context = f" in {self.building_name}" if self.building_name else ""
-            location_context = f" at {self.locality}" if self.locality else ""
-            city_context = f", {self.city}" if self.city else ""
-            
-            constructed_title = f"Spacious {bhk_string} {type_string}{project_context}{location_context}{city_context}"
-            self.property_title = constructed_title.strip()
+                # 2. Automated Title Generation — always regenerates, not just on create
+        bhk_string = str(self.bhk).upper() if self.bhk else ""
+        type_string = str(self.property_type).capitalize() if self.property_type else "Property"
+        location_context = f" in {self.locality}" if self.locality else ""
+        city_context = f", {self.city}" if self.city else ""
+        self.property_title = f"{bhk_string} {type_string} for Sale{location_context}{city_context}".strip()
 
         # 3. Trigger Auto Description Generation BEFORE saving
         self.generate_auto_descriptions()
@@ -3274,15 +3263,11 @@ class CommercialResaleProperty(models.Model):
                 pass
 
         # 2. Auto-generate title if not already set
-        if not self.property_title:
-            type_lbl = self.property_type.replace('_', ' ').title() if self.property_type else "Commercial"
-            area_lbl = f"{int(float(self.builtup_area))} Sqft" if self.builtup_area else ""
-            building_ctx = f" in {self.building_name}" if self.building_name else ""
-            locality_ctx = f" at {self.locality}, {self.city}" if self.locality and self.city else ""
-
-            constructed_title = f"Premium {area_lbl} {type_lbl}{building_ctx}{locality_ctx}"
-            self.property_title = " ".join(constructed_title.split())
-
+                # 2. Auto-generate title — always regenerates, not just on create
+        raw_type = (self.property_type or "").strip().lower()
+        type_lbl = "Commercial" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace('_', ' ').title()
+        locality_ctx = f" in {self.locality}, {self.city}" if self.locality and self.city else ""
+        self.property_title = f"{type_lbl} for Sale{locality_ctx}".strip()
         # 3. Trigger Auto Description Generation BEFORE saving
         self.generate_auto_descriptions()
 
@@ -3592,368 +3577,6 @@ class ResidentialResalePlot(models.Model):
 
 
 
-def generate_resale_unique_property_id():
-    return f"EFPLT-{uuid.uuid4().hex[:8].upper()}"
-
-class PlotSaleProperty(models.Model):
-    plot_property_id = models.CharField(
-        max_length=20,
-        primary_key=True,
-        default=generate_resale_unique_property_id,
-        editable=False
-    )
-    property_title = models.CharField(max_length=255, blank=True, null=True)
-
-    # ── STEP 1: Plot Specs ────────────────────────────────────────
-    plot_title            = models.CharField(max_length=255)
-    plot_area             = models.DecimalField(max_digits=12, decimal_places=2)
-    resale_plot_type      = models.CharField(max_length=100)
-    property_no = models.CharField(max_length=100, blank=True, null=True)
-    plot_road_facing      = models.CharField(max_length=100)
-    corner_plot           = models.CharField(max_length=10, default='no')  # Kept as corner_plot
-   
-    sanctioning_authority = models.CharField(max_length=150, blank=True, null=True)
-    plot_fencing          = models.CharField(max_length=10, default='no')
-
-    # ── STEP 2: Pricing & Legal ───────────────────────────────────
-    plot_price           = models.DecimalField(max_digits=15, decimal_places=2)
-    price_per_sqft       = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    brokerage            = models.CharField(max_length=10, default='No')
-    brokerage_percentage = models.CharField(max_length=50, blank=True, null=True)
-    ownership_type       = models.CharField(max_length=100)
-    loan_on_property     = models.CharField(max_length=10, default='no')  # Kept as loan_on_property
-    plot_loan_amount     = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-
-
-    nearby_facilities = models.TextField(blank=True, null=True)  # Comma-separated list
-    amenities = models.TextField(blank=True, null=True) 
-
-    # ── STEP 3: Media & Certificates ─────────────────────────────
-    encumbrance_cert  = models.FileField(upload_to='plot_docs/certificates/', null=True, blank=True)
-    social_video      = models.FileField(upload_to='plot_docs/videos/', blank=True, null=True)
-
-    # ── STEP 4: Location & Contact ────────────────────────────────
-    plot_city          = models.CharField(max_length=100)
-    plot_locality      = models.CharField(max_length=150)
-    plot_address       = models.TextField()
-
-    property_summary = models.TextField(blank=True, null=True)
-    property_description = models.TextField(blank=True, null=True)
-    user_description = models.TextField(blank=True, null=True)
-
-    plot_owner_name    = models.CharField(max_length=150)
-    plot_owner_contact = models.CharField(max_length=20)
-    plot_owner_email   = models.EmailField()
-    plot_owner_role    = models.CharField(max_length=20, null=True, blank=True)
-
-    # ── Uploader / Audit ─────────────────────────────────────────
-    uploaded_by_name    = models.CharField(max_length=100, blank=True, null=True)
-    uploaded_by_role    = models.CharField(max_length=50, blank=True, null=True)
-    uploaded_by_email   = models.EmailField(blank=True, null=True)
-    uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
-    upload_file_name    = models.CharField(max_length=255, blank=True, null=True)
-
-    listed_by_id = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_name = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_email = models.CharField(max_length=20, blank=True, null=True)
-
-    listed_by_contact = models.CharField(max_length=100, blank=True, null=True)
-
-    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.CharField(max_length=150, blank=True, null=True)
-
-    class Meta:
-        verbose_name        = "Plot Sale Property"
-        verbose_name_plural = "Plot Sale Properties"
-        ordering            = ['-created_at']
-
-    def __str__(self):
-        return f"{self.plot_title or 'Plot'} ({self.plot_property_id})"
-
-    # ── AUTO-FAQ GENERATOR (MODIFIED TO MATCH MODEL PROPERTIES) ──
-    def generate_auto_faqs(self):
-        self.faqs.all().delete()
-        faq_pool = []
-
-        def safe_money(val):
-            try:
-                v = int(float(str(val or 0).replace(",", "").strip()))
-                return f"Rs.{v:,}" if v else None
-            except Exception:
-                return None
-
-        price_str     = safe_money(self.plot_price)
-        loan_str      = safe_money(self.plot_loan_amount)
-        per_sqft_str  = safe_money(self.price_per_sqft)
-
-        # FAQ 1 — Core Specs
-        faq_pool.append({
-            "question": "What is the total plot area, type, and where exactly is it located?",
-            "answer": (
-                f"This is a {self.resale_plot_type or 'residential'} plot spanning {self.plot_area or 'unspecified'} Sqft, "
-                f"located in {self.plot_locality or 'the listed locality'}, {self.plot_city or 'city'}."
-            )
-        })
-
-        # FAQ 2 — Pricing
-        brokerage_text = (
-            f"A brokerage of {self.brokerage_percentage} applies."
-            if str(self.brokerage or '').lower() in ['yes', 'true', '1']
-            else "There is no brokerage applicable for this transaction."
-        )
-        faq_pool.append({
-            "question": "What is the expected price and cost per square foot for this plot?",
-            "answer": (
-                f"The expected sale price is {price_str or 'available on request'}. "
-                + (f"This translates to approximately {per_sqft_str} per Sqft. " if per_sqft_str else "")
-                + brokerage_text
-            )
-        })
-
-        # FAQ 3 — Road Facing & Corner (Fixed reference to corner_plot)
-        corner_text = (
-            "It is a corner plot, offering better road access and higher resale value."
-            if str(self.corner_plot or '').lower() == 'yes'
-            else "This is not a corner plot."
-        )
-        faq_pool.append({
-            "question": "What is the road facing direction and is this a corner plot?",
-            "answer": (
-                f"The plot faces {self.plot_road_facing or 'the main road'}, ensuring good natural light "
-                f"and ventilation for any future construction. {corner_text}"
-            )
-        })
-
-        # FAQ 4 — Fencing & Development Ready
-        faq_pool.append({
-            "question": "Is fencing already done on this plot? Is it ready for immediate construction?",
-            "answer": (
-                "Yes, boundary fencing has already been completed on this plot, making it secure "
-                "and ready for immediate construction without additional perimeter work."
-                if str(self.plot_fencing or '').lower() == 'yes' else
-                "Boundary fencing has not yet been done on this plot. The buyer may need to account "
-                "for fencing costs as part of the initial development plan."
-            )
-        })
-
-        # FAQ 5 — Authority & Ownership (Fixed reference to ownership_type & sanctioning_authority)
-        faq_pool.append({
-            "question": "Who is the sanctioning authority and what is the ownership type of this plot?",
-            "answer": (
-                f"The plot is held under {self.ownership_type or 'standard'} ownership. "
-                + (f"It has been sanctioned and approved by {self.sanctioning_authority}." if self.sanctioning_authority else
-                   "The sanctioning authority details are available on request from the owner.")
-            )
-        })
-
-        # FAQ 6 — Encumbrance Certificate
-        faq_pool.append({
-            "question": "Is an encumbrance certificate available for this plot?",
-            "answer": (
-                "Yes, the encumbrance certificate for this plot is available and can be downloaded "
-                "from the Documents section. This confirms the property is free from any undisclosed "
-                "mortgages or legal claims up to the certified date."
-                if self.encumbrance_cert else
-                "An encumbrance certificate has not been uploaded for this plot at present. Buyers are "
-                "advised to request it from the owner before proceeding with the transaction."
-            )
-        })
-
-        # FAQ 7 — Loan / Mortgage (Fixed reference to loan_on_property)
-        faq_pool.append({
-            "question": "Is there any active loan or mortgage registered against this plot?",
-            "answer": (
-                f"Yes, there is an active loan of {loan_str} registered against this plot. "
-                f"Buyers should verify clearance of this liability during title transfer."
-                if str(self.loan_on_property or '').lower() == 'yes' else
-                "No, there are no active financial loans or mortgages registered against this plot. "
-                "The title is free of any banking encumbrances, enabling clean registration."
-            )
-        })
-
-        # FAQ 8 — Why Buy This Plot (Fixed reference to corner_plot)
-        faq_pool.append({
-            "question": "What makes this plot a good investment opportunity?",
-            "answer": (
-                f"This {self.resale_plot_type or 'residential'} plot in {self.plot_locality or 'a prime locality'}, "
-                f"{self.plot_city or 'city'} offers {self.plot_area or 'ample'} Sqft of land "
-                f"with {self.plot_road_facing or 'good'} road facing. "
-                + ("Being a corner plot adds visibility and access advantage. " if str(self.corner_plot or '').lower() == 'yes' else "")
-                + ("Fencing is already done, reducing upfront development cost. " if str(self.plot_fencing or '').lower() == 'yes' else "")
-                + f"Priced at {price_str or 'a competitive rate'}, it represents strong value in the current market."
-            )
-        })
-
-        PlotSaleFAQ.objects.bulk_create([
-            PlotSaleFAQ(property=self, question=f["question"], answer=f["answer"])
-            for f in faq_pool
-        ])
-
-    # ═══════════════════════════════════════
-    # AUTO DESCRIPTION GENERATOR
-    # ═══════════════════════════════════════
-    def generate_auto_descriptions(self):
-        # Fetch safe fallbacks
-        p_type = str(self.resale_plot_type).replace('_', ' ').title() if self.resale_plot_type else "Plot"
-        loc = str(self.plot_locality).strip() if self.plot_locality else "a prime location"
-        city_str = f", {self.plot_city}" if self.plot_city else ""
-        
-        try: price_val = int(float(str(self.plot_price or 0).strip()))
-        except: price_val = 0
-        
-        try: 
-            area = str(self.plot_area).rstrip('0').rstrip('.') if '.' in str(self.plot_area) else str(self.plot_area)
-        except: 
-            area = "unspecified"
-
-        # -----------------------------------
-        # 1. SUMMARY TEXT (Always Regenerates)
-        # -----------------------------------
-        summary = f"A premium {p_type} is available for sale in {loc}{city_str}. "
-        
-        if area != "unspecified":
-            summary += f"Spanning across an expansive area of {area} sq.ft., "
-            
-        if price_val > 0:
-            summary += f"it is competitively priced at ₹{price_val:,}. "
-            
-        corner_text = "corner " if str(self.corner_plot).lower() == 'yes' else ""
-        summary += f"This {corner_text}plot presents an excellent investment opportunity for immediate construction or long-term capital appreciation."
-        
-        # Overwrite the field
-        self.property_summary = summary.strip()
-
-        # -----------------------------------
-        # 2. LONG DESCRIPTION (Always Regenerates)
-        # -----------------------------------
-        long_desc = f"<p>Secure a prime piece of real estate with this strategically located <strong>{p_type}</strong> in the highly promising neighborhood of <strong>{loc}{city_str}</strong>.</p>"
-
-        if self.plot_title:
-            long_desc += f"<p>Part of the recognized <strong>{self.plot_title}</strong> project, this land parcel ensures a perfect blend of connectivity, accessibility, and high future valuation.</p>"
-
-        # --- Section A: Property Specifications ---
-        long_desc += "<h3>Plot Specifications:</h3><ul>"
-        
-        if area != "unspecified":
-            long_desc += f"<li><strong>Total Area:</strong> Generous land footprint of {area} sq.ft.</li>"
-            
-        if price_val > 0:
-            long_desc += f"<li><strong>Pricing:</strong> Offered at ₹{price_val:,}.</li>"
-            
-        if self.plot_road_facing:
-            long_desc += f"<li><strong>Facing & Orientation:</strong> {self.plot_road_facing.capitalize()}-facing plot, ensuring great natural elements for future architectural planning.</li>"
-            
-        if str(self.corner_plot).lower() == 'yes':
-            long_desc += f"<li><strong>Corner Plot Advantage:</strong> Yes, offering dual road access, better ventilation, and premium aesthetic potential.</li>"
-            
-        if str(self.plot_fencing).lower() == 'yes':
-            long_desc += "<li><strong>Fencing & Boundary:</strong> Boundary fencing is already completed, securing the perimeter and saving upfront development costs.</li>"
-            
-        long_desc += "</ul>"
-
-        # --- Section B: Legal & Ownership Framework ---
-        long_desc += "<h3>Legal & Ownership Clearances:</h3><ul>"
-        
-        if self.ownership_type:
-            long_desc += f"<li><strong>Ownership:</strong> {self.ownership_type.capitalize()} title, ensuring a smooth and clean transfer process.</li>"
-            
-        if self.sanctioning_authority:
-            long_desc += f"<li><strong>Sanctioning Authority:</strong> Officially approved by {self.sanctioning_authority}.</li>"
-            
-        if str(self.loan_on_property).lower() == 'yes' and self.plot_loan_amount:
-            try: loan_val = int(float(str(self.plot_loan_amount or 0).strip()))
-            except: loan_val = 0
-            long_desc += f"<li><strong>Financial Status:</strong> Notes an active loan/mortgage of ₹{loan_val:,} against the property.</li>"
-        else:
-            long_desc += "<li><strong>Financial Status:</strong> Free from active banking or mortgage encumbrances.</li>"
-            
-        if self.encumbrance_cert:
-            long_desc += "<li><strong>Title Verification:</strong> Encumbrance Certificate (EC) is available, verifying the property is free of undisclosed legal claims.</li>"
-            
-        long_desc += "</ul>"
-
-        long_desc += "<p>Don't miss this rare opportunity to acquire premium land. Contact us today to schedule a site visit and review documentation!</p>"
-
-        # Overwrite the field
-        self.property_description = long_desc
-
-    # ═══════════════════════════════════════
-    # SAVE METHOD
-    # ═══════════════════════════════════════
-    def save(self, *args, **kwargs):
-        # 1. Auto-calculate price per sqft (Kept exact backend handling)
-        if self.plot_price and self.plot_area:
-            try:
-                area  = float(self.plot_area)
-                price = float(self.plot_price)
-                if area > 0:
-                    self.price_per_sqft = round(price / area, 2)
-            except (ValueError, TypeError):
-                pass
-
-        # 2. Automated Title Generation
-        if not self.property_title:
-            type_lbl = self.resale_plot_type.replace('_', ' ').title() if self.resale_plot_type else "Plot"
-            try:
-                area_val = float(self.plot_area)
-                area_lbl = f"{int(area_val):,} Sqft" if area_val == int(area_val) else f"{area_val:,} Sqft"
-            except (ValueError, TypeError):
-                area_lbl = ""
-            project_ctx  = f" ({self.plot_title})" if self.plot_title else ""
-            locality_ctx = f" at {self.plot_locality}, {self.plot_city}" if self.plot_locality and self.plot_city else ""
-            self.property_title = " ".join(f"Premium {area_lbl} {type_lbl}{project_ctx}{locality_ctx}".split())
-
-        # ---> Trigger Auto Description Generation BEFORE saving <---
-        self.generate_auto_descriptions()
-
-        # 3. Save Record
-        super().save(*args, **kwargs)
-        
-        # 4. Trigger Auto FAQs
-        self.generate_auto_faqs()
-
- 
-
- 
- 
-# ══════════════════════════════════════════════════════════════════
-#  MODEL 2 — PlotSaleImage
-# ══════════════════════════════════════════════════════════════════
- 
-class PlotSaleImage(models.Model):
-    property    = models.ForeignKey(PlotSaleProperty, on_delete=models.CASCADE, related_name='images')
-    image       = models.ImageField(upload_to='plot_docs/images/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
- 
-    class Meta:
-        ordering = ['uploaded_at']
- 
-    def __str__(self):
-        return f"Image for {self.property.plot_property_id}"
- 
- 
-# ══════════════════════════════════════════════════════════════════
-#  MODEL 3 — PlotSaleFAQ  (NEW)
-#  Auto-populated by generate_auto_faqs() on every save
-# ══════════════════════════════════════════════════════════════════
- 
-class PlotSaleFAQ(models.Model):
-    property = models.ForeignKey(PlotSaleProperty, on_delete=models.CASCADE, related_name='faqs')
-    question = models.CharField(max_length=500)
-    answer   = models.TextField()
- 
-    class Meta:
-        ordering = ['id']
- 
-    def __str__(self):
-        return f"FAQ: {self.question[:60]}"
 
 #############END MODEL SECTION RESALE PLOT LISTING##################
 
@@ -4494,22 +4117,11 @@ class IndustrialResaleProperty(models.Model):
             except (ValueError, TypeError, Decimal.InvalidOperation):
                 pass
 
-        if not self.property_title:
-            type_lbl = (
-                self.property_type.replace('_', ' ').title()
-                if self.property_type else "Industrial Asset"
-            )
-            try:
-                area_val = self.land_area
-                area_lbl = f"{area_val:,} Sqft" if area_val else ""
-            except (ValueError, TypeError):
-                area_lbl = ""
-                
-            locality_ctx = f" in {self.locality}" if self.locality else ""
-            city_ctx = f", {self.city}" if self.city else ""
-            self.property_title = " ".join(
-                f"Industrial {area_lbl} {type_lbl}{locality_ctx}{city_ctx}".split()
-            )
+        raw_type = (self.property_type or "").strip().lower()
+        type_lbl = "Industrial Property" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace('_', ' ').title()
+        locality_ctx = f" in {self.locality}" if self.locality else ""
+        city_ctx = f", {self.city}" if self.city else ""
+        self.property_title = f"{type_lbl} for Sale{locality_ctx}{city_ctx}".strip()
 
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
@@ -4748,15 +4360,16 @@ class AgriculturalResaleProperty(models.Model):
         price_str     = safe_money(self.selling_price)
         loan_str      = safe_money(self.loan_amount)
         tax_str       = safe_money(self.pending_tax_amount)
-        per_acre_str  = safe_money(self.price_per_acre_display)
+        per_acre_str  = safe_money(self.price_per_acre)
 
         # FAQ 1 — Core Land Details
         faq_pool.append({
-            "question": "What is the total land area, property type, and exact location of this agricultural property?",
+            "question": "What is the ownership type, and are there any active legal disputes on this land?",
             "answer": (
-                f"This is a {self.property_type.replace('_',' ').title() if self.property_type else 'agricultural'} "
-                f"land parcel spanning {self.land_area or 'unspecified'} Acres, situated in the village of "
-                f"{self.village or '—'}, Taluka {self.taluka or '—'}, District {self.district or '—'}, {self.state or ''}."
+                f"The land is held under {self.ownership_type or 'standard'} ownership. "
+                + (f"There is an active legal dispute on record: {self.dispute_details}. Buyers must verify status before proceeding."
+                    if str(self.agri_dispute or '').lower() == 'yes' else
+                    "The title is completely clear of any legal disputes or encumbrances.")
             )
         })
 
@@ -4803,11 +4416,12 @@ class AgriculturalResaleProperty(models.Model):
         })
 
         # FAQ 5 — Ownership & Legal
+                # FAQ 5 — Ownership & Legal
         faq_pool.append({
             "question": "What is the ownership type, and are there any active legal disputes on this land?",
             "answer": (
                 f"The land is held under {self.ownership_type or 'standard'} ownership. "
-                + (f"There is an active legal dispute on record: {self.dispute_section}. Buyers must verify status before proceeding."
+                + (f"There is an active legal dispute on record: {self.dispute_details}. Buyers must verify status before proceeding."
                    if str(self.agri_dispute or '').lower() == 'yes' else
                    "The title is completely clear of any legal disputes or encumbrances.")
             )
@@ -4946,7 +4560,7 @@ class AgriculturalResaleProperty(models.Model):
             long_desc += "<li><strong>Occupancy:</strong> Offered with immediate vacant possession.</li>"
 
         if str(self.agri_dispute).lower() == 'yes':
-            long_desc += f"<li><strong>Legal Status:</strong> Active legal dispute noted ({self.dispute_section or 'Pending resolution'}).</li>"
+            long_desc += f"<li><strong>Legal Status:</strong> Active legal dispute noted ({self.dispute_details or 'Pending resolution'}).</li>"
         else:
             long_desc += "<li><strong>Legal Status:</strong> Verified clear agricultural title with no active legal disputes.</li>"
 
@@ -4974,26 +4588,22 @@ class AgriculturalResaleProperty(models.Model):
     # ═══════════════════════════════════════
     def save(self, *args, **kwargs):
         # 1. Auto-generate price per acre values
+                # 1. Auto-generate price per acre values
         if self.selling_price and self.land_area:
             try:
                 area  = float(self.land_area)
                 price = float(self.selling_price)
                 if area > 0:
-                    self.price_per_acre_display = round(price / area, 2)
+                    self.price_per_acre = round(price / area, 2)
             except (ValueError, TypeError):
                 pass
 
         # 2. Auto-generate property_title
-        if not self.property_title:
-            type_lbl = self.property_type.replace('_', ' ').title() if self.property_type else "Land"
-            try:
-                area_val = float(self.land_area)
-                area_lbl = f"{int(area_val)} Acres" if area_val == int(area_val) else f"{area_val} Acres"
-            except (ValueError, TypeError):
-                area_lbl = ""
-            location_ctx = f" in {self.village}, {self.taluka}" if self.village and self.taluka else ""
-            district_ctx = f" ({self.district})" if self.district else ""
-            self.property_title = " ".join(f"{area_lbl} Fertile {type_lbl}{location_ctx}{district_ctx}".split())
+                # 2. Auto-generate property_title — always regenerates
+                # 2. Auto-generate property_title — always regenerates
+        location_ctx = f" in {self.village}" if self.village else ""
+        district_ctx = f", {self.district}" if self.district else ""
+        self.property_title = f"Agricultural Land for Sale{location_ctx}{district_ctx}".strip()
 
         # ---> Trigger Auto Description Generation BEFORE saving <---
         self.generate_auto_descriptions()
@@ -5213,7 +4823,7 @@ class ResidentialPlotResaleProperty(models.Model):
     #  INDUSTRIAL RESALE BROKERAGE LOGIC
     # ═══════════════════════════════════════════════════════════════════════
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Buyer Service Fee",
         "landlord": "Buyer Service Fee",
         "owner": "Buyer Service Fee",
@@ -5286,12 +4896,13 @@ class ResidentialPlotResaleProperty(models.Model):
     #  SAVE OVERRIDE
     # ═══════════════════════════════════════════════════════════════════════
     def save(self, *args, **kwargs):
-        area_lbl = f"{self.plot_area} sq.ft" if self.plot_area else ""
-        p_type = (self.property_type or "Residential Plot").replace("_", " ").title()
+        raw_type = (self.property_type or "").strip().lower()
+        p_type = "Residential Plot" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = " ".join(filter(bool, [area_lbl, p_type, "for Sale in", loc + city_name]))[:255]
+        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
+
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
         self.generate_auto_faqs()
@@ -5899,7 +5510,7 @@ class CommercialPlotResaleProperty(models.Model):
     #  INDUSTRIAL RESALE BROKERAGE LOGIC
     # ═══════════════════════════════════════════════════════════════════════
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Buyer Service Fee",
         "landlord": "Buyer Service Fee",
         "owner": "Buyer Service Fee",
@@ -5971,12 +5582,13 @@ class CommercialPlotResaleProperty(models.Model):
     #  SAVE OVERRIDE
     # ═══════════════════════════════════════════════════════════════════════
     def save(self, *args, **kwargs):
-        area_lbl = f"{self.plot_area} sq.ft" if self.plot_area else ""
-        p_type = (self.property_type or "Commercial Plot").replace("_", " ").title()
+        raw_type = (self.property_type or "").strip().lower()
+        p_type = "Commercial Plot" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = " ".join(filter(bool, [area_lbl, p_type, "for Sale in", loc + city_name]))[:255]
+        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
+
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
         self.generate_auto_faqs()
@@ -6403,7 +6015,7 @@ class IndustrialPlotResaleProperty(models.Model):
     #  INDUSTRIAL RESALE BROKERAGE LOGIC
     # ═══════════════════════════════════════════════════════════════════════
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Buyer Service Fee",
         "landlord": "Buyer Service Fee",
         "owner": "Buyer Service Fee",
@@ -6522,14 +6134,12 @@ class IndustrialPlotResaleProperty(models.Model):
         else:
             self.price_per_sqft = None
 
-        area_clean = self._clean_area()
-        area_lbl = f"{area_clean} sq.m" if area_clean else ""
-        p_type = (self.property_type or "Industrial Plot").replace("_", " ").title()
+        raw_type = (self.property_type or "").strip().lower()
+        p_type = "Industrial Plot" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
-        # Generates clean title (e.g., "1498 sq.m It Park Plot for Sale in ...")
-        self.property_title = " ".join(filter(bool, [area_lbl, p_type, "for Sale in", loc + city_name]))[:255]
+        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
         
         # Forces regeneration of summaries and descriptions with the correct formatting on every save/edit
         self.generate_auto_descriptions()
@@ -6903,7 +6513,7 @@ class AgriculturalPlotResaleProperty(models.Model):
     #  AGRICULTURAL RESALE BROKERAGE LOGIC
     # ═══════════════════════════════════════════════════════════════════════
     BROKERAGE_LABEL_MAP = {
-        "admin": "EstateFlow Service Fee",
+        "admin": "KANISHKAIMPERIA Service Fee",
         "relationship manager": "Buyer Service Fee",
         "landlord": "Buyer Service Fee",
         "owner": "Buyer Service Fee",
@@ -7010,14 +6620,14 @@ class AgriculturalPlotResaleProperty(models.Model):
         else:
             self.price_per_unit = None
 
-        unit = self.agr_area_unit or "acre"
-        area_clean = self._clean_area()
-        area_lbl = f"{area_clean} {unit}" if area_clean else ""
-        p_type = (self.property_type or "Agricultural Land").replace("_", " ").title()
+        raw_type = (self.property_type or "").strip().lower()
+        p_type = "Agricultural Land" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = " ".join(filter(bool, [area_lbl, p_type, "in", loc + city_name]))[:255]
+        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
+
+
         self.generate_auto_descriptions()
 
         # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <

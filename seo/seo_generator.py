@@ -7,12 +7,13 @@ from django.utils.text import slugify
 from seo.models import LocationSEO
 
 
+
 # =========================================================
 # SITE DOMAIN (used to build canonical_url — set SITE_URL in settings.py)
 # =========================================================
 
 def site_url():
-    return getattr(settings, "SITE_URL", "https://estateflow.nedient.co.in").rstrip("/")
+    return getattr(settings, "SITE_URL", "https://www.kanishkaimperia.com").rstrip("/")
 
 
 # =========================================================
@@ -858,7 +859,7 @@ def create_dynamic_seo(instance, page_type):
                 "description": description,
                 "author": {
                     "@type": "Person",
-                    "name": author if author else "PropCRM Team"
+                    "name": author if author else "KANISHKAIMPERIA Team"
                 }
             }
 
@@ -1011,3 +1012,4 @@ def create_dynamic_seo(instance, page_type):
     except Exception as e:
 
         print("SEO ERROR :", str(e))
+        raise

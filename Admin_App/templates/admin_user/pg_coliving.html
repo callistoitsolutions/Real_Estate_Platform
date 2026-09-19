@@ -1934,12 +1934,21 @@ document.getElementById('city').addEventListener('input', function () {
 </script>
                     </div>
                   </div>
+
+
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Locality <span class="required">*</span></label>
-                      <input type="text" class="form-control" id="locality" name="locality" placeholder="e.g., Hinjewadi" required>
+                      <select class="form-select form-control" id="locality_area" required>
+                        <option value="">-- Enter pincode first --</option>
+                      </select>
+                      <input type="text" class="form-control mt-2" name="locality_manual" id="locality_area_manual" placeholder="Enter your locality/area name" style="display:none;">
+                      <input type="hidden" name="locality" id="locality_area_final">
                     </div>
                   </div>
+
+
+
                 </div>
               
                 <div class="form-group mt-2">
@@ -3266,9 +3275,11 @@ document.getElementById('city').addEventListener('input', function () {
     }
   }
 
+  
+
   function validateStep(step) {
     let isValid = true;
-    let firstInvalidField = null; // Variable to track the exact missing field
+    let firstInvalidField = null;
     
     const stepEl = document.getElementById('step' + step);
     if (!stepEl) return true;
@@ -3285,7 +3296,6 @@ document.getElementById('city').addEventListener('input', function () {
         field.classList.add('is-invalid');
         isValid = false;
         
-        // Capture the first empty field for auto-scrolling
         if (!firstInvalidField) {
             if (field.id === 'assigned_to') {
                 document.getElementById('assignedToSearchSelect').classList.add('is-invalid');
@@ -3293,11 +3303,20 @@ document.getElementById('city').addEventListener('input', function () {
             } else {
                 firstInvalidField = field;
             }
-        } else if (field.id === 'assigned_to') {
-            document.getElementById('assignedToSearchSelect').classList.add('is-invalid');
         }
       }
     });
+
+    // NEW: Handle manual locality validation if '__other__' is chosen on Step 1
+    if (step === 1) {
+      const localitySelect = document.getElementById('locality_area');
+      const manualInput = document.getElementById('locality_area_manual');
+      if (localitySelect && localitySelect.value === '__other__' && manualInput && manualInput.value.trim() === '') {
+        isValid = false;
+        manualInput.classList.add('is-invalid');
+        if (!firstInvalidField) firstInvalidField = manualInput;
+      }
+    }
 
     // Special validation for PG Pill Buttons (Boys/Girls/Coliving)
     if (step === 1) {
@@ -3311,7 +3330,6 @@ document.getElementById('city').addEventListener('input', function () {
     }
 
     if (!isValid) {
-      // SCROLL TO MISSING FIELD: Smoothly slides up/down to the exact missing input
       if (firstInvalidField) {
         firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => { 
@@ -3333,6 +3351,11 @@ document.getElementById('city').addEventListener('input', function () {
     if (step === 2) { setCheck('cl-rooms', true); }
     return true;
   }
+
+
+
+
+
   document.querySelectorAll('.pill-btn').forEach(btn => {
     btn.addEventListener('click', function (e) {
       e.preventDefault();
@@ -4359,4 +4382,89 @@ if (document.readyState === "loading") {
     // Run once on load to ensure correct state if "Fixed Amount" is pre-selected
     toggleManualBrokerage();
   });
+
+
+
+// ================= PINCODE LOOKUP API & LOCALITY FALLBACK =================
+document.getElementById('pincode').addEventListener('blur', function () {
+    var pincode = this.value.trim();
+    if (pincode.length !== 6) return;
+
+    fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pincode)
+        .then(res => res.json())
+        .then(data => {
+            var localitySelect = document.getElementById('locality_area');
+            if (!localitySelect) return;
+            localitySelect.innerHTML = '';
+
+            if (!data.success) {
+                Swal.fire({ icon: 'warning', title: 'Invalid Pincode', text: data.error, confirmButtonColor: '#667eea' });
+                document.getElementById('city').value = '';
+                localitySelect.innerHTML = '<option value="">Invalid pincode</option>';
+                return;
+            }
+
+            document.getElementById('city').value = data.city;
+
+            var stateSelect = document.getElementById('state');
+            if (stateSelect) {
+                for (var i = 0; i < stateSelect.options.length; i++) {
+                    if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) {
+                        stateSelect.value = stateSelect.options[i].value;
+                        break;
+                    }
+                }
+            }
+
+            localitySelect.innerHTML = '<option value="">-- Select Locality --</option>';
+            data.localities.forEach(function (loc) {
+                var opt = document.createElement('option');
+                opt.value = loc;
+                opt.textContent = loc;
+                localitySelect.appendChild(opt);
+            });
+            var otherOpt = document.createElement('option');
+            otherOpt.value = '__other__';
+            otherOpt.textContent = '✏️ My locality is not listed (Enter manually)';
+            localitySelect.appendChild(otherOpt);
+
+            syncLocalityFinal();
+        })
+        .catch(function () {
+            Swal.fire({ icon: 'error', title: 'Lookup Failed', text: 'Could not verify pincode.', confirmButtonColor: '#667eea' });
+        });
+});
+
+function syncLocalityFinal() {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var finalInput = document.getElementById('locality_area_final');
+
+    if (!localitySelect || !manualInput || !finalInput) return;
+
+    if (localitySelect.value === '__other__') {
+        manualInput.style.display = 'block';
+        manualInput.required = true;
+        finalInput.value = manualInput.value.trim();
+    } else {
+        manualInput.style.display = 'none';
+        manualInput.required = false;
+        finalInput.value = localitySelect.value;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var pgForm = document.getElementById('pgForm');
+
+    if (localitySelect) localitySelect.addEventListener('change', syncLocalityFinal);
+    if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
+    if (pgForm) pgForm.addEventListener('submit', syncLocalityFinal);
+});
+
+
+
+
+
 </script>

@@ -106,6 +106,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protecti
 from openpyxl.utils import get_column_letter
 from openpyxl.comments import Comment
 from django.db.models import Q
+from CRM_Panel.models import *
 
 
 
@@ -217,7 +218,77 @@ def landlord_dashboard(request):
 
 
 
+############ Views start for enquiries for property landlord ##################
 
+def Property_Enquiry_Landlord(request):
+
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # (Your original logic stays untouched here!)
+    completion_score = calculate_profile_strength(user_obj)
+
+    property_models = [
+        RentalResidentialProperty,
+        PGColivingProperty,
+        CommercialRentalProperty,
+        ResaleResidentialProperty,
+        CommercialResaleProperty,
+        IndustrialResaleProperty,
+        AgriculturalResaleProperty,
+        ResidentialPlotResaleProperty,
+        CommercialPlotResaleProperty,
+        IndustrialPlotResaleProperty,
+        AgriculturalPlotResaleProperty,
+    ]
+
+    # 2. Collect IDs of properties listed by this user
+    matching_property_ids = []
+    for model in property_models:
+        # Use 'listed_by_name' or 'owner_name' depending on your model fields
+        ids = model.objects.filter(listed_by_name=user_obj.user_name).values_list('id', flat=True)
+        matching_property_ids.extend(list(ids))
+
+    # 3. Filter your PropertyEnquiry objects using object_id__in
+    enquiry_obj = PropertyEnquiry.objects.filter(object_id__in=matching_property_ids).order_by('-id')
+
+    enquiry_obj_count = PropertyEnquiry.objects.filter(object_id__in=matching_property_ids).count()
+    
+    rendered = render_to_string("landlord/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count})
+    
+    context = {
+        'user_obj': user_obj,
+        # Pass the object's role so the template behaves normally for the Landlord UI
+        'user_role': user_obj.user_role, 
+        'profile_completion_percentage': completion_score,
+        'property_enquiry_list':rendered    
+    }
+    
+    return render(request, "landlord/Enquiries/enquiries_landlord.html", context)
+
+
+############# Views end for enquiries for property landlord ######################
 
 
 
@@ -5921,17 +5992,15 @@ def Buy_Subscription_Ajax(request):
         payment.save()
         return JsonResponse({"status":"1", "msg" : f"Payment details updated successfully"})
 
-
     
 ############## Views end for ajax for buy subscription ########################
 
 ########### Views end for buy subscription plan for landlord #####################
 
-########### Views start for commercial rental Listing  for landlord #######################
-
-
+########### Views start for commercial rental Listing  for landlord ############
 
 def commercial_landlord(request):
+    
     # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
     admin_id = request.session.get('Admin_id') 

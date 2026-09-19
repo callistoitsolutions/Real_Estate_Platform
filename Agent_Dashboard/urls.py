@@ -20,6 +20,14 @@ urlpatterns = [
     ############ urls for update property enquiry ############################
 
     path('update_enquiry_agent/<int:id>',views.update_enquiry_agent,name="update_enquiry_agent"),
+
+    ############# urls for subscription for boost property for agents ################
+
+    path('Boost_Property_Agent', views.Boost_Property_Agent, name='Boost_Property_Agent'),
+
+    ########## urls for buy plan for agent #######################
+    
+    path('Buy_Plan_Agent/<int:id>', views.Buy_Plan_Agent, name='Buy_Plan_Agent'),
     
    # path('Wallet_Recharge_agent',views.Wallet_Recharge_agent,name="Wallet_Recharge_agent"),
     #path('lead_purchase',views.lead_purchase,name="lead_purchase"),

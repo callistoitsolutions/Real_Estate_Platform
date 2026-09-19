@@ -818,6 +818,9 @@
                                 <button class="btn-action btn-delete" title="Delete Property" onclick="Delete_Property('{{ prop.id }}')">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
+                                <a href="{% url "Boost_Property_Landlord" %}" class="btn-action btn-edit" title="Boost Property" style="background-color:green;">
+                                    <i class="fas fa-rocket"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>

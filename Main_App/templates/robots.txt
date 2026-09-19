@@ -1,8 +1,30 @@
 User-agent: *
 Allow: /
 
+# Internal dashboards / panels for logged-in users only.
+# Nothing here is meant to appear in search results, and most of it
+# sits behind a login anyway -- blocking it just saves Google's
+# crawl budget for pages that actually matter (your property and
+# SEO landing pages).
 Disallow: /admin/
 Disallow: /Adminlogin
+Disallow: /Admin_App/
+Disallow: /Tenant_Panel/
+Disallow: /Landlord_Panel/
+Disallow: /Buyer_Panel/
+Disallow: /CRM_Panel/
+Disallow: /Agent_Dashboard/
+Disallow: /RM_Dashboard/
+Disallow: /Agency_Panel/
+Disallow: /Vendor_Panel/
+Disallow: /oauth/
 Disallow: /api/
 
-Sitemap: https://estateflow.nedient.co.in/sitemap.xml
+# NOTE: /seo/ is intentionally NOT blocked. Despite the name, the
+# "seo" app only contains the public-facing owner-listing and
+# property-search landing pages (/seo/find/..., /seo/list-property/...)
+# -- these are exactly the pages built to be found on Google. The
+# actual internal SEO management tools live under /Admin_App/, which
+# is already blocked above.
+
+Sitemap: https://kanishkaimperia.com/sitemap.xml

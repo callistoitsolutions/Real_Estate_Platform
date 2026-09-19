@@ -76,7 +76,7 @@ a { color: inherit; text-decoration: none; }
 .service-grid-home { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
 @media(max-width:1100px) { .service-grid-home { grid-template-columns: repeat(2,1fr); } }
 @media(max-width:640px) { .service-grid-home { grid-template-columns: 1fr; } }
-.pcard-svc { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: .3s; box-shadow: var(--shadow-1); display: flex; flex-direction: column; }
+.pcard-svc { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; transition: .3s; box-shadow: var(--shadow-1); display: flex; flex-direction: column; text-decoration: none; }
 .pcard-svc:hover { box-shadow: var(--shadow-2); transform: translateY(-6px); border-color: var(--gold); }
 .pc-img-svc { height: 190px; position: relative; overflow: hidden; background: #e7e9ee; display: flex; align-items: center; justify-content: center; }
 .pc-img-svc img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; position: absolute; inset: 0; }
@@ -105,39 +105,11 @@ a { color: inherit; text-decoration: none; }
 .bs-btn { background: var(--navy); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; display: inline-block; transition: .2s; }
 .bs-btn:hover { background: #000; color: #fff; }
 
-
-.service-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.service-card-meta div {
-    font-size: .78rem;
-    font-weight: 700;
-    color: var(--pr2);
-    background: #fbf4de;
-    border: 1px solid #e9d9a8;
-    border-radius: 6px;
-    padding: 6px 9px;
-}
-
-.service-card-meta i {
-    margin-right: 4px;
-}
-
-.service-option-count {
-    font-size: .78rem;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    font-weight: 600;
-}
-
-.service-option-count i {
-    color: var(--pr2);
-    margin-right: 5px;
-}
+.service-card-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.service-card-meta div { font-size: .78rem; font-weight: 700; color: var(--pr2); background: #fbf4de; border: 1px solid #e9d9a8; border-radius: 6px; padding: 6px 9px; }
+.service-card-meta i { margin-right: 4px; }
+.service-option-count { font-size: .78rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 600; }
+.service-option-count i { color: var(--pr2); margin-right: 5px; }
 
 .knowledge-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start; }
 @media(max-width:900px) { .knowledge-grid { grid-template-columns: 1fr; } }
@@ -152,36 +124,29 @@ a { color: inherit; text-decoration: none; }
 .accordion-button:not(.collapsed) { background: #fbf4de; color: var(--pr2); box-shadow: none; }
 .accordion-body { background: white; color: var(--text-body); font-size: .9rem; line-height: 1.7; padding: 0 20px 20px; }
 
-footer { background: var(--navy); color: rgba(255,255,255,.7); margin-top: auto; }
-.footer-newsletter { border-bottom: 1px solid rgba(212,175,55,.14); }
-.footer-newsletter-inner { max-width: 1300px; margin: 0 auto; padding: 24px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.footer-newsletter-inner h3 { font-family: var(--serif); color: #fff; font-size: 1.05rem; font-weight: 800; }
-.footer-newsletter-inner p { font-size: .82rem; color: rgba(255,255,255,.55); margin: 0; }
-.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.08); border: 1px solid rgba(212,175,55,.25); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--gold-light); font-size: .9rem; text-decoration: none; transition: .2s; }
-.footer-social a:hover { background: var(--gold); color: var(--navy); transform: translateY(-2px); }
-.footer-inner { max-width: 1300px; margin: 0 auto; padding: 40px 20px; }
+/* Harmonized 5-Column Footer matching index.html */
+footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid rgba(255,255,255,.08); }
+.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
+.footer-newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 22px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.footer-newsletter-inner h3 { font-family: var(--serif); color: #fff; font-size: 1rem; font-weight: 800; }
+.footer-newsletter-inner p { font-size: .8rem; color: rgba(255,255,255,.5); }
+.footer-social a { width: 34px; height: 34px; background: rgba(255,255,255,.06); border: 1px solid rgba(199,154,85,.25); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--gold2); font-size: .85rem; text-decoration: none; }
+.footer-social a:hover { background: var(--gold); color: #fff; }
+.footer-inner { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-@media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
-@media(max-width:580px) { .footer-grid { grid-template-columns: 1fr; } }
-.fl-brand { font-family: var(--serif); font-size: 1.35rem; font-weight: 800; color: white; margin-bottom: 14px; }
-.fl-desc { font-size: .85rem; line-height: 1.7; margin-bottom: 14px; }
-.fl-title { font-size: .85rem; font-weight: 700; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-.fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: .2s; }
-.fl-link:hover { color: var(--gold-light); padding-left: 4px; }
-.footer-bottom { border-top: 1px solid rgba(212,175,55,.14); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1300px; margin: 0 auto; }
+@media(max-width:900px){ .footer-grid{ grid-template-columns: 1fr 1fr; } }
+@media(max-width:580px){ .footer-grid{ grid-template-columns: 1fr; } }
+.fl-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.fl-brand img { height: 34px; width: auto; }
+.fl-brand span { font-family: var(--serif); font-size: 1.2rem; font-weight: 800; color: #fff; }
+.fl-desc { font-size: .8rem; line-height: 1.7; margin-bottom: 10px; color: rgba(255,255,255,.55); }
+.fl-title { font-size: .78rem; font-weight: 700; color: var(--gold2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.fl-link { display: block; font-size: .8rem; color: rgba(255,255,255,.55); padding: 5px 0; text-decoration: none; }
+.fl-link:hover { color: var(--gold2); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.08); padding: 16px 20px; display: flex; justify-content: space-between; font-size: .75rem; flex-wrap: wrap; gap: 10px; max-width: 1200px; margin: 0 auto; color: rgba(255,255,255,.4); }
 </style>
 </head>
 <body>
-
-<div class="top-util-bar">
-    <div class="top-util-inner">
-        <div class="tu-left"><span><i class="bi bi-geo-alt"></i>Serving Nagpur &amp; 50+ Cities</span></div>
-        <div class="tu-right">
-            <span><i class="bi bi-telephone"></i>+91 90000 00000</span>
-            <a href="#"><i class="bi bi-question-circle"></i>Help &amp; Support</a>
-        </div>
-    </div>
-</div>
 
 {% include 'home_page/header.html' %}
 
@@ -237,57 +202,33 @@ footer { background: var(--navy); color: rgba(255,255,255,.7); margin-top: auto;
             </div>
          
             <div class="pc-body-svc">
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.short_description|truncatewords:20 }}</p>
 
-    <h3>{{ service.title }}</h3>
+                <div class="service-card-meta">
+                    {% if service.price_type == "fixed" and service.price %}
+                        <div><i class="bi bi-currency-rupee"></i> ₹{{ service.price|floatformat:0 }}</div>
+                    {% elif service.price_type == "starting_from" and service.price %}
+                        <div><i class="bi bi-currency-rupee"></i> Starting From ₹{{ service.price|floatformat:0 }}</div>
+                    {% else %}
+                        <div><i class="bi bi-chat-dots"></i> Price on Request</div>
+                    {% endif %}
 
-    <p>
-        {{ service.short_description|truncatewords:20 }}
-    </p>
+                    {% if service.duration %}
+                        <div><i class="bi bi-clock"></i> {{ service.duration }}</div>
+                    {% endif %}
+                </div>
 
-    <!-- Price -->
-    <div class="service-card-meta">
+                {% if service.options.all %}
+                    <div class="service-option-count">
+                        <i class="bi bi-grid"></i> Multiple service options available
+                    </div>
+                {% endif %}
 
-        {% if service.price_type == "fixed" and service.price %}
-            <div>
-                <i class="bi bi-currency-rupee"></i>
-                ₹{{ service.price|floatformat:0 }}
+                <span class="pc-btn-svc">
+                    {{ service.cta_text|default:'Request a Callback' }}
+                </span>
             </div>
-
-        {% elif service.price_type == "starting_from" and service.price %}
-            <div>
-                <i class="bi bi-currency-rupee"></i>
-                Starting From ₹{{ service.price|floatformat:0 }}
-            </div>
-
-        {% else %}
-            <div>
-                <i class="bi bi-chat-dots"></i>
-                Price on Request
-            </div>
-        {% endif %}
-
-        {% if service.duration %}
-            <div>
-                <i class="bi bi-clock"></i>
-                {{ service.duration }}
-            </div>
-        {% endif %}
-
-    </div>
-
-    <!-- Options count -->
-    {% if service.options.all %}
-        <div class="service-option-count">
-            <i class="bi bi-grid"></i>
-            Multiple service options available
-        </div>
-    {% endif %}
-
-    <span class="pc-btn-svc">
-        {{ service.cta_text|default:'Request a Callback' }}
-    </span>
-
-</div>
         </a>
         {% empty %}
         <p style="color:var(--text-muted);grid-column:1/-1;">No services added yet.</p>
@@ -354,10 +295,14 @@ footer { background: var(--navy); color: rgba(255,255,255,.7); margin-top: auto;
     </div>
 </div>
 
+<!-- Harmonized 5-Column Footer matching index.html -->
 <footer>
     <div class="footer-newsletter">
         <div class="footer-newsletter-inner">
-            <div><h3>Stay Updated!</h3><p>Subscribe to get the latest property updates.</p></div>
+            <div>
+                <h3>Stay Updated!</h3>
+                <p>Subscribe to get the latest property updates.</p>
+            </div>
             <div class="footer-social d-flex gap-2">
                 <a href="#"><i class="bi bi-facebook"></i></a>
                 <a href="#"><i class="bi bi-instagram"></i></a>
@@ -369,10 +314,13 @@ footer { background: var(--navy); color: rgba(255,255,255,.7); margin-top: auto;
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
-                <div class="fl-brand">KANISHKAIMPERIA</div>
-                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
-                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
-                <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
+                <div class="fl-brand">
+                    <img src="{% static 'images/kanishka-imperia-logo.png' %}" alt="KANISHKAIMPERIA" onerror="this.style.display='none'">
+                    <span>KANISHKAIMPERIA</span>
+                </div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since </div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 9175791501</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> kanishkaimperia@gmail.com</div>
             </div>
             <div>
                 <div class="fl-title">Services</div>
@@ -397,7 +345,7 @@ footer { background: var(--navy); color: rgba(255,255,255,.7); margin-top: auto;
                 <div class="fl-title">Company</div>
                 <a href="{% url 'blog' %}" class="fl-link">Guides</a>
                 <a href="#faqs" class="fl-link">FAQs</a>
-                <a href="#" class="fl-link">Contact Us</a>
+                <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
             </div>
         </div>
     </div>

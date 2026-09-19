@@ -4,14 +4,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{{ og_title|default:"KANISHKAIMPERIA — Verified Properties & Digital Property Card | Nagpur" }}</title>
+<title>{{ og_title|default:"KANISHKAIMPERIA — Genuine Properties & Digital Property Card | Nagpur" }}</title>
 
-<meta name="description" content="{{ og_description|default:'Verified rental, resale and commercial properties in Nagpur — plus a shareable digital property card. Chat with us directly on WhatsApp.' }}">
+<meta name="description" content="{{ og_description|default:'Rental, resale and commercial properties in Nagpur, checked by our team — plus a shareable digital property card. Chat with us directly on WhatsApp.' }}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="KANISHKAIMPERIA">
-<meta property="og:title" content="{{ og_title|default:'KANISHKAIMPERIA — Verified Properties in Nagpur' }}">
-<meta property="og:description" content="{{ og_description|default:'Browse verified properties or view our digital property card — tap to chat on WhatsApp instantly.' }}">
-<meta property="og:image" content="{{ og_image|default:'https://estateflow.nedient.co.in/static/images/estateflow-share-card.jpg' }}">
+<meta property="og:title" content="{{ og_title|default:'KANISHKAIMPERIA — Real Properties, Real People in Nagpur' }}">
+<meta property="og:description" content="{{ og_description|default:'Browse hand-checked properties or view our digital property card — tap to chat on WhatsApp instantly.' }}">
+
+<meta property="og:image" content="{{ og_image|default:request.scheme|add:'://'|add:request.get_host|add:'/static/images/kanishka-imperia-share-card.jpg' }}">
+
+
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b1730">
@@ -57,38 +60,64 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
+
 body {
     font-family: var(--sans);
     background: #f5f6f8;
-    color:#1a2531;
-    overflow-x:hidden;
+    color: #1a2531;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
 }
 a { text-decoration: none; color: inherit; }
-img { max-width: 100%; }
+img { max-width: 100%; display: block; }
 
 .container-main { width: min(1200px, 92%); margin: 0 auto; }
 .section-wrap { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
 
+
+
 .section-label {
-    color: var(--gold2);
-    font-size: 9px;
-    letter-spacing: 3px;
-    font-weight: 700;
-    margin-bottom: 8px;
+    color: var(--gold2) !important;
+    font-size: 17px !important;
+    letter-spacing: 2px !important;
+    font-weight: 800 !important;
+    margin-bottom: 10px !important;
+    text-transform: uppercase;
 }
+
+
 .section-title {
-   
-     font-family: var(--serif);
-    font-size: clamp(22px, 2.6vw, 30px);
-
-
-    line-height: 1.08;
-    color: #12202c;
-    font-weight: 600;
+    font-family: var(--serif);
+    font-size: clamp(24px, 2.8vw, 34px);
+    line-height: 1.2;
+    color: #0b1730;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+.section-subtitle {
+    font-size: 0.96rem;
+    color: #4a5568;
+    line-height: 1.65;
+    margin-top: 8px;
+    font-weight: 400;
 }
 
-.section-subtitle { font-size: .95rem; color: var(--muted); margin-top: 6px; }
 
+
+.property-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--panel);
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(11,23,48,0.04);
+}
+.property-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--gold);
+    box-shadow: 0 12px 28px rgba(11,23,48,0.1);
+}
 .sec-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:26px; flex-wrap:wrap; gap:12px; }
 .sec-link { font-size:.8rem; font-weight:700; color:var(--gold2); white-space:nowrap; border-bottom:1px solid var(--gold); padding-bottom:3px; }
 .sec-link:hover { color:var(--pr2); }
@@ -143,7 +172,7 @@ img { max-width: 100%; }
     min-height: 200px;
     position: relative;
     background-image: linear-gradient(to right, rgba(11, 23, 48, 0.95) 0%, rgba(11, 23, 48, 0.65) 55%, rgba(11,23,48,.35) 100%),
-                      url('{% static "estateflow-luxury-hero.jpg" %}');
+                      url('{% static "kanishka-imperia-luxury-hero.jpg" %}');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -154,26 +183,35 @@ img { max-width: 100%; }
 }
 
 
-.hero-content { position: relative; z-index: 2; padding: 25px 0 20px; max-width: 620px; }
-.hero-small { color: var(--gold2); font-size: 9px; letter-spacing: 3px; font-weight: 700; margin-bottom: 16px; }
+.hero-content { position: relative; z-index: 2; padding: 35px 0 25px; max-width: 660px; }
+.hero-small { color: var(--gold2); font-size: 11px; letter-spacing: 2.5px; font-weight: 800; margin-bottom: 14px; text-transform: uppercase; }
 .hero-title {
     font-family: var(--serif);
-    font-size: clamp(30px, 3.5vw, 44px);
-    line-height: 1.05;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 20px;
+    font-size: clamp(30px, 3.6vw, 46px);
+    line-height: 1.15;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 18px;
 }
 .hero-title span { color: var(--gold2); display: block; }
+.hero-description { color: rgba(255,255,255,0.92); font-size: 1.05rem; line-height: 1.7; margin-bottom: 26px; max-width: 520px; font-weight: 400; }
 
-.hero-description { color: rgba(255,255,255,.85); font-size: 1.05rem; line-height: 1.7; margin-bottom: 26px; max-width: 480px; }
+.hero-cta-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
 
 .explore-btn {
     display: inline-flex; align-items: center; gap: 18px;
     background: var(--gold2); color: #0b1115; padding: 13px 22px;
     border-radius: 30px; font-size: 11px; font-weight: 800; letter-spacing:.3px;
+    box-shadow: 0 14px 30px rgba(165,129,28,.35);
 }
-.explore-btn:hover { color:#0b1115; filter:brightness(1.05); }
+.explore-btn:hover { color:#0b1115; filter:brightness(1.05); transform: translateY(-1px); }
+.explore-btn-secondary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.08); color: #fff; padding: 13px 22px;
+    border-radius: 30px; font-size: 11px; font-weight: 800; letter-spacing:.3px;
+    border: 1px solid rgba(255,255,255,.35);
+}
+.explore-btn-secondary:hover { background: rgba(255,255,255,.16); color:#fff; }
 .hero-stats { display:flex; gap:30px; margin-top:34px; flex-wrap:wrap; }
 
 .hero-stat b { display:block; font-family:var(--serif); font-size:1.3rem; color:#fff; }
@@ -182,6 +220,8 @@ img { max-width: 100%; }
 @media(max-width: 560px) {
     .hero-title { font-size: 28px; }
     .hero-content { padding: 10px 0; }
+    .hero-cta-row { flex-direction:column; align-items:stretch; }
+    .explore-btn, .explore-btn-secondary { justify-content:center; }
 }
 
 /* =========================================================
@@ -189,12 +229,22 @@ img { max-width: 100%; }
 ========================================================= */
 
 .search-wrap { position: relative; z-index: 10; margin-top: -60px; max-width: 900px; margin-left:auto; margin-right:auto; }
+
 .search-tabs { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; justify-content:center; }
 .search-tab {
     background: rgba(11,23,48,.85); border:1px solid rgba(255,255,255,.15); color:#dfe3e5;
     font-size:.78rem; font-weight:600; padding:8px 18px; border-radius:24px; cursor:pointer;
+    transition:.2s;
 }
 .search-tab.active { background: linear-gradient(135deg,var(--gold),var(--pr2)); color:#fff; border-color:transparent; }
+.search-tab.extra-tab {
+    display:none;
+    opacity:0; transform:translateY(-4px);
+    transition:opacity .25s ease, transform .25s ease;
+}
+.search-tab.extra-tab.show {
+    display:inline-flex; opacity:1; transform:translateY(0);
+}
 
 
 .search-box {
@@ -202,27 +252,54 @@ img { max-width: 100%; }
     border: 1px solid rgba(210,190,150,.35);
     border-radius: 14px;
     display: grid;
-    grid-template-columns: 1.1fr .9fr .9fr .8fr 110px;
+    grid-template-columns: 1.1fr .9fr .9fr .8fr auto;
     padding: 6px;
     box-shadow: 0 24px 50px rgba(11,23,48,.25);
     position: relative;
+    align-items: center;
 }
 
 .search-field { display:flex; align-items:center; gap:10px; padding:0 14px; border-right:1px solid rgba(255,255,255,.1); min-height:56px; position:relative; }
 .search-field:last-of-type { border-right:none; }
 .search-field i { color: var(--gold2); font-size: 16px; flex-shrink:0; }
-.search-label { font-size: 10px; color:#9aa4aa; margin-bottom:3px; text-transform:uppercase; letter-spacing:.5px; }
-.search-field input, .search-field select {
-    background: transparent; border: none; outline: none; color: #fff;
-    font-size: 14px; font-family: var(--sans); width: 100%;
+
+
+.search-label { 
+    font-size: 11px; 
+    color: var(--gold2); 
+    margin-bottom: 4px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.6px; 
+    font-weight: 800; 
 }
-.search-field select option { background: var(--navy); color:#fff; }
+.search-field input, .search-field select {
+    background: transparent; 
+    border: none; 
+    outline: none; 
+    color: #ffffff;
+    font-size: 15px; 
+    font-weight: 600; 
+    font-family: var(--sans); 
+    width: 100%;
+}
+.search-field select option { 
+    background: var(--navy); 
+    color: #ffffff; 
+    font-size: 14px; 
+    padding: 8px; 
+}
+
 
 .search-submit {
     border: none; border-radius: 9px; background: linear-gradient(135deg,var(--gold2),var(--gold));
-    color: #fff; font-size: 12px; font-weight: 800; letter-spacing:.3px; padding:0 10px;
-    display:flex; align-items:center; justify-content:center; gap:6px;
+    color: #fff; font-size: 12px; font-weight: 800; letter-spacing:.3px;
+    padding: 0 16px;
+    min-height: 44px;
+    max-width: 100px;
+    justify-self: end;
+    display:flex; align-items:center; justify-content:center; gap:5px;
 }
+.search-submit i { font-size: 13px; }
 .search-submit:hover { filter:brightness(1.05); }
 
 .autocomplete-drop { position:absolute; top:calc(100% + 6px); left:0; width:280px; background:#fff; border-radius:10px; box-shadow:0 18px 40px rgba(0,0,0,.3); z-index:9999; overflow:hidden; display:none; }
@@ -257,8 +334,10 @@ img { max-width: 100%; }
 ========================================================= */
 .featured { padding: 90px 0 20px; background: #f5f6f8; }
 .property-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.property-card { border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--panel); transition:.3s; cursor:pointer; box-shadow:0 2px 10px rgba(11,23,48,.04); }
-.property-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow:0 14px 30px rgba(11,23,48,.12); }
+
+
+
+
 .property-photo { height: 205px; position: relative; overflow: hidden; background:#e7ebee; }
 .property-photo img { width:100%; height:100%; object-fit:cover; transition:.5s; }
 .property-card:hover .property-photo img { transform: scale(1.06); }
@@ -268,6 +347,7 @@ img { max-width: 100%; }
 .pc-save { position:absolute; top:10px; right:10px; background:none; border:none; color:#fff; font-size:1.05rem; cursor:pointer; filter:drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
 .pc-save.saved, .pc-save:hover { color:#ef4444; }
 
+
 .property-info { padding: 14px; }
 
 .property-name { color: #12202c; font-size: 15px; font-weight: 700; margin-bottom: 5px; }
@@ -276,6 +356,8 @@ img { max-width: 100%; }
 .property-meta { display:flex; gap:8px; color:#64748b; font-size:11px; margin-bottom:10px; flex-wrap:wrap; }
 .property-bottom { display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px solid var(--border-soft); }
 .property-price { color: var(--gold2); font-size: 16px; font-weight: 700; }
+
+
 .property-price small { color:#8a949b; font-weight:500; font-size:10px; }
 
 
@@ -284,27 +366,72 @@ img { max-width: 100%; }
 @media(max-width:600px){ .property-grid{ grid-template-columns: 1fr; } .property-photo{ height:230px; } }
 
 /* =========================================================
+   BLOG / INSIGHTS CARDS — was missing entirely; classes below
+   were referenced in the markup with no matching rules, so the
+   section rendered unstyled whenever it was shown.
+========================================================= */
+.blog-grid-home { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+@media(max-width:900px){ .blog-grid-home{ grid-template-columns:1fr 1fr; } }
+@media(max-width:600px){ .blog-grid-home{ grid-template-columns:1fr; } }
+.blog-card-home { display:block; background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:.3s; box-shadow:0 2px 10px rgba(11,23,48,.04); }
+.blog-card-home:hover { transform:translateY(-5px); border-color:var(--gold); box-shadow:0 14px 30px rgba(11,23,48,.12); }
+.bc-img-home { height:180px; position:relative; overflow:hidden; background:#e7ebee; }
+.bc-img-home img { width:100%; height:100%; object-fit:cover; transition:.5s; }
+.blog-card-home:hover .bc-img-home img { transform:scale(1.06); }
+.bc-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--muted); }
+.bc-badge { position:absolute; top:10px; right:10px; background:rgba(11,23,48,.85); color:#fff; font-size:.68rem; font-weight:600; padding:4px 9px; border-radius:12px; display:flex; align-items:center; gap:4px; }
+.bc-content { padding:16px; }
+.bc-category { font-size:.68rem; font-weight:700; color:var(--gold2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.bc-title-home { font-family:var(--serif); font-size:1.05rem; font-weight:700; color:#12202c; line-height:1.3; margin-bottom:8px; }
+.bc-excerpt { font-size:.82rem; color:var(--text-body); line-height:1.55; margin-bottom:14px; }
+.bc-footer { display:flex; justify-content:space-between; align-items:center; font-size:.72rem; color:var(--muted); padding-top:10px; border-top:1px solid var(--border-soft); margin-bottom:10px; }
+.bc-author { display:flex; align-items:center; gap:6px; }
+.bc-read-more { font-size:.8rem; font-weight:700; color:var(--gold2); display:flex; align-items:center; gap:6px; }
+
+/* =========================================================
    TRUST STRIP — stays dark navy
 ========================================================= */
 .trust { border-top:1px solid rgba(255,255,255,.08); border-bottom:1px solid rgba(255,255,255,.08); padding:26px 0; background:linear-gradient(180deg,var(--navy),var(--navy-2)); }
 .trust-grid { display:grid; grid-template-columns: repeat(5, 1fr); align-items:center; }
 .trust-item { display:flex; align-items:center; justify-content:center; gap:12px; border-right:1px solid rgba(255,255,255,.08); min-height:52px; padding: 0 8px; }
 .trust-icon { width:38px; height:38px; border:1px solid var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--gold2); font-size:15px; flex-shrink:0; }
-.trust-title { font-size:9.5px; color:#dce0e2; line-height:1.4; }
-.signature { font-family: cursive; color:var(--gold2); font-size:20px; transform:rotate(-4deg); text-align:center; line-height:1.15; }
+
+
+.trust-title { 
+    font-size: 14px !important; 
+    color: #e2e8f0; 
+    line-height: 1.4; 
+    font-weight: 600; 
+}
+
+.signature { 
+    font-family: cursive; 
+    color: var(--gold2); 
+    font-size: 26px !important; 
+    transform: rotate(-4deg); 
+    text-align: center; 
+    line-height: 1.15; 
+    font-weight: 700; 
+}
+
+
 @media(max-width:900px){ .trust-grid{ grid-template-columns:repeat(2,1fr); gap:16px; } .trust-item{ border-right:none; } .signature{ grid-column:1/-1; } }
 
 /* =========================================================
-   WHY ESTATEFLOW — light section
+   WHY KANISHKAIMPERIA — light section
 ========================================================= */
 .why { padding: 70px 0; background: #fff; }
 .why-grid { display:grid; grid-template-columns: 1.05fr 1fr; gap:55px; align-items:center; }
 .video-image { height:340px; border-radius:10px; overflow:hidden; position:relative; background-size:cover; background-position:center; box-shadow:0 30px 60px rgba(11,23,48,.15); }
 .video-image::after { content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(3,9,14,.6), transparent 50%); }
 .play-button { width:48px; height:48px; border:1px solid rgba(255,255,255,.7); background:rgba(0,0,0,.4); border-radius:50%; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:center; color:#fff; z-index:2; }
-.why-title { font-family:var(--serif); font-size:24px; line-height:1.15; margin-bottom:16px; color:#12202c; }
-.why-text { color:var(--text-body); font-size:.9rem; line-height:1.7; max-width:420px; margin-bottom:24px; }
-.benefits { display:flex; gap:26px; flex-wrap:wrap; }
+
+
+.why-title { font-family: var(--serif); font-size: 28px; line-height: 1.2; margin-bottom: 16px; color: #0b1730; font-weight: 700; }
+.why-text { color: #4a5568; font-size: 0.98rem; line-height: 1.7; max-width: 460px; margin-bottom: 24px; }
+.benefit { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 700; color: #0b1730; }
+
+
 .benefit { display:flex; align-items:center; gap:7px; font-size:.82rem; color:#334155; }
 .benefit i { color:var(--gold2); font-size:14px; }
 @media(max-width:900px){ .why-grid{ grid-template-columns:1fr; } .video-image{ height:260px; } }
@@ -318,8 +445,9 @@ img { max-width: 100%; }
 .stats-strip-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap; }
 .stat-item { display:flex; align-items:center; gap:12px; flex:1 1 150px; }
 .stat-icon { width:40px; height:40px; border-radius:8px; border:1px solid rgba(199,154,85,.4); background:rgba(199,154,85,.1); color:var(--gold2); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
-.stat-num { font-family:var(--serif); font-size:1.1rem; font-weight:800; color:#fff; line-height:1.1; }
-.stat-label { font-size:.72rem; color:rgba(255,255,255,.6); font-weight:500; margin-top:2px; }
+
+
+
 
 .cat-grid-eyebrow { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:4px; }
 .cat-grid-eyebrow .line { height:1px; width:60px; background:linear-gradient(to right, transparent, var(--gold)); }
@@ -339,8 +467,10 @@ img { max-width: 100%; }
 .cat-tile .ct-new { position:absolute; top:8px; left:8px; background:var(--gold); color:#fff; font-size:.6rem; font-weight:800; padding:3px 8px; border-radius:4px; text-transform:uppercase; }
 .cat-tile .ct-body { padding:11px 12px 13px; }
 
-.cat-tile h4 { font-size:.95rem; font-weight:700; color:#12202c; margin-bottom:3px; }
-.cat-tile p { font-size:.8rem; color:var(--muted); line-height:1.35; }
+
+
+.cat-tile h4 { font-size: 0.98rem; font-weight: 700; color: #0b1730; margin-bottom: 4px; }
+.cat-tile p { font-size: 0.8rem; color: #556070; line-height: 1.45; }
 
 
 .cat-view-all { border:1px solid var(--border); background:transparent; color:#12202c; font-weight:700; font-size:.8rem; padding:9px 18px; border-radius:8px; }
@@ -351,8 +481,12 @@ img { max-width: 100%; }
 .value-icon { width:36px; height:36px; border-radius:50%; border:1px solid rgba(199,154,85,.3); background:rgba(199,154,85,.1); color:var(--gold2); display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
 
 
-.value-title { font-size:.92rem; font-weight:700; color:#12202c; line-height:1.3; }
-.value-sub { font-size:.8rem; color:var(--muted); margin-top:2px; }
+
+.stat-num { font-family: var(--serif); font-size: 1.25rem; font-weight: 800; color: #fff; line-height: 1.1; }
+.stat-label { font-size: 0.78rem; color: rgba(255,255,255,.8); font-weight: 600; margin-top: 3px; }
+.value-title { font-size: 0.95rem; font-weight: 700; color: #0b1730; line-height: 1.35; }
+.value-sub { font-size: 0.82rem; color: #64748b; margin-top: 3px; }
+
 /* =========================================================
    POPULAR SEARCHES CARD GRID
 ========================================================= */
@@ -417,26 +551,38 @@ img { max-width: 100%; }
     align-items: flex-end;
     margin-bottom: 32px;
 }
+
 .trending-eyebrow {
     display: block;
-    font-size: 10px;
-    letter-spacing: 3px;
-    font-weight: 700;
+    font-size: 13px !important;
+    letter-spacing: 2px !important;
+    font-weight: 800 !important;
     color: var(--gold2);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
 }
+
+
 .trending-header h2 {
     font-family: var(--serif);
-    font-size: clamp(24px, 3vw, 38px);
-    font-weight: 600;
-    margin: 0 0 10px;
-    color: #12202c;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: #0b1730;
 }
 .trending-header p {
     margin: 0;
-    font-size: 13px;
-    color: #69747b;
+    font-size: 0.92rem;
+    color: #4a5568;
 }
+.trend-content h3 {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: #0b1730;
+}
+
 .view-all-searches {
     color: #151c21;
     font-size: 12px;
@@ -499,16 +645,9 @@ img { max-width: 100%; }
     font-weight: 700;
     margin-bottom: 6px;
 }
-.trend-content h3 {
-    font-family: var(--serif);
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 9px;
-    color: #12202c;
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis;
-}
+
+
+
 .trend-bottom {
     display: flex;
     align-items: baseline;
@@ -577,8 +716,8 @@ img { max-width: 100%; }
 @media(max-width:480px){ .hiw-grid{ grid-template-columns:1fr; } }
 .hiw-card { text-align:center; padding:26px 18px; background:var(--panel); border-radius:12px; border:1px solid var(--border); box-shadow:0 2px 10px rgba(11,23,48,.04); }
 .hiw-num { width:44px; height:44px; background:rgba(199,154,85,.12); color:var(--gold2); border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:1.1rem; font-weight:900; margin:0 auto 16px; }
-.hiw-title { font-size:.92rem; font-weight:700; color:#12202c; margin-bottom:8px; }
-.hiw-desc { font-size:.78rem; color:var(--text-body); line-height:1.6; }
+
+
 
 .knowledge-grid { display:grid; grid-template-columns:2fr 1fr; gap:30px; align-items:start; }
 @media(max-width:900px){ .knowledge-grid{ grid-template-columns:1fr; } }
@@ -682,6 +821,40 @@ img { max-width: 100%; }
 .wa-share-btn { width:44px; height:44px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.05rem; box-shadow:0 8px 20px rgba(11,23,48,.3); border:1px solid rgba(255,255,255,.1); cursor:pointer; }
 
 /* =========================================================
+   MOBILE STICKY CTA BAR — quick, thumb-reach actions so a
+   visitor never has to hunt for "Call" or "Post Property"
+   while scrolling on a phone.
+========================================================= */
+.mobile-cta-bar { display:none; }
+@media(max-width:768px) {
+    .mobile-cta-bar {
+        display:flex;
+        position:fixed;
+        left:0; right:0; bottom:0;
+        z-index:1150;
+        background:#fff;
+        border-top:1px solid var(--border);
+        box-shadow:0 -6px 20px rgba(11,23,48,.12);
+        padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+        gap:8px;
+    }
+    .mcb-btn {
+        flex:1;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        gap:2px; padding:8px 4px; border-radius:10px;
+        font-size:.66rem; font-weight:700; color:#12202c;
+        border:1px solid var(--border); background:#fff;
+    }
+    .mcb-btn i { font-size:1.05rem; }
+    .mcb-btn.mcb-call { color:#fff; background:var(--navy); border-color:var(--navy); }
+    .mcb-btn.mcb-wa { color:#fff; background:#22c55e; border-color:#22c55e; }
+    .mcb-btn.mcb-post { color:#fff; background:linear-gradient(135deg,var(--gold),var(--pr2)); border-color:transparent; }
+    /* keep page content and floating WA button clear of the sticky bar */
+    body { padding-bottom:64px; }
+    .wa-float { bottom:78px; }
+}
+
+/* =========================================================
    FOOTER — stays dark navy
 ========================================================= */
 footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rgba(255,255,255,.08); }
@@ -698,9 +871,14 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 .fl-brand { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
 .fl-brand img { height:34px; width:auto; }
 .fl-brand span { font-family:var(--serif); font-size:1.2rem; font-weight:800; color:#fff; }
+
 .fl-desc { font-size:.8rem; line-height:1.7; margin-bottom:10px; color:rgba(255,255,255,.55); }
-.fl-title { font-size:.78rem; font-weight:700; color:var(--gold2); text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; }
-.fl-link { display:block; font-size:.8rem; color:rgba(255,255,255,.55); padding:5px 0; }
+
+.hiw-title { font-size: 1rem; font-weight: 700; color: #0b1730; margin-bottom: 8px; }
+.hiw-desc { font-size: 0.85rem; color: #4a5568; line-height: 1.65; }
+.fl-title { font-size: 0.82rem; font-weight: 800; color: var(--gold2); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 14px; }
+.fl-link { display: block; font-size: 0.85rem; color: rgba(255,255,255,.75); padding: 5px 0; font-weight: 500; }
+
 .fl-link:hover { color:var(--gold2); }
 .footer-bottom { border-top:1px solid rgba(255,255,255,.08); padding:16px 20px; display:flex; justify-content:space-between; font-size:.75rem; flex-wrap:wrap; gap:10px; max-width:1200px; margin:0 auto; color:rgba(255,255,255,.4); }
 
@@ -709,24 +887,7 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 <body>
 
 <!-- Floating WhatsApp + Share buttons -->
-<div class="wa-float">
-    <button type="button" class="wa-share-btn" onclick="openShareCard()" title="Share this page" aria-label="Share this page">
-        <i class="bi bi-share-fill"></i>
-    </button>
-    <a class="wa-float-btn" href="https://wa.me/91{{ agent_whatsapp|default:'9000000000' }}?text={{ wa_intro_message|default:'Hi%2C%20I%20found%20your%20EstateFlow%20digital%20profile%20and%20would%20like%20to%20know%20more%20about%20your%20properties.'|urlencode }}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp" onclick="trackSearchClick('','', 'float_wa')">
-        <i class="bi bi-whatsapp"></i>
-    </a>
-</div>
 
-<div class="top-util-bar">
-    <div class="top-util-inner">
-        <div><span><i class="bi bi-geo-alt"></i>Serving Nagpur &amp; 50+ Cities</span></div>
-        <div style="display:flex;gap:22px;">
-            <span><i class="bi bi-telephone"></i>+91 90000 00000</span>
-            <a href="#"><i class="bi bi-question-circle"></i>Help &amp; Support</a>
-        </div>
-    </div>
-</div>
 
 <!-- ================================================================
      SITE HEADER — unchanged include, so the real logo and nav stay
@@ -741,10 +902,13 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
     {% if hero.bg_image %}style="background-image: linear-gradient(to right, rgba(11, 23, 48, 0.95) 0%, rgba(11, 23, 48, 0.65) 55%, rgba(11,23,48,.35) 100%), url('{{ hero.bg_image.url }}');"{% endif %}>
     <div class="container-main">
         <div class="hero-content">
-            <div class="hero-small">{{ hero.eyebrow|default:"PREMIUM PROPERTIES  •  VERIFIED & TRUSTED" }}</div>
+            <div class="hero-small">{{ hero.eyebrow|default:"NAGPUR'S OWN PROPERTY TEAM" }}</div>
             <h1 class="hero-title">{{ hero.title_line1|default:"Find Properties That" }}<span>{{ hero.title_line2|default:"Define Your Lifestyle" }}</span></h1>
-            <p class="hero-description">{{ hero.description|default:"Buy, rent, sell or invest in residential, commercial and land properties across Nagpur — every listing verified, every deal backed by a dedicated relationship manager." }}</p>
-            <a href="{{ hero.cta_url|default:'#properties' }}" class="explore-btn">{{ hero.cta_text|default:"Explore Properties" }} <i class="bi bi-arrow-right"></i></a>
+            <p class="hero-description">{{ hero.description|default:"Buy, rent, sell or invest in residential, commercial and land properties across Nagpur — every listing checked by our own team, every deal backed by a relationship manager who actually picks up the phone." }}</p>
+            <div class="hero-cta-row">
+                <a href="{{ hero.cta_url|default:'#properties' }}" class="explore-btn">{{ hero.cta_text|default:"Explore Properties" }} <i class="bi bi-arrow-right"></i></a>
+                <a href="{% url 'post_property' %}" class="explore-btn-secondary"><i class="bi bi-house-add"></i> Post Property FREE</a>
+            </div>
         </div>
     </div>
 </section>
@@ -755,128 +919,76 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 <div class="search-wrap">
     <div class="container-main">
 
-        <div class="search-tabs">
-            <button type="button" class="search-tab active" data-listing="rent" onclick="selectListingHome('rent', this)">Rent</button>
-            <button type="button" class="search-tab" data-listing="sale" onclick="selectListingHome('sale', this)">Buy / Resale</button>
+      
+
+    <div class="search-tabs">
+    <button type="button" class="search-tab active" data-listing="rent" onclick="selectListingHome('rent', this)">Rent</button>
+    <button type="button" class="search-tab" data-listing="sale" onclick="selectListingHome('sale', this)">Buy / Resale</button>
+</div>
+
+<form action="/listingpage/" method="GET" class="search-box" id="searchForm" onsubmit="doSearch(event)">
+    <input type="hidden" name="type" id="searchListingType" value="rent">
+
+    <div class="search-field" style="position:relative;">
+        <i class="bi bi-geo-alt"></i>
+        <div style="width:100%;">
+            <div class="search-label">Location</div>
+            <input type="text" id="sb-location-input" placeholder="City, locality or landmark" autocomplete="off"
+                   oninput="fetchAC(this.value)">
         </div>
+        <div class="autocomplete-drop" id="acDrop"></div>
+    </div>
 
-        <form action="/listingpage/" method="GET" class="search-box" id="searchForm" onsubmit="doSearch(event)">
-            <input type="hidden" name="type" id="searchListingType" value="rent">
+    <div class="search-field">
+        <i class="bi bi-house-door"></i>
+        <div style="width:100%;">
+            <div class="search-label">Property Type</div>
+            <select id="sb-property-type">
+                <option value="">Any Type</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="pg">PG / Co-Living</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="search-field" style="position:relative;">
-                <i class="bi bi-geo-alt"></i>
-                <div style="width:100%;">
-                    <div class="search-label">Location</div>
-                    <input type="text" id="sb-location-input" placeholder="City, locality or landmark" autocomplete="off"
-                           oninput="fetchAC(this.value)">
-                </div>
-                <div class="autocomplete-drop" id="acDrop"></div>
-            </div>
+    <div class="search-field">
+        <i class="bi bi-tag"></i>
+        <div style="width:100%;">
+            <div class="search-label">Budget</div>
+            <select id="sb-budget">
+                <option value="">Min - Max</option>
+                <option value="0-25">Under &#8377;25L</option>
+                <option value="25-50">&#8377;25L - &#8377;50L</option>
+                <option value="50-100">&#8377;50L - &#8377;1Cr</option>
+                <option value="100+">Above &#8377;1Cr</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="search-field">
-                <i class="bi bi-house-door"></i>
-                <div style="width:100%;">
-                    <div class="search-label">Property Type</div>
-                    <select id="sb-property-type">
-                        <option value="">Any Type</option>
-                        <option value="residential">Residential</option>
-                        <option value="commercial">Commercial</option>
-                        <option value="plot">Land &amp; Plots</option>
-                        <option value="pg">PG / Co-Living</option>
-                    </select>
-                </div>
-            </div>
+    <div class="search-field">
+        <i class="bi bi-door-open"></i>
+        <div style="width:100%;">
+            <div class="search-label">Bedrooms</div>
+            <select id="sb-bhk">
+                <option value="">Any</option>
+                <option value="1 RK">1 RK</option>
+                <option value="1 BHK">1 BHK</option>
+                <option value="2 BHK">2 BHK</option>
+                <option value="3 BHK">3 BHK</option>
+                <option value="4 BHK">4+ BHK</option>
+            </select>
+        </div>
+    </div>
 
-            <div class="search-field">
-                <i class="bi bi-tag"></i>
-                <div style="width:100%;">
-                    <div class="search-label">Budget</div>
-                    <select id="sb-budget">
-                        <option value="">Min - Max</option>
-                        <option value="0-25">Under &#8377;25L</option>
-                        <option value="25-50">&#8377;25L - &#8377;50L</option>
-                        <option value="50-100">&#8377;50L - &#8377;1Cr</option>
-                        <option value="100+">Above &#8377;1Cr</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="search-field">
-                <i class="bi bi-door-open"></i>
-                <div style="width:100%;">
-                    <div class="search-label">Bedrooms</div>
-                    <select id="sb-bhk">
-                        <option value="">Any</option>
-                        <option value="1 RK">1 RK</option>
-                        <option value="1 BHK">1 BHK</option>
-                        <option value="2 BHK">2 BHK</option>
-                        <option value="3 BHK">3 BHK</option>
-                        <option value="4 BHK">4+ BHK</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" class="search-submit"><i class="bi bi-search"></i> Search</button>
-        </form>
+    <button type="submit" class="search-submit"><i class="bi bi-search"></i> Search</button>
+</form>
     </div>
 </div>
 
 <!-- ================================================================
      FEATURED PROPERTIES
      ================================================================ -->
-<section class="featured" id="properties" hidden>
-    <div class="container-main">
-        <div class="sec-header">
-            <div>
-                <div class="section-label">FEATURED PROPERTIES</div>
-                <h2 class="section-title">Exclusive Listings<br>in Nagpur</h2>
-            </div>
-            <a href="/listingpage/?featured=true" class="sec-link">View All Properties <i class="bi bi-arrow-right ms-2"></i></a>
-        </div>
-
-        <div class="property-grid" id="featuredGrid">
-            {% for item in featured_props %}
-            <div class="property-card" onclick="window.location.href='{% url 'property_detail' listing_type=item.listing_type category=item.url_category slug=item.data.property_title|slugify pk=item.data.id %}'">
-                <div class="property-photo">
-                    {% if item.data.images.first %}
-                        <img src="{{ item.data.images.first.image.url }}" alt="{{ item.data.property_title }}">
-                    {% else %}
-                        <div class="pc-img-placeholder">🏠</div>
-                    {% endif %}
-                    {% if item.data.is_verified %}
-                        <span class="sale-badge verif-badge"><i class="bi bi-check"></i> Verified</span>
-                    {% else %}
-                        <span class="sale-badge">Featured</span>
-                    {% endif %}
-                   <button class="pc-save {% if item.data.id in wishlisted_ids %}saved{% endif %}" onclick="event.stopPropagation();toggleSave('{{ item.data.id }}','{{ item.listing_type }}','{{ item.url_category|default:item.type }}',this)">
-    <i class="bi {% if item.data.id in wishlisted_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-</button>
-                </div>
-                <div class="property-info">
-                    <div class="property-name">{{ item.data.property_title|truncatechars:30 }}</div>
-                    <div class="property-location"><i class="bi bi-geo-alt-fill"></i>{{ item.data.city }}{% if item.data.locality %}, {{ item.data.locality }}{% endif %}</div>
-                    <div class="property-meta">
-                        {% if item.data.bhk_type %}<span>{{ item.data.bhk_type }}</span><span>|</span>{% endif %}
-                        {% if item.data.bathrooms %}<span>{{ item.data.bathrooms }} Baths</span><span>|</span>{% endif %}
-                        {% if item.data.built_up_area %}<span>{{ item.data.built_up_area|floatformat:0 }} Sq.ft.</span>{% endif %}
-                    </div>
-                    <div class="property-bottom">
-                        <div class="property-price">
-                            {% if item.listing_type == 'rent' %}₹{{ item.data.monthly_rent|default:"N/A"|floatformat:0 }}<small> /month</small>{% else %}₹{{ item.data.expected_price|default:"N/A"|floatformat:0 }}{% endif %}
-                        </div>
-                        <div class="property-arrow"><i class="bi bi-arrow-right"></i></div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted);">
-                <i class="bi bi-inbox" style="font-size:2.6rem;display:block;margin-bottom:12px;"></i>
-                <p>No featured properties at the moment.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
 
 
 <div class="section-wrap" style="padding-bottom:10px;">
@@ -884,34 +996,35 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 
 <div class="section-subtitle" style="text-align:center;margin-bottom:24px;">Curated categories, matched to how people actually search</div>
 
-       <div class="category-grid-8">
-        <a href="/listingpage/?type=sale&category=Resale+Residential" class="cat-tile">
-            <div class="ct-img"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=500&q=80" alt="Residential"></div>
-            <div class="ct-body"><h4>Residential</h4><p>Buy Homes Across Nagpur</p></div>
+    
+<div class="category-grid-8">
+        <a href="/listingpage/?type=sale&category=residential" class="cat-tile">
+            <div class="ct-img"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=500&q=80" alt="Residential Buy"></div>
+            <div class="ct-body"><h4>Buy Homes</h4><p>Resale &amp; Ready Apartments</p></div>
         </a>
-        <a href="/listingpage/?type=sale&category=Commercial+Resale" class="cat-tile">
+        <a href="/listingpage/?type=rent&category=residential" class="cat-tile">
+            <div class="ct-img"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80" alt="Residential Rent"></div>
+            <div class="ct-body"><h4>Rent Flats</h4><p>Real Homes, Real Owners</p></div>
+        </a>
+        <a href="/listingpage/?type=sale&category=commercial" class="cat-tile">
             <div class="ct-img"><img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=500&q=80" alt="Commercial"></div>
-            <div class="ct-body"><h4>Commercial</h4><p>Office Spaces, Shops &amp; Showrooms</p></div>
+            <div class="ct-body"><h4>Commercial</h4><p>Offices, Shops &amp; Showrooms</p></div>
         </a>
-        <a href="/listingpage/?type=sale&category=Plot+Resale" class="cat-tile">
+        <a href="/listingpage/?type=sale&category=plot" class="cat-tile">
             <div class="ct-img"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=500&q=80" alt="Land & Plots"></div>
-            <div class="ct-body"><h4>Land &amp; Plots</h4><p>Residential &amp; Commercial Land for Sale</p></div>
+            <div class="ct-body"><h4>Land &amp; Plots</h4><p>Residential &amp; NA Plots</p></div>
         </a>
-        <a href="/listingpage/?type=sale&category=Resale+Residential&tag=luxury" class="cat-tile">
+        <a href="/listingpage/?type=rent&category=pg" class="cat-tile">
+            <div class="ct-img"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=500&q=80" alt="PG Co-living"></div>
+            <div class="ct-body"><h4>PG / Co-Living</h4><p>Shared Stays &amp; Hostels</p></div>
+        </a>
+        <a href="/listingpage/?type=sale&category=residential&tag=luxury" class="cat-tile">
             <div class="ct-img"><img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=500&q=80" alt="Luxury Homes"></div>
-            <div class="ct-body"><h4>Luxury Homes</h4><p>Premium Villas &amp; Exclusive Homes</p></div>
+            <div class="ct-body"><h4>Luxury Homes</h4><p>Premium Villas &amp; Penthouses</p></div>
         </a>
-        <a href="/listingpage/?type=rent&category=Residential+Data&tag=new" class="cat-tile">
-            <div class="ct-img"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=500&q=80" alt="New Projects"></div>
-            <div class="ct-body"><h4>New Projects</h4><p>Under Construction Projects</p></div>
-        </a>
-        <a href="/listingpage/?type=sale" class="cat-tile">
-            <div class="ct-img"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=500&q=80" alt="Resale Properties"></div>
-            <div class="ct-body"><h4>Resale Properties</h4><p>Best Deals on Resale Properties</p></div>
-        </a>
-        <a href="/listingpage/?type=rent&category=PG+Data" class="cat-tile">
-            <div class="ct-img"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=500&q=80" alt="PG / Co-living"></div>
-            <div class="ct-body"><h4>PG / Co-living</h4><p>Shared Stays for Students &amp; Professionals</p></div>
+        <a href="/listingpage/?type=sale&category=agricultural" class="cat-tile">
+            <div class="ct-img"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=500&q=80" alt="Agriculture Land"></div>
+            <div class="ct-body"><h4>Agriculture Land</h4><p>Farmhouses &amp; Acreage</p></div>
         </a>
     </div>
 
@@ -926,14 +1039,14 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
             <div class="trust-item"><div class="trust-icon"><i class="bi bi-gem"></i></div><div class="trust-title">World-Class<br>Amenities</div></div>
             <div class="trust-item"><div class="trust-icon"><i class="bi bi-geo-alt"></i></div><div class="trust-title">Prime<br>Locations</div></div>
             <div class="trust-item"><div class="trust-icon"><i class="bi bi-graph-up-arrow"></i></div><div class="trust-title">High ROI<br>Potential</div></div>
-            <div class="trust-item"><div class="trust-icon"><i class="bi bi-shield-check"></i></div><div class="trust-title">Trusted<br>Real Estate Experts</div></div>
+            <div class="trust-item"><div class="trust-icon"><i class="bi bi-shield-check"></i></div><div class="trust-title">People Who<br>Know Nagpur</div></div>
             <div class="signature">Invest in<br>a Better Tomorrow</div>
         </div>
     </div>
 </section>
 
 <!-- ================================================================
-     WHY ESTATEFLOW
+     WHY KANISHKAIMPERIA
      ================================================================ -->
 <section class="why" id="why">
     <div class="container-main">
@@ -941,30 +1054,33 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
             <div class="video-image" style="background-image:url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=90');">
                 <div class="play-button"><i class="bi bi-play-fill"></i></div>
             </div>
+           
+
             <div>
-                <div class="section-label">WHY KANISHKAIMPERIA</div>
-                <h2 class="why-title">A Smarter Way<br>to Find Property</h2>
-                <p class="why-text">KANISHKAIMPERIA combines premium property discovery, smart search, verified listings and dedicated Relationship Manager support into one seamless real-estate experience.</p>
-                <div class="benefits">
-                    <div class="benefit"><i class="bi bi-check-circle-fill"></i> Verified Properties</div>
-                    <div class="benefit"><i class="bi bi-check-circle-fill"></i> Smart Search</div>
-                    <div class="benefit"><i class="bi bi-check-circle-fill"></i> Expert Support</div>
+                <div class="section-label" style="font-size: 10px; letter-spacing: 2.5px; font-weight: 800; color: var(--gold2);">WHY KANISHKAIMPERIA</div>
+                <h2 class="why-title" style="font-family: var(--serif); font-size: clamp(24px, 2.5vw, 32px); color: #12202c; font-weight: 700; line-height: 1.2; margin-bottom: 14px;">A Smarter Way<br>to Find Property</h2>
+                <p class="why-text" style="color: var(--text-body); font-size: 0.95rem; line-height: 1.65; margin-bottom: 22px;">We combine premium property discovery, smart search and real, on-the-ground listings with a Relationship Manager who stays with you from your first search to the day you get the keys.</p>
+                <div class="benefits" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="benefit" style="font-size: 0.88rem; font-weight: 600; color: #12202c;"><i class="bi bi-check-circle-fill" style="color: var(--gold2); margin-right: 8px;"></i> Every property personally visited and checked by our team</div>
+                    <div class="benefit" style="font-size: 0.88rem; font-weight: 600; color: #12202c;"><i class="bi bi-check-circle-fill" style="color: var(--gold2); margin-right: 8px;"></i> Smart Location &amp; Budget Matching</div>
+                    <div class="benefit" style="font-size: 0.88rem; font-weight: 600; color: #12202c;"><i class="bi bi-check-circle-fill" style="color: var(--gold2); margin-right: 8px;"></i> Dedicated RM Support from Search to Deal</div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+
 <div class="stats-strip">
     <div class="stats-strip-inner">
-        <div class="stat-item"><div class="stat-icon"><i class="bi bi-building"></i></div><div><div class="stat-num">{{ total_properties|default:"25,000+" }}</div><div class="stat-label">Properties Listed</div></div></div>
-        <div class="stat-item"><div class="stat-icon"><i class="bi bi-emoji-smile"></i></div><div><div class="stat-num">{{ total_customers|default:"10,000+" }}</div><div class="stat-label">Happy Customers</div></div></div>
-        <div class="stat-item"><div class="stat-icon"><i class="bi bi-geo"></i></div><div><div class="stat-num">50+</div><div class="stat-label">Localities Covered</div></div></div>
-        <div class="stat-item"><div class="stat-icon"><i class="bi bi-person-badge"></i></div><div><div class="stat-num">87+</div><div class="stat-label">Relationship Managers</div></div></div>
-        <div class="stat-item"><div class="stat-icon"><i class="bi bi-patch-check"></i></div><div><div class="stat-num">100%</div><div class="stat-label">Verified Listings</div></div></div>
+        <div class="stat-item"><div class="stat-icon"><i class="bi bi-building"></i></div><div><div class="stat-num">Growing</div><div class="stat-label">Property Network</div></div></div>
+        <div class="stat-item"><div class="stat-icon"><i class="bi bi-patch-check"></i></div><div><div class="stat-num">Hand-Checked</div><div class="stat-label">Every Single Listing</div></div></div>
+        <div class="stat-item"><div class="stat-icon"><i class="bi bi-geo"></i></div><div><div class="stat-num">Nagpur</div><div class="stat-label">Local Expertise</div></div></div>
+        <div class="stat-item"><div class="stat-icon"><i class="bi bi-person-badge"></i></div><div><div class="stat-num">Dedicated</div><div class="stat-label">Relationship Support</div></div></div>
         <div class="stat-item"><div class="stat-icon"><i class="bi bi-shield-check"></i></div><div><div class="stat-num">Secure</div><div class="stat-label">&amp; Trusted Platform</div></div></div>
     </div>
 </div>
+
 
 {% if ad_leaderboard_slides %}
 <div class="section-wrap" style="padding-bottom:14px;">
@@ -1000,7 +1116,7 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 
 <div class="section-wrap" style="padding-top:0;">
     <div class="value-strip">
-        <div class="value-item"><div class="value-icon"><i class="bi bi-map"></i></div><div><div class="value-title">Wide Range of Verified Properties</div><div class="value-sub">Residential, Commercial &amp; Land</div></div></div>
+        <div class="value-item"><div class="value-icon"><i class="bi bi-map"></i></div><div><div class="value-title">A Wide Range of Real, Checked Properties</div><div class="value-sub">Residential, Commercial &amp; Land</div></div></div>
         <div class="value-item"><div class="value-icon"><i class="bi bi-percent"></i></div><div><div class="value-title">Best Deals Guaranteed</div><div class="value-sub">Most competitive prices &amp; offers</div></div></div>
         <div class="value-item"><div class="value-icon"><i class="bi bi-person-check"></i></div><div><div class="value-title">Expert Guidance Always</div><div class="value-sub">We help you find the perfect fit</div></div></div>
         <div class="value-item"><div class="value-icon"><i class="bi bi-file-earmark-lock2"></i></div><div><div class="value-title">Transparent &amp; Hassle Free</div><div class="value-sub">Simple, safe, honest transactions</div></div></div>
@@ -1136,20 +1252,7 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 </div>
 {% endif %}
 
-<div class="section-wrap" style="padding-top:10px;" hidden>
-    <div class="sec-header"><div><div class="section-title">Popular Localities</div><div class="section-subtitle">Explore properties in the most searched areas</div></div><a href="/listingpage/" class="sec-link">View All →</a></div>
-    <div class="locality-img-grid">
-        {% for loc in popular_localities %}
-        <a href="{{ loc.url }}" class="locality-img-card" onclick="trackSearchClick('{{ loc.area|escapejs }}','', 'rent')">
-            <div class="li-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--panel);"><i class="bi bi-geo-alt-fill" style="font-size:1.7rem;color:var(--gold2);"></i></div>
-            <h4>{{ loc.area }}</h4>
-            <p>{{ loc.total }} searches</p>
-        </a>
-        {% empty %}
-        <a href="/listingpage/?area=Dharampeth" class="locality-img-card"><div class="li-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--panel);"><i class="bi bi-geo-alt-fill" style="font-size:1.7rem;color:var(--gold2);"></i></div><h4>Dharampeth</h4><p>Popular area</p></a>
-        {% endfor %}
-    </div>
-</div>
+
 
 <div class="section-wrap" style="padding-top:10px;">
     <div class="sec-header"><div><div class="section-title">Explore Properties by City</div><div class="section-subtitle">Based on what people are actually searching for</div></div></div>
@@ -1201,7 +1304,7 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
                 <div class="hiw-num">2</div>
                 <div class="hiw-title">Explore Listings</div>
                 <div class="hiw-desc">
-                    Browse verified residential and commercial properties.
+                    Browse real residential and commercial properties, checked by our team.
                 </div>
             </div>
         </div>
@@ -1230,34 +1333,7 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 
 </section>
 
-<div class="section-wrap" style="padding-top:10px;" hidden>
-    <div class="sec-header">
-        <div><div class="section-title">📖 Latest Insights</div><div class="section-subtitle">Expert tips and real estate market trends</div></div>
-        <a href="{% url 'blog' %}" class="sec-link">View All Articles →</a>
-    </div>
-    <div class="blog-grid-home">
-        {% for blog in blogs|slice:":3" %}
-        <a href="{% url 'blog_details' blog.key %}" class="blog-card-home">
-            <div class="bc-img-home">
-                {% if blog.featured_image %}<img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}" loading="lazy">{% else %}<div class="bc-placeholder"><i class="bi bi-newspaper"></i></div>{% endif %}
-                <div class="bc-badge"><i class="bi bi-clock"></i> {{ blog.reading_time|default:"5" }} min</div>
-            </div>
-            <div class="bc-content">
-                {% if blog.category %}<div class="bc-category">{{ blog.category }}</div>{% endif %}
-                <h3 class="bc-title-home">{{ blog.title }}</h3>
-                <p class="bc-excerpt">{{ blog.meta_description|default:blog.short_description|truncatechars:100 }}</p>
-                <div class="bc-footer">
-                    <div class="bc-author"><i class="bi bi-person-circle" style="color:var(--gold2);"></i> <span>{{ blog.author|default:"KANISHKAIMPERIA Team" }}</span></div>
-                    <div style="font-weight:600;">{{ blog.created_at|date:"M d, Y" }}</div>
-                </div>
-                <div class="bc-read-more">Read Article <i class="bi bi-arrow-right"></i></div>
-            </div>
-        </a>
-        {% empty %}
-        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">No articles yet.</div>
-        {% endfor %}
-    </div>
-</div>
+
 
 <div class="section-wrap">
     <div class="knowledge-grid">
@@ -1310,7 +1386,7 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
             <h3>Talk to a Property Advisor</h3>
             <p class="bs-desc">Get expert advice. Save time &amp; money.</p>
             <ul>
-                <li><i class="bi bi-check-circle-fill"></i>Verified properties</li>
+                <li><i class="bi bi-check-circle-fill"></i>Real, on-the-ground properties</li>
                 <li><i class="bi bi-check-circle-fill"></i>Best deals &amp; offers</li>
                 <li><i class="bi bi-check-circle-fill"></i>Hassle-free visits</li>
             </ul>
@@ -1321,65 +1397,18 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 
 
 
-<div class="section-wrap" style="padding-top:10px;">
-    <div class="cta-banner">
-        <div>
-            <h2>Have a property to Sell or Rent?</h2>
-            <p>List your property and get more visibility, genuine leads &amp; faster deals.</p>
-        </div>
-        <div class="cta-actions">
-            <a href="{% url 'post_property' %}" class="cta-btn-yellow"><i class="bi bi-plus-lg"></i> List Your Property</a>
-            <a href="#plansSection" class="cta-btn-outline"><i class="bi bi-search"></i> View Plans</a>
-        </div>
-    </div>
-</div>
 
-<div id="plansSection" class="bg-band" style="padding:60px 20px;" hidden>
-    <div style="max-width:1200px;margin:0 auto;">
-        <div class="text-center mb-4">
-            <div class="section-title" style="font-size:1.9rem;">Subscription Plans</div>
-            <div class="section-subtitle">Choose the right plan to get maximum leads</div>
+
+<div class="section-wrap" style="padding: 40px 20px;">
+    <div style="background: var(--navy); border-radius: 12px; padding: 36px; color: #fff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; border: 1px solid rgba(199,154,85,0.3);">
+        <div>
+            <div style="color: var(--gold2); font-size: 10px; letter-spacing: 2px; font-weight: 700; margin-bottom: 6px;">PARTNER WITH US</div>
+            <h3 style="font-family: var(--serif); font-size: 1.5rem; margin-bottom: 8px;">For Property Owners, Agents &amp; Vendors</h3>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin: 0;">List your properties for free or join our trusted local partner network in Nagpur.</p>
         </div>
-        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4" id="planForBadges">
-            <button class="plan-badge active" data-target="Landlords">Landlords</button>
-            <button class="plan-badge" data-target="Agents/Agency">Agents/Agency</button>
-            <button class="plan-badge" data-target="Vendors">Vendors</button>
-            <button class="plan-badge" data-target="Tenants/Buyers">Tenants/Buyers</button>
-        </div>
-        <div class="d-flex justify-content-center mb-5">
-            <select id="durationSelect" class="duration-selector text-center">
-                <option value="1-month" selected>1 Month Duration</option>
-                <option value="3-months">3 Months Duration</option>
-                <option value="6-months">6 Months Duration</option>
-                <option value="12-months">12 Months Duration</option>
-            </select>
-        </div>
-        <div class="row g-4 justify-content-center align-items-stretch" id="plansContainer">
-            {% for plan in subscriptions %}
-            <div class="col-lg-4 col-md-6 col-12 plan-item"
-                 data-for="{{ plan.plan_for }}"
-                 data-duration="{% if '1' in plan.plan_duration %}1-month{% elif '3' in plan.plan_duration %}3-months{% elif '6' in plan.plan_duration %}6-months{% elif '12' in plan.plan_duration %}12-months{% endif %}">
-                <div class="plan-card {% if 'Standard' in plan.plan_type %}popular{% endif %}">
-                    {% if 'Standard Plan' in plan.plan_type %}<div class="plan-popular-badge">⭐ Most Popular</div>{% endif %}
-                    <h5 style="font-weight:800;color:var(--gold2);margin-top:{% if 'Standard' in plan.plan_type %}10px{% else %}0{% endif %};">{{ plan.plan_type }}</h5>
-                    <div class="plan-price">
-                        ₹{{ plan.plan_offer_price }}
-                        <div>₹{{ plan.plan_base_price }}</div>
-                    </div>
-                    {% if plan.plan_discount > 0 %}<div style="color:#16a34a;font-weight:bold;margin-bottom:15px;">Save {{ plan.plan_discount }}%</div>{% endif %}
-                    <div class="plan-features">
-                        <p style="font-size:.85rem;margin-bottom:15px;color:var(--text-body);">{{ plan.plan_desc|safe }}</p>
-                        <ul>
-                            <li>✔ <strong style="color:#12202c;">{{ plan.plan_max_listings }}</strong> Max Listings/Enquiries</li>
-                            <li>✔ Direct Leads Included</li>
-                            <li>✔ Priority Support</li>
-                        </ul>
-                    </div>
-                    <button class="btn-primary-custom w-100 mt-2" style="justify-content:center;padding:12px;border-radius:8px;">Choose Plan</button>
-                </div>
-            </div>
-            {% endfor %}
-            <div id="noPlansMsg" style="display:none;text-align:center;color:var(--muted);font-size:1.05rem;padding:40px;width:100%;">No plans available for this selection.</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="{% url 'post_property' %}" class="btn-primary-custom" style="padding: 12px 22px;">List Your Property FREE</a>
+            <a href="{% url 'Contact_Us' %}" class="btn-ghost" style="padding: 12px 22px;">Join Agent Network</a>
         </div>
     </div>
 </div>
@@ -1406,12 +1435,12 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
         <div class="footer-grid">
             <div>
                 <div class="fl-brand">
-                    <img src="{% static 'images/estateflow-logo.png' %}" alt="EstateFlow" onerror="this.style.display='none'">
-                    <span>KANISHKAIMPERIA</span>
-                </div>
-                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
-                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 90000 00000</div>
-                <div class="fl-desc"><i class="bi bi-envelope"></i> info@propcrm.com</div>
+    <img src="{% static 'images/kanishka-imperia-logo.png' %}" alt="KANISHKAIMPERIA" style="max-height: 38px; width: auto; object-fit: contain;">
+    <span>KANISHKAIMPERIA</span>
+</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents</div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 9175791501</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> kanishkaimperia@gmail.com</div>
             </div>
             <div>
                 <div class="fl-title">For Tenants</div>
@@ -1436,10 +1465,10 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
             </div>
             <div>
                 <div class="fl-title">Company</div>
-                <a href="{% url 'blog' %}" class="fl-link">Blog</a>
+                <a href="{% url 'blog' %}" class="fl-link">News/Guide</a>
                 <a href="{% url 'services' %}" class="fl-link">Services</a>
                 <a href="#" class="fl-link">About Us</a>
-                <a href="#" class="fl-link">Contact Us</a>
+                <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
             </div>
         </div>
     </div>
@@ -1449,6 +1478,15 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
     </div>
 </footer>
 
+<!-- ================================================================
+     MOBILE STICKY CTA BAR — always-visible quick actions on phones
+     ================================================================ -->
+<div class="mobile-cta-bar">
+    <a href="tel:+919175791501" class="mcb-btn mcb-call"><i class="bi bi-telephone-fill"></i>Call</a>
+    <a href="https://wa.me/919175791501" target="_blank" rel="noopener" class="mcb-btn mcb-wa"><i class="bi bi-whatsapp"></i>WhatsApp</a>
+    <a href="{% url 'post_property' %}" class="mcb-btn mcb-post"><i class="bi bi-house-add"></i>Post Property</a>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1457,11 +1495,46 @@ footer { background:#0b1730; color:rgba(255,255,255,.6); border-top:1px solid rg
 /* =========================================================
    HERO SEARCH — listing type toggle + submit
 ========================================================= */
+
+const propertyTypeOptions = {
+    rent: [
+        { value: '', label: 'Any Type' },
+        { value: 'residential', label: 'Residential' },
+        { value: 'commercial', label: 'Commercial' },
+        { value: 'pg', label: 'PG / Co-Living' }
+    ],
+    sale: [
+        { value: '', label: 'Any Type' },
+        { value: 'residential', label: 'Residential' },
+        { value: 'commercial', label: 'Commercial' },
+        { value: 'plot', label: 'Land & Plots' },
+        { value: 'agriculture', label: 'Agricultural Land' },
+        { value: 'industrial', label: 'Industrial & Warehouse' }
+    ]
+};
+
+function updatePropertyTypeDropdown(mode) {
+    const selectEl = document.getElementById('sb-property-type');
+    if (!selectEl) return;
+    const opts = propertyTypeOptions[mode] || propertyTypeOptions['rent'];
+    selectEl.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+}
+
 function selectListingHome(type, el) {
     document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('searchListingType').value = type;
+    if (el) el.classList.add('active');
+    
+    const hiddenTypeInput = document.getElementById('searchListingType');
+    if (hiddenTypeInput) hiddenTypeInput.value = type;
+
+    updatePropertyTypeDropdown(type);
 }
+
+
+// Initialize default dropdown options on page load (defaults to 'rent')
+document.addEventListener('DOMContentLoaded', () => {
+    updatePropertyTypeDropdown('rent');
+});
 
 function doSearch(e) {
     if (e) e.preventDefault();
@@ -1654,8 +1727,8 @@ $(document).ready(function () {
    DIGITAL CARD: share, copy-link, save-contact, QR
 ========================================================= */
 const DCARD_URL   = window.location.href;
-const DCARD_TITLE = "{{ agent_name|default:'EstateFlow' }} — {{ agent_designation|default:'Real Estate Consultant' }}";
-const DCARD_MSG   = "Hi, here's my EstateFlow digital profile with verified properties and contact details: " + DCARD_URL;
+const DCARD_TITLE = "{{ agent_name|default:'Kanishka Imperia' }} — {{ agent_designation|default:'Real Estate Consultant' }}";
+const DCARD_MSG   = "Hi, here's my Kanishka Imperia digital profile with real, checked properties and contact details: " + DCARD_URL;
 
 function shareToWhatsApp() {
     trackSearchClick('', '', 'share_wa');
@@ -1668,16 +1741,16 @@ function copyPageLink() {
     }).catch(function () { alert(DCARD_URL); });
 }
 function saveDigitalCard() {
-    const name  = "{{ agent_name|default:'EstateFlow' }}";
+    const name  = "{{ agent_name|default:'Kanishka Imperia' }}";
     const phone = "+91{{ agent_phone|default:'9000000000' }}";
-    const org   = "EstateFlow";
+    const org   = "Kanishka Imperia";
     const title = "{{ agent_designation|default:'Real Estate Consultant' }}";
     const vcard = ['BEGIN:VCARD', 'VERSION:3.0', 'N:' + name, 'FN:' + name, 'ORG:' + org, 'TITLE:' + title,
                    'TEL;TYPE=CELL:' + phone, 'URL:' + DCARD_URL, 'END:VCARD'].join('\n');
     const blob = new Blob([vcard], { type: 'text/vcard' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = name.replace(/\s+/g, '_') + '_EstateFlow.vcf';
+    link.download = name.replace(/\s+/g, '_') + '_KanishkaImperia.vcf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1700,6 +1773,69 @@ function openShareCard() {
         });
     } else { copyPageLink(); }
 }
+</script>
+
+
+<script>
+/* =========================================================
+   SMOOTH / EASED PAGE SCROLL
+   Intercepts mouse-wheel scrolling and animates it with easing
+   instead of jumping the raw wheel delta — gives a slower,
+   smoother scroll feel across the whole page.
+========================================================= */
+(function () {
+    // Respect users who've asked their OS/browser for reduced motion
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let targetY = window.scrollY;
+    let currentY = window.scrollY;
+    let ticking = false;
+    const EASE = 0.09;      // lower = smoother/slower, higher = snappier
+    const WHEEL_MULTIPLIER = 0.7; // lower = slower scroll per wheel tick
+
+    function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+    function onWheel(e) {
+        // Don't hijack scrolling inside elements meant to scroll internally
+        // (modals, dropdown panels, horizontally-scrolling strips, etc.)
+        if (e.target.closest('.mf-drawer, .mf-content, .autocomplete-drop, .modal, .quickjump-inner, .shorts-track, .filter-strip-inner, .ad-carousel')) return;
+
+        e.preventDefault();
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        targetY = clamp(targetY + e.deltaY * WHEEL_MULTIPLIER, 0, maxScroll);
+
+        if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(animateScroll);
+        }
+    }
+
+    function animateScroll() {
+        currentY += (targetY - currentY) * EASE;
+
+        if (Math.abs(targetY - currentY) < 0.5) {
+            currentY = targetY;
+            window.scrollTo(0, currentY);
+            ticking = false;
+            return;
+        }
+
+        window.scrollTo(0, currentY);
+        requestAnimationFrame(animateScroll);
+    }
+
+    // Keep our internal target in sync if the user scrolls via
+    // scrollbar drag, keyboard, or anchor links (not the wheel).
+    function onNativeScroll() {
+        if (!ticking) {
+            targetY = window.scrollY;
+            currentY = window.scrollY;
+        }
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('scroll', onNativeScroll, { passive: true });
+})();
 </script>
 </body>
 </html>

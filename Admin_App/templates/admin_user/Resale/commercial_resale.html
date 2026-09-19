@@ -424,49 +424,7 @@
 
               <div class="row">
 
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Property Type <span class="required">*</span></label>
-                    <select class="form-select form-control" id="property_type" name="property_type" required>
-                      <option value="">Select Property Type</option>
-                      <optgroup label="Office Properties">
-                        <option value="office_space">Office Space</option>
-                        <option value="it_park">IT Park / Tech Park Office</option>
-                        <option value="business_center">Business Center</option>
-                        <option value="coworking_space">Co-working Space</option>
-                      </optgroup>
-                      <optgroup label="Retail Properties">
-                        <option value="shop">Shop</option>
-                        <option value="showroom">Showroom</option>
-                        <option value="retail_store">Retail Store</option>
-                        <option value="shopping_mall_space">Mall Shop / Retail Space</option>
-                      </optgroup>
-                      <optgroup label="Industrial Properties">
-                        <option value="warehouse">Warehouse</option>
-                        <option value="godown">Godown</option>
-                        <option value="industrial_shed">Industrial Shed</option>
-                        <option value="factory">Factory</option>
-                        <option value="industrial_building">Industrial Building</option>
-                      </optgroup>
-                      <optgroup label="Hospitality & Service">
-                        <option value="hotel">Hotel</option>
-                        <option value="restaurant">Restaurant / Cafe</option>
-                        <option value="banquet_hall">Banquet Hall</option>
-                        <option value="service_center">Service Center</option>
-                      </optgroup>
-                      <optgroup label="Healthcare & Education">
-                        <option value="hospital">Hospital / Clinic</option>
-                        <option value="medical_shop">Medical Shop</option>
-                        <option value="school_college">School / College Building</option>
-                      </optgroup>
-                      <optgroup label="Other Commercial">
-                        <option value="mixed_use_building">Mixed Use Building</option>
-                        <option value="commercial_building">Commercial Building</option>
-                        <option value="business_complex">Business Complex</option>
-                      </optgroup>
-                    </select>
-                  </div>
-                </div>
+                
 
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
@@ -1032,12 +990,17 @@
                     </script>
                   </div>
                 </div>
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Area / Locality <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="locality" name="locality" placeholder="e.g., BKC" required>
-                  </div>
-                </div>
+
+
+            <div class="col-md-6 mt-2">
+    <div class="form-group">
+        <label class="form-label">Area / Locality <span class="required">*</span></label>
+        <input type="text" class="form-control" name="locality" id="locality" placeholder="e.g., Civil Lines" required>
+    </div>
+</div>
+
+
+
               </div><!-- /row -->
               
               <div class="form-group mt-2">
@@ -1118,10 +1081,7 @@
                   <label class="form-label">Longitude</label>
                   <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.1567">
                 </div>
-                <div class="col-md-6 mt-3">
-                  <label class="form-label">Pincode <span style="color:red;">*</span></label>
-                  <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440024" required>
-                </div>
+              
               </div>
             </div>
           </div><!-- /Address -->
@@ -2666,6 +2626,34 @@
   }
 
   
+
+// ================= SIMPLE PINCODE HANDLER (NO API DELAYS) =================
+document.getElementById('pincode').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 6);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 
 </body>

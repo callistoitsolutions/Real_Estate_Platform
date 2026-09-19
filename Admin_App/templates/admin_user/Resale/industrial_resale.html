@@ -942,12 +942,20 @@
                     </script>
                   </div>
                 </div>
+
+               
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label">Locality / Area <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="locality" name="locality" placeholder="e.g., Bhosari MIDC" required>
+                    <select class="form-select form-control" id="locality_area" required>
+                      <option value="">-- Enter pincode first --</option>
+                    </select>
+                    <input type="text" class="form-control mt-2" name="locality_manual" id="locality_area_manual" placeholder="Enter your locality/area name" style="display:none;">
+                    <input type="hidden" name="locality" id="locality_area_final">
                   </div>
                 </div>
+
+
               </div><!-- /row -->
 
               <div class="form-group mt-2">
@@ -2751,6 +2759,96 @@
     items.prop('checked', false);
     updateDisplay(section);
   };
+
+
+
+
+
+  // ================= PINCODE LOOKUP API & LOCALITY FALLBACK =================
+document.getElementById('pincode').addEventListener('blur', function () {
+    var pincode = this.value.trim();
+    if (pincode.length !== 6) return;
+
+    fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pincode)
+        .then(res => res.json())
+        .then(data => {
+            var localitySelect = document.getElementById('locality_area');
+            if (!localitySelect) return;
+            localitySelect.innerHTML = '';
+
+            if (!data.success) {
+                Swal.fire({ icon: 'warning', title: 'Invalid Pincode', text: data.error, confirmButtonColor: '#667eea' });
+                document.getElementById('city').value = '';
+                localitySelect.innerHTML = '<option value="">Invalid pincode</option>';
+                return;
+            }
+
+            document.getElementById('city').value = data.city;
+
+            var stateSelect = document.getElementById('state');
+            if (stateSelect) {
+                for (var i = 0; i < stateSelect.options.length; i++) {
+                    if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) {
+                        stateSelect.value = stateSelect.options[i].value;
+                        break;
+                    }
+                }
+            }
+
+            localitySelect.innerHTML = '<option value="">-- Select Locality --</option>';
+            data.localities.forEach(function (loc) {
+                var opt = document.createElement('option');
+                opt.value = loc;
+                opt.textContent = loc;
+                localitySelect.appendChild(opt);
+            });
+            var otherOpt = document.createElement('option');
+            otherOpt.value = '__other__';
+            otherOpt.textContent = '✏️ My locality is not listed (Enter manually)';
+            localitySelect.appendChild(otherOpt);
+
+            syncLocalityFinal();
+        })
+        .catch(function () {
+            Swal.fire({ icon: 'error', title: 'Lookup Failed', text: 'Could not verify pincode.', confirmButtonColor: '#667eea' });
+        });
+});
+
+function syncLocalityFinal() {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var finalInput = document.getElementById('locality_area_final');
+
+    if (!localitySelect || !manualInput || !finalInput) return;
+
+    if (localitySelect.value === '__other__') {
+        manualInput.style.display = 'block';
+        manualInput.required = true;
+        finalInput.value = manualInput.value.trim();
+    } else {
+        manualInput.style.display = 'none';
+        manualInput.required = false;
+        finalInput.value = localitySelect.value;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var industrialForm = document.getElementById('industrialForm');
+
+    if (localitySelect) localitySelect.addEventListener('change', syncLocalityFinal);
+    if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
+    if (industrialForm) industrialForm.addEventListener('submit', syncLocalityFinal);
+});
+
+
+
+
+
+
+
+
 </script>
 
 </body>

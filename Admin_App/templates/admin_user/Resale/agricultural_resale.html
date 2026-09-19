@@ -1308,11 +1308,18 @@
                     placeholder="e.g. 4.5" required>
                 </div>
 
+                
+
                 <div class="col-md-4 mb-3">
-                  <label class="form-label">Village <span class="required">*</span></label>
-                  <input type="text" class="form-control" id="village" name="village" placeholder="Enter Village"
-                    required>
+                  <label class="form-label">Pincode <span class="required">*</span></label>
+                  <input type="number" class="form-control" id="pincode" name="pincode" placeholder="e.g. 411014" maxlength="6" required>
                 </div>
+
+              <div class="col-md-4 mb-3">
+  <label class="form-label">Village / Locality <span class="required">*</span></label>
+  <input type="text" class="form-control" name="village" id="village" placeholder="e.g., Khapri" required>
+</div>
+                
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Taluka <span class="required">*</span></label>
                   <input type="text" class="form-control" id="taluka" name="taluka" placeholder="Enter Taluka" required>
@@ -3497,4 +3504,10 @@
         }
     });
   }
+
+
+// ================= SIMPLE PINCODE HANDLER (NO API DELAYS) =================
+document.getElementById('pincode').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 6);
+});
 </script>

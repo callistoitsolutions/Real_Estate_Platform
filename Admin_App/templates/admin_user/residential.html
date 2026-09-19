@@ -707,14 +707,35 @@
                                     <div class="col-md-12"><div class="form-group"><label class="form-label">Address <span class="required-star">*</span></label><textarea class="form-control" name="address" id="address" placeholder="Enter complete property address" required></textarea></div></div>
                                 </div>
                                 <div class="row mt-2">
+
+
+ <div class="col-md-6"><div class="form-group"><label class="form-label">Pincode <span class="required-star">*</span></label><input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440010" required></div></div>
+
+
+
                                     <div class="col-md-6"><div class="form-group"><label class="form-label">City <span class="required-star">*</span></label>
-                                    <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Pune" required>
+<input type="text" class="form-control" id="city" name="city" placeholder="Auto-filled from pincode" readonly required>
                                     <script>
                                     document.getElementById('city').addEventListener('input', function () {
                                         this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
                                     });
                                     </script></div></div>
-                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Locality/Area <span class="required-star">*</span></label><input type="text" class="form-control" name="locality_area" id="locality_area" placeholder="e.g., Dharampeth" required></div></div>
+
+
+
+                    <div class="col-md-6">
+    <div class="form-group">
+        <label class="form-label">Locality/Area <span class="required-star">*</span></label>
+        <select class="form-select form-control" id="locality_area" required>
+            <option value="">-- Enter pincode first --</option>
+        </select>
+        <input type="text" class="form-control mt-2" name="locality_area_manual" id="locality_area_manual"
+               placeholder="Enter your locality/area name" style="display:none;">
+        <input type="hidden" name="locality_area" id="locality_area_final">
+    </div>
+</div>
+
+
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-6"><div class="form-group"><label class="form-label">Property Landmark</label>
@@ -763,7 +784,10 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Pincode <span class="required-star">*</span></label><input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440010" required></div></div>
+
+                                   
+
+
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label"><i class="fas fa-road"></i> Main Road Connectivity</label>
@@ -1436,26 +1460,44 @@ $(document).ready(function () {
     var currentStep = 1;
     var totalSteps  = 4;
 
-    function validateStep(stepIndex) {
-        var isValid = true;
-        var stepEl = $('#step-' + stepIndex);
-        var requiredFields = stepEl.find('input[required], select[required], textarea[required]');
-        
-        requiredFields.removeClass('is-invalid');
-        $('#assignedToSearchSelect').removeClass('validation-error');
 
-        requiredFields.each(function () {
-            if (!$(this).val() || $(this).val().trim() === '') { 
-                isValid = false; 
-                $(this).addClass('is-invalid'); 
-                
-                if ($(this).attr('id') === 'assigned_to') {
-                    $('#assignedToSearchSelect').addClass('validation-error');
-                }
+
+
+
+function validateStep(stepIndex) {
+    var isValid = true;
+    var stepEl = $('#step-' + stepIndex);
+    var requiredFields = stepEl.find('input[required], select[required], textarea[required]');
+    
+    requiredFields.removeClass('is-invalid');
+    $('#assignedToSearchSelect').removeClass('validation-error');
+
+    requiredFields.each(function () {
+        if (!$(this).val() || $(this).val().trim() === '') { 
+            isValid = false; 
+            $(this).addClass('is-invalid'); 
+            
+            if ($(this).attr('id') === 'assigned_to') {
+                $('#assignedToSearchSelect').addClass('validation-error');
             }
-        });
-        return isValid;
+        }
+    });
+
+    // NEW: Handle "Other locality" manual entry validation
+    var localitySelect = $('#locality_area');
+    if (localitySelect.val() === '__other__' && $('#locality_area_manual').val().trim() === '') {
+        isValid = false;
+        $('#locality_area_manual').addClass('is-invalid');
     }
+
+    // NEW: Property Type + BHK business rule check (fields live on step 1)
+    if (stepIndex === 1 && !validatePropertyTypeBHK(true)) {
+        isValid = false;
+    }
+
+    return isValid;
+}
+
 
     $('.btn-next').off('click').on('click', function () {
         if (!validateStep(currentStep)) {
@@ -1510,10 +1552,13 @@ $(document).ready(function () {
                 syncCategoryInput(cat); 
             });
         }
-        var propNo = $('#property_no').val() || '';
-        var locality = $('#locality_area').val() || $('#locality').val() || '';
-        
-        if (!propNo.trim() || !locality.trim()) {
+
+
+       var propNo = $('#property_no').val() || '';
+var locality = $('#locality_area_final').val() || '';
+
+if (!propNo.trim() || !locality.trim()) {
+
             Swal.fire({
                 icon: 'error',
                 title: 'Missing Identification',
@@ -2451,5 +2496,157 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+
+
+
+
+</script>
+
+
+<script>
+document.getElementById('pincode').addEventListener('blur', function () {
+    var pincode = this.value.trim();
+    if (pincode.length !== 6) return;
+    fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pincode)
+        .then(res => res.json())
+        .then(data => {
+            var localitySelect = document.getElementById('locality_area');
+            localitySelect.innerHTML = '';
+            if (!data.success) {
+                Swal.fire({ icon: 'warning', title: 'Invalid Pincode', text: data.error, confirmButtonColor: '#667eea' });
+                document.getElementById('city').value = '';
+                localitySelect.innerHTML = '<option value="">Invalid pincode</option>';
+                return;
+            }
+            document.getElementById('city').value = data.city;
+            var stateSelect = document.getElementById('state');
+            for (var i = 0; i < stateSelect.options.length; i++) {
+                if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) {
+                    stateSelect.value = stateSelect.options[i].value;
+                    break;
+                }
+            }
+
+
+            localitySelect.innerHTML = '<option value="">-- Select Locality --</option>';
+data.localities.forEach(function (loc) {
+    var opt = document.createElement('option');
+    opt.value = loc;
+    opt.textContent = loc;
+    localitySelect.appendChild(opt);
+});
+var otherOpt = document.createElement('option');
+otherOpt.value = '__other__';
+otherOpt.textContent = '✏️ My locality is not listed (Enter manually)';
+localitySelect.appendChild(otherOpt);
+
+
+        })
+        .catch(function () {
+            Swal.fire({ icon: 'error', title: 'Lookup Failed', text: 'Could not verify pincode.', confirmButtonColor: '#667eea' });
+        });
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var finalInput = document.getElementById('locality_area_final');
+
+    function syncFinalValue() {
+        if (localitySelect.value === '__other__') {
+            manualInput.style.display = 'block';
+            manualInput.required = true;
+            finalInput.value = manualInput.value.trim();
+        } else {
+            manualInput.style.display = 'none';
+            manualInput.required = false;
+            finalInput.value = localitySelect.value;
+        }
+    }
+
+    localitySelect.addEventListener('change', syncFinalValue);
+    manualInput.addEventListener('input', syncFinalValue);
+
+    // Also sync right before form submit, in case user typed but didn't blur
+    document.getElementById('multiStepForm').addEventListener('submit', syncFinalValue);
+});
+
+
+
+
+const STUDIO_TYPE_PROPERTIES = ['Studio Apartment', 'Room', 'Shared Room', 'PG', 'Co-Living'];
+
+const FULL_BHK_PROPERTIES = [
+    'Apartment', 'Penthouse', 'Duplex Apartment', 'Independent House',
+    'Villa', 'Bungalow', 'Farm House', 'Independent Floor', 'Builder Floor',
+    'Duplex House', 'Triplex House', 'Serviced Apartment', 'Row House', 'Townhouse'
+];
+
+function handlePropertyTypeChange() {
+    var propType = document.getElementById('property_type').value;
+    var bhkSelect = document.getElementById('bhkk_type');
+
+    if (STUDIO_TYPE_PROPERTIES.includes(propType)) {
+        bhkSelect.value = '1 RK';
+        Array.from(bhkSelect.options).forEach(function (opt) {
+            opt.disabled = (opt.value !== '1 RK' && opt.value !== '');
+        });
+        bhkSelect.classList.remove('is-invalid');
+    } else if (FULL_BHK_PROPERTIES.includes(propType)) {
+        Array.from(bhkSelect.options).forEach(function (opt) {
+            opt.disabled = (opt.value === '1 RK');
+        });
+        if (bhkSelect.value === '1 RK') {
+            bhkSelect.value = '';
+        }
+    } else {
+        Array.from(bhkSelect.options).forEach(function (opt) { opt.disabled = false; });
+    }
+}
+
+function validatePropertyTypeBHK(showAlert) {
+    var propType = document.getElementById('property_type').value;
+    var bhkSelect = document.getElementById('bhkk_type');
+    var bhkVal = bhkSelect.value;
+
+    if (!propType || !bhkVal) return true;
+
+    if (STUDIO_TYPE_PROPERTIES.includes(propType) && bhkVal !== '1 RK') {
+        if (showAlert) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid BHK for Property Type',
+                text: '"' + propType + '" must use BHK = "1 RK".',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        bhkSelect.classList.add('is-invalid');
+        return false;
+    }
+
+    if (FULL_BHK_PROPERTIES.includes(propType) && bhkVal === '1 RK') {
+        if (showAlert) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid BHK for Property Type',
+                text: '"' + propType + '" cannot be "1 RK". Please select a proper BHK.',
+                confirmButtonColor: '#667eea'
+            });
+        }
+        bhkSelect.classList.add('is-invalid');
+        return false;
+    }
+
+    bhkSelect.classList.remove('is-invalid');
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var propTypeSelect = document.getElementById('property_type');
+    propTypeSelect.addEventListener('change', handlePropertyTypeChange);
+});
 
 </script>

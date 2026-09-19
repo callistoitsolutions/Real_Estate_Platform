@@ -3,7 +3,7 @@
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
-                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-brand">🏠 KANISHKAIMPERIA</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
                 <div class="footer-social mt-4 d-flex gap-3">
                     <a href="#"><i class="bi bi-facebook"></i></a>
@@ -30,12 +30,12 @@
                 <div class="fl-title">For Owners</div>
                 <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
                 <a href="#" class="fl-link">Agent Registration</a>
-                <a href="#" class="fl-link">PropCRM Plans</a>
-                <a href="#" class="fl-link">Contact Support</a>
+                <a href="#" class="fl-link">KANISHKAIMPERIA Plans</a>
+                <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Support</a>
             </div>
         </div>
         <div class="footer-bottom">
-            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+            <span>© 2026 KANISHKAIMPERIA · Nagpur, Maharashtra</span>
             <span>Privacy Policy · Terms · Sitemap</span>
         </div>
     </div>
@@ -303,7 +303,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const banner = document.getElementById('newListingBanner');
         if (banner) {
             banner.style.display = 'flex';
-            document.getElementById('newListingMsg').textContent = `"${data.title}" is now live! Visible to 1,248+ users on PropCRM.`;
+            document.getElementById('newListingMsg').textContent = `"${data.title}" is now live! Visible to 1,248+ users on KANISHKAIMPERIA.`;
         }
         localStorage.removeItem('newListingAdded');
         LISTINGS.unshift({...data, isNew:true, badges:['new'], listingType:'rent', bgColor:'#f1f5f9', emoji:'🏠'});
@@ -382,7 +382,7 @@ function toggleSave(id, btn) {
 
 function callListing(id) {
     const l = LISTINGS.find(x => x.id === id);
-    Swal.fire({ title: 'Contact Owner', html: `<div style="text-align:center;padding:8px;"><div style="font-size:1rem;font-weight:700;color:#1e293b;">${l ? l.owner : 'Owner'}</div><div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">📞 ${l ? l.rmPhone : '9876543210'}</div><div style="font-size:.8rem;color:#64748b;font-weight:500;">PropCRM Verified · Available 9AM–7PM</div></div>`, background: '#ffffff', color: '#1e293b', confirmButtonColor: '#006ce4', confirmButtonText: 'Call Now' });
+    Swal.fire({ title: 'Contact Owner', html: `<div style="text-align:center;padding:8px;"><div style="font-size:1rem;font-weight:700;color:#1e293b;">${l ? l.owner : 'Owner'}</div><div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">📞 ${l ? l.rmPhone : '9876543210'}</div><div style="font-size:.8rem;color:#64748b;font-weight:500;">KANISHKAIMPERIA Verified · Available 9AM–7PM</div></div>`, background: '#ffffff', color: '#1e293b', confirmButtonColor: '#006ce4', confirmButtonText: 'Call Now' });
 }
 
 function waListing(id) {

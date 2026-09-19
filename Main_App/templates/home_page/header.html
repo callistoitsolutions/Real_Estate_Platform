@@ -1,7 +1,15 @@
 {% load static %}
+
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+    <!-- End Google Tag Manager -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -17,10 +25,17 @@
 ============================================ */
 
 
+
+
+
+
+
+
+
+
 .premium-header {
-     --ph-navy: #16233a;
+    --ph-navy: #16233a;
     --ph-navy-2: #1f2f47;
-    --ph-navy-3: #263a54;
     --ph-gold: #c9a227;
     --ph-gold-light: #f1d888;
     --ph-pr2: #a5811c;
@@ -28,33 +43,81 @@
     --ph-text-body: #4b5568;
     --ph-bg: #f7f7f5;
 
-    background: linear-gradient(180deg, var(--ph-navy), var(--ph-navy-2));
-    padding: 0 25px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: none;
+    background: linear-gradient(180deg, #16233a, #1f2f47);
+    padding: 0 30px;
     position: sticky;
     top: 0;
     z-index: 9999; 
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 78px;
+    height: 90px;
     font-family: "DM Sans", sans-serif;
     box-sizing: border-box;
     transition: background .25s ease, box-shadow .25s ease, height .25s ease;
 }
 
-.premium-header.ph-scrolled {
-    background: #0b1730;
-    box-shadow: 0 6px 22px rgba(11, 23, 48, 0.28);
-    height: 66px;
+/* Transparent mode at the top of the page */
+.premium-header.header-transparent {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
 }
-.premium-header.ph-scrolled .logo img { height: 42px; }
 
+/* Scrolled state: turns solid white with dark text and visible buttons */
+.premium-header.ph-scrolled,
+.premium-header.header-transparent.ph-scrolled {
+    background: #ffffff !important;
+    box-shadow: 0 5px 20px rgba(0,0,0,.08) !important;
+    height: 72px !important;
+    border-bottom: 1px solid #e4e6ee !important;
+}
+
+.premium-header.ph-scrolled .desktop-menu > a,
+.premium-header.ph-scrolled .desktop-menu .nav-dropdown > a,
+.premium-header.header-transparent.ph-scrolled .desktop-menu > a,
+.premium-header.header-transparent.ph-scrolled .desktop-menu .nav-dropdown > a {
+    color: #16233a !important;
+}
+
+/* Post Property button color fix when scrolled onto white background */
+.premium-header.ph-scrolled .btn-nav-outline,
+.premium-header.header-transparent.ph-scrolled .btn-nav-outline {
+    border-color: #16233a !important;
+    color: #16233a !important;
+    background: transparent !important;
+}
+
+.premium-header.ph-scrolled .btn-nav-outline:hover,
+.premium-header.header-transparent.ph-scrolled .btn-nav-outline:hover {
+    background: #16233a !important;
+    color: #ffffff !important;
+}
+
+
+.premium-header {
+    height: 95px;
+    padding: 0 30px;
+}
+
+.premium-header.ph-scrolled {
+    height: 75px;
+}
+
+
+.premium-header.header-transparent.ph-scrolled .desktop-menu a:hover {
+    color: var(--menu-hover, #d4af37) !important;
+}
 
 .premium-header * {
     box-sizing: border-box;
 }
+
 
 
 .premium-header .logo {
@@ -67,8 +130,19 @@
     align-items: center;
     gap: 8px;
     letter-spacing: .2px;
-}
+    overflow: visible !important;
+} 
 
+.premium-header .logo img {
+    width: auto !important;
+    height: 70px !important;
+    max-height: 100% !important;
+    max-width: none !important;
+    object-fit: contain;
+    -webkit-font-smoothing: antialiased;
+    image-rendering: -webkit-optimize-contrast;
+    transition: all .3s ease;
+}
 
 .ef-breadcrumb-bar { background:#f7f7f5; border-bottom:1px solid #e4e6ee; padding:10px 25px; }
 .ef-breadcrumb-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:8px; font-size:.8rem; flex-wrap:wrap; }
@@ -80,12 +154,7 @@
 
 
 
-.premium-header .logo img {
-    height: 58px; 
-    width: auto;
-    object-fit: contain;
-    image-rendering: -webkit-optimize-contrast;
-}
+
 .premium-header .logo span { color: var(--ph-gold-light); }
 .premium-header .logo-badge {
     background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
@@ -104,37 +173,28 @@
     gap: 4px;
 }
 
-
 .premium-header {
     --header-bg: #ffffff;
     --header-text: #16233A;
-
     background: var(--header-bg);
     color: var(--header-text);
-
     width: 100%;
     z-index: 1000;
-
-    transition:
-        background .3s ease,
-        color .3s ease,
-        box-shadow .3s ease;
+    transition: background .3s ease, color .3s ease, box-shadow .3s ease;
 }
-
-
 
 /* ==========================================
    DYNAMIC HEADER
 ========================================== */
-
 .premium-header.header-transparent {
     background: transparent !important;
     box-shadow: none !important;
     border-bottom: 1px solid rgba(255,255,255,.15);
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
+    width: 100%;
 }
 
 .premium-header.header-transparent .nav-link,
@@ -144,51 +204,16 @@
     color: #ffffff !important;
 }
 
-.premium-header.header-transparent .dynamic-header-logo {
-    filter: none;
-}
+.premium-header.header-transparent .dynamic-header-logo { filter: none; }
+.premium-header.header-transparent .header-action { border-color: rgba(255,255,255,.5); color: #ffffff; }
 
-.premium-header.header-transparent .header-action {
-    border-color: rgba(255,255,255,.5);
-    color: #ffffff;
-}
+.premium-header.header-sticky { position: sticky; top: 0; }
+.premium-header.header-transparent.header-sticky { position: fixed; top: 0; left: 0; right: 0; width: 100%; }
 
 
-/* Sticky */
+.dynamic-header-logo { display: block; max-width: 100%; height: auto; object-fit: contain; transition: width .25s ease; }
 
-.premium-header.header-sticky {
-    position: sticky;
-    top: 0;
-}
-
-
-/* Transparent + sticky */
-
-.premium-header.header-transparent.header-sticky {
-    position: absolute;
-}
-
-
-/* Logo */
-
-.dynamic-header-logo {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-    transition: width .25s ease;
-}
-
-
-/* Mobile */
-
-@media (max-width: 768px) {
-
-    .dynamic-header-logo {
-        max-width: 160px;
-    }
-
-}
+@media (max-width: 768px) { .dynamic-header-logo { max-width: 160px; } }
 
 .premium-header .desktop-menu > a,
 .premium-header .desktop-menu .nav-dropdown > a {
@@ -196,25 +221,27 @@
     border-radius: 8px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--menu-color, rgba(255, 255, 255, 0.82));
     text-decoration: none;
     transition: .2s;
     white-space: nowrap;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     border-bottom: 2px solid transparent;
 }
 
 .premium-header .desktop-menu a:hover {
     background: rgba(255, 255, 255, 0.08);
-    color: var(--ph-gold-light);
+    color: var(--menu-hover, var(--ph-gold-light));
 }
 .premium-header .desktop-menu a.active {
-    color: var(--ph-gold-light);
+    color: var(--menu-hover, var(--ph-gold-light));
     background: rgba(212, 175, 55, 0.12);
-    border-bottom-color: var(--ph-gold);
+    border-bottom-color: var(--menu-hover, var(--ph-gold));
 }
 
-/* MAIN NAVIGATION DROPDOWN */
+/* MAIN NAVIGATION DROPDOWN (Luxury App Style) */
 .nav-dropdown {
     position: relative;
     display: inline-block;
@@ -226,26 +253,34 @@
     top: 100%;
     left: 0;
     background: #ffffff;
-    min-width: 220px;
-    border-radius: 10px;
-    box-shadow: 0 16px 34px rgba(11, 23, 48, 0.18);
+    min-width: 250px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(11, 23, 48, 0.15);
     border: 1px solid var(--ph-border);
     z-index: 10000;
-    padding: 8px 0;
+    padding: 12px 0;
     margin-top: 8px;
 }
 
 .nav-dropdown:hover .nav-dropdown-menu {
     display: block;
+    animation: fadeInDrop 0.2s ease forwards;
+}
+
+@keyframes fadeInDrop {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .premium-header .desktop-menu .nav-dropdown-menu a {
-    display: block;
-    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
     border-radius: 0;
     border-bottom: none;
-    font-weight: 500;
-    font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.88rem;
     color: var(--ph-text-body);
     text-decoration: none;
     transition: 0.2s;
@@ -253,9 +288,22 @@
     text-align: left;
 }
 
+.premium-header .desktop-menu .nav-dropdown-menu a i {
+    font-size: 1.1rem;
+    color: var(--ph-gold);
+    width: 20px;
+    text-align: center;
+    transition: 0.2s;
+}
+
 .premium-header .desktop-menu .nav-dropdown-menu a:hover {
-    background: #fbf4de;
+    background: #fdfaf0;
+    color: var(--ph-navy);
+}
+
+.premium-header .desktop-menu .nav-dropdown-menu a:hover i {
     color: var(--ph-pr2);
+    transform: scale(1.1);
 }
 
 .premium-header .nav-right {
@@ -263,7 +311,6 @@
     gap: 10px;
     align-items: center;
 }
-
 
 .premium-header .btn-nav-outline,
 .premium-header .btn-nav-pr {
@@ -307,15 +354,9 @@
     border: none;
     cursor: pointer;
 }
-.premium-header .mobile-menu-btn i {
-    font-size: 1.8rem;
-    color: var(--ph-gold-light);
-}
+.premium-header .mobile-menu-btn i { font-size: 1.8rem; color: var(--ph-gold-light); }
 
 /* Mobile Dropdown scoped class */
-
-
-
 .hdr-mobile-overlay {
     display: none;
     position: fixed; inset: 0;
@@ -328,7 +369,7 @@
     position: fixed;
     top: 0; right: 0;
     height: 100vh;
-    width: 300px;
+    width: 320px;
     max-width: 85vw;
     padding: 0;
     background: #ffffff;
@@ -342,9 +383,21 @@
     transform: translateX(100%);
     transition: transform .3s ease;
 }
-.hdr-mobile-menu.show {
-    transform: translateX(0);
+
+.premium-header .desktop-menu .ph-menu-badge,
+.hdr-mobile-menu .ph-menu-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    color: #16233a;
+    margin-left: 6px;
+    vertical-align: middle;
 }
+
+.hdr-mobile-menu.show { transform: translateX(0); }
 .hdr-mobile-head {
     background: linear-gradient(135deg, var(--ph-navy,#0b1730), var(--ph-navy-2,#101f3d));
     padding: 20px;
@@ -360,8 +413,22 @@
 }
 .hdr-mobile-close:hover { background: rgba(255,255,255,.25); }
 
+/* Mobile Navigation Categories */
+.mob-nav-category {
+    padding: 18px 20px 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--ph-gold2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: #fdfaf0;
+    border-bottom: 1px solid #e4e6ee;
+}
+
 .hdr-mobile-menu a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 14px 20px;
     font-weight: 600;
     font-size: 0.9rem;
@@ -369,17 +436,11 @@
     text-decoration: none;
     border-bottom: 1px solid #e4e6ee;
 }
+.hdr-mobile-menu a i { color: var(--ph-gold); font-size: 1.1rem; }
 .hdr-mobile-menu a:last-child { border-bottom: none; }
 .hdr-mobile-menu a:hover { color: #a5811c; background: #fbf4de; }
 
-
-
-
 /* PROFILE DROPDOWN */
-
-
-
-/* PROFILE PANEL — slides in from the right, like housing.com */
 .custom-dropdown-overlay {
     display: none;
     position: fixed; inset: 0;
@@ -405,20 +466,14 @@
     transform: translateX(100%);
     transition: transform .3s ease;
 }
-.custom-dropdown-menu.show {
-    transform: translateX(0);
-}
-
+.custom-dropdown-menu.show { transform: translateX(0); }
 
 .custom-dropdown-head {
     background: linear-gradient(135deg, var(--ph-navy,#0b1730), var(--ph-navy-2,#101f3d));
     padding: 24px 20px;
     display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
 }
-.custom-dropdown-head .cdh-user {
-    display: flex; align-items: center; gap: 12px;
-    flex: 1 1 auto; min-width: 0;
-}
+.custom-dropdown-head .cdh-user { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
 .custom-dropdown-head .cdh-avatar {
     width: 46px; height: 46px; min-width: 46px; max-width: 46px;
     border-radius: 50%;
@@ -428,286 +483,230 @@
     flex-shrink: 0; flex-grow: 0;
     box-sizing: border-box;
 }
-.custom-dropdown-head .cdh-name {
-    color: #fff; font-weight: 700; font-size: .95rem;
-    line-height: 1.3; word-break: break-word;
-}
+.custom-dropdown-head .cdh-name { color: #fff; font-weight: 700; font-size: .95rem; line-height: 1.3; word-break: break-word; }
 .custom-dropdown-head .cdh-role { color: #f1d888; font-size: .74rem; margin-top: 2px; }
-
 .custom-dropdown-close {
-    background: rgba(255,255,255,.12);
-    border: none; color: #fff;
-    width: 30px; height: 30px;
-    min-width: 30px; max-width: 30px;
-    min-height: 30px; max-height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .85rem;
-    flex-shrink: 0; flex-grow: 0;
-    padding: 0;
-    box-sizing: border-box;
-    line-height: 1;
+    background: rgba(255,255,255,.12); border: none; color: #fff;
+    width: 30px; height: 30px; min-width: 30px; max-width: 30px;
+    min-height: 30px; max-height: 30px; border-radius: 50%;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; flex-shrink: 0; flex-grow: 0; padding: 0; box-sizing: border-box; line-height: 1;
 }
 .custom-dropdown-close:hover { background: rgba(255,255,255,.25); }
 
-.custom-dropdown-menu nav {
-    padding: 10px 0 20px;
-}
+.custom-dropdown-menu nav { padding: 10px 0 20px; }
 .custom-dropdown-menu a,
 .custom-dropdown-menu button {
-    display: flex;
-    align-items: center;
-    padding: 14px 22px;
-    color: #33404f;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.92rem;
-    background: transparent;
-    border: none;
-    width: 100%;
-    text-align: left;
-    transition: 0.2s;
+    display: flex; align-items: center; padding: 14px 22px; color: #33404f;
+    text-decoration: none; font-weight: 600; font-size: 0.92rem;
+    background: transparent; border: none; width: 100%; text-align: left; transition: 0.2s;
 }
 .custom-dropdown-menu a:hover,
-.custom-dropdown-menu button:hover {
-    background: #fbf4de;
-    color: #a5811c;
-}
+.custom-dropdown-menu button:hover { background: #fbf4de; color: #a5811c; }
 .custom-dropdown-menu a i,
-.custom-dropdown-menu button i {
-    margin-right: 14px;
-    color: #a5811c;
-    font-size: 1.15rem;
-    width: 20px;
-}
-/* ============================================
-   RESPONSIVE ADJUSTMENTS
-============================================ */
+.custom-dropdown-menu button i { margin-right: 14px; color: #a5811c; font-size: 1.15rem; width: 20px; }
+
+
+#phHeaderSpacer { width: 100%; }
+
+
+
 @media(max-width:900px) {
-    .premium-header { padding: 0 15px; height: 68px; }
-    .premium-header .logo img { height: 42px; }
+
+    .premium-header {
+        padding: 0 15px;
+        height: 70px;
+    }
+
+    .premium-header .logo img {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+    }
+    
+   
+
+
+    .premium-header .logo { margin: 0 !important; order: 0 !important; }
     .premium-header .desktop-menu { display: none; }
     .premium-header .mobile-menu-btn { display: block; }
     .premium-header .nav-right .btn-nav-outline { display: none; }
 
-    .premium-header .btn-nav-pr {
-        max-width: 180px;
+    /* Logged-in state: collapse the "Hello Name" pill to just an avatar icon
+       so it never fights the hamburger for space. Full name/role/logout
+       still live in the mobile slide-out menu's Account section. */
+    .premium-header .nav-right #loginDropdown.btn-nav-pr {
+        max-width: 40px;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
+    .premium-header .nav-right #loginDropdown.btn-nav-pr span,
+    .premium-header .nav-right #loginDropdown.btn-nav-pr .bi-chevron-down {
+        display: none;
+    }
+    .premium-header .nav-right #loginDropdown.btn-nav-pr i.bi-person {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    /* Logged-out Login button keeps its label but stays compact */
+    .premium-header .btn-nav-pr:not(#loginDropdown) { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
-
-
 @media(max-width: 500px) {
     .premium-header { padding: 0 10px; }
     .premium-header .logo { font-size: 1.15rem; gap: 4px; }
     .premium-header .logo-badge { display: none; }
-
-    .premium-header .btn-nav-pr {
-        max-width: 140px;
-        padding: 7px 12px;
-        font-size: 0.75rem;
-    }
-
+    .premium-header .btn-nav-pr { max-width: 140px; padding: 7px 12px; font-size: 0.75rem; }
     .premium-header .mobile-menu-btn i { font-size: 1.6rem; }
     .premium-header .nav-right { gap: 6px; }
 }
 
+
+/* Admin Logo Control */
+
+
+
+
 /* ============================================
    AI CHATBOT LAUNCHER + PANEL
-   Scoped under .ef-chat-* — recolored to the
-   navy / gold identity, structure untouched.
 ============================================ */
-
-.ef-chat-fab{
-    position:fixed; right:22px; bottom:22px; z-index:10050;
-    width:60px; height:60px; border-radius:50%;
-    background:linear-gradient(135deg,#c9a227,#a5811c);
-    color:#0b1730; border:none; box-shadow:0 10px 25px rgba(201,162,39,.4);
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.6rem; cursor:pointer; transition:.2s;
-}
+.ef-chat-fab{ position:fixed; right:22px; bottom:22px; z-index:10050; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,#c9a227,#a5811c); color:#0b1730; border:none; box-shadow:0 10px 25px rgba(201,162,39,.4); display:flex; align-items:center; justify-content:center; font-size:1.6rem; cursor:pointer; transition:.2s; }
 .ef-chat-fab:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(201,162,39,.5); }
-.ef-chat-fab .ef-chat-dot{
-    position:absolute; top:6px; right:6px; width:10px; height:10px; border-radius:50%;
-    background:#22c55e; border:2px solid #fff;
-}
+.ef-chat-fab .ef-chat-dot{ position:absolute; top:6px; right:6px; width:10px; height:10px; border-radius:50%; background:#22c55e; border:2px solid #fff; }
 
-.ef-wa-fab {
-    position: fixed; right: 22px; bottom: 96px; z-index: 10050;
-    width: 56px; height: 56px; border-radius: 50%;
-    background: #22c55e; color: #fff; border: none;
-    box-shadow: 0 10px 24px rgba(34,197,94,.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.45rem; cursor: pointer; text-decoration: none; transition: .2s;
-}
+.ef-wa-fab { position: fixed; right: 22px; bottom: 96px; z-index: 10050; width: 56px; height: 56px; border-radius: 50%; background: #22c55e; color: #fff; border: none; box-shadow: 0 10px 24px rgba(34,197,94,.4); display: flex; align-items: center; justify-content: center; font-size: 1.45rem; cursor: pointer; text-decoration: none; transition: .2s; }
 .ef-wa-fab:hover { background: #16a34a; color: #fff; transform: translateY(-2px); box-shadow: 0 14px 30px rgba(34,197,94,.5); }
 
-@media(max-width:500px){
-    .ef-wa-fab{ right:16px; bottom:82px; width:50px; height:50px; font-size:1.3rem; }
-}
+@media(max-width:500px){ .ef-wa-fab{ right:16px; bottom:82px; width:50px; height:50px; font-size:1.3rem; } }
 
-
-.ef-chat-panel{
-    position:fixed; right:22px; bottom:96px; z-index:10050;
-    width:360px; max-width:92vw; height:520px; max-height:75vh;
-    background:#fff; border-radius:18px; overflow:hidden;
-    box-shadow:0 20px 50px rgba(11,23,48,.3);
-    font-family:"DM Sans",sans-serif;
-    display:none; flex-direction:column;
-    border:1px solid #e4e6ee;
-}
+.ef-chat-panel{ position:fixed; right:22px; bottom:96px; z-index:10050; width:360px; max-width:92vw; height:520px; max-height:75vh; background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 20px 50px rgba(11,23,48,.3); font-family:"DM Sans",sans-serif; display:none; flex-direction:column; border:1px solid #e4e6ee; }
 .ef-chat-panel.show{ display:flex; }
-
-.ef-chat-head{
-    background:linear-gradient(90deg,#0b1730,#16294d); color:#fff;
-    padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
-    border-bottom: 1px solid rgba(212,175,55,.25);
-}
+.ef-chat-head{ background:linear-gradient(90deg,#0b1730,#16294d); color:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid rgba(212,175,55,.25); }
 .ef-chat-head .ef-chat-title{ font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:8px; color: #f1d888; }
 .ef-chat-head .ef-chat-sub{ font-size:.72rem; opacity:.8; font-weight:400; color: #fff; }
 .ef-chat-head button{ background:transparent; border:none; color:#fff; font-size:1.2rem; cursor:pointer; line-height:1; }
-
 .ef-chat-body{ flex:1; overflow-y:auto; padding:14px; background:#f7f7f5; }
 .ef-chat-msg{ max-width:86%; padding:9px 12px; border-radius:14px; margin-bottom:8px; font-size:.85rem; line-height:1.4; white-space:pre-wrap; }
 .ef-chat-msg.bot{ background:#fff; border:1px solid #e4e6ee; border-top-left-radius:4px; color:#1a2338; }
 .ef-chat-msg.user{ background:linear-gradient(135deg,#c9a227,#a5811c); color:#0b1730; margin-left:auto; border-top-right-radius:4px; font-weight:600; }
 .ef-chat-msg.sys{ background:#fef2f2; border:1px solid #fecaca; color:#991b1b; font-size:.78rem; }
 .ef-chat-opts{ margin-top:6px; }
-.ef-chat-opts button{
-    border:1px solid #e9d9a8; background:#fff; color:#a5811c; border-radius:10px;
-    padding:6px 10px; margin:3px 4px 0 0; font-weight:600; font-size:.76rem; cursor:pointer;
-}
+.ef-chat-opts button{ border:1px solid #e9d9a8; background:#fff; color:#a5811c; border-radius:10px; padding:6px 10px; margin:3px 4px 0 0; font-weight:600; font-size:.76rem; cursor:pointer; }
 .ef-chat-opts button:hover{ background:#fbf4de; }
 .ef-chat-typing{ font-size:.75rem; color:#94a3b8; padding:0 4px 6px; }
-
 .ef-chat-foot{ padding:10px 12px; border-top:1px solid #e4e6ee; background:#fff; display:flex; gap:8px; }
-.ef-chat-foot input{
-    flex:1; border:1px solid #e4e6ee; border-radius:10px; padding:9px 12px; font-size:.85rem; outline:none;
-}
+.ef-chat-foot input{ flex:1; border:1px solid #e4e6ee; border-radius:10px; padding:9px 12px; font-size:.85rem; outline:none; }
 .ef-chat-foot input:focus{ border-color:#c9a227; }
-.ef-chat-foot button{
-    background:#0b1730; color:#f1d888; border:none; border-radius:10px; padding:0 14px; font-weight:700; cursor:pointer;
-}
+.ef-chat-foot button{ background:#0b1730; color:#f1d888; border:none; border-radius:10px; padding:0 14px; font-weight:700; cursor:pointer; }
 .ef-chat-foot button:hover{ background:#16294d; }
 
-@media(max-width:500px){
-    .ef-chat-panel{ right:10px; left:10px; width:auto; bottom:88px; }
-    .ef-chat-fab{ right:16px; bottom:16px; }
-}
-
-
-
-
-
+@media(max-width:500px){ .ef-chat-panel{ right:10px; left:10px; width:auto; bottom:88px; } .ef-chat-fab{ right:16px; bottom:16px; } }
 </style>
+
+</head>
 
 
 <header
     class="
         premium-header
-
-        {% if header_settings and header_settings.sticky_header %}
-            header-sticky
-        {% endif %}
-
-        {% if header_settings and header_settings.transparent_header %}
-            header-transparent
-        {% endif %}
+        {% if header_settings and header_settings.sticky_header %}header-sticky{% endif %}
+        {% if header_settings and header_settings.transparent_header %}header-transparent{% endif %}
     "
     style="
-        --header-bg:
-        {% if header_settings %}
-            {{ header_settings.header_background }}
-        {% else %}
-            #ffffff
-        {% endif %};
-
-        --header-text:
-        {% if header_settings %}
-            {{ header_settings.header_text_color }}
-        {% else %}
-            #16233A
-        {% endif %};
+        --header-bg: {% if header_settings %}{{ header_settings.header_background }}{% else %}#ffffff{% endif %};
+        --header-text: {% if header_settings %}{{ header_settings.header_text_color }}{% else %}#16233A{% endif %};
+        --menu-color: {% if header_settings %}{{ header_settings.menu_text_color }}{% else %}#ffffff{% endif %};
+        --menu-hover: {% if header_settings %}{{ header_settings.menu_hover_color }}{% else %}#d4af37{% endif %};
     "
 >
 
-    <a href="{% url 'index' %}" class="logo">
- 
-        <a href="/" class="brand-logo">
+<!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
-    {% if header_settings and header_settings.logo %}
-
+    <a href="{% url 'index' %}" class="logo brand-logo text-decoration-none"
+   style="
+       {% if header_settings.logo_position == 'center' %}margin:0 auto;{% elif header_settings.logo_position == 'right' %}margin-left:auto; order:3;{% else %}margin-right:auto;{% endif %}
+   ">
+       
+ {% if header_settings and header_settings.logo %}
         <img
             src="{{ header_settings.logo.url }}"
             alt="{{ header_settings.logo_alt }}"
             class="dynamic-header-logo"
-            style="width: {{ header_settings.logo_width }}px;"
+            style="width: auto; height: auto; max-width: {{ header_settings.logo_width|default:180 }}px; max-height: {{ header_settings.logo_height|default:80 }}px; object-fit: contain; -webkit-font-smoothing: antialiased; image-rendering: -webkit-optimize-contrast;"
         >
+        {% else %}
 
-    {% else %}
 
-        <img
-            src="{% static 'assets/img/kanishka_imperia_logo_original_size.png' %}"
-            alt="KANISHKAIMPERIA"
-            class="dynamic-header-logo"
-        >
+            <img
+                src="{% static 'assets/img/kanishka_imperia_logo_original_size.png' %}"
+                alt="KANISHKAIMPERIA"
+                class="dynamic-header-logo"
+            >
+        {% endif %}
+    </a>
 
-    {% endif %}
-
-</a>
-</a>
     <nav class="desktop-menu">
         <a href="{% url 'index' %}" hidden class="{% if request.path == '/' %}active{% endif %}">Home</a>
 
+        <!-- LUXURY RENTALS DROPDOWN -->
         <div class="nav-dropdown">
-            <a href="#">For Rent</a>
+            <a href="#">Rent & Lease <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
             <div class="nav-dropdown-menu">
-                <a href="/listingpage/?type=rent&category=Residential+Data">Residential Rental</a>
-                <a href="/listingpage/?type=rent&category=Commercial+Data">Commercial Rental</a>
-                <a href="/listingpage/?type=rent&category=PG+Data">PG / Co-Living</a>
+                <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Premium Residences</a>
+                <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial Spaces</a>
+                <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> Co-Living / PG</a>
             </div>
         </div>
 
+        <!-- LUXURY SALES DROPDOWN -->
         <div class="nav-dropdown">
-            <a href="#">For Sale</a>
+            <a href="#">Buy & Invest <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
             <div class="nav-dropdown-menu">
-                <a href="/listingpage/?type=sale&category=Resale+Residential">Residential Resale</a>
-                <a href="/listingpage/?type=sale&category=Commercial+Resale">Commercial Resale</a>
-                <a href="/listingpage/?type=sale&category=Plot+Resale">Plot Sale</a>
-                <a href="/listingpage/?type=sale&category=Agricultural+Data">Agricultural Land</a>
-                <a href="/listingpage/?type=sale&category=Industrial+Resale">Industrial Property</a>
+                <a href="/listingpage/?type=sale&category=residential"><i class="bi bi-house-door"></i> Luxury Residences</a>
+                <a href="/listingpage/?type=sale&category=commercial"><i class="bi bi-briefcase"></i> Commercial Investments</a>
+                <a href="/listingpage/?type=sale&category=plot"><i class="bi bi-map"></i> Land & Plots</a>
+                <a href="/listingpage/?type=sale&category=agricultural"><i class="bi bi-tree"></i> Agricultural Estates</a>
+                <a href="/listingpage/?type=sale&category=industrial"><i class="bi bi-factory"></i> Industrial Assets</a>
             </div>
         </div>
 
-        <a href="{% url 'services' %}">Services</a>
+                <a href="{% url 'services' %}">
+            Services
+            {% if header_settings.show_badge and header_settings.badge_menu_label == "Services" %}
+                <span class="ph-menu-badge" style="background:{{ header_settings.badge_color }};">{{ header_settings.badge_text }}</span>
+            {% endif %}
+        </a>
         <a href="{% url 'blog' %}">News/Guide</a>
 
-    {% comment %} <a href="{% url 'dynamic_property_faq' %}">FAQs</a> {% endcomment %}
-</li>
-
-        <a href="{% url 'Adminlogin' %}">Admin</a>
+        <a href="{% url 'Adminlogin' %}" hidden>Admin</a>
         <a href="{% url 'Contact_Us' %}">Contact Us</a>
-
-
     </nav>
 
-    <div class="nav-right">
-        <a href="{% url 'post_property' %}" class="btn-nav-outline">
-            <i class="bi bi-plus-lg"></i> Post Property FREE
+       <div class="nav-right">
+        {% if header_settings.show_primary_btn|default_if_none:True %}
+        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'post_property' %}{% endif %}"
+           class="btn-nav-outline"
+           style="{% if header_settings.primary_btn_bg and header_settings.primary_btn_bg != 'transparent' %}background:{{ header_settings.primary_btn_bg }};{% endif %}{% if header_settings.primary_btn_text_color %}color:{{ header_settings.primary_btn_text_color }};{% endif %}">
+            <i class="bi bi-plus-lg"></i> {{ header_settings.primary_btn_text|default:"Post Property FREE" }}
         </a>
+        {% endif %}
 
         {% if user_obj %}
         <div class="dropdown d-inline-block" style="position: relative;">
 
-            <a href="#" class="btn-nav-pr text-decoration-none" id="loginDropdown" onclick="toggleProfileMenu(event)">
-                <i class="bi bi-person"></i> Hello {{user_obj.user_name}}-{{user_obj.user_role}}
-                <i class="bi bi-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
-            </a>
-
-                                            <div class="custom-dropdown-overlay" id="profileOverlay" onclick="toggleProfileMenu(event)"></div>
+         <a href="#" class="btn-nav-pr text-decoration-none" id="loginDropdown" onclick="toggleProfileMenu(event)">
+    <i class="bi bi-person"></i> <span>Hello {{user_obj.user_name}}-{{user_obj.user_role}}</span>
+    <i class="bi bi-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
+</a>
+            <div class="custom-dropdown-overlay" id="profileOverlay" onclick="toggleProfileMenu(event)"></div>
             <div class="custom-dropdown-menu" id="profileMenu">
                 <div class="custom-dropdown-head">
                     <div class="cdh-user">
@@ -721,7 +720,6 @@
                 </div>
                 <nav>
                 {% if user_obj.user_role == "Landlord" %}
-
                     <a href="{% url 'landlord_dashboard' %}" target="_blank">
                 {% elif user_obj.user_role == "Tenant" %}
                     <a href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank">
@@ -747,49 +745,93 @@
                     <i class="bi bi-search"></i> Searched Properties
                 </a>
 
-
-
-                             <button onclick="User_Logout()">
+                 <button onclick="User_Logout()">
                     <i class="bi bi-door-closed"></i> Logout
                 </button>
                 </nav>
             </div>
         </div>
 
-
-
-        {% else %}
-            <a href="{% url 'login' %}" class="btn-nav-pr">
-                <i class="bi bi-box-arrow-in-right"></i> Login
+              {% else %}
+            {% if header_settings.show_secondary_btn|default_if_none:True %}
+            <a href="{% if header_settings.secondary_btn_url %}{{ header_settings.secondary_btn_url }}{% else %}{% url 'login' %}{% endif %}"
+               class="btn-nav-pr">
+                <i class="bi bi-box-arrow-in-right"></i> {{ header_settings.secondary_btn_text|default:"Login" }}
             </a>
+            {% endif %}
         {% endif %}
     </div>
 
     
-        <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)">
+    <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)">
         <i class="bi bi-list"></i>
     </button>
 
+    <!-- UPDATED MOBILE MENU -->
     <div class="hdr-mobile-overlay" id="hdrMobileOverlay" onclick="toggleHdrMenu(event)"></div>
     <div id="hdrMobileMenu" class="hdr-mobile-menu">
         <div class="hdr-mobile-head">
             <span>Menu</span>
             <button class="hdr-mobile-close" onclick="toggleHdrMenu(event)" aria-label="Close"><i class="bi bi-x-lg"></i></button>
         </div>
-        <a href="{% url 'index' %}">Home</a>
-        <a href="/listingpage/?type=rent">For Rent</a>
-        <a href="/listingpage/?type=sale">For Sale</a>
-        <a href="{% url 'services' %}">Services</a>
-        <a href="{% url 'blog' %}">News/Guide</a>
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'Adminlogin' %}">Admin Login</a>
-        <a href="{% url 'Contact_Us' %}">Contact Us</a>
-        <a href="{% url 'post_property' %}">Post Property FREE</a>
-    </div>
-</header>
+        
+        <a href="{% url 'index' %}"><i class="bi bi-house"></i> Home</a>
+        
+        <!-- Luxury Mobile Nav Categories -->
+        <div class="mob-nav-category">Rent & Lease</div>
+        <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Premium Residences</a>
+        <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial Spaces</a>
+        <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> Co-Living / PG</a>
+        
+        <div class="mob-nav-category">Buy & Invest</div>
+        <a href="/listingpage/?type=sale&category=residential"><i class="bi bi-house-door"></i> Luxury Residences</a>
+        <a href="/listingpage/?type=sale&category=commercial"><i class="bi bi-briefcase"></i> Commercial Investments</a>
+        <a href="/listingpage/?type=sale&category=plot"><i class="bi bi-map"></i> Land & Plots</a>
+        <a href="/listingpage/?type=sale&category=agricultural"><i class="bi bi-tree"></i> Agricultural Estates</a>
+        <a href="/listingpage/?type=sale&category=industrial"><i class="bi bi-factory"></i> Industrial Assets</a>
 
+        <div class="mob-nav-category">More Links</div>
+        <a href="{% url 'services' %}"><i class="bi bi-star"></i> Services</a>
+        <a href="{% url 'blog' %}"><i class="bi bi-journal-text"></i> News/Guide</a>
+        <a href="{% url 'Contact_Us' %}"><i class="bi bi-envelope"></i> Contact Us</a>
+        <a href="{% url 'post_property' %}"><i class="bi bi-plus-circle"></i> Post Property FREE</a>
+        
+        
+        <div class="mob-nav-category">Account</div>
+{% if user_obj %}
+    {% if user_obj.user_role == "Landlord" %}
+        <a href="{% url 'landlord_dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% elif user_obj.user_role == "Tenant" %}
+        <a href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% elif user_obj.user_role == "Buyer" %}
+        <a href="{% url 'Buyer_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% elif user_obj.user_role == "Agent" %}
+        <a href="{% url 'agent_dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% elif user_obj.user_role == "Agency/Builder" %}
+        <a href="{% url 'Agency_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% elif user_obj.user_role == "Vendor" %}
+        <a href="{% url 'Vendors:vendors_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% elif user_obj.user_role == "Relationship Manager" %}
+        <a href="{% url 'rm_dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
+    {% endif %}
+    <a href="{% url 'Wishlist_Property' %}"><i class="bi bi-heart"></i> Wishlist Properties</a>
+    <a href="#" onclick="User_Logout(); return false;"><i class="bi bi-door-closed"></i> Logout ({{ user_obj.user_name }})</a>
+{% else %}
+    <a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> User Login</a>
+{% endif %}
+<a href="{% url 'Adminlogin' %}" hidden><i class="bi bi-shield-lock"></i> Admin Login</a>
+        
+
+
+
+    </div>
+
+    </header>
+<div id="phHeaderSpacer"></div>
 
 {% if breadcrumbs %}
+
+
 <div class="ef-breadcrumb-bar">
     <div class="ef-breadcrumb-inner">
         <a href="{% url 'index' %}"><i class="bi bi-house-door-fill"></i> Home</a>
@@ -806,7 +848,7 @@
 {% endif %}
 
 
-<a class="ef-wa-fab" href="https://wa.me/919000000000?text={{ 'Hi Kanishka Imperia, I would like to know more about your properties.'|urlencode }}" target="_blank" rel="noopener" aria-label="Chat with Kanishka Imperia on WhatsApp">
+<a class="ef-wa-fab" href="https://wa.me/9175791501?text={{ 'Hi Kanishka Imperia, I would like to know more about your properties.'|urlencode }}" target="_blank" rel="noopener" aria-label="Chat with Kanishka Imperia on WhatsApp">
     <i class="bi bi-whatsapp"></i>
 </a>
 
@@ -874,26 +916,11 @@ document.addEventListener('click', function(e) {
     if (mobileMenu && mobileMenu.classList.contains('show')) {
         if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
             mobileMenu.classList.remove('show');
-        }
-    }
-
-    // Handle profile menu close
-   
-
-        // Handle profile menu close
-   
-
-            // Handle mobile menu close
-    if (mobileMenu && mobileMenu.classList.contains('show')) {
-        if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
-            mobileMenu.classList.remove('show');
             const mobileOverlay = document.getElementById("hdrMobileOverlay");
             if (mobileOverlay) mobileOverlay.classList.remove('show');
         }
     }
 });
-
-// User Logout Script using SweetAlert2
 
 
 // Header background change on scroll (like housing.com)
@@ -909,6 +936,39 @@ document.addEventListener('click', function(e) {
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+})();
+
+// Reserve space below the fixed header so page content and the breadcrumb
+// bar are never hidden behind it. Skipped automatically on pages where the
+// hero section sits directly under the header, since it's meant to overlay it.
+(function() {
+    const headerEl = document.querySelector('.premium-header');
+    const spacer = document.getElementById('phHeaderSpacer');
+    if (!headerEl || !spacer) return;
+
+    function getNextFlowSibling(el) {
+        let sib = el.nextElementSibling;
+        while (sib && getComputedStyle(sib).position === 'fixed') {
+            sib = sib.nextElementSibling;
+        }
+        return sib;
+    }
+
+    function updateSpacer() {
+        const isTransparent = headerEl.classList.contains('header-transparent');
+        if (!isTransparent) {
+            spacer.style.height = '0px';
+            return;
+        }
+        const nextEl = getNextFlowSibling(spacer);
+        const hasHeroNext = nextEl && nextEl.classList.contains('hero');
+        spacer.style.height = hasHeroNext ? '0px' : headerEl.offsetHeight + 'px';
+    }
+
+    window.addEventListener('load', updateSpacer);
+    window.addEventListener('resize', updateSpacer);
+    window.addEventListener('scroll', updateSpacer, { passive: true });
+    updateSpacer();
 })();
 
 // User Logout Script using SweetAlert2

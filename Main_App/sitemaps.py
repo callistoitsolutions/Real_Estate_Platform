@@ -7,7 +7,7 @@ from Admin_App.models import (
     PGColivingProperty,
     ResaleResidentialProperty,
     CommercialResaleProperty,
-    PlotSaleProperty,              # NEW: was missing entirely
+                  # NEW: was missing entirely
     IndustrialResaleProperty,
     AgriculturalResaleProperty,
     ResidentialPlotResaleProperty,
@@ -168,7 +168,7 @@ sitemaps = {
 
     # FIXED: PlotSaleProperty's PK is plot_property_id, not id — this
     # would have raised AttributeError with the old location() method.
-    "plot_sale": make_sitemap(PlotSaleProperty, "plot_sale", pk_field="plot_property_id"),
+    #"plot_sale": make_sitemap(PlotSaleProperty, "plot_sale", pk_field="plot_property_id"),
 
     "industrial_sale": make_sitemap(IndustrialResaleProperty, "industrial_sale"),
     "agriculture_sale": make_sitemap(AgriculturalResaleProperty, "agriculture_sale"),

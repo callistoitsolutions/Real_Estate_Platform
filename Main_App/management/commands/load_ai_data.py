@@ -4,11 +4,11 @@ from django.core.management.base import BaseCommand
 from Main_App.models import IntentMaster, FraudRiskRule, LeadScoringRule  # Change 'your_app_name' to your actual app name!
 
 class Command(BaseCommand):
-    help = 'Loads EstateFlow AI training data from the Excel dataset.'
+    help = 'Loads KANISHKAIMPERIA AI training data from the Excel dataset.'
 
     def handle(self, *args, **kwargs):
         # Ensure pandas can find the file in your project root
-        file_path = os.path.join(os.getcwd(), 'EstateFlow_AI_Intent_Training_Dataset.xlsx')
+        file_path = os.path.join(os.getcwd(), 'KANISHKAIMPERIA_AI_Intent_Training_Dataset.xlsx')
         
         if not os.path.exists(file_path):
             self.stderr.write(self.style.ERROR(f"File not found: {file_path}"))

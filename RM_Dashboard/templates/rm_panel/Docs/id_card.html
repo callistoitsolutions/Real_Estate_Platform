@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
+  
   /* --- Original Layout Styles --- */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
@@ -518,6 +519,7 @@
       });
   }
 
+
   // Download ID Card Container as PDF using jsPDF and html2canvas
   function downloadCardAsPDF() {
       const cardContainer = document.getElementById('rmIdentityCardContainer');
@@ -529,5 +531,6 @@
           pdf.save('RM_Identity_Card_{{ user_obj.user_id|default:"card" }}.pdf');
       });
   }
+
   
 </script>

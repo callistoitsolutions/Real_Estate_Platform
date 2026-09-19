@@ -71,10 +71,17 @@ def property_search_landing(request, page_type, city, locality=None, bhk=None):
 
     city = city.replace("-", " ").title()
     locality_display = locality.replace("-", " ").title() if locality else None
+
     bhk = bhk or request.GET.get("bhk", "").strip() or None
+    max_price = request.GET.get("max_price", "").strip() or None
+    min_price = request.GET.get("min_price", "").strip() or None
+    furnishing = request.GET.get("furnishing", "").strip() or None
 
     count, properties = get_matching_properties(
-        page_type, city, locality=locality_display, bhk=bhk, limit=24
+        page_type, city, locality=locality_display, bhk=bhk, limit=24,
+        max_price=int(max_price) if max_price else None,
+        min_price=int(min_price) if min_price else None,
+        furnishing=furnishing,
     )
 
     # ---- ELIGIBILITY CHECK ----
@@ -173,3 +180,70 @@ def quick_locality_enquiry(request):
         return JsonResponse({"status": "ok", "message": "Thanks! Our team will contact you shortly."})
 
     return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+
+
+# =========================================================
+# 4. SMART SEARCH — free-text query in, correct landing page out.
+#    Handles the full intent picture: transaction type, category,
+#    BHK, budget, furnishing, no-brokerage, possession — not just
+#    budget alone. This is what lets "2bhk under 20k besa no
+#    brokerage" land the searcher on exactly the right filtered page.
+# =========================================================
+
+from seo.landing_seo import parse_search_intent, resolve_page_type
+from Main_App.models import LocalityPriceTrend
+
+
+def smart_search_redirect(request):
+    query = request.GET.get("q", "").strip()
+    if not query:
+        return redirect("listings")
+
+    intent = parse_search_intent(query)
+    page_type = resolve_page_type(intent)
+
+    # resolve city/locality against real data — simple substring
+    # match against every known city/locality pair, longest match wins
+    q_lower = query.lower()
+    city_match, locality_match = None, None
+    best_len = 0
+    for row in LocalityPriceTrend.objects.values_list("city", "locality").distinct():
+        city, locality = row
+        if city and city.lower() in q_lower and len(city) > best_len:
+            city_match, best_len = city, len(city)
+        if locality and locality.lower() in q_lower:
+            locality_match = locality
+
+    if not city_match:
+        # can't place it geographically — fall back to general search
+        # with whatever filters we did detect
+        cfg = CATEGORY_CONFIG.get(page_type, {})
+        fallback = f"{reverse('listings')}?type={cfg.get('listing_type','')}&category={cfg.get('url_category','')}"
+        return redirect(fallback)
+
+    url_kwargs = {"page_type": page_type, "city": slugify(city_match)}
+    url_name = "property_search_landing_city"
+    if locality_match:
+        url_kwargs["locality"] = slugify(locality_match)
+        url_name = "property_search_landing"
+
+    target = reverse(url_name, kwargs=url_kwargs)
+
+    extra_params = []
+    if intent["bhk"]:
+        extra_params.append(f"bhk={intent['bhk']}")
+    if intent["max_price"]:
+        extra_params.append(f"max_price={intent['max_price']}")
+    if intent["min_price"]:
+        extra_params.append(f"min_price={intent['min_price']}")
+    if intent["furnishing"]:
+        extra_params.append(f"furnishing={intent['furnishing']}")
+    if intent["no_brokerage"]:
+        extra_params.append("no_brokerage=1")
+
+    if extra_params:
+        target += "?" + "&".join(extra_params)
+
+    return redirect(target)

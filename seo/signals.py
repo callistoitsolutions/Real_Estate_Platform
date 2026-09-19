@@ -111,20 +111,7 @@ def commercial_resale_seo(sender, instance, created, **kwargs):
 # PLOT SALE
 # =====================================================
 
-@receiver(post_save, sender=PlotSaleProperty)
-def plot_sale_seo(sender, instance, created, **kwargs):
 
-    print("PLOT SALE SIGNAL")
-
-    try:
-
-        create_dynamic_seo(instance, "plot_sale")
-
-        print("PLOT SALE SEO CREATED")
-
-    except Exception as e:
-
-        print("PLOT SALE SEO ERROR:", str(e))
 
 
 # =====================================================
