@@ -264,10 +264,13 @@ def Property_Enquiry_Landlord(request):
     ]
 
     # 2. Collect IDs of properties listed by this user
+
     matching_property_ids = []
     for model in property_models:
         # Use 'listed_by_name' or 'owner_name' depending on your model fields
+
         ids = model.objects.filter(listed_by_name=user_obj.user_name).values_list('id', flat=True)
+
         matching_property_ids.extend(list(ids))
 
     # 3. Filter your PropertyEnquiry objects using object_id__in
@@ -279,7 +282,6 @@ def Property_Enquiry_Landlord(request):
     
     context = {
         'user_obj': user_obj,
-        # Pass the object's role so the template behaves normally for the Landlord UI
         'user_role': user_obj.user_role, 
         'profile_completion_percentage': completion_score,
         'property_enquiry_list':rendered    

@@ -2440,6 +2440,7 @@ def export_commercial_rent(request):
         ("Property Specifications", "electricity_included", False, "Electricity Included?"),
         ("Property Specifications", "water_included", False, "Water Included?"),
         ("Property Specifications", "building_configuration", False, "Building Configuration"),
+        ("Property Specifications", "floor_number", False, "Floor Number"),
         ("Property Specifications", "total_floors", True, "Total Floors Constructed"),
         ("Property Specifications", "staircases", False, "Staircases"),
         ("Property Specifications", "passenger_lifts", False, "Passenger Lifts"),
@@ -8353,8 +8354,11 @@ def rental_residential_add(request):
                 built_up_area=to_decimal(request.POST.get('built_up_area')),
                 bathrooms=to_int(request.POST.get('bathrooms')),
                 balconies=to_int(request.POST.get('balconies')),
+                terrace_details=request.POST.get('terrace_details'),
+                
                 building_configuration=request.POST.get('building_configuration'),
                 total_floors=to_int(request.POST.get('total_floors')),
+                floor_number=to_int(request.POST.get('floor_number')),
                 facing_direction=request.POST.get('facing_direction', request.POST.get('facing')),
                 furnishing_status=request.POST.get('furnishing_status'),
                 available_for=request.POST.get('available_for'),
@@ -9217,7 +9221,7 @@ def rental_list(request):
         # ═══════════════════════════════════════
         REQUIRED = {
             "property_type", "property_no", "bhk_type", "renting_option",
-            "built_up_area", "bathrooms", "building_configuration", "total_floors",
+            "built_up_area", "bathrooms", "building_configuration", "total_floors", "floor_number",
             "furnishing_status", "available_for", "monthly_rent",
             "address", "city", "locality_area", "state", "pincode",
             "listed_by_name", "listed_by_contact", "listed_by_email", "listed_by_role",
@@ -9266,8 +9270,8 @@ def rental_list(request):
             ],
             "Basic Information": [
                 "id", "property_title", "property_type", "property_no", "bhk_type", "renting_option",
-                "built_up_area", "bathrooms", "balconies",
-                "building_configuration", "total_floors", "facing_direction",
+                "built_up_area", "bathrooms", "balconies",  "terrace_details",
+                "building_configuration", "total_floors", "floor_number",  "facing_direction",
                 "furnishing_status", "available_for"
             ],
             "Property Details": [
@@ -9321,8 +9325,8 @@ def rental_list(request):
             "property_title": "Auto_Generated Title", "property_type": "Apartment",
             "property_no": "e.g. B-402", "bhk_type": "e.g. 2bhk",
             "renting_option": "Full Property/Single Room/Shared Room", "built_up_area": "sq.ft",
-            "bathrooms": "Number", "balconies": "Number", "building_configuration": "e.g. G+3",
-            "total_floors": "Number", "facing_direction": "North/East", "furnishing_status": "Semi Furnished",
+            "bathrooms": "Number", "balconies": "Number", "terrace_details": "sq.ft", "building_configuration": "e.g. G+3",
+            "total_floors": "Number", "floor_number": "Number", "facing_direction": "North/East", "furnishing_status": "Semi Furnished",
             "available_for": "Family/Bachelor", "carpet_area": "sq.ft", "city_zone": "North/South", "ownership_type": "Freehold",
             "property_condition": "Resale", "property_age": "1-3 Years",
             "wing_number": "e.g. A/B", "building_name": "Text", "availability_status": "Ready to Move",
@@ -10534,11 +10538,13 @@ def _residential_field_map():
             ("built_up_area",           "Built-up Area (sq.ft)", True),
             ("bathrooms",                "Bathrooms", True),
             ("balconies",                "Balconies", False),
-            ("building_configuration",  "Building Configuration", True),
+            ("terrace_details",          "Terrace Details", False),
+            ("building_configuration",   "Building Configuration", True),
             ("total_floors",             "Total Floors Constructed", True),
-            ("facing_direction",        "Facing Direction", False),
-            ("furnishing_status",       "Furnishing Status", True),
-            ("available_for",           "Available For", True),
+            ("floor_number",             "Floor Number", True),
+            ("facing_direction",         "Facing Direction", False),
+            ("furnishing_status",        "Furnishing Status", True),
+            ("available_for",            "Available For", True),
         ]),
         ("Property Details", [
             ("carpet_area",     "Carpet Area (sq.ft)", False),
@@ -10632,8 +10638,8 @@ def _sample_row_data():
         "listed_by_contact": "9876543210",
  
         "property_type": "Apartment", "property_no": "B-402", "bhk_type": "2bhk" , "renting_option": "Full Property",
-        "built_up_area": "1200", "bathrooms": "2", "balconies": "1",
-        "building_configuration": "G+3", "total_floors": "4", "facing_direction": "East",
+        "built_up_area": "1200", "bathrooms": "2", "balconies": "1", "terrace_details": "1200 sqfit",
+        "building_configuration": "G+3", "total_floors": "4", "floor_number": "2", "facing_direction": "East",
         "furnishing_status": "Semi Furnished", "available_for": "Family",
  
         "carpet_area": "950", "city_zone": "West Zone", "ownership_type": "Freehold",
@@ -10885,6 +10891,7 @@ def import_residential_excel(request):
     'bathrooms',
     'building_configuration',
     'total_floors',
+    'floor_number',
     'furnishing_status',
     'available_for',
     'monthly_rent',
@@ -11464,8 +11471,8 @@ def rental_residential_edit(request, pk):
             # =====================================================
             tracked_fields_list = [
                 'property_type', 'property_no', 'bhk_type', 'renting_option',
-                'built_up_area', 'bathrooms', 'balconies', 'building_configuration',
-                'total_floors', 'facing_direction', 'furnishing_status', 'available_for',
+                'built_up_area', 'bathrooms', 'balconies', 'terrace_details', 'building_configuration',
+                'total_floors', 'floor_number', 'facing_direction', 'furnishing_status', 'available_for',
                 'carpet_area', 'city_zone', 'ownership_type', 'property_condition',
                 'property_age', 'wing_number', 'building_name',
                 'availability_status', 'available_from', 'lease_duration',
@@ -11499,7 +11506,9 @@ def rental_residential_edit(request, pk):
             prop.bathrooms = to_int(p.get('bathrooms'))
             prop.balconies = to_int(p.get('balconies'))
             prop.building_configuration = p.get('building_configuration')
+            prop.terrace_details = p.get('terrace_details')
             prop.total_floors = to_int(p.get('total_floors'))
+            prop.floor_number = to_int(p.get('floor_number'))
             prop.facing_direction = p.get('facing_direction')
             prop.furnishing_status = p.get('furnishing_status')
             prop.available_for = p.get('available_for')
@@ -11912,12 +11921,14 @@ def commercial_rental_add(request):
                 google_maps_link=request.POST.get('google_maps_link'),
                 latitude=request.POST.get('latitude'),
                 longitude=request.POST.get('longitude'),
+                terrace_details=request.POST.get('terrace_details'),
 
                 dg_ups_included=(request.POST.get('dg_ups_included') == 'on'),
                 electricity_included=(request.POST.get('electricity_included') == 'on'),
                 water_included=(request.POST.get('water_included') == 'on'),
 
                 building_configuration=request.POST.get('building_configuration'),
+                floor_number=to_int_or_none(request.POST.get('floor_number')),
                 total_floors=to_int_or_none(request.POST.get('total_floors')),
                 staircases=to_int_or_none(request.POST.get('staircases')),
                 passenger_lifts=to_int(request.POST.get('passenger_lifts')),
@@ -12222,6 +12233,7 @@ def commercial_edit(request, pk):
             prop.google_maps_link  = p.get('google_maps_link')
             prop.latitude          = p.get('latitude')
             prop.longitude         = p.get('longitude')
+            prop.terrace_details   = p.get('terrace_details')
 
             # ---------- BUILDING SPECS ----------
             prop.dg_ups_included      = (p.get('dg_ups_included') == 'on')
@@ -12229,6 +12241,7 @@ def commercial_edit(request, pk):
             prop.water_included       = (p.get('water_included') == 'on')
 
             prop.building_configuration = p.get('building_configuration')
+            prop.floor_number    = to_int_or_none(p.get('floor_number'))
             prop.total_floors    = to_int_or_none(p.get('total_floors'))
             prop.staircases      = to_int_or_none(p.get('staircases'))
             prop.passenger_lifts = to_int(p.get('passenger_lifts'))
@@ -12509,6 +12522,7 @@ def _commercial_rental_field_map():
             ("electricity_included",   "Electricity Included?", False),
             ("water_included",         "Water Included?", False),
             ("building_configuration", "Building Configuration", False),
+            ("floor_number",           "Floor Number", True),
             ("total_floors",           "Total Floors Constructed", True),
             ("staircases",             "Staircases", False),
             ("passenger_lifts",        "Passenger Lifts", False),
@@ -12562,7 +12576,7 @@ def _commercial_rental_field_map():
 
     decimal_fields = {"builtup_area", "carpet_area"}
     int_fields = {
-        "property_age", "total_floors", "staircases", "passenger_lifts",
+        "property_age", "total_floors", "floor_number", "staircases", "passenger_lifts",
         "service_lifts", "private_parking", "min_seats", "max_seats", "cabins",
         "meeting_rooms", "private_washroom", "public_washroom", "monthly_rent",
         "advanced_rent_amount", "security_deposit_amount", "maintenance_charges",
@@ -12617,6 +12631,7 @@ def _commercial_sample_row_data():
         "electricity_included": "false",
         "water_included": "true",
         "building_configuration": "G+4",
+        "floor_number": "2",
         "total_floors": "4",
         "staircases": "2",
         "passenger_lifts": "2",
@@ -26882,6 +26897,13 @@ def agricultural_resale_reports(request):
 
 ########### Views start for plot residential list ##########################
 
+
+from django.db.models import Avg, Max, Min, Sum, Count, Q
+from django.db.models.functions import Coalesce
+from decimal import Decimal
+
+
+
 def residential_plot_resale_list(request):
     admin_id = request.session.get('Admin_id')
     user_id  = request.session.get('User_id')
@@ -26911,18 +26933,18 @@ def residential_plot_resale_list(request):
         .order_by('-created_at')
     )
 
-    # Read query params
-    search_query       = request.GET.get('search', '').strip()
-    prop_type          = request.GET.get('plot_type', '').strip()
-    city_filter        = request.GET.get('city', '').strip()
-    locality_filter    = request.GET.get('locality', '').strip()
-    road_facing_filter = request.GET.get('road_facing', '').strip()
-    corner_filter      = request.GET.get('corner_plot', '').strip()
-    loan_filter        = request.GET.get('loan', '').strip()
-    min_price          = request.GET.get('min_price', '').strip()
-    max_price          = request.GET.get('max_price', '').strip()
-    from_date          = request.GET.get('from_date', '').strip()
-    to_date            = request.GET.get('to_date', '').strip()
+    # Read query params safely with distinct names
+    search_query         = request.GET.get('search', '').strip()
+    prop_type            = request.GET.get('plot_type', '').strip()
+    city_filter          = request.GET.get('city', '').strip()
+    locality_filter      = request.GET.get('locality', '').strip()
+    road_facing_filter   = request.GET.get('road_facing', '').strip()
+    corner_filter        = request.GET.get('corner_plot', '').strip()
+    loan_filter          = request.GET.get('loan', '').strip()
+    min_price_query      = request.GET.get('min_price', '').strip()
+    max_price_query      = request.GET.get('max_price', '').strip()
+    from_date            = request.GET.get('from_date', '').strip()
+    to_date              = request.GET.get('to_date', '').strip()
 
     # Apply filters
     properties = all_properties
@@ -26959,13 +26981,18 @@ def residential_plot_resale_list(request):
         elif loan_filter.lower() == 'no':
             properties = properties.filter(Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__isnull=True) | Q(property_loan_status=''))
 
-    if min_price:
-        try: properties = properties.filter(selling_price__gte=float(min_price))
-        except ValueError: pass
+    # Safely convert and filter prices only if valid values exist
+    if min_price_query not in [None, '']:
+        try:
+            properties = properties.filter(selling_price__gte=float(min_price_query))
+        except (ValueError, TypeError):
+            pass
 
-    if max_price:
-        try: properties = properties.filter(selling_price__lte=float(max_price))
-        except ValueError: pass
+    if max_price_query not in [None, '']:
+        try:
+            properties = properties.filter(selling_price__lte=float(max_price_query))
+        except (ValueError, TypeError):
+            pass
 
     if from_date:
         properties = properties.filter(created_at__date__gte=from_date)
@@ -26984,39 +27011,45 @@ def residential_plot_resale_list(request):
     # ── KPI STATS & FORM-ALIGNED METRICS ─────────────────────────────────────
     total_count = all_properties.count()
 
-    residential_count  = all_properties.filter(land_use__icontains='Residential').count()
-    commercial_count   = all_properties.filter(land_use__icontains='Commercial').count()
-    agricultural_count = all_properties.filter(land_use__icontains='Agricultural').count()
+    residential_count   = all_properties.filter(land_use__icontains='Residential').count()
+    commercial_count    = all_properties.filter(land_use__icontains='Commercial').count()
+    agricultural_count  = all_properties.filter(land_use__icontains='Agricultural').count()
     
     finance_ready_count = all_properties.filter(
         Q(property_loan_status__iexact='No Active Loan') | Q(property_loan_status__iexact='Loan Closed')
     ).count()
 
-    corner_plot_count  = all_properties.filter(corner_plot__iexact='yes').count()
-    fenced_plot_count  = all_properties.exclude(Q(plot_fencing__iexact='none') | Q(plot_fencing__isnull=True) | Q(plot_fencing='')).count()
-    active_listings    = all_properties.exclude(selling_price__isnull=True).count()
+    corner_plot_count   = all_properties.filter(corner_plot__iexact='yes').count()
+    fenced_plot_count   = all_properties.exclude(Q(plot_fencing__iexact='none') | Q(plot_fencing__isnull=True) | Q(plot_fencing='')).count()
+    active_listings     = all_properties.exclude(selling_price__isnull=True).count()
 
     # Form-specific analytic cards
     na_converted_count = all_properties.filter(na_status__icontains='NA').count()
     clear_title_count  = all_properties.filter(title_clearance__icontains='Clear').count()
 
-    # Duplication metrics
+    # Safely handle duplicate count aggregation
+        # Safely handle duplicate count aggregation
+    valid_dup_props = all_properties.exclude(duplicate_count__isnull=True)
     duplicate_properties_count = all_properties.filter(is_duplicate=True).count()
-    duplicate_count_sum = all_properties.aggregate(total_dups=Sum('duplicate_count'))['total_dups'] or 0
+    duplicate_count_sum = valid_dup_props.aggregate(total_dups=Sum('duplicate_count'))['total_dups'] or 0
 
-    price_agg = all_properties.aggregate(
-        avg      = Avg('selling_price'),
-        max_val  = Max('selling_price'),
-        min_val  = Min('selling_price'),
-        avg_sqft = Avg('plot_price_per_sqft'),
-        avg_area = Avg('plot_area'),
+    # Safe Price & Area Aggregations
+    valid_price_props = all_properties.exclude(selling_price__isnull=True)
+    valid_sqft_props  = all_properties.exclude(plot_price_per_sqft__isnull=True)
+    valid_area_props  = all_properties.exclude(plot_area__isnull=True)
+
+    price_agg = valid_price_props.aggregate(
+        avg     = Avg('selling_price'),
+        max_val = Max('selling_price'),
+        min_val = Min('selling_price'),
     )
-    avg_price       = price_agg['avg']
-    max_price       = price_agg['max_val']
-    min_price       = price_agg['min_val']
-    avg_price_sqft  = price_agg['avg_sqft']
-    avg_plot_area   = price_agg['avg_area']
-    total_value     = all_properties.aggregate(sum_val=Sum('selling_price'))['sum_val'] or 0
+    avg_price_sqft = valid_sqft_props.aggregate(avg_sqft=Avg('plot_price_per_sqft'))['avg_sqft']
+    avg_plot_area  = valid_area_props.aggregate(avg_area=Avg('plot_area'))['avg_area']
+
+    calculated_avg_price = price_agg['avg']
+    calculated_max_price = price_agg['max_val']
+    calculated_min_price = price_agg['min_val']
+    total_value          = valid_price_props.aggregate(sum_val=Sum('selling_price'))['sum_val'] or 0
 
     property_type_counts = dict(all_properties.values('property_type').annotate(count=Count('id')).values_list('property_type', 'count'))
     ownership_counts = dict(all_properties.values('ownership_type').annotate(count=Count('id')).values_list('ownership_type', 'count'))
@@ -27031,52 +27064,53 @@ def residential_plot_resale_list(request):
         uploaded_files = []
 
     context = {
-        'admin_obj'                  : admin_obj,
-        'user_obj'                   : user_obj,
-        'properties'                 : properties,
-        'filtered_count'             : properties.count(),
-        'total_properties'           : total_count,
-        'total_count'                : total_count,
+        'admin_obj'                    : admin_obj,
+        'user_obj'                     : user_obj,
+        'properties'                   : properties,
+        'filtered_count'               : properties.count(),
+        'total_properties'             : total_count,
+        'total_count'                  : total_count,
 
-        'search_query'               : search_query,
-        'prop_type_query'            : prop_type,
-        'city_query'                 : city_filter,
-        'locality_query'             : locality_filter,
-        'road_facing_query'          : road_facing_filter,
-        'corner_query'               : corner_filter,
-        'loan_query'                 : loan_filter,
-        'from_date'                  : from_date,
-        'to_date'                    : to_date,
+        'search_query'                 : search_query,
+        'prop_type_query'              : prop_type,
+        'city_query'                   : city_filter,
+        'locality_query'               : locality_filter,
+        'road_facing_query'            : road_facing_filter,
+        'corner_query'                 : corner_filter,
+        'loan_query'                   : loan_filter,
+        'from_date'                    : from_date,
+        'to_date'                      : to_date,
 
         # Metric Cards
-        'active_listings'            : active_listings,
-        'residential_count'          : residential_count,
-        'commercial_count'           : commercial_count,
-        'agricultural_count'         : agricultural_count,
-        'finance_ready_count'        : finance_ready_count,
-        'corner_plot_count'          : corner_plot_count,
-        'fenced_plot_count'          : fenced_plot_count,
-        'na_converted_count'         : na_converted_count,
-        'clear_title_count'          : clear_title_count,
-        'duplicate_properties_count' : duplicate_properties_count,
-        'duplicate_count_sum'        : duplicate_count_sum,
+        'active_listings'              : active_listings,
+        'residential_count'            : residential_count,
+        'commercial_count'             : commercial_count,
+        'agricultural_count'           : agricultural_count,
+        'finance_ready_count'          : finance_ready_count,
+        'corner_plot_count'            : corner_plot_count,
+        'fenced_plot_count'            : fenced_plot_count,
+        'na_converted_count'           : na_converted_count,
+        'clear_title_count'            : clear_title_count,
+        'duplicate_properties_count'   : duplicate_properties_count,
+        'duplicate_count_sum'          : duplicate_count_sum,
 
-        'avg_price'                  : avg_price,
-        'max_price'                  : max_price,
-        'min_price'                  : min_price,
-        'avg_price_sqft'             : avg_price_sqft,
-        'avg_plot_area'              : avg_plot_area,
-        'total_value'                : total_value,
+        'avg_price'                    : calculated_avg_price,
+        'max_price'                    : calculated_max_price,
+        'min_price'                    : calculated_min_price,
+        'avg_price_sqft'               : avg_price_sqft,
+        'avg_plot_area'                : avg_plot_area,
+        'total_value'                  : total_value,
 
-        'property_type_counts'       : property_type_counts,
-        'ownership_counts'           : ownership_counts,
-        'unique_prop_types'          : unique_prop_types,
-        'unique_cities'              : unique_cities,
-        'unique_localities'          : unique_localities,
-        'uploaded_files'             : uploaded_files,
+        'property_type_counts'         : property_type_counts,
+        'ownership_counts'             : ownership_counts,
+        'unique_prop_types'            : unique_prop_types,
+        'unique_cities'                : unique_cities,
+        'unique_localities'            : unique_localities,
+        'uploaded_files'               : uploaded_files,
     }
 
     return render(request, 'admin_user/Reports/Resale_Plot/residential_plot_resale_list.html', context)
+
 
 ############# Views end for plot residential list ################################
 

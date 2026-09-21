@@ -1037,6 +1037,46 @@
             <div class="section-header dark-theme"><i class="fas fa-location-dot"></i> Location Details</div>
             <div class="section-body">
               <div class="row">
+
+
+
+  <div class="col-md-4 mt-2">
+    <label class="form-label">PIN Code <span class="required">*</span></label>
+    <input type="text" class="form-control" name="pincode" id="pincode"
+           placeholder="e.g., 440015" maxlength="6" inputmode="numeric" required>
+    <p class="hint-text">Enter pincode first. City, state and localities load automatically.</p>
+  </div>
+
+
+
+
+  <div class="col-md-4 mt-2">
+    <label class="form-label">City / District <span class="required">*</span></label>
+    <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required>
+  </div>
+
+
+    <div class="col-md-12 mt-3">
+    <label class="form-label">Locality / Neighbourhood <span class="required">*</span></label>
+    <select class="form-select form-control" id="locality_area" required>
+      <option value="">-- Enter pincode first --</option>
+    </select>
+    <input type="text" class="form-control mt-2" id="locality_area_manual"
+           placeholder="Type your locality / area name" style="display:none;">
+    <!-- id is now "locality", so the rest of your JS finds it -->
+    <input type="hidden" name="locality" id="locality">
+    <p class="hint-text">Primary location filter used by buyers</p>
+  </div>
+
+  <div class="col-md-12 mt-3">
+    <label class="form-label">Nearby Landmark / Reference Point</label>
+    <input type="text" class="form-control" name="property_landmark" id="property_landmark"
+           placeholder="e.g., Near Hingna T-Point, Opp. NIT Gate">
+  </div>
+
+
+
+
                 <div class="col-md-4 mt-2">
                   <label class="form-label">State <span class="required">*</span></label>
                   <select class="form-select form-control" name="state" id="state" required>
@@ -1077,31 +1117,17 @@
                     <option value="Puducherry">Puducherry</option>
                   </select>
                 </div>
-                <div class="col-md-4 mt-2">
-                  <label class="form-label">City / District <span class="required">*</span></label>
-                  <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required onkeyup="updatePreview()">
-                </div>
+
+
 
                
-                <div class="col-md-4 mt-2">
-                  <label class="form-label">Locality / Neighbourhood <span class="required">*</span></label>
-                  <select class="form-select form-control" id="locality_area" required>
-                    <option value="">-- Enter pincode first --</option>
-                  </select>
-                  <input type="text" class="form-control mt-2" name="locality_manual" id="locality_area_manual" placeholder="Enter your locality/area name" style="display:none;">
-                  <input type="hidden" name="locality" id="locality_area_final">
-                  <p class="hint-text">Primary location filter used by buyers</p>
-                </div>
+
+               
+                
 
 
-                <div class="col-md-6 mt-3">
-                  <label class="form-label">Nearby Landmark / Reference Point</label>
-                  <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="e.g., Near Hingna T-Point, Opp. NIT Gate">
-                </div>
-                <div class="col-md-6 mt-3">
-                  <label class="form-label">PIN Code <span style="color:red;">*</span></label>
-                  <input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440015" maxlength="6" required>
-                </div>
+               
+
                 <div class="col-md-12 mt-3">
                   <label class="form-label">Full Address <span class="required">*</span></label>
                   <textarea class="form-control" name="address" id="address" rows="3" required placeholder="e.g., Plot No. 42, Layout No. 5, Manish Nagar, Wardha Road, Nagpur – 440015"></textarea>
@@ -2596,7 +2622,8 @@
 
     fd.append('state', $('#state').val());
     fd.append('city', $('#city').val());
-    fd.append('locality', $('#locality').val());
+    syncLocalityFinal();
+    fd.set('locality', cleanText($('#locality').val()));   // set() replaces, append() would duplicate
     fd.append('property_landmark', $('#property_landmark').val());
     fd.append('pincode', $('#pincode').val());
     fd.append('address', $('#address').val());
@@ -2774,85 +2801,89 @@
 
 
 
-// ================= PINCODE LOOKUP API & LOCALITY FALLBACK =================
-document.getElementById('pincode').addEventListener('blur', function () {
-    var pincode = this.value.trim();
-    if (pincode.length !== 6) return;
-
-    fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pincode)
-        .then(res => res.json())
-        .then(data => {
-            var localitySelect = document.getElementById('locality_area');
-            if (!localitySelect) return;
-            localitySelect.innerHTML = '';
-
-            if (!data.success) {
-                Swal.fire({ icon: 'warning', title: 'Invalid Pincode', text: data.error, confirmButtonColor: '#56ab2f' });
-                document.getElementById('city').value = '';
-                localitySelect.innerHTML = '<option value="">Invalid pincode</option>';
-                return;
-            }
-
-            document.getElementById('city').value = data.city;
-
-            var stateSelect = document.getElementById('state');
-            if (stateSelect) {
-                for (var i = 0; i < stateSelect.options.length; i++) {
-                    if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) {
-                        stateSelect.value = stateSelect.options[i].value;
-                        break;
-                    }
-                }
-            }
-
-            localitySelect.innerHTML = '<option value="">-- Select Locality --</option>';
-            data.localities.forEach(function (loc) {
-                var opt = document.createElement('option');
-                opt.value = loc;
-                opt.textContent = loc;
-                localitySelect.appendChild(opt);
-            });
-            var otherOpt = document.createElement('option');
-            otherOpt.value = '__other__';
-            otherOpt.textContent = '✏️ My locality is not listed (Enter manually)';
-            localitySelect.appendChild(otherOpt);
-
-            syncLocalityFinal();
-        })
-        .catch(function () {
-            Swal.fire({ icon: 'error', title: 'Lookup Failed', text: 'Could not verify pincode.', confirmButtonColor: '#56ab2f' });
-        });
-});
+function cleanText(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v).trim();
+  return ['undefined', 'null', 'none', 'nan'].includes(s.toLowerCase()) ? '' : s;
+}
 
 function syncLocalityFinal() {
-    var localitySelect = document.getElementById('locality_area');
-    var manualInput = document.getElementById('locality_area_manual');
-    var finalInput = document.getElementById('locality_area_final');
+  const sel    = document.getElementById('locality_area');
+  const manual = document.getElementById('locality_area_manual');
+  const hidden = document.getElementById('locality');
+  if (!sel || !manual || !hidden) return;
 
-    if (!localitySelect || !manualInput || !finalInput) return;
+  if (sel.value === '__other__') {
+    manual.style.display = 'block';
+    manual.required = true;
+    hidden.value = cleanText(manual.value);
+  } else {
+    manual.style.display = 'none';
+    manual.required = false;
+    hidden.value = cleanText(sel.value);
+  }
+  updatePreview();
+}
 
-    if (localitySelect.value === '__other__') {
-        manualInput.style.display = 'block';
-        manualInput.required = true;
-        finalInput.value = manualInput.value.trim();
-    } else {
-        manualInput.style.display = 'none';
-        manualInput.required = false;
-        finalInput.value = localitySelect.value;
-    }
+function fillLocalities(list) {
+  const sel = document.getElementById('locality_area');
+  sel.innerHTML = '';
+  const clean = [...new Set((list || []).map(cleanText).filter(Boolean))];
+
+  if (clean.length) {
+    sel.add(new Option('-- Select Locality --', ''));
+    clean.forEach(l => sel.add(new Option(l, l)));
+  }
+  sel.add(new Option('✏️ My locality is not listed (enter manually)', '__other__'));
+  if (!clean.length) sel.value = '__other__';   // nothing to pick, go straight to manual input
+  syncLocalityFinal();
+}
+
+let lastLookedUpPincode = '';
+function lookupPincode() {
+  const pin = document.getElementById('pincode').value.trim();
+  if (pin.length !== 6 || pin === lastLookedUpPincode) return;
+  lastLookedUpPincode = pin;
+
+  fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pin)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        lastLookedUpPincode = '';
+        fillLocalities([]);
+        Swal.fire({ icon: 'warning', title: 'Pincode not found',
+                    text: data.error || 'Please enter your locality manually.', confirmButtonColor: '#56ab2f' });
+        return;
+      }
+      if (cleanText(data.city)) document.getElementById('city').value = data.city;
+
+      const apiState = cleanText(data.state).toLowerCase();
+      const stateSelect = document.getElementById('state');
+      if (stateSelect && apiState) {
+        for (const o of stateSelect.options) {
+          if (o.value.toLowerCase() === apiState) { stateSelect.value = o.value; break; }
+        }
+      }
+      fillLocalities(data.localities);
+    })
+    .catch(() => {
+      lastLookedUpPincode = '';
+      fillLocalities([]);
+      Swal.fire({ icon: 'error', title: 'Lookup failed',
+                  text: 'Could not verify pincode. Please enter your locality manually.', confirmButtonColor: '#56ab2f' });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    var localitySelect = document.getElementById('locality_area');
-    var manualInput = document.getElementById('locality_area_manual');
-    var plotForm = document.getElementById('plotForm');
-
-    if (localitySelect) localitySelect.addEventListener('change', syncLocalityFinal);
-    if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
-    if (plotForm) plotForm.addEventListener('submit', syncLocalityFinal);
+  const pin = document.getElementById('pincode');
+  pin.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    if (this.value.length === 6) lookupPincode(); else lastLookedUpPincode = '';
+  });
+  pin.addEventListener('blur', lookupPincode);
+  document.getElementById('locality_area').addEventListener('change', syncLocalityFinal);
+  document.getElementById('locality_area_manual').addEventListener('input', syncLocalityFinal);
 });
-
-
 
 
 

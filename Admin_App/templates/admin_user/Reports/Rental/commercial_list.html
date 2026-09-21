@@ -719,6 +719,7 @@ Electricity Included?</th>
           
             <th>Building Configuration</th>
             <th>Total Floors Constructed</th>
+              <th>Floor Number</th>
             <th>Staircases</th>
             <th>Passenger Lifts</th>
             <th>Service Lifts</th>
@@ -968,6 +969,8 @@ Electricity Included?</th>
             <td>{{ prop.building_configuration|default:"—" }}</td>
             <!-- 39. Total Floors Constructed -->
             <td>{{ prop.total_floors|default:"—" }}</td>
+            
+             <td>{{ prop.floor_number|default:"—" }}</td>
             <!-- 40. Staircases -->
             <td>{{ prop.staircases|default:"—" }}</td>
             <!-- 41. Passenger Lifts -->

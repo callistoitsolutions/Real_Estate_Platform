@@ -243,7 +243,7 @@ urlpatterns = [
 
      path('residential_plot_resale',views.residential_plot_resale,name="residential_plot_resale"),
 
-     ######## urls for ajax for add/edit resale residential plot property ################
+     ######## urls for ajax for add/edit resale residential plot property #############
     
      path('Resale_Residential_Plot_Ajax',  views.Resale_Residential_Plot_Ajax,    name='Resale_Residential_Plot_Ajax'),
 

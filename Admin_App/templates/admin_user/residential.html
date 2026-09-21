@@ -469,11 +469,26 @@
 
                                 </div>
                                 <div class="row mt-2">
+
                                     <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-expand"></i> Built-up Area (sq.ft) <span class="required-star">*</span></label><input type="number" class="form-control" name="built_up_area" id="built_up_area" placeholder="e.g., 1200" required></div></div>
                                     <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-bath"></i> Bathrooms <span class="required-star">*</span></label><input type="number" class="form-control" name="bathrooms" id="bathrooms" placeholder="e.g., 2" required></div></div>
                                     <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-couch"></i> Balconies</label><input type="number" class="form-control" name="balconies" id="balconies" placeholder="e.g., 1"></div></div>
+
+                                    
+
                                 </div>
                                 <div class="row mt-2">
+
+                                    <!-- NEW GHOST FIELD: Client sees it, database ignores it -->
+                                      
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label"><i class="fas fa-sun text-warning"></i> Terrace Details</label>
+                                            <input type="text" class="form-control" id="terrace_details" name="terrace_details"  placeholder="e.g., 500 sq.ft Private Terrace">
+                                        </div>
+                                    </div>
+
+                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="form-label">Building Configuration</label>
@@ -486,7 +501,20 @@
                                             <input type="number" class="form-control" id="total_floors" name="total_floors" placeholder="e.g., 3" required>
                                         </div>
                                     </div>
-                                    <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-compass"></i> Facing Direction</label>
+
+                                     
+                                    
+                                </div>
+                                <div class="row mt-2">
+
+                                     <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Floor Number <span style="color: red;" class="required">*</span></label>
+                                            <input type="number" class="form-control" id="floor_number" name="floor_number" placeholder="e.g., 3" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-compass"></i> Facing Direction</label>
                                         <select class="form-select form-control" name="facing_direction" id="facing_direction">
                                             <option value="">Select Direction</option>
                                             <option value="North">North</option>
@@ -500,8 +528,8 @@
                                             <option value="Multiple Facing">Multiple Facing</option>
                                         </select>
                                     </div></div>
-                                </div>
-                                <div class="row mt-2">
+
+
                                     <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-warehouse"></i> Furnishing Status <span class="required-star">*</span></label><select class="form-select form-control" name="furnishing_status" id="furnishing_status" required><option value="">Select Status</option><option value="Fully Furnished">Fully Furnished</option><option value="Semi Furnished">Semi Furnished</option><option value="Unfurnished">Unfurnished</option></select></div></div>
                                     <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label><select class="form-select form-control" name="available_for" id="available_for" required><option value="">Select Option</option><option value="Family">Family</option><option value="Bachelors">Bachelors</option><option value="Both">Both</option></select></div></div>
                                 </div>
@@ -826,6 +854,7 @@
                         </div>
 
                     </div>
+
                     <div class="form-step" id="step-3">
 
                         <div class="form-section">
@@ -848,6 +877,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-section">
                             <div class="section-header"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
                             <div class="section-body">
@@ -928,6 +958,7 @@
             </div>
             <i class="fas fa-arrow-right guide-arrow"></i>
             <div class="guide-step">
+                
                 <div class="guide-step-num">3</div>
                 <div class="guide-step-text">
                     <strong>Set your cover photo</strong>
@@ -1583,12 +1614,34 @@ if (!propNo.trim() || !locality.trim()) {
             cancelButtonText: 'Review again'
         }).then(function (result) {
             if (result.isConfirmed) {
+
+                // --- START TERRACE TEXT HACK ---
+                let rawTerrace = $('#phantom_terrace').val();
+                if (rawTerrace && rawTerrace.trim() !== "") {
+                    // Use a standard visible paragraph with an ID so CKEditor keeps it
+                    let safeHtml = '<p id="custom-terrace-data"><strong>Outdoor Space:</strong> ' + rawTerrace + '</p>';
+                    
+                    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.rent_residential_desc) {
+                        let currentHtml = CKEDITOR.instances.rent_residential_desc.getData();
+                        if (!currentHtml.includes('custom-terrace-data')) {
+                            CKEDITOR.instances.rent_residential_desc.setData(safeHtml + currentHtml);
+                        }
+                    } else {
+                        let autoDesc = $('#rent_residential_desc').val() || '';
+                        if (!autoDesc.includes('custom-terrace-data')) {
+                            $('#rent_residential_desc').val(safeHtml + '\n\n' + autoDesc);
+                        }
+                    }
+                }
+
+                
                 Swal.fire({ 
                     title: 'Checking & Saving Listing...', 
                     text: 'Validating duplicate inventory rules...',
                     allowOutsideClick: false, 
                     didOpen: function () { Swal.showLoading(); } 
                 });
+
                 form.submit();
             }
         });

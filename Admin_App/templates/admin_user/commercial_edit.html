@@ -774,10 +774,18 @@
                     <label class="form-label">Building Configuration</label>
                     <input type="text" class="form-control" name="building_configuration" value="{{ prop.building_configuration|default:'' }}">
                   </div>
+
                   <div class="col-md-4 mb-3">
                     <label class="form-label">Total Floors Constructed <span class="required">*</span></label>
                     <input type="number" class="form-control" name="total_floors" value="{{ prop.total_floors|default:'' }}" required>
                   </div>
+
+
+                    <div class="col-md-4 mb-3">
+                    <label class="form-label"> Floor Number <span class="required">*</span></label>
+                    <input type="number" class="form-control" name="floor_number" value="{{ prop.floor_number|default:'' }}" required>
+                  </div>
+
                   <div class="col-md-4 mb-3">
                     <label class="form-label">Staircases</label>
                     <input type="number" class="form-control" name="staircases" value="{{ prop.staircases|default:'' }}">

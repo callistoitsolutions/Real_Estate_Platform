@@ -1154,9 +1154,13 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
 
 
 
-             <div class="col-md-4 mt-2">
+        <div class="col-md-4 mt-2">
     <label class="form-label">Village / Mouza / Taluka Name <span class="required">*</span></label>
-    <input type="text" class="form-control" name="locality" id="locality" placeholder="e.g., Khapri / Kalmeshwar" required>
+    <select class="form-select form-control" id="locality_area" required>
+        <option value="">-- Enter pincode first --</option>
+    </select>
+    <input type="text" class="form-control mt-2" name="locality_manual" id="locality_area_manual" placeholder="Enter village / taluka name" style="display:none;">
+    <input type="hidden" name="locality" id="locality_area_final">
     <p class="hint-text">Primary location filter used by buyers</p>
 </div>
 
@@ -1744,7 +1748,7 @@ function updatePreview() {
   // Fixed: Consistently use selling_price instead of the undefined 'price' variable
   const selling_price = document.getElementById('selling_price')?.value || '';
   const city   = document.getElementById('city')?.value || '';
-  const loc    = document.getElementById('locality')?.value || '';
+    const loc    = document.getElementById('locality_area_final')?.value || '';
   const catEl  = document.getElementById('property_type');
   const catTxt = catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
   const unit   = document.getElementById('agr_area_unit')?.value || 'acre';
@@ -1795,7 +1799,8 @@ function setCheck(id, done) {
 }
 
 /* LIVE INPUT LISTENERS FIXED (Matched to correct HTML IDs) */
-['plot_title', 'plot_area', 'selling_price', 'city', 'locality', 'listed_by_name'].forEach(id => {
+
+['plot_title', 'plot_area', 'selling_price', 'city', 'listed_by_name'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updatePreview);
 });
@@ -2434,7 +2439,9 @@ function syncUploadedByStep4() {
 
 document.getElementById('plotForm').addEventListener('submit', function(e) {
   e.preventDefault();
+  syncLocalityFinal();
   for (let i = 1; i <= 4; i++) {
+
     if (i !== currentStep) {
       const stepEl = document.getElementById('step'+i);
       for (const f of stepEl.querySelectorAll('[required]')) {
@@ -2662,3 +2669,86 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         </script>
+
+
+
+        <script>
+// ================= PINCODE LOOKUP API & LOCALITY FALLBACK =================
+document.getElementById('pincode').addEventListener('blur', function () {
+    var pincode = this.value.trim();
+    if (pincode.length !== 6) return;
+
+    fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pincode)
+        .then(res => res.json())
+        .then(data => {
+            var localitySelect = document.getElementById('locality_area');
+            if (!localitySelect) return;
+            localitySelect.innerHTML = '';
+
+            if (!data.success) {
+                Swal.fire({ icon: 'warning', title: 'Invalid Pincode', text: data.error, confirmButtonColor: '#84cc16' });
+                document.getElementById('city').value = '';
+                localitySelect.innerHTML = '<option value="">Invalid pincode</option>';
+                return;
+            }
+
+            document.getElementById('city').value = data.city;
+
+            var stateSelect = document.getElementById('state');
+            if (stateSelect) {
+                for (var i = 0; i < stateSelect.options.length; i++) {
+                    if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) {
+                        stateSelect.value = stateSelect.options[i].value;
+                        break;
+                    }
+                }
+            }
+
+            localitySelect.innerHTML = '<option value="">-- Select Village / Taluka --</option>';
+            data.localities.forEach(function (loc) {
+                var opt = document.createElement('option');
+                opt.value = loc;
+                opt.textContent = loc;
+                localitySelect.appendChild(opt);
+            });
+            var otherOpt = document.createElement('option');
+            otherOpt.value = '__other__';
+            otherOpt.textContent = '✏️ My village/taluka is not listed (Enter manually)';
+            localitySelect.appendChild(otherOpt);
+
+            syncLocalityFinal();
+        })
+        .catch(function () {
+            Swal.fire({ icon: 'error', title: 'Lookup Failed', text: 'Could not verify pincode.', confirmButtonColor: '#84cc16' });
+        });
+});
+
+function syncLocalityFinal() {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var finalInput = document.getElementById('locality_area_final');
+
+    if (!localitySelect || !manualInput || !finalInput) return;
+
+    if (localitySelect.value === '__other__') {
+        manualInput.style.display = 'block';
+        manualInput.required = true;
+        finalInput.value = manualInput.value.trim();
+    } else {
+        manualInput.style.display = 'none';
+        manualInput.required = false;
+        finalInput.value = localitySelect.value;
+    }
+    updatePreview();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var localitySelect = document.getElementById('locality_area');
+    var manualInput = document.getElementById('locality_area_manual');
+    var plotForm = document.getElementById('plotForm');
+
+    if (localitySelect) localitySelect.addEventListener('change', syncLocalityFinal);
+    if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
+    if (plotForm) plotForm.addEventListener('submit', syncLocalityFinal);
+});
+</script>

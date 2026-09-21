@@ -107,7 +107,7 @@ admin.site.register(ResaleCommercialVideo)
 
 ############# Register Plot Resale Property Table/Modal ###############
 
-admin.site.register(PlotSaleProperty)
+
 
 ############### Register Industrial Resale Property Table/Modal #################
 

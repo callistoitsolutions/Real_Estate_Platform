@@ -3157,7 +3157,7 @@
     const area = document.getElementById('plot_area')?.value?.trim();
     const typeEl = document.getElementById('property_type');
     const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text.split('(')[0].trim() : 'Residential Plot';
-    const loc = document.getElementById('locality')?.value?.trim();
+    const loc = document.getElementById('locality_area_final')?.value?.trim();
     const city = document.getElementById('city')?.value?.trim();
     
     if (!area) return '';
@@ -3170,7 +3170,7 @@
     const area = document.getElementById('plot_area')?.value || '';
     const price = document.getElementById('selling_price')?.value || '';
     const city = document.getElementById('city')?.value || '';
-    const loc = document.getElementById('locality')?.value || '';
+    const loc = document.getElementById('locality_area_final')?.value || '';
     const amenitiesChecked = $('.amenities-checkbox:checked').length > 0;
     const facilitiesChecked = $('.facilities-checkbox:checked').length > 0;
 
@@ -3626,7 +3626,7 @@
 
     fd.append('state', $('#state').val());
     fd.append('city', $('#city').val());
-    fd.append('locality', $('#locality').val());
+    fd.append('locality', $('#locality_area_final').val());
     fd.append('property_landmark', $('#property_landmark').val());
     fd.append('pincode', $('#pincode').val());
     fd.append('address', $('#address').val());

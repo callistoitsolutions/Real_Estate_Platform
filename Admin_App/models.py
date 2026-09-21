@@ -894,9 +894,11 @@ class RentalResidentialProperty(models.Model):
 
     bathrooms = models.IntegerField(blank=True, null=True)
     balconies = models.IntegerField(blank=True, null=True)
+    terrace_details = models.CharField(max_length=100, blank=True, null=True)
 
     building_configuration = models.CharField(max_length=20, blank=True, null=True)   # e.g. "G+3"
     total_floors = models.IntegerField(blank=True, null=True)
+    floor_number = models.IntegerField(blank=True, null=True)
 
     facing_direction = models.CharField(max_length=50, blank=True, null=True)
     furnishing_status = models.CharField(max_length=50, blank=True, null=True)
@@ -1588,8 +1590,12 @@ class CommercialRentalProperty(models.Model):
     water_included = models.BooleanField(default=False)
 
     building_configuration = models.CharField(max_length=50, blank=True, null=True)
+    floor_number = models.IntegerField(blank=True, null=True)
     total_floors = models.IntegerField(blank=True, null=True)
+
     staircases = models.IntegerField(blank=True, null=True)
+
+    terrace_details = models.CharField(max_length=100, blank=True, null=True)
     passenger_lifts = models.IntegerField(default=0)
     service_lifts = models.IntegerField(default=0)
     private_parking = models.IntegerField(default=0)
@@ -4722,7 +4728,7 @@ class ResidentialPlotResaleProperty(models.Model):
 
     property_title = models.CharField(max_length=255, blank=True, null=True)
     property_no = models.CharField(max_length=150, blank=True, null=True)
-    plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    plot_area = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     property_type = models.CharField(max_length=100, blank=True, null=True)
 
     ########## Zone Classiification and Township Approvals #######################
@@ -5375,6 +5381,7 @@ class ResidentialPlotResaleActivityLog(models.Model):
 
 ############## Modal Start for Commercial Resale Plot ########################
 
+
 def generate_commercial_plot_id():
     return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
 
@@ -5535,8 +5542,9 @@ class CommercialPlotResaleProperty(models.Model):
     def generate_auto_descriptions(self):
         p_type = (self.property_type or "Commercial Plot").replace("_", " ").title()
         area_str = f"{self.plot_area} sq.ft" if self.plot_area else "Prime Commercial Area"
-       
-        loc = self.locality or "Prime Commercial Zone"
+
+        raw_locality = (self.locality or "").strip()
+        loc = raw_locality if raw_locality.lower() not in ("", "undefined", "null", "none") else "Prime Commercial Zone"
         city_str = f", {self.city}" if self.city else ""
 
         # Summary
@@ -5584,15 +5592,32 @@ class CommercialPlotResaleProperty(models.Model):
     def save(self, *args, **kwargs):
         raw_type = (self.property_type or "").strip().lower()
         p_type = "Commercial Plot" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
-        loc = self.locality or ""
+
+    # Sanitize locality — treat "undefined"/"null"/"none" strings as empty
+        raw_locality = (self.locality or "").strip()
+        if raw_locality.lower() in ("", "undefined", "null", "none"):
+            self.locality = ""   # also clean the DB field itself
+            loc = ""
+        else:
+            loc = raw_locality
+
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
+    # Build title, avoid dangling comma if locality is empty
+        if loc and city_name:
+            location_part = f"{loc}{city_name}"
+        elif loc:
+           location_part = loc
+        elif self.city:
+           location_part = self.city
+        else:
+           location_part = "Prime Location"
+
+        self.property_title = f"{p_type} for Sale in {location_part}".strip()[:255]
 
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
         self.generate_auto_faqs()
-
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO FAQ ENGINE (COMMERCIAL PLOT)
     # ═══════════════════════════════════════════════════════════════════════
@@ -6058,7 +6083,9 @@ class IndustrialPlotResaleProperty(models.Model):
         area_clean = self._clean_area()
         area_str = f"{area_clean} sq.m" if area_clean else "Prime Area"
         estate = f"in {self.industrial_estate_name}" if self.industrial_estate_name else ""
-        loc = self.locality or "Industrial Zone"
+
+        raw_locality = (self.locality or "").strip()
+        loc = raw_locality if raw_locality.lower() not in ("", "undefined", "null", "none") else "Industrial Zone"
         city_str = f", {self.city}" if self.city else ""
 
         # Summary
@@ -6120,6 +6147,9 @@ class IndustrialPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  SAVE OVERRIDE
     # ═══════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════════
+    #  SAVE OVERRIDE
+    # ═══════════════════════════════════════════════════════════════════════
     def save(self, *args, **kwargs):
         # ── AUTO-CALCULATE PRICE PER SQ.M / SQ.FT ──
         if self.selling_price and self.plot_area:
@@ -6136,22 +6166,39 @@ class IndustrialPlotResaleProperty(models.Model):
 
         raw_type = (self.property_type or "").strip().lower()
         p_type = "Industrial Plot" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
-        loc = self.locality or ""
+
+        # Sanitize locality — treat "undefined"/"null"/"none" strings as empty
+        raw_locality = (self.locality or "").strip()
+        if raw_locality.lower() in ("", "undefined", "null", "none"):
+            self.locality = ""
+            loc = ""
+        else:
+            loc = raw_locality
+
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
-        
+        if loc and city_name:
+            location_part = f"{loc}{city_name}"
+        elif loc:
+            location_part = loc
+        elif self.city:
+            location_part = self.city
+        else:
+            location_part = "Prime Location"
+
+        self.property_title = f"{p_type} for Sale in {location_part}".strip()[:255]
+
         # Forces regeneration of summaries and descriptions with the correct formatting on every save/edit
         self.generate_auto_descriptions()
 
-        # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <<<
+        # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <
         if self._state.adding:
             key_source = f"{self.address}|{self.locality}|{self.city}|{self.plot_area}|{self.property_no}"
             self.property_unique_key = key_source.strip().lower().replace(" ", "")
 
         super().save(*args, **kwargs)
 
-        # >>> RECALCULATE DUPLICATE GROUP FROM ACTUAL DB STATE (idempotent) <<<
+        # >>> RECALCULATE DUPLICATE GROUP FROM ACTUAL DB STATE (idempotent) <
         if self.property_unique_key:
             group_qs = IndustrialPlotResaleProperty.objects.filter(
                 property_unique_key=self.property_unique_key,
@@ -6556,7 +6603,9 @@ class AgriculturalPlotResaleProperty(models.Model):
         area_clean = self._clean_area()
         area_str = f"{area_clean} {unit}" if area_clean else "Prime Land Parcel"
         p_type = (self.property_type or "Agricultural Land").replace("_", " ").title()
-        loc = self.locality or "Rural Cluster"
+
+        raw_locality = (self.locality or "").strip()
+        loc = raw_locality if raw_locality.lower() not in ("", "undefined", "null", "none") else "Rural Cluster"
         city_str = f", {self.city}" if self.city else ""
 
         summary = f"A fertile {area_str} {p_type} parcel is offered for resale at {loc}{city_str}. "
@@ -6622,11 +6671,27 @@ class AgriculturalPlotResaleProperty(models.Model):
 
         raw_type = (self.property_type or "").strip().lower()
         p_type = "Agricultural Land" if raw_type in ("", "undefined", "null", "none") else self.property_type.replace("_", " ").title()
-        loc = self.locality or ""
+
+        # Sanitize locality — treat "undefined"/"null"/"none" strings as empty
+        raw_locality = (self.locality or "").strip()
+        if raw_locality.lower() in ("", "undefined", "null", "none"):
+            self.locality = ""
+            loc = ""
+        else:
+            loc = raw_locality
+
         city_name = f", {self.city}" if self.city else ""
 
-        self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
+        if loc and city_name:
+            location_part = f"{loc}{city_name}"
+        elif loc:
+            location_part = loc
+        elif self.city:
+            location_part = self.city
+        else:
+            location_part = "Prime Location"
 
+        self.property_title = f"{p_type} for Sale in {location_part}".strip()[:255]
 
         self.generate_auto_descriptions()
 

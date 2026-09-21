@@ -1661,7 +1661,7 @@ function updatePreview() {
   const area  = document.getElementById('plot_area')?.value || '';
   const price = document.getElementById('selling_price')?.value || '';
   const city  = document.getElementById('city')?.value || '';
-  const loc   = document.getElementById('locality')?.value || '';
+   const loc   = document.getElementById('locality_area_final')?.value || ''; 
   const catEl = document.getElementById('property_type');
   const catTxt= catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
 
