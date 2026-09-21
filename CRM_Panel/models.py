@@ -78,6 +78,9 @@ class PropertyEnquiry(models.Model):
     country_code = models.CharField(max_length=10, default="+91", blank=True, null=True)
     enquiry_phone = models.CharField(max_length=20, blank=True, null=True)
 
+    enquiry_visit_date = models.DateField( blank=True, null=True)
+    enquiry_visit_time = models.TimeField( blank=True, null=True)
+
     whatsapp_consent = models.BooleanField(default=False)
 
     # IMPROVED: Foreign Key to UTMLink instead of duplicating fields

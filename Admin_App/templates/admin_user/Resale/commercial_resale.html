@@ -424,6 +424,49 @@
 
               <div class="row">
 
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Property Type <span class="required">*</span></label>
+                    <select class="form-select form-control" id="property_type" name="property_type" required>
+                      <option value="">Select Property Type</option>
+                      <optgroup label="Office Properties">
+                        <option value="office_space">Office Space</option>
+                        <option value="it_park">IT Park / Tech Park Office</option>
+                        <option value="business_center">Business Center</option>
+                        <option value="coworking_space">Co-working Space</option>
+                      </optgroup>
+                      <optgroup label="Retail Properties">
+                        <option value="shop">Shop</option>
+                        <option value="showroom">Showroom</option>
+                        <option value="retail_store">Retail Store</option>
+                        <option value="shopping_mall_space">Mall Shop / Retail Space</option>
+                      </optgroup>
+                      <optgroup label="Industrial Properties">
+                        <option value="warehouse">Warehouse</option>
+                        <option value="godown">Godown</option>
+                        <option value="industrial_shed">Industrial Shed</option>
+                        <option value="factory">Factory</option>
+                        <option value="industrial_building">Industrial Building</option>
+                      </optgroup>
+                      <optgroup label="Hospitality & Service">
+                        <option value="hotel" >Hotel</option>
+                        <option value="restaurant" >Restaurant / Cafe</option>
+                        <option value="banquet_hall" >Banquet Hall</option>
+                        <option value="service_center" >Service Center</option>
+                      </optgroup>
+                      <optgroup label="Healthcare & Education">
+                        <option value="hospital" >Hospital / Clinic</option>
+                        <option value="medical_shop" >Medical Shop</option>
+                        <option value="school_college" >School / College Building</option>
+                      </optgroup>
+                      <optgroup label="Other Commercial">
+                        <option value="mixed_use_building" >Mixed Use Building</option>
+                        <option value="commercial_building" >Commercial Building</option>
+                        <option value="business_complex" >Business Complex</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                </div>
                 
 
                 <div class="col-md-6 mt-2">
@@ -572,6 +615,15 @@
                     </select>
                   </div>
                 </div>
+
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Terrace Details </label>
+                    <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required>
+                  </div>
+                </div>
+
+
               </div><!-- /row -->
             </div>
           </div><!-- /Basic Information -->
@@ -604,6 +656,22 @@
                     <input type="number" class="form-control" name="plot_area" id="plot_area" placeholder="optional">
                   </div>
                 </div>
+
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Total Floors Constructed </label>
+                    <input type="number" class="form-control" name="total_floors" id="total_floors" placeholder="e.g., 3">
+                  </div>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Floor Number </label>
+                    <input type="number" class="form-control" name="floor_number" id="floor_number" placeholder="e.g., 3">
+                  </div>
+                </div>
+
+
               </div><!-- /row -->
             </div>
           </div><!-- /Area Measurements -->
@@ -1435,7 +1503,7 @@
     var normalizedRole = (role || "").trim().toLowerCase();
     var labelText = "";
     switch (normalizedRole) {
-      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'admin': labelText = "Kanishka Imperia Service Fee"; break;
       case 'relationship manager': labelText = "Buyer Service Fee"; break;
       case 'landlord': labelText = "Buyer Service Fee"; break;
       case 'agent': labelText = "Brokerage"; break;
@@ -2338,19 +2406,6 @@
         }
     }
 
-    if (window.totalImageCount && window.totalImageCount() < 3) {
-        goToStep(4);
-        $('.img-total-summary').addClass('input-error');
-        document.querySelector('.img-total-summary').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        swal({
-            title: 'Missing Images',
-            text: 'Please upload at least 3 property images.',
-            icon: 'error'
-        });
-        return;
-    } else {
-        $('.img-total-summary').removeClass('input-error');
-    }
 
     // Function to dynamically update progress elements inside swal
     function updateProgress(value, statusText) {
@@ -2406,12 +2461,15 @@
     fd.append('property_age', $('#property_age').val());
     fd.append('furnishing_status', $('#furnishing_status').val());
     fd.append('facing_direction', $('#facing_direction').val());
+    fd.append('terrace_details', $('#terrace_details').val());
 
     // Areas
     fd.append('super_builtup_area', $('#super_builtup_area').val());
     fd.append('builtup_area', $('#builtup_area').val());
     fd.append('carpet_area', $('#carpet_area').val());
     fd.append('plot_area', $('#plot_area').val());
+    fd.append('total_floors', $('#total_floors').val());
+    fd.append('floor_number', $('#floor_number').val());
 
     // Commercial Specs
     fd.append('no_staircases', $('#no_staircases').val());

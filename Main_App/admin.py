@@ -39,3 +39,5 @@ admin.site.register(LocalityInsight)
 admin.site.register(LocalityPriceTrend)
 
 ############ Register LocalityInsight Modal Ends Here ##############################
+
+admin.site.register(SearchLog)

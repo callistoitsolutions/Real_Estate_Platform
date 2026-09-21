@@ -568,13 +568,11 @@ import math
 
 ########### Views start for ajax for send property enquiry ########################
 
-
 @csrf_exempt
 def Send_Property_Enquiry(request):
     if request.method == "POST":
         data = request.POST.dict()
 
-        
         print("=" * 50)
         print("Send_Property_Enquiry called")
         print("Received data:", data)
@@ -588,6 +586,28 @@ def Send_Property_Enquiry(request):
         country_code = data.get('country_code', '+91')
         whatsapp_consent = data.get('whatsapp_consent', 'no') == 'yes'
         
+        # Extract visit date and time from form submission
+        raw_visit_date = data.get('enquiry_visit_date', '').strip()
+        raw_visit_time = data.get('enquiry_visit_time', '').strip()
+
+        # Parse visit date (expects YYYY-MM-DD from HTML5 date input)
+        visit_date = None
+        if raw_visit_date:
+            try:
+                visit_date = datetime.strptime(raw_visit_date, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+
+        # Parse visit time (expects HH:MM or HH:MM:SS from HTML5 time input)
+        visit_time = None
+        if raw_visit_time:
+            for fmt in ('%H:%M', '%H:%M:%S'):
+                try:
+                    visit_time = datetime.strptime(raw_visit_time, fmt).time()
+                    break
+                except ValueError:
+                    pass
+
         # Get UTM parameters
         utm_source = data.get('utm_source', '').strip()
         utm_medium = data.get('utm_medium', '').strip()
@@ -597,7 +617,6 @@ def Send_Property_Enquiry(request):
         utm_path = data.get('utm_path', '').strip()
         page_url = data.get('page_url', '').strip()
         
-
         # 2. Find the property
         real_property = None
         
@@ -640,14 +659,12 @@ def Send_Property_Enquiry(request):
         property_content_type = ContentType.objects.get_for_model(real_property)
         utm_link = None
         
-        # If utm_source or utm_medium are empty (normal form), assign default fallback values
         if not utm_source:
             utm_source = 'direct'
         if not utm_medium:
             utm_medium = 'organic'
 
         try:
-            # Try to get existing UTMLink matching these source/medium parameters
             utm_link = UTMLink.objects.get(
                 utm_source=utm_source,
                 utm_medium=utm_medium,
@@ -663,7 +680,6 @@ def Send_Property_Enquiry(request):
             print(f" Found existing UTMLink: {utm_link.link_id}")
             
         except UTMLink.DoesNotExist:
-            # Create new fallback UTMLink for normal visits if it doesn't exist yet
             import uuid
             link_id = str(uuid.uuid4())[:8]
             property_title = getattr(real_property, 'title', None) or getattr(real_property, 'property_title', str(real_property))
@@ -697,7 +713,7 @@ def Send_Property_Enquiry(request):
             ).first()
             print(f" Multiple UTMLinks found, using first: {utm_link.link_id}")
         
-        # 4. Save Enquiry with ONLY utm_link foreign key
+        # 4. Save Enquiry with extracted visit date & time
         try:
             enquiry = PropertyEnquiry.objects.create(
                 content_type=property_content_type,
@@ -706,9 +722,11 @@ def Send_Property_Enquiry(request):
                 country_code=country_code,
                 enquiry_phone=data.get('enquiry_phone', '').strip(),
                 whatsapp_consent=whatsapp_consent,
-                utm_link=utm_link,  #  Only the foreign key
-                enquiry_date=datetime.now().date(),
-                enquiry_time=datetime.now().time()
+                utm_link=utm_link,
+                enquiry_visit_date=visit_date,
+                enquiry_visit_time=visit_time,
+                enquiry_date=datetime.today(),
+                enquiry_time=datetime.now()
             )
             
             print(f" Enquiry saved - ID: {enquiry.id}")
@@ -723,7 +741,7 @@ def Send_Property_Enquiry(request):
             
             return JsonResponse({
                 "status": "1", 
-                "msg": "Enquiry submitted successfully!"
+                "msg": "Enquiry submitted successfully our RM will be contact you soon !"
             })
             
         except Exception as e:
@@ -733,8 +751,7 @@ def Send_Property_Enquiry(request):
                 "msg": "Could not save enquiry. Please try again."
             })
     
-    return JsonResponse({"status": "0", "msg": "Invalid request."})
-    
+    return JsonResponse({"status": "0", "msg": "Invalid request."})    
 
 ########### Views end for ajax for send property enquiry ######################
 
@@ -1154,7 +1171,7 @@ def _safe_parse_pg_room_prices(pg_obj):
             for key, field in price_map.items():
                 if key in rtype:
                     try:
-                        result[field] = float(room.room_rent)
+                         result[field] = float(room.room_rent)
                     except (ValueError, TypeError):
                         pass
                     break

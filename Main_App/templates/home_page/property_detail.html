@@ -705,7 +705,6 @@ button { font-family: inherit; }
   <!-- ═══ HEADER BAR & PRICING ═══ -->
   <div class="property-header-card">
     <div>
-      <span class="badge-verified-glow"><i class="fas fa-certificate"></i> Verified {{ property_group|default:"Listing"|title }}</span>
       <h1 class="prop-headline">{{ p.title }}</h1>
       <div class="prop-subloc">
         <i class="fas fa-location-dot"></i>
@@ -788,9 +787,10 @@ button { font-family: inherit; }
     {% if p.facing or p.facing_direction or p.plot_facing %}
     <div class="fact-pill-box">
       <div class="fact-icon-wrap"><i class="fas fa-compass"></i></div>
-      <div class="fact-content"><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }}</strong><span>Facing</span></div>
+      <div class="fact-content"><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }}</strong><span>Facing </span></div>
     </div>
     {% endif %}
+
   </div>
 
   <!-- ═══ STICKY QUICK JUMP ═══ -->

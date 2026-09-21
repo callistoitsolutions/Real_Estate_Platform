@@ -4098,7 +4098,7 @@ def Rm_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -4401,7 +4401,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # GENERATE USER ID
             # --------------------------------------------------
-            user_id = f"EF-{new_user.id}-{year_suffix}"
+            user_id = f"KI-{new_user.id}-{year_suffix}"
 
             new_user.user_id = user_id
             new_user.save()
@@ -4861,7 +4861,7 @@ def Landlord_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -5311,7 +5311,7 @@ def Tenant_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -5759,7 +5759,7 @@ def Buyer_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -6218,7 +6218,7 @@ def Agent_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -6679,7 +6679,7 @@ def Agency_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -7168,7 +7168,7 @@ def Vendor_Data(request):
                         year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
                         
                         # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        user_id = f"KI-{new_user.id}-{year_suffix}"
                         
                         # Update the user with the generated user_id
                         new_user.user_id = user_id
@@ -21047,6 +21047,7 @@ def resale_residential_import_excel(request):
             'age of property': 'property_age',
             'facing direction': 'facing_direction',
             'occupancy status': 'occupancy_status',
+            'terrace details': 'terrace_details',
             'bhk': 'bhk',
             'super built-up area': 'super_builtup_area',
             'built-up area': 'builtup_area',
@@ -21054,6 +21055,7 @@ def resale_residential_import_excel(request):
             'plot area': 'plot_area',
             'building configuration': 'building_configuration',
             'total floors constructed': 'total_floors',
+            'floor number': 'floor_number',
             'bathrooms': 'bathrooms',
             'balconies': 'balconies',
             'covered parking': 'covered_parking',
@@ -21179,7 +21181,8 @@ def resale_residential_import_excel(request):
                 p_age            = get_val('property_age')
                 face             = get_val('facing_direction')
                 occ              = get_val('occupancy_status')
-                fl_no            = get_val('floor_no')
+                terr              = get_val('terrace_details')
+                
                 
                 bhk              = get_val('bhk')
                 sb_area          = get_val('super_builtup_area')
@@ -21188,6 +21191,8 @@ def resale_residential_import_excel(request):
                 plot             = get_val('plot_area')
                 bldg_cfg         = get_val('building_configuration')
                 tot_fl           = get_val('total_floors')
+                fl_no            = get_val('floor_number')
+            
                 baths            = get_val('bathrooms')
                 balcs            = get_val('balconies')
                 cov_pk           = get_val('covered_parking')
@@ -21415,6 +21420,7 @@ def resale_residential_import_excel(request):
                 prop.property_age = p_age
                 prop.facing_direction = face
                 prop.occupancy_status = occ
+                prop.terrace_details = terr
                 
                 prop.bhk = bhk
                 prop.super_builtup_area = sb_val
@@ -21423,6 +21429,8 @@ def resale_residential_import_excel(request):
                 prop.plot_area = p_val
                 prop.building_configuration = bldg_cfg
                 prop.total_floors = tf_val
+                prop.floor_number = fl_no
+
                 prop.bathrooms = baths_val
                 prop.balconies = balcs_val
                 prop.covered_parking = c_pk_val
@@ -21591,7 +21599,7 @@ def resale_residential_sample_excel(request):
                 ('Society Type *', 'Gated Community'), ('Tower/Wing Number', 'A Wing'),
                 ('Water Type *', 'Municipal Corporation Supply'), ('Furnishing Status *', 'Semi-Furnished'),
                 ('Age of Property (Years) *', '1-3 Years'), ('Facing Direction *', 'North-East'),
-                ('Occupancy Status', 'Vacant (Ready for Possession)')
+                ('Occupancy Status', 'Vacant (Ready for Possession)'),('Terrace Details', '500 sqft. private terrace'),
             ]
         },
         {
@@ -21600,7 +21608,7 @@ def resale_residential_sample_excel(request):
                 ('BHK *', '3 BHK'), ('Super Built-up Area (sq.ft) *', 1600.00),
                 ('Built-up Area (sq.ft) *', 1450.00), ('Carpet Area (sq.ft) *', 1120.00),
                 ('Plot Area (sq.ft)', ''), ('Building Configuration', 'G+12'),
-                ('Total Floors Constructed *', 12), ('Bathrooms *', 2), ('Balconies', 1),
+                ('Total Floors Constructed ', 12),('Floor Number ', 3), ('Bathrooms *', 2), ('Balconies', 1),
                 ('Covered Parking', 1), ('Open Parking Available? *', 'No')
             ]
         },
@@ -21772,6 +21780,7 @@ EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE = [
     {'field': 'property_age', 'label': 'Age of Property*', 'section_name': 'BASIC INFORMATION'},
     {'field': 'facing_direction', 'label': 'Facing Direction*', 'section_name': 'BASIC INFORMATION'},
     {'field': 'occupancy_status', 'label': 'Occupancy Status', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'terrace_details', 'label': 'Terrace Details', 'section_name': 'BASIC INFORMATION'},
 
     # Property Details
     {'field': 'bhk', 'label': 'BHK*', 'section_name': 'PROPERTY DETAILS'},
@@ -21780,7 +21789,8 @@ EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE = [
     {'field': 'carpet_area', 'label': 'Carpet Area (sq.ft)*', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'plot_area', 'label': 'Plot Area (sq.ft)', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'building_configuration', 'label': 'Building Configuration', 'section_name': 'PROPERTY DETAILS'},
-    {'field': 'total_floors', 'label': 'Total Floors Constructed*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'total_floors', 'label': 'Total Floors Constructed', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'floor_number', 'label': 'Floor Number', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'bathrooms', 'label': 'Bathrooms*', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'balconies', 'label': 'Balconies', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'covered_parking', 'label': 'Covered Parking', 'section_name': 'PROPERTY DETAILS'},
@@ -23335,10 +23345,13 @@ def import_commercial_data(request):
             'age of property': 'property_age',
             'furnishing status': 'furnishing_status',
             'facing direction': 'facing_direction',
+            'terrace details': 'terrace_details',
             'super built-up area': 'super_builtup_area',
             'built-up area': 'builtup_area',
             'carpet area': 'carpet_area',
             'plot area': 'plot_area',
+            'total floors constructed': 'total_floors',
+            'floor number': 'floor_number',
             'no. of staircases': 'no_staircases',
             'passenger lifts': 'passenger_lifts',
             'service lifts': 'service_lifts',
@@ -23472,11 +23485,14 @@ def import_commercial_data(request):
                 p_age        = get_val('property_age')
                 furn         = get_val('furnishing_status')
                 face         = get_val('facing_direction')
+                terr         = get_val('terrace_details')
                 
                 sb_area      = get_val('super_builtup_area')
                 b_area       = get_val('builtup_area')
                 c_area       = get_val('carpet_area')
                 plot         = get_val('plot_area')
+                t_floor         = get_val('total_floors')
+                floor         = get_val('floor_number')
                 
                 stair        = get_val('no_staircases', '0')
                 pass_l       = get_val('passenger_lifts', '0')
@@ -23668,11 +23684,14 @@ def import_commercial_data(request):
                 prop.property_age = p_age
                 prop.furnishing_status = furn
                 prop.facing_direction = face
+                prop.terrace_details = terr
                 
                 prop.super_builtup_area = sb_val
                 prop.builtup_area = b_val
                 prop.carpet_area = c_val
                 prop.plot_area = p_val
+                prop.total_floors = t_floor
+                prop.floor_number = floor
                 
                 prop.no_staircases = stair_val
                 prop.passenger_lifts = pass_val
@@ -23839,14 +23858,14 @@ def download_commercial_sample_excel(request):
                 ('Shop/Godown No/Unit No *', 'Unit-101'), ('Occupancy Status *', 'Vacant'),
                 ('Zone Type *', 'commercial'), ('Location Hub', 'central_business_district'),
                 ('Property Condition *', 'Brand New'), ('Age of Property *', 1),
-                ('Furnishing Status', 'Fully Furnished'), ('Facing Direction', 'North-East')
+                ('Furnishing Status', 'Fully Furnished'), ('Facing Direction', 'North-East'),('Terrace Details', '500 sqft private terrace')
             ]
         },
         {
             "title": "AREA MEASUREMENTS",
             "fields": [
                 ('Super Built-up Area (sq.ft) *', 2200.00), ('Built-up Area (sq.ft) *', 2000.00),
-                ('Carpet Area (sq.ft)', 1600.00), ('Plot Area (sq.ft)', '')
+                ('Carpet Area (sq.ft)', 1600.00), ('Plot Area (sq.ft)', ''),('Total Floors Constructed', 3),('Floor Number', 3)
             ]
         },
         {
@@ -23996,12 +24015,15 @@ EXPORT_COLUMNS_BLUEPRINT = [
     {'field': 'property_age', 'label': 'Age of Property *', 'section_name': 'BASIC INFORMATION'},
     {'field': 'furnishing_status', 'label': 'Furnishing Status', 'section_name': 'BASIC INFORMATION'},
     {'field': 'facing_direction', 'label': 'Facing Direction', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'terrace_details', 'label': 'Terrace Details', 'section_name': 'BASIC INFORMATION'},
 
     # Area Measurements
     {'field': 'super_builtup_area', 'label': 'Super Built-up Area (sq.ft) *', 'section_name': 'AREA MEASUREMENTS'},
     {'field': 'builtup_area', 'label': 'Built-up Area (sq.ft) *', 'section_name': 'AREA MEASUREMENTS'},
     {'field': 'carpet_area', 'label': 'Carpet Area (sq.ft)', 'section_name': 'AREA MEASUREMENTS'},
     {'field': 'plot_area', 'label': 'Plot Area (sq.ft)', 'section_name': 'AREA MEASUREMENTS'},
+    {'field': 'total_floors', 'label': 'Total Floor Constructed', 'section_name': 'AREA MEASUREMENTS'},
+    {'field': 'floor_number', 'label': 'Floor Number', 'section_name': 'AREA MEASUREMENTS'},
 
     # Commercial Specifications
     {'field': 'no_staircases', 'label': 'No. of Staircases', 'section_name': 'COMMERCIAL SPECIFICATIONS'},
