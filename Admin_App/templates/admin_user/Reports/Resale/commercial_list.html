@@ -660,12 +660,15 @@
                         <th>Age of Property</th>
                         <th>Furnishing Status</th>
                         <th>Facing Direction</th>
+                        <th>Terrace Details</th>
 
                         <!-- Area Measurements Section -->
                         <th>Super Built-up Area (sq.ft)</th>
                         <th>Built-up Area (sq.ft)</th>
                         <th>Carpet Area (sq.ft)</th>
                         <th>Plot Area (sq.ft)</th>
+                        <th>Total Floors</th>
+                        <th>Floor Number</th>
 
                         <!-- Commercial Specifications Section -->
                         <th>No. of Staircases</th>
@@ -840,12 +843,15 @@
                         <td>{{ prop.property_age|default:"—" }}</td>
                         <td>{{ prop.furnishing_status|default:"—" }}</td>
                         <td>{{ prop.facing_direction|default:"—" }}</td>
+                        <td>{{ prop.terrace_details|default:"—" }}</td>
 
                         <!-- Area Measurements Section -->
                         <td>{{ prop.super_builtup_area|default:"—" }}</td>
                         <td>{{ prop.builtup_area|default:"—" }}</td>
                         <td>{{ prop.carpet_area|default:"—" }}</td>
                         <td>{{ prop.plot_area|default:"—" }}</td>
+                        <td>{{ prop.total_floors|default:"—" }}</td>
+                        <td>{{ prop.floor_number|default:"—" }}</td>
 
                         <!-- Commercial Specifications Section -->
                         <td>{{ prop.no_staircases|default:"0" }}</td>

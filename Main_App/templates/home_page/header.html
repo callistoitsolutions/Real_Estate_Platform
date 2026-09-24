@@ -2,11 +2,13 @@
 
 <head>
     <!-- Google Tag Manager -->
+  
+
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KXBSXTN4');</script>
     <!-- End Google Tag Manager -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -100,14 +102,6 @@
 }
 
 
-.premium-header {
-    height: 95px;
-    padding: 0 30px;
-}
-
-.premium-header.ph-scrolled {
-    height: 75px;
-}
 
 
 .premium-header.header-transparent.ph-scrolled .desktop-menu a:hover {
@@ -306,15 +300,31 @@
     transform: scale(1.1);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .premium-header .nav-right {
     display: flex;
     gap: 10px;
     align-items: center;
+    height: 100%;
 }
 
 .premium-header .btn-nav-outline,
 .premium-header .btn-nav-pr {
-    padding: 8px 16px;
+    height: 42px;
+    padding: 0 16px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.82rem;
@@ -322,11 +332,16 @@
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    line-height: 1;
     transition: .2s;
     white-space: nowrap;
     font-family: "DM Sans", sans-serif;
+    box-sizing: border-box;
 }
+
+
 .premium-header .btn-nav-outline {
     border: 1.5px solid rgba(255, 255, 255, 0.4);
     color: #ffffff;
@@ -574,6 +589,8 @@
 /* ============================================
    AI CHATBOT LAUNCHER + PANEL (Leading Platform Theme)
 ============================================ */
+
+
 .ef-chat-fab {
     position: fixed;
     right: 22px;
@@ -582,10 +599,10 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #c9a227, #a5811c);
-    color: #0b1730;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
     border: none;
-    box-shadow: 0 10px 25px rgba(201, 162, 39, 0.4);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -595,8 +612,10 @@
 }
 .ef-chat-fab:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(201, 162, 39, 0.5);
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.5);
 }
+
+
 .ef-chat-fab .ef-chat-dot {
     position: absolute;
     top: 6px;
@@ -669,14 +688,16 @@
     justify-content: space-between;
     border-bottom: 1px solid rgba(201, 162, 39, 0.3);
 }
+
 .ef-chat-head .ef-chat-title {
     font-weight: 700;
     font-size: 0.98rem;
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #f1d888;
+    color: #93c5fd;
 }
+
 .ef-chat-head .ef-chat-sub {
     font-size: 0.72rem;
     opacity: 0.85;
@@ -723,14 +744,16 @@
     color: #1e293b;
     box-shadow: 0 2px 5px rgba(0,0,0,0.02);
 }
+
 .ef-chat-msg.user {
-    background: linear-gradient(135deg, #c9a227, #a5811c);
-    color: #0b1730;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
     margin-left: auto;
     border-top-right-radius: 4px;
     font-weight: 600;
-    box-shadow: 0 2px 5px rgba(201,162,39,0.2);
+    box-shadow: 0 2px 5px rgba(37,99,235,0.25);
 }
+
 .ef-chat-msg.sys {
     background: #fef2f2;
     border: 1px solid #fecaca;
@@ -745,10 +768,12 @@
     flex-wrap: wrap;
     gap: 5px;
 }
+
+
 .ef-chat-opts button {
-    border: 1px solid #e2d198;
-    background: #fffdf5;
-    color: #8c6d17;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
     border-radius: 8px;
     padding: 6px 11px;
     font-weight: 600;
@@ -757,8 +782,8 @@
     transition: all 0.2s;
 }
 .ef-chat-opts button:hover {
-    background: #fbf4de;
-    border-color: #c9a227;
+    background: #dbeafe;
+    border-color: #2563eb;
     color: #16233a;
 }
 .ef-chat-typing {
@@ -784,13 +809,15 @@
     outline: none;
     transition: border-color 0.2s;
 }
+
+
 .ef-chat-foot input:focus {
-    border-color: #c9a227;
-    box-shadow: 0 0 0 3px rgba(201,162,39,0.12);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
 }
 .ef-chat-foot button {
-    background: #16233a;
-    color: #f1d888;
+    background: #2563eb;
+    color: #ffffff;
     border: none;
     border-radius: 10px;
     width: 42px;
@@ -803,9 +830,8 @@
     transition: background 0.2s;
 }
 .ef-chat-foot button:hover {
-    background: #1f2f47;
+    background: #1d4ed8;
 }
-
 @media(max-width: 500px) {
     .ef-chat-panel { right: 10px; left: 10px; width: auto; bottom: 88px; }
     .ef-chat-fab { right: 16px; bottom: 16px; }
@@ -835,8 +861,9 @@
 >
 
 <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KXBSXTN4"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
     <!-- End Google Tag Manager (noscript) -->
 
     <a href="{% url 'index' %}" class="logo brand-logo text-decoration-none"
@@ -869,7 +896,7 @@
         <div class="nav-dropdown">
             <a href="#">Rent & Lease <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
             <div class="nav-dropdown-menu">
-                <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Premium Residences</a>
+                <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Rental Residences</a>
                 <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial Spaces</a>
                 <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> Co-Living / PG</a>
             </div>
@@ -895,18 +922,20 @@
         </a>
         <a href="{% url 'blog' %}">News/Guide</a>
 
-        <a href="{% url 'Adminlogin' %}" hidden>Admin</a>
         <a href="{% url 'Contact_Us' %}">Contact Us</a>
     </nav>
 
        <div class="nav-right">
-        {% if header_settings.show_primary_btn|default_if_none:True %}
-        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'post_property' %}{% endif %}"
+
+    {% if header_settings.show_primary_btn|default_if_none:True %}
+        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'Coming_Soon' %}{% endif %}"
+           id="navPostPropBtn"
            class="btn-nav-outline"
            style="{% if header_settings.primary_btn_bg and header_settings.primary_btn_bg != 'transparent' %}background:{{ header_settings.primary_btn_bg }};{% endif %}{% if header_settings.primary_btn_text_color %}color:{{ header_settings.primary_btn_text_color }};{% endif %}">
-            <i class="bi bi-plus-lg"></i> {{ header_settings.primary_btn_text|default:"Post Property FREE" }}
+            <i class="bi bi-plus-lg"></i> <span id="postPropText"></span>
         </a>
         {% endif %}
+
 
         {% if user_obj %}
         <div class="dropdown d-inline-block" style="position: relative;">
@@ -988,7 +1017,7 @@
         
         <!-- Luxury Mobile Nav Categories -->
         <div class="mob-nav-category">Rent & Lease</div>
-        <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Premium Residences</a>
+        <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Rental Residences</a>
         <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial Spaces</a>
         <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> Co-Living / PG</a>
         
@@ -1003,7 +1032,7 @@
         <a href="{% url 'services' %}"><i class="bi bi-star"></i> Services</a>
         <a href="{% url 'blog' %}"><i class="bi bi-journal-text"></i> News/Guide</a>
         <a href="{% url 'Contact_Us' %}"><i class="bi bi-envelope"></i> Contact Us</a>
-        <a href="{% url 'post_property' %}"><i class="bi bi-plus-circle"></i> Post Property FREE</a>
+        <a href="{% url 'Coming_Soon' %}"><i class="bi bi-plus-circle"></i> Post Property FREE</a>
         
         
         <div class="mob-nav-category">Account</div>
@@ -1133,18 +1162,28 @@ document.addEventListener('click', function(e) {
 
 
 // Header background change on scroll (like housing.com)
+
+// Header background change on scroll (like housing.com)
 (function() {
     const headerEl = document.querySelector('.premium-header');
     if (!headerEl) return;
-    function onScroll() {
+    let ticking = false;
+    function applyScrollState() {
         if (window.scrollY > 40) {
             headerEl.classList.add('ph-scrolled');
         } else {
             headerEl.classList.remove('ph-scrolled');
         }
+        ticking = false;
+    }
+    function onScroll() {
+        if (!ticking) {
+            requestAnimationFrame(applyScrollState);
+            ticking = true;
+        }
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    applyScrollState();
 })();
 
 // Reserve space below the fixed header so page content and the breadcrumb
@@ -1569,4 +1608,18 @@ function efSendToBackend(message){
         }
     });
 }
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const rawText = "{{ header_settings.primary_btn_text|default:'Post Property FREE' }}";
+    const textSpan = document.getElementById('postPropText');
+    if (!textSpan) return;
+
+    if (rawText.toUpperCase().includes('FREE')) {
+        let parts = rawText.split(/free/i);
+       textSpan.innerHTML = parts[0].trim() + ' <span style="background: linear-gradient(135deg, #c9a227, #a5811c); color: #16233a; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 0.75rem; display: inline-block; margin-left: 4px; vertical-align: middle;">FREE</span>';
+    } else {
+        textSpan.textContent = rawText;
+    }
+});
 </script>

@@ -8,6 +8,10 @@ urlpatterns = [
       ##########urls for Lanlord#####
    
     path('',views.index,name="index"),
+
+    ############ urls for coming soon page ###############################
+
+    path('Coming_Soon',views.Coming_Soon,name="Coming_Soon"),
    
    # path('api/advanced-search/', views.advanced_search_api, name='advanced_search'),
 

@@ -1673,7 +1673,7 @@
     var normalizedRole = (role || "").trim().toLowerCase();
     var labelText = "Brokerage";
     switch (normalizedRole) {
-      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'admin': labelText = "Kanishka Imperia Service Fee"; break;
       case 'relationship manager': labelText = "Buyer Service Fee"; break;
       case 'landlord': labelText = "Buyer Service Fee"; break;
       case 'agent': labelText = "Brokerage"; break;
@@ -2711,11 +2711,7 @@
     var newImagesCount = window.totalImageCount ? window.totalImageCount() : 0;
     var grandTotalImages = existingImagesCount + newImagesCount;
 
-    if (grandTotalImages < 3) {
-        goToStep(5);
-        Swal.fire({ icon: 'error', title: 'Missing Images', text: 'Please have at least 3 property images uploaded or saved.' });
-        return;
-    }
+
 
     var progressValue = 0;
     var loadingInterval;

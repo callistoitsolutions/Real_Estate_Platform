@@ -2230,17 +2230,6 @@
         }
     }
 
-    if (window.totalImageCount && window.totalImageCount() < 3) {
-        goToStep(4);
-        Swal.fire({
-            title: 'Missing Images',
-            text: 'Please have at least 3 property images uploaded or saved.',
-            icon: 'error',
-            confirmButtonColor: '#f59e0b'
-        });
-        return;
-    }
-
     function updateProgress(value, statusText) {
         var progressText = document.getElementById('swalProgressText');
         var progressBar = document.getElementById('swalProgressBar');

@@ -1308,7 +1308,7 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
     'occupancy_status', 'floor_no', 'floor_number', 'society_type', 'water_type','city_zone' , 'availability_status' ,'land_area' ,
     'ownership_type' , 'locality_area' , 'property_landmark' , 'latitude' , 'longitude' , 'google_maps_link' , 'builtup_area' ,
     'property_category', 'zone_type', 'location_hub', 'property_condition', 'property_age', 'builtup_area' , 'main_road_connectivity' ,
-    'super_builtup_area', 'no_staircases', 'num_cabins',
+    'super_builtup_area', 'no_staircases', 'num_cabins', 'floor_number' , 'terrace_details' ,
     'user_description', 'property_summary', 'property_description',
     'ownership_status', 'ownership_document_type', 'title_clarity_status',
     'encumbrance_status', 'property_loan', 'existing_tenants', 'any_legal_dispute',
@@ -4065,75 +4065,67 @@ def Verify_Otp_Api(request):
 @csrf_exempt
 def Prop_Register_Api(request):
     if request.method == "POST":
-        user_identifier = request.POST.get('email', '').strip()
-        name = request.POST.get('name', '').strip()
-        mobile = request.POST.get('mobile', '').strip()
-        role = request.POST.get('role', '').strip()
+        user_identifier = request.POST.get('user_email', '').strip()
+        name = request.POST.get('user_name', '').strip()
+        mobile = request.POST.get('user_phone', '').strip()
+        role = request.POST.get('user_role', '').strip()
+        password = request.POST.get('user_password', '').strip()
+
         
-        #  CRITICAL FIX: Check the new success flag instead of the raw email
-        verified_user = request.session.get('otp_verified_for')
-        if verified_user != user_identifier:
-             return JsonResponse({'status': '0', 'msg': 'Security timeout. Please request a new OTP.'})
-             
         try:
             email_val = user_identifier if '@' in user_identifier else ''
-
-            generated_password = get_random_string(
-                length=12, 
-                allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*'
-            )
             
-            # 1. Save user object details
+            # 1. Save user object details initially to get a database ID
             new_user = User_Details(
                 user_email=email_val,
                 user_name=name,
                 user_phone=mobile,
                 user_role=role,
-                user_password=generated_password,
+                user_password=password,
                 user_register_date=datetime.today(),
                 user_register_time=datetime.now()
             )
-            new_user.save()
-            
-            # 2.  RENDER AND SEND EXTERNAL HTML EMAIL TEMPLATE
-            if email_val:
-                subject = "Welcome to KANISHKAIMPERIA! "
-                login_link = request.build_absolute_uri('/') 
-                
-                # Context variables to map directly into the template
-                context = {
-                    'name': name,
-                    'email': email_val,
-                    'role': role,
-                    'login_link': login_link
-                }
-                
-                # Compiles the standalone HTML file with our context data
-                html_message = render_to_string('emails/welcome_mail.html', context)
-                
-                # Plain text version fallback for strict email clients
-                plain_message = strip_tags(html_message)
+            new_user.save() # Saves first so new_user.id is generated
 
-                send_mail(
-                    subject=subject,
-                    message=plain_message,
-                    from_email=None, 
-                    recipient_list=[email_val],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
+            # 2. Now generate the custom user_id using the valid ID
+            current_year = datetime.now().year
+            year_suffix = str(current_year)[-2:]
             
-            # 3. Handle active user sessions setups
+            new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
+            new_user.save(update_fields=['user_id']) # Update just the user_id field
+            
+            # 3. RENDER AND SEND EXTERNAL HTML EMAIL TEMPLATE
+            # if email_val:
+            #     subject = "Welcome to KANISHKAIMPERIA!"
+            #     login_link = request.build_absolute_uri('/') 
+                
+            #     context = {
+            #         'name': name,
+            #         'email': email_val,
+            #         'role': role,
+            #         'login_link': login_link,
+            #         'password': password
+            #     }
+                
+            #     html_message = render_to_string('emails/welcome_mail.html', context)
+            #     plain_message = strip_tags(html_message)
+
+            #     send_mail(
+            #         subject=subject,
+            #         message=plain_message,
+            #         from_email=None, 
+            #         recipient_list=[email_val],
+            #         html_message=html_message,
+            #         fail_silently=False,
+            #     )
+            
+            # 4. Handle active user sessions setup
             request.session['User_id'] = str(new_user.id)
             request.session['user_type'] = new_user.user_role
-            
-            request.session.pop('auth_otp', None)
-            request.session.pop('auth_identifier', None)
-            request.session.pop('otp_verified_for', None)
             request.session.modified = True
             
             return JsonResponse({'status': '1', 'msg': 'Account Created Successfully!'})
-            
+        
         except Exception as e:
             print(traceback.format_exc())
             return JsonResponse({'status': '0', 'msg': f"Server Error: {str(e)}"})
@@ -4708,6 +4700,13 @@ def index(request):
 
     return render(request, "home_page/index.html", context)
 
+
+############ Views start for coming soon page ###########################
+
+def Coming_Soon(request):
+    return render(request,"home_page/coming_soon.html")
+
+############ Views end for coming soon page ###############################
 
 @require_POST
 def track_search_click(request):

@@ -1411,6 +1411,7 @@
         <select class="form-select form-control" id="property_type" name="property_type" required>
             <option value="">Select Property Type</option>
             <option value="apartment">Apartment</option>
+            <option value="flat">Flat</option>
             <option value="studio_apartment">Studio Apartment</option>
             <option value="penthouse">Penthouse</option>
             <option value="independent_house">Independent House</option>
@@ -1535,6 +1536,15 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Terrace Details </label>
+                                        <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required>
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -1575,12 +1585,21 @@
                                         <input type="text" class="form-control" id="building_configuration" name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3">
                                     </div>
                                 </div>
+
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Total Floors Constructed <span class="required">*</span></label>
+                                        <label class="form-label">Total Floors Constructed </label>
                                         <input type="number" class="form-control" id="total_floors" name="total_floors" placeholder="e.g., 3" required>
                                     </div>
                                 </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Floor Number </label>
+                                        <input type="number" class="form-control" id="floor_number" name="floor_number" placeholder="e.g., 3" required>
+                                    </div>
+                                </div>
+
                             </div>
 
                             
@@ -1597,20 +1616,21 @@
                                
 
                                 <div class="col-md-4 mt-2">
-    <div class="form-group">
-        <label class="form-label">BHK <span class="required">*</span></label>
-        <select class="form-select form-control" id="bhk" name="bhk" required>
-            <option value="">Select</option>
-            <option value="0bhk">0 BHK / Studio</option>
-            <option value="1rk">1 RK</option>
-            <option value="1bhk">1 BHK</option>
-            <option value="2bhk">2 BHK</option>
-            <option value="3bhk">3 BHK</option>
-            <option value="4bhk">4 BHK</option>
-            <option value="5+bhk">5+ BHK</option>
-        </select>
-    </div>
-</div>
+                                    <div class="form-group">
+                                        <label class="form-label">BHK <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="bhk" name="bhk" required>
+                                            <option value="">Select</option>
+                                            <option value="0bhk">0 BHK / Studio</option>
+                                            <option value="1rk">1 RK</option>
+                                            <option value="1bhk">1 BHK</option>
+                                            <option value="2bhk">2 BHK</option>
+                                            <option value="3bhk">3 BHK</option>
+                                            <option value="4bhk">4 BHK</option>
+                                            <option value="5+bhk">5+ BHK</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Bathrooms <span class="required">*</span></label>
@@ -1825,6 +1845,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="conditional-section mt-2" id="res_tax_amount_section" style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Pending Tax Amount (₹)</label>
@@ -3844,6 +3865,7 @@
         fd.append('property_age', $('#property_age').val());
         fd.append('facing_direction', $('#facing_direction').val());
         fd.append('occupancy_status', $('#occupancy_status').val());
+        fd.append('terrace_details', $('#terrace_details').val());
 
         fd.append('super_builtup_area', $('#super_builtup_area').val());
         fd.append('builtup_area', $('#builtup_area').val());
@@ -3851,6 +3873,7 @@
         fd.append('plot_area', $('#plot_area').val());
         fd.append('building_configuration', $('#building_configuration').val());
         fd.append('total_floors', $('#total_floors').val());
+        fd.append('floor_number', $('#floor_number').val());
         fd.append('brokerage_percentage', $('#brokerage_percentage').val());
         fd.append('manual_brokerage', $('#manual_brokerage').val());
 

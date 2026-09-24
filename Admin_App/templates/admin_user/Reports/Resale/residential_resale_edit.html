@@ -1593,6 +1593,7 @@
                                         <select class="form-select form-control" id="property_type" name="property_type" required>
                                             <option value="">Select Property Type</option>
                                             <option value="apartment"{% if prop.property_type == "apartment" %}selected{% endif %}>Apartment</option>
+                                            <option value="flat"{% if prop.property_type == "flat" %}selected{% endif %}>Flat</option>
                                             <option value="studio_apartment"{% if prop.property_type == "studio_apartment" %}selected{% endif %}>Studio Apartment</option>
                                             <option value="penthouse"{% if prop.property_type == "penthouse" %}selected{% endif %}>Penthouse</option>
                                             <option value="independent_house"{% if prop.property_type == "independent_house" %}selected{% endif %}>Independent House</option>
@@ -1716,6 +1717,15 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Terrace Details </label>
+                                        <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required value="{{prop.terrace_details}}">
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -1758,10 +1768,18 @@
                                 </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Total Floors Constructed <span class="required">*</span></label>
+                                        <label class="form-label">Total Floors Constructed </label>
                                         <input type="number" class="form-control" id="total_floors" name="total_floors" placeholder="e.g., 3" required value="{{ prop.total_floors|default_if_none:"" }}">
                                     </div>
                                 </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Floor Number </label>
+                                        <input type="number" class="form-control" id="floor_number" name="floor_number" placeholder="e.g., 3" required value="{{ prop.floor_number|default_if_none:"" }}">
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -2001,6 +2019,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="conditional-section mt-2" id="res_tax_amount_section" style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Pending Tax Amount (₹)</label>
@@ -4244,6 +4263,7 @@ function processPropertySubmission(_this) {
     fd.append('property_age', $('#property_age').val());
     fd.append('facing_direction', $('#facing_direction').val());
     fd.append('occupancy_status', $('#occupancy_status').val());
+    fd.append('terrace_details', $('#terrace_details').val());
 
     fd.append('super_builtup_area', $('#super_builtup_area').val());
     fd.append('builtup_area', $('#builtup_area').val());
@@ -4251,6 +4271,7 @@ function processPropertySubmission(_this) {
     fd.append('plot_area', $('#plot_area').val());
     fd.append('building_configuration', $('#building_configuration').val());
     fd.append('total_floors', $('#total_floors').val());
+    fd.append('floor_number', $('#floor_number').val());
     fd.append('brokerage_percentage', $('#brokerage_percentage').val());
     fd.append('manual_brokerage', $('#manual_brokerage').val());
 

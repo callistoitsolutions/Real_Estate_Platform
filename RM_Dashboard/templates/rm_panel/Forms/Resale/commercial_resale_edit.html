@@ -500,6 +500,15 @@
                     </select>
                   </div>
                 </div>
+
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Terrace Details </label>
+                    <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required value="{{prop.terrace_details}}">
+                  </div>
+                </div>
+
+
               </div>
             </div>
           </div>
@@ -532,6 +541,22 @@
                     <input type="number" class="form-control" name="plot_area" id="plot_area" placeholder="optional" value="{{ prop.plot_area|default_if_none:"" }}">
                   </div>
                 </div>
+
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Total Floors Constructed </label>
+                    <input type="number" class="form-control" name="total_floors" id="total_floors" placeholder="e.g., 3" value="{{prop.total_floors}}">
+                  </div>
+                </div>
+
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Floor Number </label>
+                    <input type="number" class="form-control" name="floor_number" id="floor_number" placeholder="e.g., 3" value="{{prop.floor_number}}">
+                  </div>
+                </div>
+
+
               </div>
             </div>
           </div>
@@ -2515,12 +2540,15 @@
     fd.append('property_age', $('#property_age').val());
     fd.append('furnishing_status', $('#furnishing_status').val());
     fd.append('facing_direction', $('#facing_direction').val());
+    fd.append('terrace_details', $('#terrace_details').val());
 
     // Areas
     fd.append('super_builtup_area', $('#super_builtup_area').val());
     fd.append('builtup_area', $('#builtup_area').val());
     fd.append('carpet_area', $('#carpet_area').val());
     fd.append('plot_area', $('#plot_area').val());
+    fd.append('total_floors', $('#total_floors').val());
+    fd.append('floor_number', $('#floor_number').val());
 
     // Commercial Specs
     fd.append('no_staircases', $('#no_staircases').val());

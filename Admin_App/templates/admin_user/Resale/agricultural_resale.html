@@ -2232,7 +2232,7 @@
 
     switch (normalizedRole) {
       case 'admin':
-        labelText = "EstateFlow Service Fee";
+        labelText = "Kanishka Imperia Service Fee";
         break;
       case 'relationship manager':
         labelText = "Buyer Service Fee";
@@ -3219,21 +3219,6 @@
         }
     }
 
-    if (window.totalImageCount && window.totalImageCount() < 3) {
-        goToStep(5);
-        $('.img-total-summary').addClass('input-error');
-        var imgSummaryEl = document.querySelector('.img-total-summary');
-        if (imgSummaryEl) imgSummaryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        Swal.fire({
-            title: 'Missing Images',
-            text: 'Please upload at least 3 property images.',
-            icon: 'error',
-            confirmButtonColor: '#56ab2f'
-        });
-        return;
-    } else {
-        $('.img-total-summary').removeClass('input-error');
-    }
 
     function updateProgress(value, statusText) {
         var progressText = document.getElementById('swalProgressText');
@@ -3409,7 +3394,7 @@
 
     $.ajax({
         method: "POST",
-        url: formEl.getAttribute('action'),
+        url: "{% url 'Resale_Agricultural_Ajax' %}",
         data: fd,
         processData: false,
         contentType: false,
@@ -3452,7 +3437,7 @@
                         text: (response.msg || response.message || 'Agricultural property published successfully.') + propertyIdText,
                         confirmButtonColor: '#56ab2f'
                     }).then(() => {
-                        window.location.reload();
+                        window.location.href = "{% url 'agricultural_resale_list' %}";
                     });
                 } else {
                     Swal.fire({

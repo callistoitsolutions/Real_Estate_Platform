@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+{% load static %}
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,23 +47,45 @@
       overflow-x: hidden;
     }
 
-    /* BRAND LOGO */
+    /* BRAND LOGO WRAPPER */
+    .brand-header-wrap {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand-circle-logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 10px auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ph-navy), var(--ph-navy-3));
+      border: 2px solid var(--ph-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(11, 23, 48, 0.15);
+    }
+    .brand-circle-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .brand-logo {
       font-family: "Playfair Display", serif;
-      font-size: 1.9rem;
+      font-size: 1.6rem;
       font-weight: 800;
       color: var(--ph-navy);
-      text-align: center;
-      margin-bottom: 6px;
       text-decoration: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: .2px;
+      line-height: 1.1;
+      letter-spacing: 0.5px;
     }
     .brand-logo span {
+      display: block;
+      font-size: 1.4rem;
       color: var(--ph-pr2);
+      letter-spacing: 2px;
+      font-weight: 700;
+      margin-top: 2px;
     }
     .brand-tagline {
       text-align: center;
@@ -70,7 +94,7 @@
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--ph-gold);
-      margin-bottom: 24px;
+      margin-top: 2px;
     }
 
     /* LOGIN CARD */
@@ -247,18 +271,22 @@
 
   <div class="login-card">
 
-    <div class="brand-logo">
-      🏛️ KANISHKA<span>IMPERIA</span>
+    <div class="brand-header-wrap">
+      <div class="brand-circle-logo">
+        <img src="{% static 'login_logo.png' %}" alt="KanishkaImperia Logo" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'bi bi-building-fill\'></i>';">
+      </div>
+      <div class="brand-logo">
+        KANISHKA <span>IMPERIA</span>
+      </div>
+      <div class="brand-tagline">Luxury Realty &amp; Estates</div>
     </div>
-    <div class="brand-tagline">Luxury Realty &amp; Estates</div>
 
-    <div class="form-title">Forgot Password</div>
+    <div class="form-title">Reset Password</div>
 
     <form method="post" onsubmit="return false;">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ next|default:'' }}">
 
-      <!-- STEP 1: IDENTIFIER INPUT -->
       <!-- STEP 1: IDENTIFIER INPUT -->
       <div id="step-1-email" class="auth-step active-step">
         <label class="form-label-top"><span id="identifierLabelText">Email Address</span> <span class="required">*</span></label>
@@ -274,14 +302,6 @@
             <input class="form-check-input" type="radio" name="otp_channel" id="channel_email" value="email" checked onchange="switchInputType()">
             <label class="form-check-label fw-medium text-dark" for="channel_email">Email</label>
           </div>
-          {% comment %} <div class="form-check">
-            <input class="form-check-input" type="radio" name="otp_channel" id="channel_whatsapp" value="whatsapp" onchange="switchInputType()">
-            <label class="form-check-label fw-medium text-dark" for="channel_whatsapp">WhatsApp</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="otp_channel" id="channel_sms" value="sms" onchange="switchInputType()">
-            <label class="form-check-label fw-medium text-dark" for="channel_sms">SMS</label>
-          </div> {% endcomment %}
         </div>
 
         <button type="button" class="btn-login" onclick="checkEmailExists(this)">Continue</button>
@@ -336,18 +356,14 @@
   </div>
 
 <script>
-  
     let otpTimerInterval = null;
 
     // Tab switching engine
-
     function goToStepAuth(stepId) {
-        $('.auth-step').removeClass('active-step');
-        $('#' + stepId).addClass('active-step');
+        $('.auth-step').removeClass('active-step');$('#' + stepId).addClass('active-step');
     }
 
     // Auto-tab assistant for verification boxes
-
     function moveToNext(current, event) {
         if (current.value.length >= current.maxLength) {
             let next = $(current).next('.otp-input');
@@ -360,10 +376,9 @@
     }
 
     // Switch input field type, placeholder, and label dynamically based on selected channel
-
     function switchInputType() {
         let channel = $('input[name="otp_channel"]:checked').val();
-        let $input = $('#forgot_email');
+        let $input =$('#forgot_email');
         
         $input.val(''); 
 
@@ -380,7 +395,6 @@
     }
 
     // STEP 1: Verify Profile Existence & Format Check (Email or Mobile)
-
     function checkEmailExists(_this) {
         let rawVal = $('#forgot_email').val();
         let identifier = rawVal.trim();
@@ -426,7 +440,6 @@
     }
 
     // STEP 2B (Trigger): Request Verification Token & Start 40s Timer
-    
     function sendOTP(identifier, channel) {
         $('#display_otp_email').text(identifier + ` (via ${channel.toUpperCase()})`);
         $('.otp-input').val(''); 
@@ -441,7 +454,6 @@
     }
 
     // 40 Seconds Countdown Logic
-
     function startOtpCountdown() {
         let timeLeft = 40;
         $('#countdown').text(timeLeft);
@@ -462,7 +474,6 @@
     }
 
     // Resend OTP Trigger Option
-
     function resendOTPAction() {
         let identifier = $('#forgot_email').val().trim();
         let selectedChannel = $('input[name="otp_channel"]:checked').val();
@@ -484,10 +495,9 @@
     }
 
     // STEP 2B (Execution): Code Validation Path
-
     function verifyOTP(_this) {
         let otp = "";
-        $('.otp-input').each(function() { otp += $(this).val(); });
+        $('.otp-input').each(function() { otp +=$(this).val(); });
         if(otp.length < 4) return swal({icon: "warning", title: "Incomplete Code", text: "Please enter the full otp."});
 
         let btnText = _this.innerHTML;
@@ -511,7 +521,6 @@
     }
 
     // STEP 3 (Execution): Account Onboarding Path
-
     function processProgRegistration(_this) {
         let identifier = $('#forgot_email').val();
         let password = $('#forgot_pass').val();
@@ -550,7 +559,6 @@
             }
         });
     }
-
   </script>
 
 </body>

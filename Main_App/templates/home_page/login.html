@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+{% load static %}
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,23 +47,45 @@
       overflow-x: hidden;
     }
 
-    /* BRAND LOGO */
+    /* BRAND LOGO WRAPPER */
+    .brand-header-wrap {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand-circle-logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 10px auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ph-navy), var(--ph-navy-3));
+      border: 2px solid var(--ph-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(11, 23, 48, 0.15);
+    }
+    .brand-circle-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .brand-logo {
       font-family: "Playfair Display", serif;
-      font-size: 1.9rem;
+      font-size: 1.6rem;
       font-weight: 800;
       color: var(--ph-navy);
-      text-align: center;
-      margin-bottom: 6px;
       text-decoration: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: .2px;
+      line-height: 1.1;
+      letter-spacing: 0.5px;
     }
     .brand-logo span {
+      display: block;
+      font-size: 1.4rem;
       color: var(--ph-pr2);
+      letter-spacing: 2px;
+      font-weight: 700;
+      margin-top: 2px;
     }
     .brand-tagline {
       text-align: center;
@@ -70,7 +94,7 @@
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: var(--ph-gold);
-      margin-bottom: 24px;
+      margin-top: 2px;
     }
 
     /* LOGIN CARD */
@@ -238,10 +262,15 @@
 
   <div class="login-card">
 
-    <div class="brand-logo">
-      🏛️ KANISHKA<span>IMPERIA</span>
+    <div class="brand-header-wrap">
+      <div class="brand-circle-logo">
+        <img src="{% static 'login_logo.png' %}" alt="KanishkaImperia Logo" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'bi bi-building-fill\'></i>';">
+      </div>
+      <div class="brand-logo">
+        KANISHKA <span>IMPERIA</span>
+      </div>
+      <div class="brand-tagline">Luxury Realty &amp; Estates</div>
     </div>
-    <div class="brand-tagline">Luxury Realty &amp; Estates</div>
 
     <div class="form-title">Welcome Back</div>
     <div class="form-subtitle">Please sign in to your account to continue</div>
@@ -270,7 +299,7 @@
         <button type="button" class="btn-login" onclick="processProgLogin(this)">Sign In</button>
       </div>
 
-      <div id="step-2-otp" class="auth-step">
+      {% comment %} <div id="step-2-otp" class="auth-step">
         <button type="button" class="back-btn" onclick="goToStepAuth('step-1-email')"><i class="bi bi-arrow-left"></i> Change Email</button>
         <div class="form-subtitle text-start mb-2">We've sent a 4-digit verification code to <strong id="display_otp_email" class="text-dark"></strong>.</div>
 
@@ -313,10 +342,13 @@
           <label>Select User Role</label>
         </div>
         <button type="button" class="btn-login btn-emerald" onclick="processProgRegistration(this)">Create Account &amp; Sign In</button>
-      </div>
+      </div> {% endcomment %}
 
       <div class="bottom-link">
         Need assistance? <a href="{% url 'index' %}">Return to Home</a>
+      </div>
+      <div class="bottom-link">
+        New to portal? <a href="{% url 'signup' %}">Create Profile</a>
       </div>
       <div class="bottom-link">
         Don't Remember Password? <a href="{% url "Forgot_Password" %}">Forgot Password</a>
@@ -343,8 +375,7 @@
     // Tab switching engine
 
     function goToStepAuth(stepId) {
-        $('.auth-step').removeClass('active-step');
-        $('#' + stepId).addClass('active-step');
+        $('.auth-step').removeClass('active-step');$('#' + stepId).addClass('active-step');
     }
 
     // Auto-tab assistant for verification boxes
@@ -378,7 +409,7 @@
                 if(response.exists) {
                     goToStepAuth('step-2-login');
                 } else {
-                    sendOTP(email);
+                    swal({icon: "warning", title: "Not Exists", text: "Your email address is not registered with KanishkaImperia"});
                 }
             },
             error: function() {
@@ -439,7 +470,7 @@
     // STEP 2B (Execution): Code Validation Path
     function verifyOTP(_this) {
         let otp = "";
-        $('.otp-input').each(function() { otp += $(this).val(); });
+        $('.otp-input').each(function() { otp +=$(this).val(); });
         if(otp.length < 4) return swal({icon: "warning", title: "Incomplete Code", text: "Please supply the entire token."});
 
         let btnText = _this.innerHTML;

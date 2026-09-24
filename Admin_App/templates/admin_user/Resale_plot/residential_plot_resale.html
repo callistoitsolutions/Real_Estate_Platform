@@ -2517,21 +2517,6 @@
         }
     }
 
-    if (window.totalImageCount && window.totalImageCount() < 3) {
-        goToStep(4);
-        $('.img-total-summary').addClass('input-error');
-        var imgSummaryEl = document.querySelector('.img-total-summary');
-        if (imgSummaryEl) imgSummaryEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        Swal.fire({
-            title: 'Missing Images',
-            text: 'Please upload at least 3 property images.',
-            icon: 'error',
-            confirmButtonColor: '#56ab2f'
-        });
-        return;
-    } else {
-        $('.img-total-summary').removeClass('input-error');
-    }
 
     function updateProgress(value, statusText) {
         var progressText = document.getElementById('swalProgressText');

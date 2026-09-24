@@ -837,7 +837,7 @@ class Subscription_Purchase_Details(models.Model):
 
 
 def generate_unique_rental_residential_id():
-    return f"EFPRR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIPRR-{uuid.uuid4().hex[:8].upper()}"
 
 
 # ==========================================
@@ -1526,7 +1526,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import models
 
 def generate_commercial_rental_id():
-    return f"EFCPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KICPR-{uuid.uuid4().hex[:8].upper()}"
 
 class CommercialRentalProperty(models.Model):
     id = models.CharField(
@@ -2030,7 +2030,7 @@ class CommercialRentalActivityLog(models.Model):
 
 
 def generate_unique_pg_property_id():
-    return f"EFPG-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIPG-{uuid.uuid4().hex[:8].upper()}"
 
 
 class PGColivingProperty(models.Model):
@@ -2525,7 +2525,7 @@ class PGColivingActivityLog(models.Model):
 # Helper function to generate the custom primary key
 def generate_resale_unique_property_id():
     # Example format: EFRES-A1B2C3D4
-    return f"EFRES-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIRES-{uuid.uuid4().hex[:8].upper()}"
 
 
 
@@ -2566,8 +2566,8 @@ class ResaleResidentialProperty(models.Model):
     furnishing_status = models.CharField(max_length=100, blank=True, null=True)      
     property_age = models.CharField(max_length=100, blank=True, null=True)      
     facing_direction = models.CharField(max_length=100, blank=True, null=True)      
-    occupancy_status = models.CharField(max_length=100, blank=True, null=True)      
-    floor_no = models.PositiveIntegerField(default=1, null=True, blank=True)  # ADD THIS FIELD
+    occupancy_status = models.CharField(max_length=100, blank=True, null=True)    
+    terrace_details = models.CharField(max_length=200, blank=True, null=True)      
 
     ################## Property Measurements Section ###########################
     super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
@@ -2575,7 +2575,8 @@ class ResaleResidentialProperty(models.Model):
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     building_configuration = models.CharField(max_length=100, blank=True, null=True)
-    total_floors = models.PositiveIntegerField(default=1, null=True, blank=True)
+    total_floors = models.CharField(max_length=5, null=True, blank=True)
+    floor_number = models.CharField(max_length=5, null=True, blank=True)
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
     manual_brokerage = models.PositiveIntegerField(default=0, null=True, blank=True)
 
@@ -2974,7 +2975,7 @@ class ResaleResidentialVideo(models.Model):
 
 # Helper function to generate the custom primary key
 def generate_property_id():
-    return f"EFCOM-{uuid.uuid4().hex[:8].upper()}"
+    return f"KICOM-{uuid.uuid4().hex[:8].upper()}"
 
 
 class CommercialResaleProperty(models.Model):
@@ -3019,6 +3020,7 @@ class CommercialResaleProperty(models.Model):
     property_age = models.CharField(max_length=50,blank=True,null=True)
     furnishing_status = models.CharField(max_length=50,blank=True,null=True)
     facing_direction = models.CharField(max_length=50,blank=True,null=True)
+    terrace_details = models.CharField(max_length=200,blank=True,null=True)
     bhk = models.CharField(max_length=50,blank=True,null=True)
 
     ################# Area Measurements Section ##############################
@@ -3027,6 +3029,8 @@ class CommercialResaleProperty(models.Model):
     builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    total_floors = models.CharField(max_length=5,blank=True, null=True)
+    floor_number = models.CharField(max_length=5,blank=True, null=True)
 
     ############# Commercial Specifications Section ############################
 
@@ -3461,7 +3465,7 @@ class ResaleCommercialVideo(models.Model):
 ############### Modal Start for Residential Resale Plot ########################
 
 def generate_residential_resale_plot_id():
-    return f"EFPLT-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIPLT-{uuid.uuid4().hex[:8].upper()}"
 
 class ResidentialResalePlot(models.Model):
     plot_property_id = models.CharField(
@@ -3594,7 +3598,7 @@ class ResidentialResalePlot(models.Model):
 
 # Helper function to generate the custom primary key
 def generate_industrial_id():
-    return f"EFIND-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIND-{uuid.uuid4().hex[:8].upper()}"
 
 
 class IndustrialResaleProperty(models.Model):
@@ -4208,7 +4212,7 @@ class ResaleIndustrialVideo(models.Model):
 
 # Helper function to generate the custom primary key
 def generate_agri_id():
-    return f"EFAGR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIAGR-{uuid.uuid4().hex[:8].upper()}"
 
 
 class AgriculturalResaleProperty(models.Model):
@@ -4694,7 +4698,7 @@ class ResaleAgriculturalVideo(models.Model):
 
 
 def generate_residential_plot_id():
-    return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 
 class ResidentialPlotResaleProperty(models.Model):
@@ -5383,7 +5387,7 @@ class ResidentialPlotResaleActivityLog(models.Model):
 
 
 def generate_commercial_plot_id():
-    return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 class CommercialPlotResaleProperty(models.Model):
     id = models.CharField(
@@ -5907,7 +5911,7 @@ class CommercialPlotResaleActivityLog(models.Model):
 
 
 def generate_industrial_plot_id():
-    return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 class IndustrialPlotResaleProperty(models.Model):
     id = models.CharField(
@@ -6426,7 +6430,7 @@ class IndustrialPlotResaleActivityLog(models.Model):
 
 
 def generate_agricultural_plot_id():
-    return f"EFAPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIAPR-{uuid.uuid4().hex[:8].upper()}"
 
 
 class AgriculturalPlotResaleProperty(models.Model):

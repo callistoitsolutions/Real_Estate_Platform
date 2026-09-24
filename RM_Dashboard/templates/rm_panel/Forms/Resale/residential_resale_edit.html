@@ -1609,6 +1609,15 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Terrace Details </label>
+                                        <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required>
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -1653,6 +1662,12 @@
                                     <div class="form-group">
                                         <label class="form-label">Total Floors Constructed <span class="required">*</span></label>
                                         <input type="number" class="form-control" id="total_floors" name="total_floors" placeholder="e.g., 3" required value="{{ prop.total_floors|default_if_none:"" }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Floor Number </label>
+                                        <input type="number" class="form-control" id="floor_number" name="floor_number" placeholder="e.g., 3" required>
                                     </div>
                                 </div>
                             </div>
@@ -4048,6 +4063,7 @@ function processPropertySubmission(_this) {
     fd.append('property_age', $('#property_age').val());
     fd.append('facing_direction', $('#facing_direction').val());
     fd.append('occupancy_status', $('#occupancy_status').val());
+    fd.append('terrace_details', $('#terrace_details').val());
 
     fd.append('super_builtup_area', $('#super_builtup_area').val());
     fd.append('builtup_area', $('#builtup_area').val());
