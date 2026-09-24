@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary: #006ce4; 
+  --primary: #006ce4;
   --primary-dark: #0050a8;
   --pr: #f97316;
   --pr2: #ea580c;
@@ -26,7 +26,6 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 
-/* SUB-HEADER FOR CONTEXT */
 .sub-header { background: white; border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
 .sub-header-left { display: flex; align-items: center; gap: 8px; }
 .nav-chip { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: rgba(249,115,22,.15); color: var(--pr); border: 1px solid rgba(249,115,22,.3); }
@@ -68,18 +67,15 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 .field label{font-size:.76rem;font-weight:700;color:#374151;}
 .field label .req{color:#ef4444;margin-left:2px;}
 .field label .opt{font-size:.66rem;color:var(--muted);font-weight:400;margin-left:4px;}
+.field .hint{font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.4;}
+.field .hint.private{color:#b45309;font-weight:600;}
 .field input,.field select,.field textarea{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;font-size:.84rem;color:var(--sec);transition:.2s;width:100%;font-family:'Poppins',sans-serif;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:white;box-shadow:0 0 0 3px rgba(0,108,228,.1);}
 .field textarea{resize:vertical;min-height:90px;line-height:1.5;}
-.field .help{font-size:.68rem;color:var(--muted);margin-top:2px;}
+.field input[readonly]{background:#eef2ff;color:#4338ca;font-weight:700;}
 .field .prefix-wrap{position:relative;}
 .field .prefix-wrap .prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.82rem;font-weight:700;color:var(--muted);}
 .field .prefix-wrap input{padding-left:28px;}
-
-.toggle-group{display:flex;flex-wrap:wrap;gap:8px;}
-.tgl{padding:8px 14px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);transition:.2s;user-select:none;font-family:'Poppins',sans-serif;}
-.tgl:hover{border-color:var(--primary);color:var(--primary);}
-.tgl.active{background:rgba(0,108,228,0.1);color:var(--primary);border-color:var(--primary);}
 
 .check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .check-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:.2s;}
@@ -87,13 +83,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 .check-item input{accent-color:var(--primary);width:15px;height:15px;flex-shrink:0;cursor:pointer;}
 .check-item label{font-size:.78rem;font-weight:600;color:#374151;cursor:pointer;}
 .check-item.selected{background:rgba(0,108,228,0.05);border-color:var(--primary);}
-
-.photo-drop{border:2px dashed var(--border);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);}
-.photo-drop:hover{border-color:var(--primary);background:rgba(0,108,228,0.03);}
-.photo-drop input{display:none;}
-.photo-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
-.photo-thumb{width:90px;height:80px;border-radius:9px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--bg);position:relative;overflow:hidden;}
-.photo-thumb .remove-photo{position:absolute;top:3px;right:3px;width:18px;height:18px;background:rgba(239,68,68,.9);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.5rem;cursor:pointer;border:none;}
 
 .review-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;}
 .rb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem;}
@@ -109,17 +98,18 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 .btn-sec:hover{border-color:var(--primary);color:var(--primary);}
 .btn-lg{padding:13px 28px;font-size:.9rem;}
 
-.sidebar{display:flex;flex-direction:column;gap:16px;}
+.sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px;align-self:start;}
 
 .preview-card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;color:var(--sec);box-shadow:0 4px 12px rgba(0,0,0,.03);}
 .pc-head{font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
 .pc-mock{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);}
-.pcm-img{height:120px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
-.pcm-badges{position:absolute;top:8px;left:8px;display:flex;gap:4px;}
+.pcm-img{height:120px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;overflow:hidden;}
+.pcm-img img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
+.pcm-badges{position:absolute;top:8px;left:8px;display:flex;gap:4px;z-index:2;}
 .pcm-badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:5px;}
 .b-rent{background:rgba(255,255,255,.9);color:#0f172a;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
 .b-comm{background:#7c3aed;color:white;}
-.pcm-price{position:absolute;bottom:8px;left:8px;background:rgba(15,23,42,.85);color:white;font-size:.82rem;font-weight:900;padding:3px 9px;border-radius:6px;}
+.pcm-price{position:absolute;bottom:8px;left:8px;background:rgba(15,23,42,.85);color:white;font-size:.82rem;font-weight:900;padding:3px 9px;border-radius:6px;z-index:2;}
 .pcm-body{padding:12px;}
 .pcm-title{font-size:.84rem;font-weight:800;color:#0f172a;margin-bottom:3px;}
 .pcm-loc{font-size:.7rem;color:#64748b;margin-bottom:8px;}
@@ -138,7 +128,8 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 .ic-item i{color:var(--primary);font-size:.7rem;margin-top:2px;flex-shrink:0;}
 
 .step-content{display:none;}
-.step-content.active{display:block;}
+.step-content.active{display:block;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
 .form-badge{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:6px;}
 .fb-rent{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;}
@@ -149,13 +140,11 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 .is-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
 .is-success{background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;}
 
-/* number stepper */
 .number-stepper{display:flex;align-items:center;gap:10px;}
 .stepper-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--primary);background:#fff;color:var(--primary);font-weight:700;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
 .stepper-btn:hover{background:var(--primary);color:#fff;}
 .stepper-value{min-width:36px;text-align:center;font-weight:700;font-size:1rem;}
 
-/* toggle switch */
 .toggle-switch-wrap{display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:600;color:#374151;}
 .switch{position:relative;display:inline-block;width:42px;height:24px;}
 .switch input{opacity:0;width:0;height:0;}
@@ -164,21 +153,65 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 input:checked+.slider-sw{background:var(--primary);}
 input:checked+.slider-sw:before{transform:translateX(18px);}
 
-@media(max-width:1024px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
-@media(max-width:768px){.fg-2,.fg-3,.fg-4{grid-template-columns:1fr;}.check-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:480px){.check-grid{grid-template-columns:1fr;}.step-label{display:none;}}
+/* ===== smart image category uploader ===== */
+.img-upload-guide{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,#eff6ff 0%,#eef2ff 100%);border:2px dashed #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:18px;}
+.guide-step{display:flex;align-items:center;gap:10px;flex:1;min-width:190px;}
+.guide-step-num{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-weight:800;font-size:.78rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.guide-step-text{font-size:.74rem;color:#1e3a8a;line-height:1.35;}
+.guide-step-text strong{display:block;font-size:.8rem;color:#1e293b;}
+.guide-arrow{color:#93c5fd;display:none;}
+@media(min-width:900px){.guide-arrow{display:block;}}
 
+.img-total-summary{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:12px 18px;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.img-total-summary .total-count{font-weight:700;color:var(--sec);font-size:.9rem;}
+.img-total-summary .total-count span{color:var(--primary);}
+.img-total-summary .min-warning{font-size:.74rem;color:#dc2626;font-weight:700;}
+.img-total-summary .min-ok{font-size:.74rem;color:var(--success);font-weight:700;}
 
-.auth-step { display: none; animation: fadeInSlideUp 0.4s ease forwards; }
+.img-cat-tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px;counter-reset:catstep;}
+.img-cat-tab{position:relative;border:1.5px solid var(--border);background:#fff;border-radius:12px;padding:16px 12px 12px;font-size:.78rem;font-weight:700;color:#4a5568;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:5px;transition:.2s;counter-increment:catstep;}
+.img-cat-tab i{font-size:1.15rem;color:#94a3b8;}
+.img-cat-tab .cat-count{background:#f1f5f9;color:#64748b;border-radius:20px;padding:1px 8px;font-size:.66rem;font-weight:700;align-self:flex-end;margin-top:-2px;}
+.img-cat-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.img-cat-tab.active i{color:#fff;}
+.img-cat-tab.active .cat-count{background:rgba(255,255,255,.25);color:#fff;}
+.img-cat-tab.has-images:not(.active){border-color:var(--success);}
+.img-cat-tab::before{content:counter(catstep);position:absolute;top:-7px;left:-7px;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #cbd5e0;color:#64748b;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.img-cat-tab.active::before{border-color:var(--primary);color:var(--primary);}
+.img-cat-tab.has-images::before{content:"\f00c";font-family:"Font Awesome 5 Free";font-weight:900;background:var(--success);border-color:var(--success);color:#fff;}
+.img-cat-tab:nth-child(1)::after,.img-cat-tab:nth-child(2)::after{content:"★ Cover Photo";font-size:.6rem;font-weight:700;color:#b45309;background:#fef3c7;padding:2px 8px;border-radius:20px;align-self:flex-start;}
+.img-cat-tab.active:nth-child(1)::after,.img-cat-tab.active:nth-child(2)::after{color:#fff;background:rgba(255,255,255,.25);}
+
+.img-cat-panel{display:none;}
+.img-cat-panel.active{display:block;animation:fadeIn .3s ease;}
+.img-cat-upload-area{border:2px dashed var(--border);border-radius:12px;padding:30px 18px;text-align:center;background:var(--bg);cursor:pointer;transition:.2s;}
+.img-cat-upload-area:hover,.img-cat-upload-area.dragover{border-color:var(--primary);background:#eff6ff;}
+.img-cat-upload-area .upload-icon{width:52px;height:52px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+.img-cat-upload-area .upload-icon i{font-size:1.4rem;color:var(--primary);}
+.img-cat-upload-area .upload-text{font-size:.94rem;font-weight:700;color:#374151;margin-top:4px;}
+.img-cat-upload-area .upload-subtext{display:inline-block;margin-top:6px;padding:3px 11px;background:#fff;border:1px solid var(--border);border-radius:20px;color:#64748b;font-size:.72rem;}
+
+.img-cat-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:16px;}
+.img-cat-preview-item{position:relative;border-radius:10px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.1);aspect-ratio:1;cursor:grab;border:2px solid transparent;}
+.img-cat-preview-item.dragging{opacity:.4;}
+.img-cat-preview-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-cat-preview-item .cover-badge{position:absolute;bottom:6px;left:6px;background:linear-gradient(135deg,#f6d365,#fda085);color:#3b2a00;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:20px;}
+.img-cat-preview-item .remove-image{position:absolute;top:6px;right:6px;width:24px;height:24px;background:#ef4444;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;}
+.img-cat-preview-item .remove-image:hover{background:#dc2626;}
+
+.photo-drop{border:2px dashed var(--border);border-radius:14px;padding:34px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);}
+.photo-drop:hover{border-color:var(--primary);background:rgba(0,108,228,.03);}
+.photo-drop input{display:none;}
+
+.auth-step { display: none; animation: fadeIn 0.4s ease forwards; }
 .auth-step.active-step { display: block; }
-@keyframes fadeInSlideUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-}
 .otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
 .otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 8px; border: 2px solid #e2e8f0; background: white;}
 .otp-input:focus { border-color: #006ce4; outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
 
+@media(max-width:1024px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
+@media(max-width:768px){.fg-2,.fg-3,.fg-4{grid-template-columns:1fr;}.check-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.check-grid{grid-template-columns:1fr;}.step-label{display:none;}}
 </style>
 </head>
 <body>
@@ -194,203 +227,447 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
   <a href="{% url 'index' %}" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
 </div>
 
+<form method="POST" enctype="multipart/form-data" action="{% url 'commercial_rental_add' %}" id="commercialForm" novalidate>
+{% csrf_token %}
 <div class="page-wrap">
 
   <div class="page-head">
-    <h1>📝 Post Commercial Rental Property — FREE</h1>
-    <p>Fill 4 simple steps · Goes live instantly · Get leads from 87+ RMs &amp; portal users</p>
+    <h1>📝 Post Your Commercial Space — It's FREE</h1>
+    <p>Takes under 5 minutes · Goes live instantly · Reaches 50,000+ verified tenants &amp; 87+ RMs</p>
   </div>
 
   <div class="stepper" id="stepper">
     <div class="step-item">
       <div class="step-circle active" id="sc1">1</div>
-      <div class="step-label active" id="sl1">Basic Info</div>
+      <div class="step-label active" id="sl1">About the Property</div>
     </div>
     <div class="step-line" id="line1"></div>
     <div class="step-item">
       <div class="step-circle" id="sc2">2</div>
-      <div class="step-label" id="sl2">Pricing & Utilities</div>
+      <div class="step-label" id="sl2">Space, Rent &amp; Contact</div>
     </div>
     <div class="step-line" id="line2"></div>
     <div class="step-item">
       <div class="step-circle" id="sc3">3</div>
-      <div class="step-label" id="sl3">Building & Amenities</div>
+      <div class="step-label" id="sl3">Amenities</div>
     </div>
     <div class="step-line" id="line3"></div>
     <div class="step-item">
       <div class="step-circle" id="sc4">4</div>
-      <div class="step-label" id="sl4">Photos & Publish</div>
+      <div class="step-label" id="sl4">Photos &amp; Publish</div>
     </div>
   </div>
 
+  <!-- =========================================================
+       STEP 1 — matches admin "Basic Information" + "Location Details"
+       ========================================================= -->
   <div class="step-content active" id="step1">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> Step 1 — Basic Property Information</h2>
-      <p>Tell us what type of commercial property you are listing for rent and where it is located.</p>
+      <h2><i class="fas fa-building" style="color:var(--primary);"></i> Let's start with the basics</h2>
+      <p>Auto-generated title, smart suggestions and pincode lookup below help you finish faster.</p>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Type & Identity</div><div class="sd-line"></div></div>
+    <div class="fg" style="margin-bottom:16px;">
+      <div class="field">
+        <label>Listing Title <span class="opt">(auto-written for you — edit anytime)</span></label>
+        <input type="text" name="property_title" id="property_title" readonly placeholder="We'll craft this automatically as you fill the form below">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">What are you listing?</div><div class="sd-line"></div></div>
     <div class="fg fg-2">
       <div class="field">
-        <label>Property Type <span class="req">*</span></label>
-        <select name="property_type" required>
-          <option value="">Select property type</option>
-          <option value="office-space">Office Space</option>
-          <option value="shop">Shop / Showroom</option>
-          <option value="warehouse">Warehouse / Godown</option>
-          <option value="industrial">Industrial Building</option>
-          <option value="land">Commercial Land</option>
+        <label>Type of Commercial Space <span class="req">*</span></label>
+        <select name="property_type" id="property_type" required>
+          <option value="">Choose the closest match…</option>
+          <option value="studio_apartment">Studio Apartment</option>
+          <option value="apartment">Apartment</option>
+          <option value="office_space">Office Space</option>
+          <option value="coworking_space">Co-working Space</option>
+          <option value="business_center">Business Center</option>
+          <option value="shop">Shop</option>
+          <option value="showroom">Showroom</option>
+          <option value="retail_space">Retail Space</option>
+          <option value="warehouse">Warehouse</option>
+          <option value="godown">Godown</option>
+          <option value="industrial_shed">Industrial Shed</option>
+          <option value="factory">Factory</option>
+          <option value="industrial_building">Industrial Building</option>
+          <option value="commercial_land">Commercial Land</option>
+          <option value="industrial_land">Industrial Land</option>
+          <option value="hotel">Hotel</option>
+          <option value="guest_house">Guest House</option>
+          <option value="restaurant">Restaurant Space</option>
+          <option value="cafe">Cafe Space</option>
+          <option value="clinic">Clinic</option>
+          <option value="hospital">Hospital</option>
+          <option value="school">School</option>
+          <option value="college">College / Institute</option>
+          <option value="mixed_use_building">Mixed Use Building</option>
+          <option value="commercial_building">Commercial Building</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="hint">Tenants filter by this first — pick the closest match for maximum visibility.</div>
+      </div>
+      <div class="field" id="bhkFieldWrapper">
+        <label>Room / Unit Configuration <span class="req">*</span></label>
+        <select name="bhk" id="bhk" required>
+          <option value="">Select configuration</option>
+          <option value="0 BHK">0 BHK / Studio (open layout)</option>
+          <option value="1 BHK">1 BHK</option>
+          <option value="2 BHK">2 BHK</option>
+          <option value="3 BHK">3 BHK</option>
+          <option value="4 BHK">4 BHK</option>
+          <option value="5+ BHK">5+ BHK</option>
         </select>
       </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Property Condition <span class="req">*</span></label>
-        <select name="property_condition" required>
-          <option value="">Select</option>
-          <option value="bare-shell">Bare Shell</option>
-          <option value="warm-shell">Warm Shell</option>
-          <option value="fitted">Fitted</option>
-          <option value="furnished">Furnished</option>
+        <label>Building / Project Name <span class="req">*</span></label>
+        <input type="text" name="building_name" id="building_name" placeholder="e.g. Alpha Business Tower" required oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Tower / Wing <span class="opt">(if applicable)</span></label>
+        <input type="text" name="wing_number" id="wing_number" placeholder="e.g. Wing B, Tower 2">
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Shop / Unit / Godown No. <span class="req">*</span></label>
+        <input type="text" name="property_no" id="property_no" placeholder="e.g. Shop No. 14, Unit 302" required>
+        <div class="hint private"><i class="fas fa-lock"></i> Kept private — used only to verify the listing, never shown publicly.</div>
+      </div>
+      <div class="field">
+        <label>How soon is it available? <span class="req">*</span></label>
+        <select name="availability_status" id="availability_status" required>
+          <option value="">Select availability</option>
+          <option value="available_immediately">Available Immediately</option>
+          <option value="within_7_days">Within 7 Days</option>
+          <option value="within_15_days">Within 15 Days</option>
+          <option value="within_30_days">Within 30 Days</option>
+          <option value="within_60_days">Within 60 Days</option>
+          <option value="within_90_days">Within 90 Days</option>
+          <option value="currently_occupied">Currently Occupied</option>
+          <option value="under_renovation">Under Renovation</option>
+          <option value="ready_to_move">Ready to Move</option>
+          <option value="custom_date">Pick a Specific Date</option>
         </select>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;" id="availableFromWrapper">
+      <div class="field">
+        <label>Exact Available-From Date <span class="opt">(only if you picked a specific date above)</span></label>
+        <input type="date" name="available_from" id="available_from">
+      </div>
+      <div class="field">
+        <label>Age of Property (years) <span class="req">*</span></label>
+        <input type="number" name="property_age" id="property_age" min="0" placeholder="e.g. 5" required>
       </div>
     </div>
 
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
         <label>Ownership Type <span class="req">*</span></label>
-        <select name="ownership_type" required>
-          <option value="">Select</option>
-          <option value="freehold">Freehold</option>
-          <option value="leasehold">Leasehold</option>
-          <option value="co-operative">Co-operative Society</option>
+        <select name="ownership_type" id="ownership_type" required>
+          <option value="">Select ownership</option>
+          <option value="Freehold">Freehold (you own the property &amp; land)</option>
+          <option value="Leasehold">Leasehold (long-term lease)</option>
+          <option value="Co-operative Society">Co-operative Society</option>
+          <option value="Power of Attorney">Power of Attorney (POA)</option>
+          <option value="Inherited Property">Inherited / Family Property</option>
         </select>
       </div>
       <div class="field">
-        <label>Construction Status <span class="opt">(Optional)</span></label>
-        <select name="construction_status">
-          <option value="">Select</option>
-          <option value="new">New Construction</option>
-          <option value="resale">Resale</option>
+        <label>Current Condition <span class="opt">(helps set the right expectations)</span></label>
+        <select name="property_condition" id="property_condition">
+          <option value="">Select condition</option>
+          <option value="Brand New">Brand New</option>
+          <option value="Less than 1 Year Old">Less than 1 Year Old</option>
+          <option value="Well Maintained">Well Maintained</option>
+          <option value="Recently Renovated">Recently Renovated</option>
+          <option value="Needs Renovation">Needs Renovation</option>
+          <option value="Ready to Move">Ready to Move</option>
+          <option value="Warm Shell">Warm Shell (flooring, ceiling &amp; lights ready)</option>
+          <option value="Bare Shell">Bare Shell (raw space, interior work needed)</option>
+          <option value="Fully Furnished">Fully Furnished</option>
+          <option value="Semi Furnished">Semi Furnished</option>
         </select>
       </div>
     </div>
 
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Zone Type <span class="opt">(Optional)</span></label>
-        <select name="zone_type">
-          <option value="">Select</option>
-          <option value="industrial">Industrial</option>
-          <option value="commercial">Commercial</option>
-          <option value="residential">Residential</option>
-          <option value="sez">Special Economic Zone</option>
-        </select>
+        <label>Built-up Area <span class="req">*</span></label>
+        <div class="prefix-wrap">
+          <input type="number" class="ps-input" name="builtup_area" id="builtup_area" placeholder="e.g. 1500" required oninput="updatePreview()">
+          <span class="prefix" style="left:auto;right:12px;">sq.ft</span>
+        </div>
+        <div class="hint">Total area including walls — the number most tenants search by.</div>
       </div>
       <div class="field">
-        <label>Location Hub <span class="opt">(Optional)</span></label>
-        <select name="location_hub">
-          <option value="">Select</option>
-          <option value="it-park">IT Park</option>
-          <option value="business-district">Business District</option>
-          <option value="mall">Shopping Mall</option>
-          <option value="standalone">Standalone</option>
-        </select>
+        <label>Carpet Area <span class="opt">(usable floor area)</span></label>
+        <div class="prefix-wrap">
+          <input type="number" name="carpet_area" id="carpet_area" placeholder="e.g. 1200">
+          <span class="prefix" style="left:auto;right:12px;">sq.ft</span>
+        </div>
       </div>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Location Details</div><div class="sd-line"></div></div>
-    <div class="fg fg-2">
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Where is it located?</div><div class="sd-line"></div></div>
+    <div class="fg">
       <div class="field">
-        <label>City <span class="req">*</span></label>
-        <input type="text" name="city" id="cityInput" placeholder="Enter city" required oninput="updatePreview()">
+        <label>Full Address <span class="req">*</span></label>
+        <textarea name="address" id="address" rows="2" placeholder="e.g. 402, Alpha Tower, Near Phoenix Mall, opposite City Bank" required></textarea>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Pincode <span class="req">*</span></label>
+        <input type="number" name="pincode" id="pincode" maxlength="6" placeholder="e.g. 440014" required>
+        <div class="hint">Type your pincode — we'll auto-fill the city, state &amp; nearby localities for you.</div>
       </div>
       <div class="field">
         <label>Area / Locality <span class="req">*</span></label>
-        <input type="text" name="locality" id="locality" placeholder="Enter area/locality" required oninput="updatePreview()">
+        <select id="locality" required>
+          <option value="">Enter pincode first ↑</option>
+        </select>
+        <input type="text" class="mt-2" id="locality_manual" placeholder="Type your locality name" style="display:none;">
+        <input type="hidden" name="locality" id="locality_final">
       </div>
     </div>
-    <div class="fg" style="margin-top:16px;">
-      <div class="field">
-        <label>Property Address <span class="req">*</span></label>
-        <textarea name="address" rows="3" placeholder="Enter complete address" required></textarea>
-      </div>
-    </div>
+
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Building / Project / Society <span class="req">*</span></label>
-        <input type="text" name="building_name" placeholder="Enter or search" required>
+        <label>Nearby Landmark <span class="opt">(makes it easier to find)</span></label>
+        <input type="text" name="property_landmark" id="property_landmark" placeholder="e.g. Opposite HDFC Bank, next to Metro Mall">
       </div>
       <div class="field">
-        <label>Possession Status <span class="req">*</span></label>
-        <select name="possession_status" required>
-          <option value="">Select</option>
-          <option value="ready-to-move">Ready to Move</option>
-          <option value="under-construction">Under Construction</option>
+        <label>City <span class="req">*</span></label>
+        <input type="text" name="city" id="city" placeholder="Auto-filled once you enter your pincode" readonly required oninput="updatePreview()">
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>State <span class="req">*</span></label>
+        <select name="state" id="state" required>
+          <option value="">Select State</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+          <option value="Assam">Assam</option>
+          <option value="Bihar">Bihar</option>
+          <option value="Chhattisgarh">Chhattisgarh</option>
+          <option value="Goa">Goa</option>
+          <option value="Gujarat">Gujarat</option>
+          <option value="Haryana">Haryana</option>
+          <option value="Himachal Pradesh">Himachal Pradesh</option>
+          <option value="Jharkhand">Jharkhand</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Kerala">Kerala</option>
+          <option value="Madhya Pradesh">Madhya Pradesh</option>
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Manipur">Manipur</option>
+          <option value="Meghalaya">Meghalaya</option>
+          <option value="Mizoram">Mizoram</option>
+          <option value="Nagaland">Nagaland</option>
+          <option value="Odisha">Odisha</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Rajasthan">Rajasthan</option>
+          <option value="Sikkim">Sikkim</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Tripura">Tripura</option>
+          <option value="Uttar Pradesh">Uttar Pradesh</option>
+          <option value="Uttarakhand">Uttarakhand</option>
+          <option value="West Bengal">West Bengal</option>
+          <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+          <option value="Chandigarh">Chandigarh</option>
+          <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+          <option value="Ladakh">Ladakh</option>
+          <option value="Lakshadweep">Lakshadweep</option>
+          <option value="Puducherry">Puducherry</option>
         </select>
       </div>
-    </div>
-    <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Available From <span class="opt">(Optional)</span></label>
-        <input type="date" name="available_from">
-      </div>
-      <div class="field">
-        <label>Age of Property <span class="req">*</span></label>
-        <select name="property_age" required>
-          <option value="">Select</option>
-          <option value="0-1">0-1 Year</option>
-          <option value="1-3">1-3 Years</option>
-          <option value="3-5">3-5 Years</option>
-          <option value="5-10">5-10 Years</option>
-          <option value="10+">10+ Years</option>
+        <label>Location Type <span class="opt">(optional, but boosts search ranking)</span></label>
+        <select name="location_hub" id="location_hub">
+          <option value="">Select location type</option>
+          <option value="business_district">Business District (CBD)</option>
+          <option value="it_park">IT / Technology Park</option>
+          <option value="corporate_hub">Corporate Hub</option>
+          <option value="commercial_complex">Commercial Complex</option>
+          <option value="shopping_mall">Shopping Mall</option>
+          <option value="high_street">High Street Market</option>
+          <option value="market_area">Market Area</option>
+          <option value="industrial_estate">Industrial Estate</option>
+          <option value="logistics_hub">Logistics / Warehouse Hub</option>
+          <option value="sez">Special Economic Zone (SEZ)</option>
+          <option value="transport_hub">Transport Hub</option>
+          <option value="airport_corridor">Airport Corridor</option>
+          <option value="metro_corridor">Metro Corridor</option>
+          <option value="mixed_use_development">Mixed Use Development</option>
+          <option value="standalone">Standalone Property</option>
         </select>
       </div>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Office Facilities</div><div class="sd-line"></div></div>
-    <div class="fg fg-2">
-      <div class="field">
-        <label>Min Number of Seats <span class="opt">(Optional)</span></label>
-        <input type="number" name="min_seats" min="1" placeholder="e.g. 10">
-      </div>
-      <div class="field">
-        <label>Max Number of Seats <span class="opt">(Optional)</span></label>
-        <input type="number" name="max_seats" min="1" placeholder="e.g. 50">
-      </div>
-    </div>
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Number of Cabins <span class="opt">(Optional)</span></label>
-        <input type="number" name="cabins" min="0" placeholder="e.g. 5">
+        <label>Zone Type <span class="opt">(optional)</span></label>
+        <select name="zone_type" id="zone_type">
+          <option value="">Select zone type</option>
+          <option value="commercial">Commercial Zone</option>
+          <option value="industrial">Industrial Zone</option>
+          <option value="mixed_use">Mixed Use Zone</option>
+          <option value="residential_commercial">Residential-cum-Commercial Zone</option>
+          <option value="it_park">IT / Tech Park Zone</option>
+          <option value="business_district">Business District (CBD)</option>
+          <option value="special_economic_zone">Special Economic Zone (SEZ)</option>
+          <option value="logistics_zone">Logistics / Warehousing Zone</option>
+          <option value="industrial_corridor">Industrial Corridor</option>
+          <option value="export_processing_zone">Export Processing Zone (EPZ)</option>
+        </select>
       </div>
       <div class="field">
-        <label>Number of Meeting Rooms <span class="opt">(Optional)</span></label>
-        <input type="number" name="meeting_rooms" min="0" placeholder="e.g. 2">
+        <label>Google Maps Link <span class="opt">(recommended — builds trust)</span></label>
+        <input type="url" name="google_maps_link" placeholder="Paste your Google Maps share link here">
       </div>
     </div>
+
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Private Washroom <span class="opt">(Optional)</span></label>
+        <label>Latitude <span class="opt">(auto-fills from map link)</span></label>
+        <input type="text" name="latitude" id="latitude" placeholder="e.g., 21.1458">
+      </div>
+      <div class="field">
+        <label>Longitude <span class="opt">(auto-fills from map link)</span></label>
+        <input type="text" name="longitude" id="longitude" placeholder="e.g., 79.0882">
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <div></div>
+      <button type="button" class="btn btn-pr" onclick="goToStep(2)">Next — Space, Rent &amp; Contact <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+  </div>
+
+  <!-- =========================================================
+       STEP 2 — matches admin "Property Specifications" + "Pricing Details" + contact
+       ========================================================= -->
+  <div class="step-content" id="step2">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-ruler-combined" style="color:var(--primary);"></i> Tell us about the space &amp; the rent</h2>
+      <p>Accurate numbers here mean fewer back-and-forth calls later.</p>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Building &amp; Layout</div><div class="sd-line"></div></div>
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Building Configuration <span class="opt">(optional)</span></label>
+        <input type="text" name="building_configuration" id="building_configuration" placeholder="e.g. G, G+1, G+3">
+      </div>
+      <div class="field">
+        <label>Total Floors in Building <span class="req">*</span></label>
+        <input type="number" name="total_floors" id="total_floors" min="0" placeholder="e.g. 3" required>
+      </div>
+      <div class="field">
+        <label>Your Floor Number <span class="req">*</span></label>
+        <input type="number" name="floor_number" id="floor_number" min="0" placeholder="e.g. 2" required>
+      </div>
+    </div>
+
+    <div class="fg fg-3" style="margin-top:16px;">
+      <div class="field">
+        <label>Staircases <span class="opt">(optional)</span></label>
+        <input type="number" name="staircases" id="staircases" min="0" placeholder="e.g. 2">
+      </div>
+      <div class="field">
+        <label>Passenger Lifts</label>
         <div class="number-stepper">
-          <button type="button" class="stepper-btn" onclick="updateStepper('pw',-1)">−</button>
-          <span class="stepper-value" id="pw">0</span>
-          <button type="button" class="stepper-btn" onclick="updateStepper('pw',1)">+</button>
+          <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts',-1)">−</button>
+          <span class="stepper-value" id="passenger_lifts_display">0</span>
+          <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts',1)">+</button>
+          <input type="hidden" name="passenger_lifts" id="passenger_lifts" value="0">
         </div>
       </div>
       <div class="field">
-        <label>Public Washroom <span class="opt">(Optional)</span></label>
+        <label>Service Lifts</label>
         <div class="number-stepper">
-          <button type="button" class="stepper-btn" onclick="updateStepper('pubw',-1)">−</button>
-          <span class="stepper-value" id="pubw">0</span>
-          <button type="button" class="stepper-btn" onclick="updateStepper('pubw',1)">+</button>
+          <button type="button" class="stepper-btn" onclick="updateStepper('service_lifts',-1)">−</button>
+          <span class="stepper-value" id="service_lifts_display">0</span>
+          <button type="button" class="stepper-btn" onclick="updateStepper('service_lifts',1)">+</button>
+          <input type="hidden" name="service_lifts" id="service_lifts" value="0">
         </div>
       </div>
     </div>
+
+    <div class="fg fg-3" style="margin-top:16px;">
+      <div class="field">
+        <label>Private Parking Spots</label>
+        <div class="number-stepper">
+          <button type="button" class="stepper-btn" onclick="updateStepper('private_parking',-1)">−</button>
+          <span class="stepper-value" id="private_parking_display">0</span>
+          <button type="button" class="stepper-btn" onclick="updateStepper('private_parking',1)">+</button>
+          <input type="hidden" name="private_parking" id="private_parking" value="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Private Washrooms</label>
+        <div class="number-stepper">
+          <button type="button" class="stepper-btn" onclick="updateStepper('private_washroom',-1)">−</button>
+          <span class="stepper-value" id="private_washroom_display">0</span>
+          <button type="button" class="stepper-btn" onclick="updateStepper('private_washroom',1)">+</button>
+          <input type="hidden" name="private_washroom" id="private_washroom" value="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Public Washrooms</label>
+        <div class="number-stepper">
+          <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom',-1)">−</button>
+          <span class="stepper-value" id="public_washroom_display">0</span>
+          <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom',1)">+</button>
+          <input type="hidden" name="public_washroom" id="public_washroom" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Seating Capacity — Minimum <span class="opt">(optional, for offices)</span></label>
+        <input type="number" name="min_seats" id="min_seats" min="0" placeholder="e.g. 20">
+      </div>
+      <div class="field">
+        <label>Seating Capacity — Maximum <span class="opt">(optional, for offices)</span></label>
+        <input type="number" name="max_seats" id="max_seats" min="0" placeholder="e.g. 50">
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Private Cabins <span class="opt">(optional)</span></label>
+        <input type="number" name="cabins" id="cabins" min="0" placeholder="e.g. 2">
+      </div>
+      <div class="field">
+        <label>Meeting Rooms <span class="opt">(optional)</span></label>
+        <input type="number" name="meeting_rooms" id="meeting_rooms" min="0" placeholder="e.g. 1">
+      </div>
+    </div>
+
     <div class="fg" style="margin-top:16px;">
       <div class="field">
-        <label>Flooring Type <span class="opt">(Optional)</span></label>
-        <select name="flooring_type">
-          <option value="">Select</option>
+        <label>Flooring Type <span class="opt">(optional)</span></label>
+        <select name="flooring_type" id="flooring_type">
+          <option value="">Select flooring</option>
           <option value="marble">Marble</option>
           <option value="vitrified">Vitrified Tiles</option>
           <option value="granite">Granite</option>
@@ -400,308 +677,445 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
       </div>
     </div>
 
-    <div class="step-nav">
-      <div></div>
-      <button class="btn btn-primary" onclick="goToStep(2)" style="background:var(--primary);color:white;border:none;">Next — Pricing & Utilities <i class="fas fa-arrow-right"></i></button>
-    </div>
-  </div>
-  </div>
-
-  <div class="step-content" id="step2">
-  <div class="form-card">
-    <div class="card-head">
-      <h2><i class="fas fa-rupee-sign" style="color:var(--primary);"></i> Step 2 — Area, Pricing & Utilities</h2>
-      <p>Enter all rental pricing, area, deposit, brokerage and utility details.</p>
-    </div>
-
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Area Details</div><div class="sd-line"></div></div>
-    <div class="fg fg-2">
-      <div class="field">
-        <label>Built-up Area (sq.ft) <span class="req">*</span></label>
-        <input type="number" name="built_up_area" id="builtArea" min="100" placeholder="Enter Built-up Area" required oninput="updatePreview()">
-      </div>
-      <div class="field">
-        <label>Carpet Area (sq.ft) <span class="opt">(Optional)</span></label>
-        <input type="number" name="carpet_area" placeholder="Enter Carpet Area">
-      </div>
-    </div>
-
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Pricing & Brokerage</div><div class="sd-line"></div></div>
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">What's included in the rent?</div><div class="sd-line"></div></div>
     <div class="fg fg-3">
       <div class="field">
-        <label>Expected Rent (₹/month) <span class="req">*</span></label>
-        <div class="prefix-wrap">
-          <span class="prefix">₹</span>
-          <input type="number" name="monthly_rent" id="monthlyRent" placeholder="Amount" required oninput="updatePreview()">
+        <label>DG &amp; UPS Backup Included?</label>
+        <div class="toggle-switch-wrap">
+          <label class="switch"><input type="checkbox" name="dg_ups_included" id="dg_ups_included" onchange="toggleLabel(this,'dg-label')"><span class="slider-sw"></span></label>
+          <span id="dg-label">No, billed separately</span>
         </div>
       </div>
       <div class="field">
-        <label>Security Deposit (₹) <span class="opt">(Optional)</span></label>
-        <div class="prefix-wrap">
-          <span class="prefix">₹</span>
-          <input type="number" name="security_deposit" placeholder="Amount">
+        <label>Electricity Included?</label>
+        <div class="toggle-switch-wrap">
+          <label class="switch"><input type="checkbox" name="electricity_included" id="electricity_included" onchange="toggleLabel(this,'elec-label')"><span class="slider-sw"></span></label>
+          <span id="elec-label">No, billed separately</span>
         </div>
       </div>
       <div class="field">
-        <label>Maintenance Charges (₹/month) <span class="opt">(Optional)</span></label>
-        <div class="prefix-wrap">
-          <span class="prefix">₹</span>
-          <input type="number" name="maintenance_charges" placeholder="Amount">
+        <label>Water Included?</label>
+        <div class="toggle-switch-wrap">
+          <label class="switch"><input type="checkbox" name="water_included" id="water_included" onchange="toggleLabel(this,'water-label')"><span class="slider-sw"></span></label>
+          <span id="water-label">No, billed separately</span>
         </div>
       </div>
     </div>
 
-    <div class="fg fg-2" style="margin-top:16px;">
-      <div class="field">
-        <label>Negotiable <span class="opt">(Optional)</span></label>
-        <div style="display:flex;gap:20px;margin-top:6px;">
-          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;">
-            <input type="radio" name="negotiable" value="Yes" style="accent-color:var(--primary);"> Yes
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;">
-            <input type="radio" name="negotiable" value="No" style="accent-color:var(--primary);"> No
-          </label>
-        </div>
-      </div>
-      <div class="field">
-        <label>Brokerage <span class="opt">(Optional)</span></label>
-        <select name="brokerage" id="brokerageSelect">
-          <option value="">Select Option</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="fg fg-2" style="margin-top:16px;display:none;" id="brokerageSection">
-      <div class="field">
-        <label>Brokerage Percentage <span class="opt">(Optional)</span></label>
-        <select name="brokerage_percentage" id="brokeragePercentage">
-          <option value="">Select Brokerage</option>
-          <option value="1%">1%</option>
-          <option value="1.5%">1.5%</option>
-          <option value="2%">2%</option>
-          <option value="Negotiable">Negotiable</option>
-          <option value="Manual">Enter Manually</option>
-        </select>
-      </div>
-      <div class="field" id="manualBrokerage" style="display:none;">
-        <label>Enter Brokerage <span class="opt">(Optional)</span></label>
-        <input type="text" name="manual_brokerage" placeholder="e.g. 2.5%">
-      </div>
-    </div>
-
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Charges & Utilities</div><div class="sd-line"></div></div>
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Rent, Deposit &amp; Charges</div><div class="sd-line"></div></div>
     <div class="fg fg-2">
       <div class="field">
-        <label>DG & UPS Charges Included?</label>
-        <div class="toggle-switch-wrap">
-          <label class="switch"><input type="checkbox" name="dg_ups_included"><span class="slider-sw"></span></label>
-          <span id="dg-label">No</span>
+        <label>Expected Monthly Rent <span class="req">*</span></label>
+        <div class="prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" name="monthly_rent" id="monthly_rent" placeholder="e.g. 75,000" required oninput="updatePreview()">
         </div>
+        <div class="hint">Priced right, listings get up to 3× more enquiries.</div>
       </div>
-      <div class="field">
-        <label>Electricity Charges Included?</label>
-        <div class="toggle-switch-wrap">
-          <label class="switch"><input type="checkbox" name="electricity_included"><span class="slider-sw"></span></label>
-          <span id="elec-label">No</span>
-        </div>
+      <div class="field" id="brokerageLabelWrapper">
+        <label id="brokerageLabel">Brokerage <span class="req">*</span></label>
+        <select name="brokerage_percentage" id="brokeragePercentage">
+          <option value="">How is brokerage settled?</option>
+          <option value="No Brokerage">No Brokerage</option>
+          <option value="15 Days Rent">15 Days' Rent</option>
+          <option value="1 Month Rent" selected>1 Month's Rent</option>
+          <option value="Fixed Amount">Fixed Amount</option>
+          <option value="Negotiable">Negotiable</option>
+        </select>
       </div>
     </div>
+
+    <div class="fg fg-2" style="margin-top:16px;" id="manualBrokerageWrapper" style="display:none;">
+      <div class="field" id="manualBrokerage" style="display:none;">
+        <label>Fixed Brokerage Amount</label>
+        <input type="text" name="manual_brokerage" placeholder="e.g. ₹15,000">
+      </div>
+    </div>
+
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Water Charges Included?</label>
-        <div class="toggle-switch-wrap">
-          <label class="switch"><input type="checkbox" name="water_included"><span class="slider-sw"></span></label>
-          <span id="water-label">No</span>
+        <label>Advance Rent Required <span class="req">*</span></label>
+        <select name="advanced_rent_type" id="advanced_rent_type" required>
+          <option value="No Advance">No Advance</option>
+          <option value="1 Month Rent" selected>1 Month's Rent</option>
+          <option value="2 Months Rent">2 Months' Rent</option>
+          <option value="3 Months Rent">3 Months' Rent</option>
+          <option value="4 Months Rent">4 Months' Rent</option>
+          <option value="5 Months Rent">5 Months' Rent</option>
+          <option value="6 Months Rent">6 Months' Rent</option>
+          <option value="7 Months Rent">7 Months' Rent</option>
+          <option value="8 Months Rent">8 Months' Rent</option>
+          <option value="9 Months Rent">9 Months' Rent</option>
+          <option value="10 Months Rent">10 Months' Rent</option>
+          <option value="11 Months Rent">11 Months' Rent</option>
+          <option value="Fixed Amount">Fixed Amount</option>
+        </select>
+      </div>
+      <div class="field" id="advanced_rent_amount_container" style="display:none;">
+        <label>Advance Rent Amount</label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="advanced_rent_amount" id="advanced_rent_amount" placeholder="e.g. 75,000"></div>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Refundable Security Deposit <span class="req">*</span></label>
+        <select name="security_deposit_type" id="security_deposit_type" required>
+          <option value="No Deposit">No Deposit</option>
+          <option value="1 Month Rent" selected>1 Month's Rent</option>
+          <option value="2 Months Rent">2 Months' Rent</option>
+          <option value="3 Months Rent">3 Months' Rent</option>
+          <option value="4 Months Rent">4 Months' Rent</option>
+          <option value="5 Months Rent">5 Months' Rent</option>
+          <option value="6 Months Rent">6 Months' Rent</option>
+          <option value="7 Months Rent">7 Months' Rent</option>
+          <option value="8 Months Rent">8 Months' Rent</option>
+          <option value="9 Months Rent">9 Months' Rent</option>
+          <option value="10 Months Rent">10 Months' Rent</option>
+          <option value="11 Months Rent">11 Months' Rent</option>
+          <option value="Fixed Amount">Fixed Amount</option>
+        </select>
+      </div>
+      <div class="field" id="security_deposit_amount_container" style="display:none;">
+        <label>Deposit Amount</label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="security_deposit_amount" id="security_deposit_amount" placeholder="e.g. 2,50,000"></div>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Maintenance Charges</label>
+        <div style="display:flex;gap:10px;margin-top:2px;flex-wrap:wrap;">
+          <label class="check-item" style="flex:1;"><input type="radio" name="maintenance_type" value="Included" id="maint-inc" checked> <label for="maint-inc" style="margin:0;">Included in rent</label></label>
+          <label class="check-item" style="flex:1;"><input type="radio" name="maintenance_type" value="Excluding" id="maint-exc"> <label for="maint-exc" style="margin:0;">Billed separately</label></label>
+        </div>
+      </div>
+      <div class="field" id="maintenance_amount_container" style="display:none;">
+        <label>Monthly Maintenance Amount</label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="maintenance_charges" id="maintenance_charges" placeholder="e.g. 5,000"></div>
+      </div>
+    </div>
+
+    <div class="fg fg-3" style="margin-top:16px;">
+      <div class="field">
+        <label>Is the Rent Negotiable?</label>
+        <div style="display:flex;gap:20px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;"><input type="radio" name="negotiable" value="Yes" style="accent-color:var(--primary);"> Yes</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;"><input type="radio" name="negotiable" value="No" style="accent-color:var(--primary);"> No</label>
         </div>
       </div>
       <div class="field">
-        <label>Lock-in Period (months) <span class="opt">(Optional)</span></label>
-        <input type="number" name="lockin_period" min="0" placeholder="e.g. 12">
+        <label>Lock-in Period <span class="opt">(months, optional)</span></label>
+        <input type="number" name="lockin_period" id="lockin_period" min="0" placeholder="e.g. 11">
+      </div>
+      <div class="field">
+        <label>Annual Rent Escalation <span class="opt">(%, optional)</span></label>
+        <input type="number" name="rent_increase" id="rent_increase" min="0" step="0.1" placeholder="e.g. 5">
       </div>
     </div>
+
     <div class="fg" style="margin-top:16px;">
       <div class="field">
-        <label>Expected Rent Increase (%/year) <span class="opt">(Optional)</span></label>
-        <input type="number" name="rent_increase" min="0" max="100" step="0.1" placeholder="e.g. 5">
+        <label>Estimated Total Move-in Cost <span class="opt">(calculated automatically)</span></label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="total_move_in_cost" id="total_move_in_cost" placeholder="Auto-calculated from advance + deposit + brokerage + maintenance" readonly></div>
       </div>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Nearby Facilities</div><div class="sd-line"></div></div>
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Your Contact Details</div><div class="sd-line"></div></div>
     <div class="fg fg-2">
       <div class="field">
-        <label>Metro Stations Nearby <span class="opt">(Optional)</span></label>
-        <input type="text" name="metro_nearby" placeholder="Enter nearby metro stations">
+        <label>Your Name <span class="req">*</span></label>
+        <input type="text" name="owner_name" id="owner_name" placeholder="e.g. Rahul Deshmukh" required oninput="updatePreview()">
       </div>
       <div class="field">
-        <label>Bus Stops Nearby <span class="opt">(Optional)</span></label>
-        <input type="text" name="bus_nearby" placeholder="Enter nearby bus stops">
-      </div>
-    </div>
-    <div class="fg fg-2" style="margin-top:16px;">
-      <div class="field">
-        <label>Restaurants / Cafes Nearby <span class="opt">(Optional)</span></label>
-        <input type="text" name="restaurants_nearby" placeholder="Enter nearby restaurants">
-      </div>
-      <div class="field">
-        <label>Banks / ATMs Nearby <span class="opt">(Optional)</span></label>
-        <input type="text" name="banks_nearby" placeholder="Enter nearby banks">
-      </div>
-    </div>
-
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Contact Information</div><div class="sd-line"></div></div>
-    <div class="fg fg-2">
-      <div class="field">
-        <label>Owner Name <span class="req">*</span></label>
-        <input type="text" name="owner_name" id="ownerName" placeholder="Enter your full name" required oninput="updatePreview()">
-      </div>
-      <div class="field">
-        <label>Contact Number <span class="req">*</span></label>
-        <input type="tel" name="contact_number" placeholder="e.g., +91 9876543210" required>
+        <label>Mobile Number <span class="req">*</span></label>
+        <input type="tel" name="contact_number" id="contact_number" placeholder="e.g. +91 98765 43210" required>
+        <div class="hint">Used only for verified tenant enquiries via call/WhatsApp — never shared publicly.</div>
       </div>
     </div>
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
         <label>Email Address <span class="req">*</span></label>
-        <input type="email" name="email" placeholder="your.email@example.com" required>
+        <input type="email" name="email" placeholder="you@example.com" required>
       </div>
       <div class="field">
-        <label>Alternate Contact <span class="opt">(Optional)</span></label>
-        <input type="tel" name="alternate_contact" placeholder="e.g., +91 9876543210">
+        <label>Alternate Number <span class="opt">(optional)</span></label>
+        <input type="tel" name="alternate_contact" placeholder="Backup number in case we can't reach you">
       </div>
-    </div>
-
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Listing Uploaded By</div><div class="sd-line"></div></div>
-    <div class="fg fg-4">
-      <div class="field">
-        <label>Name</label>
-        <input type="text" name="uploaded_by_name" id="display_up_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" name="uploaded_by_email" id="display_up_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
-      </div>
-      <div class="field">
-        <label>Contact</label>
-        <input type="tel" name="uploaded_by_contact" id="display_up_mobile" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
-      </div>
-      <div class="field">
-        <label>Role</label>
-        <input type="text" name="uploaded_by_role" id="display_up_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
-      </div>
-    </div>
-    <div class="inline-status is-info" style="margin-top:4px;margin-bottom:8px;">
-      <i class="fas fa-info-circle"></i>
-      <span style="font-size:.76rem;">These fields are auto-filled from your login session.</span>
     </div>
 
     <div class="step-nav">
-      <button class="btn btn-sec" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-      <button class="btn btn-primary" onclick="goToStep(3)" style="background:var(--primary);color:white;border:none;">Next — Building & Amenities <i class="fas fa-arrow-right"></i></button>
+      <button type="button" class="btn btn-sec" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+      <button type="button" class="btn btn-pr" onclick="goToStep(3)">Next — Amenities <i class="fas fa-arrow-right"></i></button>
     </div>
   </div>
   </div>
 
+  <!-- =========================================================
+       STEP 3 — matches admin "Amenities" + "Nearby Facilities" + description
+       ========================================================= -->
   <div class="step-content" id="step3">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-building" style="color:var(--primary);"></i> Step 3 — Building Details & Amenities</h2>
-      <p>Enter building infrastructure details and select available amenities.</p>
+      <h2><i class="fas fa-star" style="color:var(--primary);"></i> What does the property offer?</h2>
+      <p>Listings with 5+ amenities checked get noticeably more shortlists.</p>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Building Details</div><div class="sd-line"></div></div>
-    <div class="fg fg-3">
-      <div class="field">
-        <label>Total Floors <span class="opt">(Optional)</span></label>
-        <input type="number" name="total_floors" min="1" placeholder="e.g. 10">
-      </div>
-      <div class="field">
-        <label>Your Floor <span class="opt">(Optional)</span></label>
-        <input type="number" name="your_floor" min="0" placeholder="e.g. 3">
-      </div>
-      <div class="field">
-        <label>Number of Staircases <span class="opt">(Optional)</span></label>
-        <input type="number" name="staircases" min="0" placeholder="e.g. 2">
-      </div>
-    </div>
-
-    <div class="fg fg-3" style="margin-top:20px;">
-      <div class="field">
-        <label>Passenger Lifts <span class="opt">(Optional)</span></label>
-        <div class="number-stepper">
-          <button type="button" class="stepper-btn" onclick="updateStepper('pl',-1)">−</button>
-          <span class="stepper-value" id="pl">0</span>
-          <button type="button" class="stepper-btn" onclick="updateStepper('pl',1)">+</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Service Lifts <span class="opt">(Optional)</span></label>
-        <div class="number-stepper">
-          <button type="button" class="stepper-btn" onclick="updateStepper('sl2',-1)">−</button>
-          <span class="stepper-value" id="sl2">0</span>
-          <button type="button" class="stepper-btn" onclick="updateStepper('sl2',1)">+</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Private Parking <span class="opt">(Optional)</span></label>
-        <div class="number-stepper">
-          <button type="button" class="stepper-btn" onclick="updateStepper('pp',-1)">−</button>
-          <span class="stepper-value" id="pp">0</span>
-          <button type="button" class="stepper-btn" onclick="updateStepper('pp',1)">+</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities</div><div class="sd-line"></div></div>
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities on the property</div><div class="sd-line"></div></div>
     <div class="check-grid">
-        {% for amenities in ameneties_obj %}
-          <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--primary);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
-        {% endfor %}
+      {% for am in ameneties_obj %}
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="{{ am.amenties_name }}" onchange="checkToggle(this)"> <label><i class="{{ am.amenties_icon }}" style="color:var(--primary);font-size:12px;"></i> {{ am.amenties_name }}</label></label>
+      {% endfor %}
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Nearby Facilities</div><div class="sd-line"></div></div>
-      <div class="check-grid">
-        {% for facilities in facilities_obj %}
-          <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--primary);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
-        {% endfor %}
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">What's within walking distance?</div><div class="sd-line"></div></div>
+    <div class="check-grid">
+      {% for fa in facilities_obj %}
+      <label class="check-item"><input type="checkbox" name="nearby_facilities[]" value="{{ fa.facilities_name }}" onchange="checkToggle(this)"> <label><i class="{{ fa.facilities_icon }}" style="color:var(--primary);font-size:12px;"></i> {{ fa.facilities_name }}</label></label>
+      {% endfor %}
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">In your own words</div><div class="sd-line"></div></div>
+    <div class="fg">
+      <div class="field">
+        <label>Describe the Space <span class="opt">(optional, but builds trust)</span></label>
+        <textarea name="user_description" id="user_description" rows="4" placeholder="e.g. Sun-lit corner office with glass cabins, ready for a 20-seat team, walking distance from the metro…" oninput="updateChecklist()"></textarea>
+        <div class="hint">Mention what makes it special — footfall, view, parking ease, recent renovation, etc.</div>
       </div>
+    </div>
 
     <div class="step-nav">
-      <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-      <button class="btn btn-primary" onclick="goToStep(4)" style="background:var(--primary);color:white;border:none;">Next — Photos & Publish <i class="fas fa-arrow-right"></i></button>
+      <button type="button" class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+      <button type="button" class="btn btn-pr" onclick="goToStep(4)">Next — Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
     </div>
   </div>
   </div>
 
+  <!-- =========================================================
+       STEP 4 — matches admin's 12 image categories + video + "listed elsewhere"
+       ========================================================= -->
   <div class="step-content" id="step4">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-camera" style="color:var(--primary);"></i> Step 4 — Photos & Publish</h2>
-      <p>Listings with photos get <strong>5× more enquiries</strong>. Add at least 3 photos.</p>
+      <h2><i class="fas fa-camera" style="color:var(--primary);"></i> Show it off — photos get 5× more enquiries</h2>
+      <p>Sort photos into the right room so tenants can browse exactly what they care about.</p>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Images</div><div class="sd-line"></div></div>
-    <div class="photo-drop" onclick="document.getElementById('imageInput').click()">
-      <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" onchange="handlePhotos(event)">
-      <div style="font-size:2.5rem;margin-bottom:10px;">📷</div>
-      <div style="font-size:.9rem;font-weight:700;color:var(--sec);">Click to Upload Photos or Drag & Drop</div>
-      <div style="font-size:.76rem;color:var(--muted);margin-top:4px;">JPG, PNG · Max 10 photos</div>
-    </div>
-    <div class="photo-preview" id="imagePreview"></div>
-
-    <div class="fg fg-2" style="margin-top:20px;">
-      <div class="field">
-        <label>Upload Floor Plan <span class="opt">(Optional)</span></label>
-        <input type="file" name="floor_plan" accept="image/*" style="padding:6px;">
+    <div class="img-upload-guide">
+      <div class="guide-step">
+        <div class="guide-step-num">1</div>
+        <div class="guide-step-text"><strong>Pick a room</strong>Tap a tile below (Exterior, Reception, Workspace…)</div>
       </div>
-      <div class="field">
-        <label>Upload Video / Social Media Link <span class="opt">(Optional)</span></label>
-        <input type="file" name="property_video" accept="video/*" style="padding:6px;">
+      <i class="fas fa-arrow-right guide-arrow"></i>
+      <div class="guide-step">
+        <div class="guide-step-num">2</div>
+        <div class="guide-step-text"><strong>Drop in matching photos</strong>Click or drag images into that room only</div>
+      </div>
+      <i class="fas fa-arrow-right guide-arrow"></i>
+      <div class="guide-step">
+        <div class="guide-step-num">3</div>
+        <div class="guide-step-text"><strong>Set your cover photo</strong>Drag to reorder — the 1st photo in Exterior/Reception becomes the cover</div>
       </div>
     </div>
 
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">📋 Final Review Before Publishing</div><div class="sd-line"></div></div>
+    <div class="img-total-summary">
+      <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
+      <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 photos to publish</div>
+    </div>
+
+    <div class="img-cat-tabs" id="imgCatTabs">
+      <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Building Exterior <span class="cat-count" id="count-exterior">0</span></div>
+      <div class="img-cat-tab" data-cat="reception"><i class="fas fa-door-open"></i> Reception / Lobby <span class="cat-count" id="count-reception">0</span></div>
+      <div class="img-cat-tab" data-cat="workspace"><i class="fas fa-briefcase"></i> Office Workspace <span class="cat-count" id="count-workspace">0</span></div>
+      <div class="img-cat-tab" data-cat="cabins"><i class="fas fa-user-tie"></i> Cabins / Manager Rooms <span class="cat-count" id="count-cabins">0</span></div>
+      <div class="img-cat-tab" data-cat="meeting_room"><i class="fas fa-handshake"></i> Meeting / Conference Room <span class="cat-count" id="count-meeting_room">0</span></div>
+      <div class="img-cat-tab" data-cat="shop_showroom"><i class="fas fa-store"></i> Shop / Showroom Area <span class="cat-count" id="count-shop_showroom">0</span></div>
+      <div class="img-cat-tab" data-cat="warehouse"><i class="fas fa-boxes-stacked"></i> Warehouse / Storage <span class="cat-count" id="count-warehouse">0</span></div>
+      <div class="img-cat-tab" data-cat="pantry"><i class="fas fa-utensils"></i> Pantry / Cafeteria <span class="cat-count" id="count-pantry">0</span></div>
+      <div class="img-cat-tab" data-cat="washroom"><i class="fas fa-restroom"></i> Washroom <span class="cat-count" id="count-washroom">0</span></div>
+      <div class="img-cat-tab" data-cat="parking"><i class="fas fa-square-parking"></i> Parking <span class="cat-count" id="count-parking">0</span></div>
+      <div class="img-cat-tab" data-cat="amenities"><i class="fas fa-tree"></i> Common Amenities <span class="cat-count" id="count-amenities">0</span></div>
+      <div class="img-cat-tab" data-cat="floor_plan"><i class="fas fa-ruler-combined"></i> Floor Plan <span class="cat-count" id="count-floor_plan">0</span></div>
+    </div>
+
+    <div class="img-cat-panels">
+      <div class="img-cat-panel active" data-cat-panel="exterior">
+        <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="exterior">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Exterior photos here</div>
+          <div class="upload-subtext">Front elevation, entrance, signage — up to 5 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-exterior"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="reception">
+        <input type="file" class="img-cat-input" id="imgInput-reception" name="property_images_reception[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="reception">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Reception / Lobby photos here</div>
+          <div class="upload-subtext">Reception desk, waiting area — up to 4 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-reception"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="workspace">
+        <input type="file" class="img-cat-input" id="imgInput-workspace" name="property_images_workspace[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="workspace">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Workspace photos here</div>
+          <div class="upload-subtext">Open office, workstations — up to 6 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-workspace"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="cabins">
+        <input type="file" class="img-cat-input" id="imgInput-cabins" name="property_images_cabins[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="cabins">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Cabin photos here</div>
+          <div class="upload-subtext">Private cabins, executive rooms — up to 4 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-cabins"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="meeting_room">
+        <input type="file" class="img-cat-input" id="imgInput-meeting_room" name="property_images_meeting_room[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="meeting_room">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Meeting Room photos here</div>
+          <div class="upload-subtext">Conference table, presentation setup — up to 4 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-meeting_room"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="shop_showroom">
+        <input type="file" class="img-cat-input" id="imgInput-shop_showroom" name="property_images_shop_showroom[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="shop_showroom">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Shop / Showroom photos here</div>
+          <div class="upload-subtext">Display area, retail space — up to 5 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-shop_showroom"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="warehouse">
+        <input type="file" class="img-cat-input" id="imgInput-warehouse" name="property_images_warehouse[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="warehouse">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Warehouse / Storage photos here</div>
+          <div class="upload-subtext">Storage racks, loading area — up to 5 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-warehouse"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="pantry">
+        <input type="file" class="img-cat-input" id="imgInput-pantry" name="property_images_pantry[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="pantry">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Pantry / Cafeteria photos here</div>
+          <div class="upload-subtext">Pantry, dining area — up to 3 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-pantry"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="washroom">
+        <input type="file" class="img-cat-input" id="imgInput-washroom" name="property_images_washroom[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="washroom">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Washroom photos here</div>
+          <div class="upload-subtext">Staff / customer washrooms — up to 3 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-washroom"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="parking">
+        <input type="file" class="img-cat-input" id="imgInput-parking" name="property_images_parking[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="parking">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Parking photos here</div>
+          <div class="upload-subtext">Basement / open parking — up to 3 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-parking"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="amenities">
+        <input type="file" class="img-cat-input" id="imgInput-amenities" name="property_images_amenities[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="amenities">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Common Amenity photos here</div>
+          <div class="upload-subtext">Lift, security, gym, cafeteria — up to 5 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-amenities"></div>
+      </div>
+      <div class="img-cat-panel" data-cat-panel="floor_plan">
+        <input type="file" class="img-cat-input" id="imgInput-floor_plan" name="property_images_floor_plan[]" accept="image/*" multiple style="display:none;">
+        <div class="img-cat-upload-area" data-cat="floor_plan">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <div class="upload-text">Click or drag Floor Plan images here</div>
+          <div class="upload-subtext">Office / shop layout diagrams — up to 3 photos</div>
+        </div>
+        <div class="img-cat-preview" id="imgPreview-floor_plan"></div>
+      </div>
+    </div>
+
+    <div style="font-size:.76rem;color:var(--muted);margin-top:6px;">
+      <i class="fas fa-arrows-alt"></i> Drag thumbnails within a room to reorder. The first photo under <strong>Building Exterior</strong> or <strong>Reception / Lobby</strong> becomes your cover photo.
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">A quick video helps even more</div><div class="sd-line"></div></div>
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" checked onchange="toggleVideoOption()">
+          <label class="form-check-label" for="video_upload">Upload a Walkthrough Video</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto" onchange="toggleVideoOption()">
+          <label class="form-check-label" for="video_auto">Auto-Create a Slideshow from My Photos</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted" onchange="toggleVideoOption()">
+          <label class="form-check-label" for="video_rm">My Video is Large — Share it with an RM</label>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" name="video_source" id="video_source" value="upload">
+
+    <div id="videoUploadWrapper">
+      <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+      <div class="photo-drop" id="videoUploadArea">
+        <div style="font-size:2rem;margin-bottom:8px;">🎥</div>
+        <div style="font-size:.88rem;font-weight:700;color:var(--sec);">Click to upload a full walkthrough</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">MP4/MOV, max 60 seconds, up to 20MB</div>
+      </div>
+      <video id="videoPreview" controls style="display:none;width:100%;max-height:300px;border-radius:12px;margin-top:14px;"></video>
+    </div>
+
+    <div id="videoAutoWrapper" style="display:none;">
+      <div class="inline-status is-info">
+        <i class="fas fa-magic"></i>
+        <span>We'll turn your uploaded photos into a walkthrough-style slideshow automatically (needs at least 3 photos).</span>
+      </div>
+    </div>
+
+    <div id="videoRMWrapper" style="display:none;">
+      <div class="inline-status is-info" style="margin-bottom:12px;">
+        <i class="fas fa-headset"></i>
+        <span>Share your video with our RM on WhatsApp/email. Once published on our channel, paste the public link below.</span>
+      </div>
+      <div class="field">
+        <label>Published Video Link</label>
+        <input type="url" name="property_video_link" id="property_video_link" placeholder="Paste your YouTube / Instagram / Facebook link">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Any other listings?</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <div class="field">
+        <label>Is this property listed on another portal?</label>
+        <div style="display:flex;gap:20px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;"><input type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" onchange="togglePortalField()"> Yes</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;"><input type="radio" name="listed_elsewhere" id="listed_no" value="No" checked onchange="togglePortalField()"> No, only here</label>
+        </div>
+      </div>
+      <div class="field" id="portalField" style="display:none;">
+        <label>Which Portal?</label>
+        <input type="text" name="portal_name" id="portal_name" placeholder="e.g. Housing, 99acres, MagicBricks, NoBroker">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">📋 Before you publish</div><div class="sd-line"></div></div>
     <div class="review-box">
       <div class="rb-row"><span class="rb-label">Property Type</span><span class="rb-val" id="rv-type">—</span></div>
       <div class="rb-row"><span class="rb-label">Location</span><span class="rb-val" id="rv-location">—</span></div>
@@ -713,13 +1127,13 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
     <div class="inline-status is-success" style="margin-bottom:14px;">
       <i class="fas fa-rocket"></i>
       <div>
-        <div style="font-weight:800;font-size:.82rem;">🚀 What Happens After You Publish?</div>
+        <div style="font-weight:800;font-size:.82rem;">🚀 What happens after you publish?</div>
         <div style="font-size:.74rem;margin-top:4px;line-height:1.7;">
-          ✅ Listing goes live instantly on KANISHKAIMPERIA portal<br>
+          ✅ Goes live instantly on KANISHKAIMPERIA<br>
           ✅ Visible to 50,000+ businesses &amp; tenants<br>
-          ✅ Assigned to a dedicated RM who will help close the deal<br>
-          ✅ WhatsApp notifications for every new enquiry<br>
-          ✅ Listing valid for 30 days — easy renewal from dashboard
+          ✅ A dedicated RM is assigned to help close the deal<br>
+          ✅ WhatsApp alert for every new enquiry<br>
+          ✅ Listing stays live for 30 days — renew anytime from your dashboard
         </div>
       </div>
     </div>
@@ -734,10 +1148,8 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
     </div>
 
     <div class="step-nav">
-      <button class="btn btn-sec" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
-      <button class="btn btn-pr btn-lg" onclick="publishListing()">
-        <i class="fas fa-rocket"></i> 🚀 Submit Listing
-      </button>
+      <button type="button" class="btn btn-sec" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+      <button type="submit" class="btn btn-pr btn-lg" id="submitBtn"><i class="fas fa-rocket"></i> 🚀 Submit Listing</button>
     </div>
   </div>
   </div>
@@ -746,38 +1158,33 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
     <div class="preview-card">
       <div class="pc-head"><i class="fas fa-eye"></i> Live Preview — Portal Card</div>
       <div class="pc-mock">
-        <div class="pcm-img">
+        <div class="pcm-img" id="previewImgWrap">
           🏢
           <div class="pcm-badges">
             <span class="pcm-badge b-rent">FOR RENT</span>
-            <span class="pcm-badge b-comm">Commercial</span>
+            <span class="pcm-badge b-comm" id="previewType">Commercial</span>
           </div>
           <div class="pcm-price" id="previewPrice">₹ — /mo</div>
         </div>
         <div class="pcm-body">
           <div class="pcm-title" id="previewTitle">Commercial Property</div>
           <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> Area, City</div>
-          <div class="pcm-specs">
-            <span id="prevArea">— sqft</span>
-            <span>Commercial</span>
-          </div>
+          <div class="pcm-specs"><span id="prevArea">— sqft</span></div>
         </div>
       </div>
-      <div style="font-size:.68rem;color:var(--muted);margin-top:10px;text-align:center;">Will appear in search results &amp; featured section</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:10px;text-align:center;">This is how tenants will see your listing in search results</div>
     </div>
 
     <div class="checklist-card">
       <div class="cl-title">📋 Listing Checklist</div>
-      <div class="cl-item" id="cl-proptype"><i class="fas fa-circle"></i> Property type selected</div>
-      <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> Location added</div>
-      <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Rent entered</div>
-      <div class="cl-item" id="cl-area"><i class="fas fa-circle"></i> Built-up area filled</div>
-      <div class="cl-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details added</div>
+      <div class="cl-item" id="cl-basic"><i class="fas fa-circle"></i> Basic information</div>
+      <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Pricing details</div>
+      <div class="cl-item" id="cl-desc"><i class="fas fa-circle"></i> Description added</div>
       <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Photos uploaded</div>
     </div>
 
     <div class="info-card">
-      <div class="ic-title">💡 Pro Tips for Faster Leads</div>
+      <div class="ic-title">💡 Pro tips for faster leads</div>
       <div class="ic-item"><i class="fas fa-camera"></i> Add 8+ clear photos — 5× more enquiries</div>
       <div class="ic-item"><i class="fas fa-ruler-combined"></i> Mention exact carpet &amp; built-up area</div>
       <div class="ic-item"><i class="fas fa-shield-alt"></i> Request KANISHKAIMPERIA Verification for 6× trust</div>
@@ -787,441 +1194,598 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
   </div>
 
 </div>
+</form>
 
+<!-- Auth modal (unchanged flow — progressive email → login/OTP → details) -->
 <div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
-      
-      <div class="modal-header border-0 pb-0" style="position: relative;">
-        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Continue to KANISHKAIMPERIA</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
+    <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+      <div class="modal-header border-0 pb-0" style="position:relative;">
+        <h5 class="modal-title" style="font-weight:800;color:#1e293b;">Continue to KANISHKAIMPERIA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position:absolute;right:20px;top:20px;"></button>
       </div>
-
       <div class="modal-body pt-3 pb-4 px-4">
-        
         <div id="step-1-email" class="auth-step active-step">
-          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Enter your email address to login or create a new account.</p>
+          <p style="font-size:.9rem;color:#64748b;margin-bottom:20px;">Enter your email to continue — we'll log you in or create an account.</p>
           <div class="mb-3">
-            <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
-            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+            <label style="font-size:.8rem;font-weight:700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius:10px;padding:12px;background:#f8fafc;">
           </div>
-          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
-            Continue <i class="fas fa-arrow-right ms-1"></i>
-          </button>
+          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background:#006ce4;color:white;font-weight:700;padding:12px;border-radius:10px;">Continue <i class="fas fa-arrow-right ms-1"></i></button>
         </div>
-
         <div id="step-2-login" class="auth-step">
-          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
-          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Welcome back! Please enter your password to continue.</p>
-          
+          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:#64748b;font-size:.9rem;font-weight:600;margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size:.9rem;color:#64748b;margin-bottom:20px;">Welcome back! Enter your password to continue.</p>
           <div class="mb-3">
-            <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
-            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+            <label style="font-size:.8rem;font-weight:700;">Password <span class="text-danger">*</span></label>
+            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius:10px;padding:12px;background:#f8fafc;">
           </div>
-          
-          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
-            Secure Login
-          </button>
+          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background:#006ce4;color:white;font-weight:700;padding:12px;border-radius:10px;">Secure Login</button>
         </div>
-
         <div id="step-2-otp" class="auth-step">
-          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
-          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
-          
+          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:#64748b;font-size:.9rem;font-weight:600;margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size:.9rem;color:#64748b;margin-bottom:20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
           <div class="otp-container">
-            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
-            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
-            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
-            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this,event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this,event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this,event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this,event)">
           </div>
-          
-          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
-            Verify OTP
-          </button>
+          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background:#f97316;color:white;font-weight:700;padding:12px;border-radius:10px;">Verify OTP</button>
         </div>
-
         <div id="step-3-details" class="auth-step">
-          <p style="font-size: 0.9rem; color: #10b981; font-weight: 600; margin-bottom: 20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
-          
+          <p style="font-size:.9rem;color:#10b981;font-weight:600;margin-bottom:20px;"><i class="fas fa-check-circle"></i> Email verified! Just a few details.</p>
           <div class="mb-3">
-            <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
-            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px; padding: 10px; background: #f8fafc;">
+            <label style="font-size:.8rem;font-weight:700;">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius:10px;padding:10px;background:#f8fafc;">
           </div>
-          
           <div class="mb-3">
-            <label style="font-size: 0.8rem; font-weight: 700;">Mobile Number <span class="text-danger">*</span></label>
-            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px; padding: 10px; background: #f8fafc;" maxlength="10">
+            <label style="font-size:.8rem;font-weight:700;">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 digits" style="border-radius:10px;padding:10px;background:#f8fafc;" maxlength="10">
           </div>
-          
           <div class="mb-3">
-             <label style="font-size: 0.8rem; font-weight: 700;">I am a <span class="text-danger">*</span></label>
-             <select id="flow_reg_role" class="form-select" style="border-radius: 10px; padding: 10px; background: #f8fafc;" required>
-               <option value="SelectRole" selected disabled>Choose a role...</option>
-               <option value="Landlord">Landlord</option>
-               <option value="Agent">Agent</option>
-               <option value="Agency/Builder">Agencies / Builder</option>
-               <option value="Vendor">Vendor</option>
-             </select>
+            <label style="font-size:.8rem;font-weight:700;">I am a <span class="text-danger">*</span></label>
+            <select id="flow_reg_role" class="form-select" style="border-radius:10px;padding:10px;background:#f8fafc;" required>
+              <option value="SelectRole" selected disabled>Choose a role…</option>
+              <option value="Landlord">Landlord</option>
+              <option value="Agent">Agent</option>
+              <option value="Agency/Builder">Agency / Builder</option>
+              <option value="Vendor">Vendor</option>
+            </select>
           </div>
-
-          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background: #10b981; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
-            Create Account & Continue
-          </button>
+          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background:#10b981;color:white;font-weight:700;padding:12px;border-radius:10px;">Create Account &amp; Continue</button>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-// --- GLOBAL STATE ---
+/* ===================== GLOBAL STATE ===================== */
 let isLoggedIn = {% if user_obj %}true{% else %}false{% endif %};
-let pendingAction = null; 
+let pendingAction = null;
 let currentStep = 1;
 
-// --- DYNAMIC HEADER UPDATE ---
-function updateHeaderNav(uName, uRole, uEmail, uMobile) {
-    const navRight = document.querySelector('.nav-right');
-    const loginBtn = navRight ? navRight.querySelector('a[href*="login"]') : null;
-    
-    const dashboardUrls = {
-        "Landlord": "{% url 'landlord_dashboard' %}",
-        "Tenant": "{% url 'Tenant_App:tenant_Dashboard' %}",
-        "Buyer": "{% url 'Buyer_Dashboard' %}",
-        "Agent": "{% url 'agent_dashboard' %}",
-        "Agency/Builder": "{% url 'Agency_Dashboard' %}",
-        "Vendor": "{% url 'Vendors:vendors_Dashboard' %}"
-    };
-    const targetUrl = dashboardUrls[uRole] || "#";
-    
-    if (loginBtn) {
-        const dropdownHTML = `
-          <div class="dropdown d-inline-block">
-              <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-person"></i> Hello ${uName}-${uRole}
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius: 12px; min-width: 200px;">
-                  <li>
-                      <a class="dropdown-item py-2 fw-medium text-secondary" href="${targetUrl}">
-                          <i class="bi bi-send me-2 text-primary"></i> Access Dashboard
-                      </a>
-                  </li>
-                  
-                  <li>
-                      <a class="dropdown-item py-2 fw-medium text-secondary" href="#">
-                          <i class="bi bi-heart me-2 text-danger"></i> Wishlist Properties
-                      </a>
-                  </li>
-
-                  <li>
-                      <a class="dropdown-item py-2 fw-medium text-secondary" href="#">
-                          <i class="bi bi-search me-2 text-info"></i> Searched Properties
-                      </a>
-                  </li>
-
-                  <li><hr class="dropdown-divider" style="border-color: #f1f5f9;"></li>
-
-                  <li>
-                      <button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()">
-                          <i class="bi bi-door-closed me-2 text-warning"></i> Logout
-                      </button>
-                  </li>
-              </ul>
-          </div>
-        `;
-        loginBtn.outerHTML = dropdownHTML;
-        const newDropdown = document.getElementById('loginDropdown');
-        if(newDropdown && typeof bootstrap !== 'undefined') new bootstrap.Dropdown(newDropdown);
-    }
-
-    const nameField = document.getElementById('display_up_name');
-    const emailField = document.getElementById('display_up_email');
-    const mobileField = document.getElementById('display_up_mobile');
-    const roleField = document.getElementById('display_up_role');
-    if(nameField) nameField.value = uName;
-    if(emailField) emailField.value = uEmail;
-    if(roleField) roleField.value = uRole;
-    if(mobileField) mobileField.value = uMobile || "";
-}
-
-// --- MODAL TAB SWITCHERS ---
-function goToStepAuth(stepId) {
-    $('.auth-step').removeClass('active-step').hide(); 
-    $('#' + stepId).addClass('active-step').fadeIn(250);
-}
-function moveToNext(current, event) {
-    if (current.value.length >= current.maxLength) {
-        let next = $(current).next('.otp-input');
-        if (next.length) next.focus();
-    }
-    if (event.key === "Backspace" && current.value.length === 0) {
-        let prev = $(current).prev('.otp-input');
-        if (prev.length) prev.focus();
-    }
-}
-
-/* ── FORM STEPPER (WITH LOGIN INTERCEPTION) ── */
+/* ===================== STEPPER NAVIGATION ===================== */
 function goToStep(n) {
   let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
-  
   if (n === 2 && userStatus === false) {
-      pendingAction = function() { goToStep(2); }; 
-      goToStepAuth('step-1-email');
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
-      return; 
+    pendingAction = function () { goToStep(2); };
+    goToStepAuth('step-1-email');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
+    return;
   }
+  if (n > currentStep && !validateStep(currentStep)) return;
 
   document.getElementById('step' + currentStep).classList.remove('active');
   document.getElementById('step' + n).classList.add('active');
   for (let i = 1; i <= 4; i++) {
-    const sc = document.getElementById('sc' + i);
-    const sl = document.getElementById('sl' + i);
-    const line = document.getElementById('line' + i);
-    if (sc) sc.className = 'step-circle'; 
-    if (sl) sl.className = 'step-label';
-    if (line) line.className = 'step-line';
-    if (i < n) {
-      if(sc){ sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.6rem;"></i>'; }
-      if(sl) sl.classList.add('done');
-      if(line) line.classList.add('done');
-    } else if (i === n) {
-      if(sc){ sc.classList.add('active'); sc.textContent = i; }
-      if(sl) sl.classList.add('active');
-    } else {
-      if(sc) sc.textContent = i;
-    }
+    const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
+    if (i < n) { sc.className = 'step-circle done'; sl.className = 'step-label done'; sc.innerHTML = '<i class="fas fa-check" style="font-size:.6rem;"></i>'; if (line) line.className = 'step-line done'; }
+    else if (i === n) { sc.className = 'step-circle active'; sl.className = 'step-label active'; sc.textContent = i; if (line) line.className = 'step-line'; }
+    else { sc.className = 'step-circle'; sl.className = 'step-label'; sc.textContent = i; if (line) line.className = 'step-line'; }
   }
   currentStep = n;
+  updateReview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (typeof updateReview === 'function') updateReview();
 }
 
-// --- PROGRESSIVE AUTHENTICATION API CALLS ---
-function checkEmailExists(_this) {
-    let email = $('#flow_email').val().trim();
-    if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
+function validateStep(step) {
+  let isValid = true, firstInvalid = null;
+  document.getElementById('step' + step).querySelectorAll('[required]').forEach(f => {
+    f.classList.remove('is-invalid');
+    if (!f.value || !f.value.trim()) { f.classList.add('is-invalid'); f.style.borderColor = '#ef4444'; isValid = false; if (!firstInvalid) firstInvalid = f; }
+    else { f.style.borderColor = ''; }
+  });
 
-    $.ajax({
-        type: "POST", url: "{% url 'Check_Email_Api' %}", 
-        data: { 'email': email},
-        success: function(response) {
-            $(_this).prop("disabled", false).html(btnText);
-            if(response.exists) goToStepAuth('step-2-login');
-            else sendOTP(email);
-        },
-        error: function() { $(_this).prop("disabled", false).html(btnText); Swal.fire("Error", "Server error.", "error"); }
-    });
-}
-
-function sendOTP(email) {
-    $('#display_otp_email').text(email);
-    goToStepAuth('step-2-otp'); 
-    $.ajax({ 
-        type: "POST", 
-        url: "{% url 'Send_Otp_Api' %}", 
-        data: { 'email': email } 
-    });
-}
-
-function processProgLogin(_this) {
-    let email = $('#flow_email').val();
-    let password = $('#flow_password').val();
-    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
-
-    $.ajax({
-        type: "POST", url: "{% url 'Prop_Login_Api' %}", 
-        data: { 'email': email, 'password': password },
-        success: function(response) {
-            if(response.status == '1') {
-                isLoggedIn = true; 
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
-                
-                // NO-RELOAD: Update Header UI instantly
-                updateHeaderNav(response.user_name || "User", response.user_role || "User", response.user_email || email, response.user_mobile || "");
-                
-                // RESUME PAUSED ACTION
-                if (typeof pendingAction === 'function') {
-                    let action = pendingAction; pendingAction = null; action(); 
-                } else {
-                    Swal.fire("Success", "Logged in successfully!", "success");
-                }
-            } else {
-                $(_this).prop("disabled", false).html(btnText);
-                Swal.fire("Error", response.msg || "Incorrect password", "error");
-            }
-        }
-    });
-}
-
-function verifyOTP(_this) {
-    let otp = "";
-    $('.otp-input').each(function() { otp += $(this).val(); });
-    if(otp.length < 4) return Swal.fire("Wait", "Please enter the 4-digit OTP.", "info");
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
-
-    $.ajax({
-        type: "POST", url: "{% url 'Verify_Otp_Api' %}", 
-        data: { 'email': $('#flow_email').val(), 'otp': otp },
-        success: function(response) {
-            $(_this).prop("disabled", false).html(btnText);
-            if(response.valid) goToStepAuth('step-3-details');
-            else Swal.fire("Error", "Invalid OTP. Try again.", "error");
-        }
-    });
-}
-
-function processProgRegistration(_this) {
-    let email = $('#flow_email').val();
-    let name = $('#flow_reg_name').val();
-    let mobile = $('#flow_reg_mobile').val();
-    let role = $('#flow_reg_role').val();
-
-    if(!name || !mobile || role === "SelectRole") return Swal.fire("Wait", "Please fill in all details.", "info");
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
-
-    $.ajax({
-        type: "POST", url: "{% url 'Prop_Register_Api' %}", 
-        data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role},
-        success: function(response) {
-            if(response.status == '1') {
-                isLoggedIn = true; 
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
-                
-                // NO-RELOAD: Update Header UI instantly
-                updateHeaderNav(name, role, email, mobile);
-                
-                // RESUME PAUSED ACTION
-                if (typeof pendingAction === 'function') {
-                    let action = pendingAction; pendingAction = null; action(); 
-                } else {
-                    Swal.fire("Success", "Account created!", "success");
-                }
-            } else {
-                $(_this).prop("disabled", false).html(btnText);
-                Swal.fire("Error", response.msg || "Registration failed.", "error");
-            }
-        }
-    });
-}
-
-/* ── PROPERTY FORM UTILITIES ── */
-document.addEventListener('DOMContentLoaded', function () {
-  const brokerageSelect = document.getElementById('brokerageSelect');
-  const brokerageSection = document.getElementById('brokerageSection');
-  const brokeragePercentage = document.getElementById('brokeragePercentage');
-  const manualBrokerage = document.getElementById('manualBrokerage');
-  if(brokerageSelect) {
-      brokerageSelect.addEventListener('change', function () {
-        if (this.value === 'Yes') brokerageSection.style.display = 'grid';
-        else { brokerageSection.style.display = 'none'; manualBrokerage.style.display = 'none'; }
-      });
+  const propertyTypeSelect = document.getElementById('property_type');
+  const bhkSelect = document.getElementById('bhk');
+  if (propertyTypeSelect && bhkSelect) {
+    const pType = propertyTypeSelect.value.toLowerCase();
+    if (pType.includes('studio') && bhkSelect.value !== '0 BHK') {
+      isValid = false;
+      if (!firstInvalid) firstInvalid = bhkSelect;
+      Swal.fire({ icon: 'warning', title: 'Studio Configuration Mismatch', text: 'Studio Apartments should have configuration set to "0 BHK / Studio".', confirmButtonColor: '#006ce4' });
+    }
   }
-  if(brokeragePercentage) {
-      brokeragePercentage.addEventListener('change', function () {
-        if (this.value === 'Manual') manualBrokerage.style.display = 'flex';
-        else manualBrokerage.style.display = 'none';
-      });
-  }
-});
 
-function checkToggle(cb) {
-  const item = cb.closest('.check-item');
-  if (cb.checked) item.classList.add('selected'); else item.classList.remove('selected');
+  var localitySelect = document.getElementById('locality');
+  if (localitySelect && localitySelect.value === '__other__' && document.getElementById('locality_manual').value.trim() === '') {
+    isValid = false;
+    if (!firstInvalid) firstInvalid = document.getElementById('locality_manual');
+  }
+
+  if (!isValid) {
+    if (firstInvalid) { firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => firstInvalid.focus(), 300); }
+    Swal.fire({ icon: 'warning', title: 'A Few Details Missing', text: 'Please fill in all required fields (marked with *) before continuing.', confirmButtonColor: '#006ce4' });
+  }
+  return isValid;
 }
+
+/* ===================== SMART TITLE + LIVE PREVIEW ===================== */
+function generatePropertyTitle() {
+  const pType = document.getElementById('property_type');
+  const typeText = (pType && pType.value) ? pType.options[pType.selectedIndex].text : '';
+  const pCond = document.getElementById('property_condition');
+  const condText = (pCond && pCond.value) ? pCond.options[pCond.selectedIndex].text : '';
+  const locality = document.getElementById('locality_final')?.value.trim() || '';
+  const city = document.getElementById('city')?.value.trim() || '';
+  const area = document.getElementById('builtup_area')?.value.trim() || '';
+
+  let parts = [];
+  if (condText) parts.push(condText);
+  parts.push(typeText || 'Commercial Property');
+  parts.push('for Rent in');
+  if (locality) parts.push(locality + ',');
+  if (city) parts.push(city);
+  if (area) parts.push('(' + area + ' sq.ft.)');
+
+  const titleField = document.getElementById('property_title');
+  if (titleField) titleField.value = parts.join(' ').replace(/ ,/g, ',');
+}
+
 function updatePreview() {
-  const title = document.getElementById('propTitle')?.value || 'Your Property Title';
-  const loc   = document.getElementById('locality')?.value  || 'Area';
-  const rent  = document.getElementById('monthlyRent')?.value;
-  const area  = document.getElementById('carpetArea')?.value;
-  document.getElementById('previewTitle').textContent = title;
-  document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + (loc || 'Area') + ', Nagpur';
+  generatePropertyTitle();
+  const city = document.getElementById('city')?.value || 'City';
+  const loc = document.getElementById('locality_final')?.value || 'Area';
+  const rent = document.getElementById('monthly_rent')?.value;
+  const area = document.getElementById('builtup_area')?.value;
+  const pType = document.getElementById('property_type');
+  const typeStr = pType && pType.options[pType.selectedIndex] ? pType.options[pType.selectedIndex].text : 'Commercial';
+
+  document.getElementById('previewTitle').textContent = loc ? loc + ' Commercial Property' : 'Commercial Property';
+  document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + (loc || 'Area') + ', ' + (city || 'City');
   document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
   document.getElementById('prevArea').textContent = area ? area + ' sqft' : '— sqft';
-  setCheck('cl-title', title && title !== 'Your Property Title');
-  setCheck('cl-location', !!loc);
-  setCheck('cl-price', !!rent);
+  document.getElementById('previewType').textContent = typeStr;
+
+  setCheck('cl-basic', !!(city && loc && typeStr !== 'Commercial'));
+  setCheck('cl-price', !!(rent && area));
+  updateChecklist();
 }
+
 function updateChecklist() {
-  const desc = document.getElementById('rent_residential_desc')?.value || '';
-  setCheck('cl-desc', desc.length >= 80);
+  const desc = document.getElementById('user_description')?.value || '';
+  setCheck('cl-desc', desc.length > 20);
 }
+
+function updateReview() {
+  const pType = document.getElementById('property_type');
+  const typeStr = pType && pType.options[pType.selectedIndex] ? pType.options[pType.selectedIndex].text : '—';
+  const city = document.getElementById('city')?.value || '';
+  const loc = document.getElementById('locality_final')?.value || '';
+  const rent = document.getElementById('monthly_rent')?.value;
+  const area = document.getElementById('builtup_area')?.value;
+  document.getElementById('rv-type').textContent = typeStr;
+  document.getElementById('rv-location').textContent = (loc || '—') + (city ? ', ' + city : '');
+  document.getElementById('rv-rent').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/month' : '—';
+  document.getElementById('rv-area').textContent = area ? area + ' sqft' : '—';
+}
+
 function setCheck(id, done) {
   const el = document.getElementById(id);
   if (!el) return;
   el.className = 'cl-item' + (done ? ' done' : '');
   el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
 }
-function updateReview() {
-  const title = document.getElementById('propTitle')?.value || '—';
-  const loc   = document.getElementById('locality')?.value || '—';
-  const rent  = document.getElementById('monthlyRent')?.value;
-  const area  = document.getElementById('carpetArea')?.value;
-  document.getElementById('rv-title').textContent = title;
-  document.getElementById('rv-location').textContent = (loc || '—') + ', Nagpur';
-  document.getElementById('rv-rent').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/month' : '—';
-  document.getElementById('rv-area').textContent = area ? area + ' sqft' : '—';
+
+document.querySelectorAll('#step1 input, #step1 select, #step2 input, #step2 select').forEach(el => {
+  el.addEventListener('input', updatePreview);
+  el.addEventListener('change', updatePreview);
+});
+
+/* ===================== STEPPERS / TOGGLES ===================== */
+function updateStepper(field, change) {
+  const hiddenInput = document.getElementById(field), display = document.getElementById(field + '_display');
+  let val = Math.max(0, (parseInt(hiddenInput.value) || 0) + change);
+  hiddenInput.value = val; display.textContent = val;
 }
-function handlePhotos(e) {
-  const files = Array.from(e.target.files).slice(0, 10);
-  const prev  = document.getElementById('imagePreview');
-  prev.innerHTML = '';
-  files.forEach(f => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const th = document.createElement('div');
-      th.className = 'photo-thumb';
-      th.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
-        <button class="remove-photo" type="button" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
-      prev.appendChild(th);
-    };
-    reader.readAsDataURL(f);
-  });
-  setCheck('cl-photos', files.length > 0);
+function toggleLabel(el, labelId) {
+  document.getElementById(labelId).textContent = el.checked ? 'Yes, included' : 'No, billed separately';
+}
+function checkToggle(cb) {
+  const item = cb.closest('.check-item');
+  if (cb.checked) item.classList.add('selected'); else item.classList.remove('selected');
 }
 
-/* ── PUBLISH / SUBMIT ── */
-function publishListing() {
+/* ===================== CONDITIONAL FIELDS ===================== */
+document.getElementById('advanced_rent_type')?.addEventListener('change', function () {
+  document.getElementById('advanced_rent_amount_container').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+});
+document.getElementById('security_deposit_type')?.addEventListener('change', function () {
+  document.getElementById('security_deposit_amount_container').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+});
+document.querySelectorAll('input[name="maintenance_type"]').forEach(radio => {
+  radio.addEventListener('change', function () {
+    document.getElementById('maintenance_amount_container').style.display = this.value === 'Excluding' ? 'block' : 'none';
+  });
+});
+document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+  document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+});
+function togglePortalField() {
+  var yesRadio = document.getElementById('listed_yes');
+  var portalField = document.getElementById('portalField');
+  var portalInput = document.getElementById('portal_name');
+  if (!portalField || !yesRadio) return;
+  if (yesRadio.checked) { portalField.style.display = 'block'; if (portalInput) setTimeout(() => portalInput.focus(), 100); }
+  else { portalField.style.display = 'none'; if (portalInput) portalInput.value = ''; }
+}
+document.addEventListener('DOMContentLoaded', togglePortalField);
+
+/* ===================== AUTO MOVE-IN COST CALCULATOR ===================== */
+document.addEventListener('DOMContentLoaded', function () {
+  function calcMoveInCost() {
+    let monthlyRent = parseFloat(document.getElementById('monthly_rent')?.value) || 0;
+    let advance = 0, advanceType = document.getElementById('advanced_rent_type')?.value || '';
+    if (advanceType === 'Fixed Amount') advance = parseFloat(document.getElementById('advanced_rent_amount')?.value) || 0;
+    else if (advanceType !== 'No Advance' && advanceType !== '') { let m = advanceType.match(/(\d+)/); advance = monthlyRent * (m ? parseFloat(m[1]) : 0); }
+
+    let deposit = 0, depositType = document.getElementById('security_deposit_type')?.value || '';
+    if (depositType === 'Fixed Amount') deposit = parseFloat(document.getElementById('security_deposit_amount')?.value) || 0;
+    else if (depositType !== 'No Deposit' && depositType !== '') { let m = depositType.match(/(\d+)/); deposit = monthlyRent * (m ? parseFloat(m[1]) : 0); }
+
+    let brokerage = 0, brokerageType = document.getElementById('brokeragePercentage')?.value || '';
+    if (brokerageType === '15 Days Rent') brokerage = monthlyRent / 2;
+    else if (brokerageType === '1 Month Rent') brokerage = monthlyRent;
+    else if (brokerageType === 'Fixed Amount') brokerage = parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0;
+
+    let maintenance = 0;
+    if (document.querySelector("input[name='maintenance_type']:checked")?.value === 'Excluding') {
+      maintenance = parseFloat(document.getElementById('maintenance_charges')?.value) || 0;
+    }
+
+    const total = advance + deposit + brokerage + maintenance;
+    const totalInput = document.getElementById('total_move_in_cost');
+    if (totalInput) totalInput.value = Math.round(total);
+  }
+  ['#monthly_rent', '#advanced_rent_type', '#advanced_rent_amount', '#security_deposit_type', '#security_deposit_amount',
+   '#brokeragePercentage', "[name='manual_brokerage']", '#maintenance_charges', "input[name='maintenance_type']"]
+    .forEach(sel => document.querySelectorAll(sel).forEach(el => { el.addEventListener('input', calcMoveInCost); el.addEventListener('change', calcMoveInCost); }));
+  calcMoveInCost();
+});
+
+/* ===================== STUDIO / BHK RULE ===================== */
+document.addEventListener('DOMContentLoaded', function () {
+  const propertyTypeSelect = document.getElementById('property_type');
+  const bhkSelect = document.getElementById('bhk');
+  if (!propertyTypeSelect || !bhkSelect) return;
+  propertyTypeSelect.addEventListener('change', function () {
+    const selectedType = this.value.toLowerCase();
+    if (selectedType.includes('studio')) {
+      bhkSelect.value = '0 BHK';
+      Array.from(bhkSelect.options).forEach(o => { o.disabled = !!(o.value && o.value !== '0 BHK'); });
+    } else {
+      Array.from(bhkSelect.options).forEach(o => { o.disabled = false; });
+      if (bhkSelect.value === '0 BHK') bhkSelect.value = '';
+    }
+  });
+});
+
+/* ===================== CARPET AREA VALIDATION ===================== */
+document.addEventListener('DOMContentLoaded', function () {
+  var builtUpInput = document.getElementById('builtup_area');
+  var carpetInput = document.getElementById('carpet_area');
+  if (!builtUpInput || !carpetInput) return;
+  function validateCarpetArea() {
+    var builtUp = parseFloat(builtUpInput.value) || 0;
+    var carpet = parseFloat(carpetInput.value) || 0;
+    if (carpet > 0 && builtUp > 0 && carpet > builtUp) {
+      Swal.fire({ icon: 'warning', title: 'Carpet Area Looks Too Large', text: 'Carpet Area (' + carpet + ' sq.ft) can\'t exceed Built-up Area (' + builtUp + ' sq.ft). Please double-check.', confirmButtonColor: '#006ce4' });
+      carpetInput.value = '';
+    }
+  }
+  carpetInput.addEventListener('blur', validateCarpetArea);
+  builtUpInput.addEventListener('blur', function () { if (carpetInput.value) validateCarpetArea(); });
+});
+
+/* ===================== PINCODE → CITY / STATE / LOCALITY LOOKUP ===================== */
+document.getElementById('pincode')?.addEventListener('blur', function () {
+  var pincode = this.value.trim();
+  if (pincode.length !== 6) return;
+  fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pincode)
+    .then(res => res.json())
+    .then(data => {
+      var localitySelect = document.getElementById('locality');
+      localitySelect.innerHTML = '';
+      if (!data.success) {
+        Swal.fire({ icon: 'warning', title: 'Invalid Pincode', text: data.error, confirmButtonColor: '#006ce4' });
+        document.getElementById('city').value = '';
+        localitySelect.innerHTML = '<option value="">Invalid pincode</option>';
+        return;
+      }
+      document.getElementById('city').value = data.city;
+      var stateSelect = document.getElementById('state');
+      for (var i = 0; i < stateSelect.options.length; i++) {
+        if (stateSelect.options[i].value.toLowerCase() === data.state.toLowerCase()) { stateSelect.value = stateSelect.options[i].value; break; }
+      }
+      localitySelect.innerHTML = '<option value="">-- Select Locality --</option>';
+      data.localities.forEach(function (loc) {
+        var opt = document.createElement('option'); opt.value = loc; opt.textContent = loc; localitySelect.appendChild(opt);
+      });
+      var otherOpt = document.createElement('option'); otherOpt.value = '__other__'; otherOpt.textContent = "✏️ My locality isn't listed (enter manually)";
+      localitySelect.appendChild(otherOpt);
+      syncLocalityFinal();
+      updatePreview();
+    })
+    .catch(function () { Swal.fire({ icon: 'error', title: 'Lookup Failed', text: 'Could not verify pincode.', confirmButtonColor: '#006ce4' }); });
+});
+function syncLocalityFinal() {
+  var localitySelect = document.getElementById('locality');
+  var manualInput = document.getElementById('locality_manual');
+  var finalInput = document.getElementById('locality_final');
+  if (!localitySelect) return;
+  if (localitySelect.value === '__other__') {
+    manualInput.style.display = 'block'; manualInput.required = true; finalInput.value = manualInput.value.trim();
+  } else {
+    manualInput.style.display = 'none'; manualInput.required = false; finalInput.value = localitySelect.value;
+  }
+  updatePreview();
+}
+document.addEventListener('DOMContentLoaded', function () {
+  var localitySelect = document.getElementById('locality');
+  var manualInput = document.getElementById('locality_manual');
+  if (localitySelect) localitySelect.addEventListener('change', syncLocalityFinal);
+  if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
+  document.getElementById('commercialForm')?.addEventListener('submit', syncLocalityFinal);
+});
+
+/* ===================== 12-CATEGORY SMART IMAGE UPLOADER ===================== */
+const IMG_CATEGORIES = ['exterior', 'reception', 'workspace', 'cabins', 'meeting_room', 'shop_showroom', 'warehouse', 'pantry', 'washroom', 'parking', 'amenities', 'floor_plan'];
+const IMG_CATEGORY_LIMITS = { exterior: 5, reception: 4, workspace: 6, cabins: 4, meeting_room: 4, shop_showroom: 5, warehouse: 5, pantry: 3, washroom: 3, parking: 3, amenities: 5, floor_plan: 3 };
+const IMG_TOTAL_LIMIT = 30;
+const IMG_MIN_REQUIRED = 3;
+const catFiles = {};
+IMG_CATEGORIES.forEach(c => { catFiles[c] = []; });
+
+function totalImageCount() { return IMG_CATEGORIES.reduce((s, c) => s + catFiles[c].length, 0); }
+function syncCategoryInput(cat) {
+  var dt = new DataTransfer();
+  catFiles[cat].forEach(f => dt.items.add(f));
+  document.getElementById('imgInput-' + cat).files = dt.files;
+}
+function renderCategory(cat) {
+  var preview = document.getElementById('imgPreview-' + cat);
+  preview.innerHTML = '';
+  catFiles[cat].forEach(function (file, idx) {
+    var div = document.createElement('div');
+    div.className = 'img-cat-preview-item'; div.draggable = true; div.dataset.index = idx;
+    var img = document.createElement('img'); div.appendChild(img);
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button'; removeBtn.className = 'remove-image'; removeBtn.innerHTML = '✖';
+    removeBtn.onclick = function () { removeCatImage(cat, file.name); };
+    div.appendChild(removeBtn);
+    if (idx === 0 && (cat === 'exterior' || cat === 'reception')) {
+      var coverTag = document.createElement('span');
+      coverTag.className = 'cover-badge'; coverTag.innerHTML = '<i class="fas fa-star"></i> Cover';
+      div.appendChild(coverTag);
+    }
+    preview.appendChild(div);
+    attachDragEvents(div, cat);
+    var reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; };
+    reader.readAsDataURL(file);
+
+    if (idx === 0 && cat === 'exterior') {
+      var wrap = document.getElementById('previewImgWrap');
+      if (wrap) { let r2 = new FileReader(); r2.onload = e2 => { wrap.querySelector('img')?.remove(); let pImg = document.createElement('img'); pImg.src = e2.target.result; wrap.prepend(pImg); }; r2.readAsDataURL(file); }
+    }
+  });
+  document.getElementById('count-' + cat).innerText = catFiles[cat].length;
+  var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+  if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
+}
+function attachDragEvents(item, cat) {
+  item.addEventListener('dragstart', function (e) { item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', item.dataset.index); });
+  item.addEventListener('dragend', function () { item.classList.remove('dragging'); });
+  item.addEventListener('dragover', function (e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+  item.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    var toIndex = parseInt(item.dataset.index, 10);
+    if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+    var moved = catFiles[cat].splice(fromIndex, 1)[0];
+    catFiles[cat].splice(toIndex, 0, moved);
+    syncCategoryInput(cat); renderCategory(cat);
+  });
+}
+function renderAllCategories() {
+  IMG_CATEGORIES.forEach(renderCategory);
+  var total = totalImageCount();
+  document.getElementById('imgTotalCount').innerText = total;
+  var notice = document.getElementById('imgMinNotice');
+  if (notice) {
+    if (total >= IMG_MIN_REQUIRED) { notice.className = 'min-ok'; notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' photos added.'; }
+    else { notice.className = 'min-warning'; notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' photos to publish'; }
+  }
+  setCheck('cl-photos', total > 0);
+}
+function handleCatFiles(cat, files) {
+  var incoming = Array.from(files).filter(f => f.type.startsWith('image/'));
+  var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+  if (catFiles[cat].length + incoming.length > limit) {
+    Swal.fire('Room Limit Reached', 'Maximum ' + limit + ' photos allowed for this room.', 'warning');
+    incoming = incoming.slice(0, Math.max(0, limit - catFiles[cat].length));
+  }
+  if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+    Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' photos allowed across all rooms.', 'warning');
+    incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+  }
+  catFiles[cat] = catFiles[cat].concat(incoming);
+  syncCategoryInput(cat); renderAllCategories();
+}
+window.removeCatImage = function (cat, fileName) {
+  catFiles[cat] = catFiles[cat].filter(f => f.name !== fileName);
+  syncCategoryInput(cat); renderAllCategories();
+};
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var cat = this.dataset.cat;
+      document.querySelectorAll('.img-cat-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.img-cat-panel').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]').classList.add('active');
+    });
+  });
+  IMG_CATEGORIES.forEach(function (cat) {
+    var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+    var input = document.getElementById('imgInput-' + cat);
+    if (!zone || !input) return;
+    zone.addEventListener('click', () => input.click());
+    input.addEventListener('change', e => handleCatFiles(cat, e.target.files));
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleCatFiles(cat, e.dataTransfer.files); });
+  });
+  renderAllCategories();
+});
+
+/* ===================== VIDEO OPTION TOGGLE ===================== */
+function toggleVideoOption() {
+  var uploadRadio = document.getElementById('video_upload');
+  var autoRadio = document.getElementById('video_auto');
+  var rmRadio = document.getElementById('video_rm');
+  document.getElementById('videoUploadWrapper').style.display = uploadRadio.checked ? 'block' : 'none';
+  document.getElementById('videoAutoWrapper').style.display = autoRadio.checked ? 'block' : 'none';
+  document.getElementById('videoRMWrapper').style.display = rmRadio.checked ? 'block' : 'none';
+  document.getElementById('video_source').value = uploadRadio.checked ? 'upload' : (autoRadio.checked ? 'auto' : 'rm_assisted');
+}
+document.getElementById('videoUploadArea')?.addEventListener('click', function () { document.getElementById('videoInput').click(); });
+document.getElementById('videoInput')?.addEventListener('change', function (e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) {
+    e.target.value = '';
+    Swal.fire({ icon: 'warning', title: 'Video Too Large', text: 'This file exceeds the 20MB limit. Please share it with our RM instead using the option above.', confirmButtonColor: '#006ce4' });
+    document.getElementById('video_rm').checked = true; toggleVideoOption();
+    return;
+  }
+  var preview = document.getElementById('videoPreview');
+  preview.src = URL.createObjectURL(file); preview.style.display = 'block'; preview.load(); preview.play();
+});
+
+/* ===================== SUBMIT WITH CONFIRMATION ===================== */
+document.getElementById('commercialForm')?.addEventListener('submit', function (e) {
+  e.preventDefault();
   let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
-  if (userStatus === false) {
-      pendingAction = publishListing; 
-      goToStepAuth('step-1-email');
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
-      return; 
-  }
+  if (userStatus === false) { pendingAction = () => document.getElementById('commercialForm').requestSubmit(); goToStepAuth('step-1-email'); bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show(); return; }
+  if (!validateStep(4)) return;
   if (!document.getElementById('agreeTerms').checked) {
-    Swal.fire({ icon: 'warning', title: 'Agreement Required',
-      text: 'Please agree to KANISHKAIMPERIA Terms of Service before publishing.',
-      background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316' });
+    Swal.fire({ icon: 'warning', title: 'Please Confirm', text: 'Agree to the Terms of Service before publishing.', confirmButtonColor: '#006ce4' });
     return;
   }
-  const title = document.getElementById('propTitle')?.value;
-  const rent  = document.getElementById('monthlyRent')?.value;
-  if (!title || !rent) {
-    Swal.fire({ icon: 'error', title: 'Required Fields Missing',
-      text: 'Please fill in the Property Title and Monthly Rent before publishing.',
-      background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316' });
-    return;
-  }
+  const form = this;
   Swal.fire({
-    icon: 'success', title: '🎉 Listing Submitted!',
-    html: `<div style="text-align:center;">
-      <div style="font-size:.9rem;font-weight:700;margin-bottom:8px;">"${title}" is now LIVE on KANISHKAIMPERIA!</div>
-      <div style="font-size:.78rem;color:#64748b;">Visible to 50,000+ tenants · RM assigned · WhatsApp alerts enabled</div>
-    </div>`,
-    background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316', confirmButtonText: 'View Portal →'
-  }).then(() => { window.location.href = '/listingpage/?type=rent'; });
+    title: 'Publish This Listing?', text: 'Your commercial property will go live instantly.', icon: 'question',
+    showCancelButton: true, confirmButtonColor: '#006ce4', cancelButtonColor: '#cbd5e0', confirmButtonText: '<i class="fas fa-check"></i> Yes, Publish'
+  }).then(result => {
+    if (!result.isConfirmed) return;
+    Swal.fire({ title: 'Publishing Your Property…', text: 'Uploading photos and video. Please wait.', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading() });
+
+    IMG_CATEGORIES.forEach(cat => syncCategoryInput(cat));
+    var formData = new FormData(form);
+    fetch(form.action, { method: 'POST', body: formData, headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value } })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          Swal.fire({ icon: 'success', title: '🎉 Listing Published!', text: data.message, confirmButtonColor: '#10b981' }).then(() => { window.location.href = '/listingpage/?type=rent'; });
+        } else {
+          let isDup = (data.message || '').includes('Duplicate');
+          Swal.fire({ icon: isDup ? 'warning' : 'error', title: isDup ? 'Duplicate Listing Detected' : 'Submission Failed', text: data.message, confirmButtonColor: '#006ce4' });
+        }
+      })
+      .catch(err => { Swal.fire('Error', 'Submit failed: ' + err.message, 'error'); });
+  });
+});
+
+/* ===================== PROGRESSIVE AUTH FLOW ===================== */
+function goToStepAuth(stepId) { $('.auth-step').removeClass('active-step').hide(); $('#' + stepId).addClass('active-step').fadeIn(250); }
+function moveToNext(current, event) {
+  if (current.value.length >= current.maxLength) { let next = $(current).next('.otp-input'); if (next.length) next.focus(); }
+  if (event.key === 'Backspace' && current.value.length === 0) { let prev = $(current).prev('.otp-input'); if (prev.length) prev.focus(); }
+}
+function checkEmailExists(_this) {
+  let email = $('#flow_email').val().trim();
+  if (!email) return Swal.fire('Wait', 'Please enter a valid email address.', 'info');
+  let btnText = _this.innerHTML;
+  $(_this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Checking...');
+  $.ajax({
+    type: 'POST', url: "{% url 'Check_Email_Api' %}", data: { email: email },
+    success: function (response) { $(_this).prop('disabled', false).html(btnText); if (response.exists) goToStepAuth('step-2-login'); else sendOTP(email); },
+    error: function () { $(_this).prop('disabled', false).html(btnText); Swal.fire('Error', 'Server error.', 'error'); }
+  });
+}
+function sendOTP(email) {
+  $('#display_otp_email').text(email);
+  goToStepAuth('step-2-otp');
+  $.ajax({ type: 'POST', url: "{% url 'Send_Otp_Api' %}", data: { email: email } });
+}
+function processProgLogin(_this) {
+  let email = $('#flow_email').val(); let password = $('#flow_password').val();
+  if (!password) return Swal.fire('Wait', 'Please enter your password.', 'info');
+  let btnText = _this.innerHTML;
+  $(_this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Logging in...');
+  $.ajax({
+    type: 'POST', url: "{% url 'Prop_Login_Api' %}", data: { email: email, password: password },
+    success: function (response) {
+      if (response.status == '1') {
+        isLoggedIn = true;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+        if (typeof pendingAction === 'function') { let action = pendingAction; pendingAction = null; action(); } else { Swal.fire('Success', 'Logged in successfully!', 'success'); }
+      } else { $(_this).prop('disabled', false).html(btnText); Swal.fire('Error', response.msg || 'Incorrect password', 'error'); }
+    }
+  });
+}
+function verifyOTP(_this) {
+  let otp = ''; $('.otp-input').each(function () { otp += $(this).val(); });
+  if (otp.length < 4) return Swal.fire('Wait', 'Please enter the 4-digit OTP.', 'info');
+  let btnText = _this.innerHTML;
+  $(_this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Verifying...');
+  $.ajax({
+    type: 'POST', url: "{% url 'Verify_Otp_Api' %}", data: { email: $('#flow_email').val(), otp: otp },
+    success: function (response) { $(_this).prop('disabled', false).html(btnText); if (response.valid) goToStepAuth('step-3-details'); else Swal.fire('Error', 'Invalid OTP. Try again.', 'error'); }
+  });
+}
+function processProgRegistration(_this) {
+  let email = $('#flow_email').val(); let name = $('#flow_reg_name').val(); let mobile = $('#flow_reg_mobile').val(); let role = $('#flow_reg_role').val();
+  if (!name || !mobile || role === 'SelectRole') return Swal.fire('Wait', 'Please fill in all details.', 'info');
+  let btnText = _this.innerHTML;
+  $(_this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Creating Account...');
+  $.ajax({
+    type: 'POST', url: "{% url 'Prop_Register_Api' %}", data: { email: email, name: name, mobile: mobile, role: role },
+    success: function (response) {
+      if (response.status == '1') {
+        isLoggedIn = true;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+        if (typeof pendingAction === 'function') { let action = pendingAction; pendingAction = null; action(); } else { Swal.fire('Success', 'Account created!', 'success'); }
+      } else { $(_this).prop('disabled', false).html(btnText); Swal.fire('Error', response.msg || 'Registration failed.', 'error'); }
+    }
+  });
 }
 </script>
 

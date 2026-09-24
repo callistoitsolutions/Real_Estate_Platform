@@ -196,6 +196,323 @@ class HeaderSettings(models.Model):
         return "Header Settings"
 
 
+
+
+
+
+
+# ---------------------------------------------------------------------------
+# 1. EXPLORE TOP PROPERTY CATEGORIES  (the 7 tiles: Buy Homes, Rent Flats...)
+# ---------------------------------------------------------------------------
+class PropertyCategoryTile(models.Model):
+    title = models.CharField(max_length=60)               # "Buy Homes"
+    subtitle = models.CharField(max_length=100)            # "Resale & Ready Apartments"
+    image = models.ImageField(upload_to="category_tiles/")
+    listing_type = models.CharField(
+        max_length=10, choices=[("rent", "Rent"), ("sale", "Sale")]
+    )
+    category_slug = models.CharField(
+        max_length=30,
+        help_text="Value used in ?category= querystring e.g. residential, commercial, plot, pg, agricultural",
+    )
+    extra_tag = models.CharField(
+        max_length=30, blank=True, help_text="Optional e.g. 'luxury' for &tag=luxury"
+    )
+    is_new = models.BooleanField(default=False, help_text="Shows the 'NEW' ribbon")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+    def get_url(self):
+        url = f"/listingpage/?type={self.listing_type}&category={self.category_slug}"
+        if self.extra_tag:
+            url += f"&tag={self.extra_tag}"
+        return url
+
+
+# ---------------------------------------------------------------------------
+# 2. TRUST STRIP  (World-Class Amenities / Prime Locations / High ROI / ...)
+# ---------------------------------------------------------------------------
+class TrustHighlight(models.Model):
+    icon_class = models.CharField(
+        max_length=60, help_text="Bootstrap icon class e.g. bi bi-gem"
+    )
+    title_line1 = models.CharField(max_length=40)
+    title_line2 = models.CharField(max_length=40, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.title_line1} {self.title_line2}"
+
+
+class TrustSignature(models.Model):
+    """Singleton — the cursive 'Invest in a Better Tomorrow' text."""
+    line1 = models.CharField(max_length=60, default="Invest in")
+    line2 = models.CharField(max_length=60, default="a Better Tomorrow")
+
+    def __str__(self):
+        return f"{self.line1} {self.line2}"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# 3. WHY KANISHKAIMPERIA
+# ---------------------------------------------------------------------------
+class WhySection(models.Model):
+    """Singleton content block."""
+    eyebrow = models.CharField(max_length=60, default="WHY KANISHKAIMPERIA")
+    title_line1 = models.CharField(max_length=60, default="A Smarter Way")
+    title_line2 = models.CharField(max_length=60, default="to Find Property")
+    description = models.TextField()
+    video_image = models.ImageField(upload_to="why_section/")
+    video_url = models.URLField(blank=True, help_text="Optional — plays on clicking the play button")
+
+    def __str__(self):
+        return "Why KanishkaImperia Section (singleton)"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+
+class WhyBenefit(models.Model):
+    text = models.CharField(max_length=120)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.text
+
+
+# ---------------------------------------------------------------------------
+# 4. STATS STRIP  (Growing / Hand-Checked / Nagpur / Dedicated / Secure)
+# ---------------------------------------------------------------------------
+class StatHighlight(models.Model):
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-building")
+    value_text = models.CharField(max_length=40, help_text="e.g. 'Growing' or '1,200+'")
+    label = models.CharField(max_length=60, help_text="e.g. 'Property Network'")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.value_text} — {self.label}"
+
+
+# ---------------------------------------------------------------------------
+# 5. VALUE STRIP  (6 items: Wide Range / Best Deals / Expert Guidance ...)
+# ---------------------------------------------------------------------------
+class ValueProposition(models.Model):
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-map")
+    title = models.CharField(max_length=80)
+    subtitle = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+# ---------------------------------------------------------------------------
+# 6. HOW IT WORKS  (4 steps)
+# ---------------------------------------------------------------------------
+class HowItWorksStep(models.Model):
+    step_number = models.PositiveIntegerField()
+    title = models.CharField(max_length=60)
+    description = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"Step {self.step_number}: {self.title}"
+
+
+# ---------------------------------------------------------------------------
+# 7. THE TWO SPLIT BANNER CARDS
+#    ("Tell us your requirement" / "Talk to a Property Advisor")
+# ---------------------------------------------------------------------------
+class InfoBannerCard(models.Model):
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-clipboard-check")
+    eyebrow = models.CharField(max_length=80, blank=True)
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
+    button_text = models.CharField(max_length=40)
+    button_url = models.CharField(max_length=200, default="#")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+class InfoBannerBullet(models.Model):
+    banner = models.ForeignKey(
+        InfoBannerCard, related_name="bullets", on_delete=models.CASCADE
+    )
+    text = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.text
+
+
+# ---------------------------------------------------------------------------
+# 8. PARTNER BANNER  (For Property Owners, Agents, Vendors)
+# ---------------------------------------------------------------------------
+class PartnerBanner(models.Model):
+    """Singleton."""
+    eyebrow = models.CharField(max_length=60, default="PARTNER WITH US")
+    title = models.CharField(max_length=120)
+    description = models.CharField(max_length=200)
+    button1_text = models.CharField(max_length=40, default="List Your Property FREE")
+    button2_text = models.CharField(max_length=40, default="Join Agent Network")
+
+    def __str__(self):
+        return "Partner Banner (singleton)"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# 9. NEWSLETTER STRIP + SOCIAL LINKS
+# ---------------------------------------------------------------------------
+class NewsletterSection(models.Model):
+    """Singleton."""
+    title = models.CharField(max_length=60, default="Stay Updated!")
+    description = models.CharField(
+        max_length=150, default="Subscribe to get the latest property updates."
+    )
+
+    def __str__(self):
+        return "Newsletter Section (singleton)"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+
+class SocialLink(models.Model):
+    PLATFORM_CHOICES = [
+        ("facebook", "Facebook"),
+        ("instagram", "Instagram"),
+        ("whatsapp", "WhatsApp"),
+        ("twitter", "Twitter / X"),
+        ("youtube", "YouTube"),
+        ("linkedin", "LinkedIn"),
+    ]
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-facebook")
+    url = models.URLField()
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.get_platform_display()
+
+
+# ---------------------------------------------------------------------------
+# 10. SITE SETTINGS  (brand info, phone, email, copyright)
+# ---------------------------------------------------------------------------
+class SiteSettings(models.Model):
+    """Singleton — global site/company info used across header + footer."""
+    brand_name = models.CharField(max_length=60, default="KANISHKAIMPERIA")
+    brand_logo = models.ImageField(upload_to="branding/", blank=True, null=True)
+    footer_description = models.TextField(
+        default="Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents"
+    )
+    phone = models.CharField(max_length=20, default="9175791501")
+    email = models.EmailField(default="kanishkaimperia@gmail.com")
+    copyright_text = models.CharField(
+        max_length=100, default="© {year} KANISHKAIMPERIA · Nagpur, Maharashtra",
+        help_text="Use {year} to auto-insert the current year"
+    )
+
+    def __str__(self):
+        return "Site Settings (singleton)"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# 11. FOOTER LINK COLUMNS  (For Tenants / For Buyers / For Owners / Company)
+# ---------------------------------------------------------------------------
+class FooterColumn(models.Model):
+    title = models.CharField(max_length=40)  # "For Tenants"
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+class FooterLink(models.Model):
+    column = models.ForeignKey(FooterColumn, related_name="links", on_delete=models.CASCADE)
+    text = models.CharField(max_length=60)
+    url = models.CharField(max_length=200, help_text="Relative path, e.g. /listingpage/?type=rent, or a named url like {% url 'blog' %} resolved in admin note")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.text
+
+
+# ---------------------------------------------------------------------------
+# 12. AGENT / DIGITAL CARD PROFILE  (used by dcard-strip + vCard JS)
+# ---------------------------------------------------------------------------
+class AgentProfile(models.Model):
+    name = models.CharField(max_length=80, default="Kanishka Imperia")
+    designation = models.CharField(max_length=80, default="Real Estate Consultant")
+    phone = models.CharField(max_length=15, default="9000000000")
+    photo = models.ImageField(upload_to="agents/", blank=True, null=True)
+    is_verified = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, help_text="Only one active profile is shown on the homepage")
+
+    def __str__(self):
+        return self.name
+
+
 from django.utils.text import slugify
 
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -246,6 +563,27 @@ class Blog(models.Model):
         return self.title
 
 
+
+from django.db import models
+
+class BlogCategoryPill(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.name
+
+class GuideCategoryCard(models.Model):
+    name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=50, default="bi bi-journal-text")
+    article_count = models.IntegerField(default=0)
+    slug = models.SlugField(unique=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
 
 
 
@@ -411,6 +749,112 @@ class Service_Option(models.Model):
 
 
 
+
+
+
+
+class ServiceHighlight(models.Model):
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-shield-check")
+    title = models.CharField(max_length=60)
+    description = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+class ServicesBannerCard(models.Model):
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-clipboard-check")
+    color_variant = models.CharField(
+        max_length=10,
+        choices=[("blue", "Gold/Blue tint"), ("indigo", "Grey/Indigo tint")],
+        default="blue",
+        help_text="Matches the bs-blue / bs-indigo CSS classes",
+    )
+    eyebrow = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
+    button_text = models.CharField(max_length=40)
+    button_url = models.CharField(max_length=200, default="#")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+class ServicesBannerBullet(models.Model):
+    banner = models.ForeignKey(ServicesBannerCard, related_name="bullets", on_delete=models.CASCADE)
+    text = models.CharField(max_length=100)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.text
+
+
+class ServiceDetailFAQ(models.Model):
+    service = models.ForeignKey(Service, related_name="faqs", on_delete=models.CASCADE)
+    question = models.CharField(max_length=200)
+    answer = models.TextField()
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.service.title} - {self.question}"
+
+
+class ServiceSidebarQuickLink(models.Model):
+    text = models.CharField(max_length=50)
+    url = models.CharField(max_length=200, default="#")
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.text
+
+
+class ServiceBenefit(models.Model):
+    icon_class = models.CharField(max_length=60, help_text="e.g. bi bi-shield-check")
+    title = models.CharField(max_length=60)
+    description = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+class ServiceProcessStep(models.Model):
+    step_number = models.PositiveIntegerField()
+    title = models.CharField(max_length=80)
+    description = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"Step {self.step_number}: {self.title}"
 
 
 ############### Models start for user details model ############################
@@ -837,7 +1281,7 @@ class Subscription_Purchase_Details(models.Model):
 
 
 def generate_unique_rental_residential_id():
-    return f"EFPRR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIPRR-{uuid.uuid4().hex[:8].upper()}"
 
 
 # ==========================================
@@ -1526,7 +1970,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import models
 
 def generate_commercial_rental_id():
-    return f"EFCPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KICPR-{uuid.uuid4().hex[:8].upper()}"
 
 class CommercialRentalProperty(models.Model):
     id = models.CharField(
@@ -2030,7 +2474,7 @@ class CommercialRentalActivityLog(models.Model):
 
 
 def generate_unique_pg_property_id():
-    return f"EFPG-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIPG-{uuid.uuid4().hex[:8].upper()}"
 
 
 class PGColivingProperty(models.Model):
@@ -2525,7 +2969,7 @@ class PGColivingActivityLog(models.Model):
 # Helper function to generate the custom primary key
 def generate_resale_unique_property_id():
     # Example format: EFRES-A1B2C3D4
-    return f"EFRES-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIRES-{uuid.uuid4().hex[:8].upper()}"
 
 
 
@@ -2566,8 +3010,8 @@ class ResaleResidentialProperty(models.Model):
     furnishing_status = models.CharField(max_length=100, blank=True, null=True)      
     property_age = models.CharField(max_length=100, blank=True, null=True)      
     facing_direction = models.CharField(max_length=100, blank=True, null=True)      
-    occupancy_status = models.CharField(max_length=100, blank=True, null=True)      
-    floor_no = models.PositiveIntegerField(default=1, null=True, blank=True)  # ADD THIS FIELD
+    occupancy_status = models.CharField(max_length=100, blank=True, null=True)    
+    terrace_details = models.CharField(max_length=200, blank=True, null=True)      
 
     ################## Property Measurements Section ###########################
     super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
@@ -2575,7 +3019,8 @@ class ResaleResidentialProperty(models.Model):
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     building_configuration = models.CharField(max_length=100, blank=True, null=True)
-    total_floors = models.PositiveIntegerField(default=1, null=True, blank=True)
+    total_floors = models.CharField(max_length=5, null=True, blank=True)
+    floor_number = models.CharField(max_length=5, null=True, blank=True)
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
     manual_brokerage = models.PositiveIntegerField(default=0, null=True, blank=True)
 
@@ -2974,7 +3419,7 @@ class ResaleResidentialVideo(models.Model):
 
 # Helper function to generate the custom primary key
 def generate_property_id():
-    return f"EFCOM-{uuid.uuid4().hex[:8].upper()}"
+    return f"KICOM-{uuid.uuid4().hex[:8].upper()}"
 
 
 class CommercialResaleProperty(models.Model):
@@ -3019,6 +3464,7 @@ class CommercialResaleProperty(models.Model):
     property_age = models.CharField(max_length=50,blank=True,null=True)
     furnishing_status = models.CharField(max_length=50,blank=True,null=True)
     facing_direction = models.CharField(max_length=50,blank=True,null=True)
+    terrace_details = models.CharField(max_length=200,blank=True,null=True)
     bhk = models.CharField(max_length=50,blank=True,null=True)
 
     ################# Area Measurements Section ##############################
@@ -3027,6 +3473,8 @@ class CommercialResaleProperty(models.Model):
     builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    total_floors = models.CharField(max_length=5,blank=True, null=True)
+    floor_number = models.CharField(max_length=5,blank=True, null=True)
 
     ############# Commercial Specifications Section ############################
 
@@ -3461,7 +3909,7 @@ class ResaleCommercialVideo(models.Model):
 ############### Modal Start for Residential Resale Plot ########################
 
 def generate_residential_resale_plot_id():
-    return f"EFPLT-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIPLT-{uuid.uuid4().hex[:8].upper()}"
 
 class ResidentialResalePlot(models.Model):
     plot_property_id = models.CharField(
@@ -3594,7 +4042,7 @@ class ResidentialResalePlot(models.Model):
 
 # Helper function to generate the custom primary key
 def generate_industrial_id():
-    return f"EFIND-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIND-{uuid.uuid4().hex[:8].upper()}"
 
 
 class IndustrialResaleProperty(models.Model):
@@ -4208,7 +4656,7 @@ class ResaleIndustrialVideo(models.Model):
 
 # Helper function to generate the custom primary key
 def generate_agri_id():
-    return f"EFAGR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIAGR-{uuid.uuid4().hex[:8].upper()}"
 
 
 class AgriculturalResaleProperty(models.Model):
@@ -4694,7 +5142,7 @@ class ResaleAgriculturalVideo(models.Model):
 
 
 def generate_residential_plot_id():
-    return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 
 class ResidentialPlotResaleProperty(models.Model):
@@ -5383,7 +5831,7 @@ class ResidentialPlotResaleActivityLog(models.Model):
 
 
 def generate_commercial_plot_id():
-    return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 class CommercialPlotResaleProperty(models.Model):
     id = models.CharField(
@@ -5907,7 +6355,7 @@ class CommercialPlotResaleActivityLog(models.Model):
 
 
 def generate_industrial_plot_id():
-    return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 class IndustrialPlotResaleProperty(models.Model):
     id = models.CharField(
@@ -6426,7 +6874,7 @@ class IndustrialPlotResaleActivityLog(models.Model):
 
 
 def generate_agricultural_plot_id():
-    return f"EFAPR-{uuid.uuid4().hex[:8].upper()}"
+    return f"KIAPR-{uuid.uuid4().hex[:8].upper()}"
 
 
 class AgriculturalPlotResaleProperty(models.Model):

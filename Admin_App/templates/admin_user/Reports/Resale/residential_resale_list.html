@@ -661,6 +661,7 @@
                         <th>Age of Property</th>
                         <th>Facing Direction</th>
                         <th>Occupancy Status</th>
+                        <th>Terrace Details</th>
 
                         <th>Super Built-up Area (sqft)</th>
                         <th>Built-up Area (sqft)</th>
@@ -668,6 +669,7 @@
                         <th>Plot Area (sqft)</th>
                         <th>Building Configuration</th>
                         <th>Total Floors</th>
+                        <th>Floor Number</th>
 
                         <th>BHK</th>
                         <th>Bathrooms</th>
@@ -832,6 +834,7 @@
                         <td>{{ prop.property_age|default:"—" }}</td>
                         <td>{{ prop.facing_direction|default:"—" }}</td>
                         <td>{{ prop.occupancy_status|default:"—" }}</td>
+                        <td>{{ prop.terrace_details|default:"—" }}</td>
 
                         <!-- Measurements -->
                         <td>{{ prop.super_builtup_area|default:"—" }}</td>
@@ -840,6 +843,7 @@
                         <td>{{ prop.plot_area|default:"—" }}</td>
                         <td>{{ prop.building_configuration|default:"—" }}</td>
                         <td>{{ prop.total_floors|default:"—" }}</td>
+                        <td>{{ prop.floor_number|default:"—" }}</td>
 
                         <!-- Configuration -->
                         <td>{{ prop.bhk|default:"—" }}</td>

@@ -1277,7 +1277,7 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
         property_group = 'resale'
 
     # ── 2. Fetch the object ──────────────────────────────────
-    obj = get_object_or_404(property_model, pk=pk)
+    obj = get_object_or_404(property_model, pk=pk, is_deleted=False, approval_status='Approved')
 
 
     from collections import defaultdict
@@ -1308,7 +1308,7 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
     'occupancy_status', 'floor_no', 'floor_number', 'society_type', 'water_type','city_zone' , 'availability_status' ,'land_area' ,
     'ownership_type' , 'locality_area' , 'property_landmark' , 'latitude' , 'longitude' , 'google_maps_link' , 'builtup_area' ,
     'property_category', 'zone_type', 'location_hub', 'property_condition', 'property_age', 'builtup_area' , 'main_road_connectivity' ,
-    'super_builtup_area', 'no_staircases', 'num_cabins',
+    'super_builtup_area', 'no_staircases', 'num_cabins', 'floor_number' , 'terrace_details' ,
     'user_description', 'property_summary', 'property_description',
     'ownership_status', 'ownership_document_type', 'title_clarity_status',
     'encumbrance_status', 'property_loan', 'existing_tenants', 'any_legal_dispute',
@@ -1935,7 +1935,7 @@ def property_detail_view(request, listing_type, category, pk, slug=None):
     similar = []
     try:
         city_val = p['city']
-        similar_qs = property_model.objects.filter(is_deleted=False).exclude(pk=obj.pk)
+        similar_qs = property_model.objects.filter(is_deleted=False, approval_status='Approved').exclude(pk=obj.pk)
 
         if city_val:
             if hasattr(property_model, 'city'):
@@ -3188,6 +3188,8 @@ def listings_view(request):
 
         if hasattr(db_model, 'is_deleted'):
             obj_q = obj_q.filter(is_deleted=False)
+        if hasattr(db_model, 'approval_status'):
+            obj_q = obj_q.filter(approval_status='Approved')
 
         if city_filter:
             city_field = 'city' if hasattr(db_model, 'city') else 'plot_city' if hasattr(db_model, 'plot_city') else None
@@ -4418,9 +4420,10 @@ def build_property_object(obj, listing_type, category):
 
 
 
+
 def get_featured_queryset(model):
     return model.objects.filter(
-       
+        is_deleted=False, approval_status='Approved'
     ).order_by('-created_at')[:6]
 
 
@@ -4493,25 +4496,24 @@ def index(request):
     # ==========================================
     # RENTAL PROPERTIES
     # ==========================================
-    rental_residential = RentalResidentialProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
-    rental_commercial = CommercialRentalProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
-    rental_pg = PGColivingProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
+    rental_residential = RentalResidentialProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
+    rental_commercial = CommercialRentalProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
+    rental_pg = PGColivingProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
 
-    # ==========================================
-    # RESALE PROPERTIES
-    # ==========================================
-    resale_residential = ResaleResidentialProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
-    resale_commercial = CommercialResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
-    resale_industrial = IndustrialResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
-    resale_agricultural = AgriculturalResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
+    resale_residential = ResaleResidentialProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
+    resale_commercial = CommercialResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
+    resale_industrial = IndustrialResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
+    resale_agricultural = AgriculturalResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
 
     resale_plots_combined = list(chain(
-        
-        ResidentialPlotResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4],
-        CommercialPlotResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4],
-        IndustrialPlotResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4],
-        AgriculturalPlotResaleProperty.objects.filter(is_deleted=False).prefetch_related('images').order_by('-created_at')[:4]
-    ))
+    
+    ResidentialPlotResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4],
+    CommercialPlotResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4],
+    IndustrialPlotResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4],
+    AgriculturalPlotResaleProperty.objects.filter(is_deleted=False, approval_status='Approved').prefetch_related('images').order_by('-created_at')[:4]
+))
+
+
     resale_plots_combined.sort(key=lambda x: getattr(x, 'created_at'), reverse=True)
     resale_plot = resale_plots_combined[:4]
 
@@ -4525,6 +4527,45 @@ def index(request):
     # OTHER DATA
     # ==========================================
     hero = HeroSection.objects.filter(is_active=True).first()
+
+    category_tiles = PropertyCategoryTile.objects.filter(is_active=True)
+ # 2. Trust Strip
+    trust_highlights = TrustHighlight.objects.filter(is_active=True)
+    trust_signature =  TrustSignature.objects.first()
+ 
+        # 3. Why KanishkaImperia
+    why_section =  WhySection.objects.first()
+    why_benefits = WhyBenefit.objects.filter(is_active=True)
+ 
+        # 4. Stats Strip
+    stat_highlights = StatHighlight.objects.filter(is_active=True)
+ 
+        # 5. Value Strip
+    value_props = ValueProposition.objects.filter(is_active=True)
+ 
+        # 6. How It Works
+    how_it_works_steps = HowItWorksStep.objects.filter(is_active=True)
+ 
+        # 7. Info banner cards ("Tell us your requirement" / "Talk to advisor")
+        #    .prefetch_related pulls the bullets in one extra query instead of N
+    info_banners = InfoBannerCard.objects.filter(is_active=True).prefetch_related("bullets")
+ 
+        # 8. Partner Banner
+    partner_banner = PartnerBanner.objects.first()
+ 
+        # 9. Newsletter + Social
+    newsletter_section = NewsletterSection.objects.first()
+    social_links = SocialLink.objects.filter(is_active=True)
+ 
+        # 10 & 11. Site settings + Footer columns
+    site_settings = SiteSettings.objects.first()
+    footer_columns = FooterColumn.objects.filter(is_active=True).prefetch_related("links")
+ 
+        # 12. Agent / digital card
+    agent = AgentProfile.objects.filter(is_active=True).first()
+ 
+        # current year for copyright, if you don't use SiteSettings.copyright_text
+    current_year = date.today().year
     seo_pages = LocationSEO.objects.filter(is_active=True, pagetype="blog")
     services = LocationSEO.objects.filter(pagetype="service", is_active=True)
     subscriptions = Subscription_Details.objects.all()
@@ -4682,6 +4723,24 @@ def index(request):
 
     context = {
         "hero": hero,
+        "category_tiles":category_tiles,
+        "trust_highlights":trust_highlights,
+        "trust_signature":trust_signature,
+        "why_section":why_section,
+        "why_benefits":why_benefits,
+        "stat_highlights":stat_highlights,
+        "value_props":value_props,
+        "how_it_works_steps":how_it_works_steps,
+        "info_banners":info_banners,
+        "partner_banner":partner_banner,
+        "newsletter_section":newsletter_section,
+        "social_links":social_links,
+        "site_settings":site_settings,
+        "footer_columns":footer_columns,
+        "site_settings": site_settings,
+        "footer_columns":footer_columns,
+        "agent":agent,
+        "current_year":current_year,
         "seo_pages": seo_pages,
         "today": today,
         "fifteen_days_ago": fifteen_days_ago,
@@ -4739,36 +4798,96 @@ from django.db.models import Count
 
 
 
-# ==========================================
-# SERVICES VIEWS
-# ==========================================
 def services(request):
+    """View for the main services listing page."""
     active_services = Service.objects.filter(status="active").order_by('sort_order', 'title')
     
     for s in active_services:
-        # Fetch the real SEO slug from the database
         seo_record = LocationSEO.objects.filter(pagetype="service", object_id=str(s.id)).first()
-        # Fallback to key if slug is missing for any reason
         s.seo_slug = seo_record.slug if seo_record and seo_record.slug else f"service-{s.id}"
 
-    context = {'services': active_services}
-    # ... (keep your user session logic here)
+    highlights = ServiceHighlight.objects.filter(is_active=True)
+    banner_cards = ServicesBannerCard.objects.filter(is_active=True)
+    
+    # Use ServiceDetailFAQ query (or filter by service if needed)
+    faqs = ServiceDetailFAQ.objects.filter(is_active=True) 
+    
+    quick_links = ServiceSidebarQuickLink.objects.filter(is_active=True)
+
+    context = {
+        'services': active_services,
+        'highlights': highlights,
+        'banner_cards': banner_cards,
+        'faqs': faqs,
+        'quick_links': quick_links,
+    }
     return render(request, "home_page/services.html", context)
 
 
+
 def services_details(request, slug):
-    # Search by slug instead of key
     seo = LocationSEO.objects.filter(slug=slug, pagetype="service", is_active=True).first()
     if not seo:
         raise Http404("Service not found")
         
+    # 'service' represents ONLY the specific service the user clicked on, 
+    # even if you have hundreds of different services in your database.
     service = seo.content_object
     keywords = seo.secondary_keywords.split(",") if seo.secondary_keywords else []
 
-    return render(request, "home_page/services_details.html", {
-        "seo": seo, "service": service, "keywords": keywords
+    benefits = ServiceBenefit.objects.filter(is_active=True)
+    process_steps = ServiceProcessStep.objects.filter(is_active=True)
+    
+    # Automatically generates unique FAQs tailored to THIS specific service
+    service_faqs = []
+    
+    # 1. Pricing FAQ customized for this specific service
+    if service.price_type == "fixed" and service.price:
+        price_text = f"The fixed price for {service.title} is ₹{int(service.price)}."
+    elif service.price_type == "starting_from" and service.price:
+        price_text = f"{service.title} starts at ₹{int(service.price)} with options for customization."
+    else:
+        price_text = f"Pricing for {service.title} is available upon request after reviewing your specific requirements."
+        
+    service_faqs.append({
+        "id": 1,
+        "question": f"What is the cost and pricing structure for {service.title}?",
+        "answer": price_text
     })
 
+    # 2. Duration FAQ customized for this specific service
+    duration_text = service.duration if service.duration else "1-3 business days"
+    service_faqs.append({
+        "id": 2,
+        "question": f"How long does it take to complete {service.title}?",
+        "answer": f"Typically, the execution for {service.title} takes approximately {duration_text}, depending on the scope of your request."
+    })
+
+    # 3. Tiers/Options FAQ customized if this service has packages
+    option_count = service.options.filter(is_active=True).count()
+    if option_count > 0:
+        option_names = ", ".join([opt.option_name for opt in service.options.filter(is_active=True)])
+        service_faqs.append({
+            "id": 3,
+            "question": f"Are there different packages available for {service.title}?",
+            "answer": f"Yes, we offer {option_count} different packages for this service: {option_names}. You can select your preferred tier directly from the request form."
+        })
+    else:
+        service_faqs.append({
+            "id": 3,
+            "question": f"Do I get a dedicated manager for {service.title}?",
+            "answer": f"Yes, every {service.title} request is assigned a dedicated Relationship Manager who oversees the entire process from start to finish."
+        })
+
+    context = {
+        "seo": seo,
+        "service": service,
+        "keywords": keywords,
+        "benefits": benefits,
+        "process_steps": process_steps,
+        "service_faqs": service_faqs,
+    }
+    return render(request, "home_page/services_details.html", context)
 
 # ==========================================
 # BLOG VIEWS
@@ -4777,8 +4896,10 @@ def services_details(request, slug):
 
 from django.db.models import Count
 
+
+
+
 def blog(request):
-    # FIX: Used status__iexact to ignore case-sensitivity issues between "Published" and "published"
     blogs = Blog.objects.filter(status__iexact="published").order_by("-published_date")
     
     category_query = request.GET.get('category')
@@ -4786,33 +4907,58 @@ def blog(request):
         blogs = blogs.filter(category=category_query)
         
     for b in blogs:
-        # Fetch the real SEO slug from the database
         seo_record = LocationSEO.objects.filter(pagetype="blog", object_id=str(b.id)).first()
         b.seo_slug = seo_record.slug if seo_record and seo_record.slug else f"blog-{b.id}"
 
-    # FIX: Also applied __iexact to the category aggregation so the counts are accurate
+    # Dynamic Category Cards from database or aggregated counts
     cat_data = Blog.objects.filter(status__iexact="published").values('category').annotate(count=Count('category'))
+    guide_categories = [{'name': c['category'], 'count': c['count'], 'icon': 'bi bi-journal-text'} for c in cat_data if c['category']]
     
-    # Optional: You can add the styling dictionaries back here if you want colored icons on the frontend
-    guide_categories = [{'name': c['category'], 'count': c['count']} for c in cat_data if c['category']]
+    # Dynamic Pills
+    pills = BlogCategoryPill.objects.filter(is_active=True).order_by('sort_order')
 
-    context = {"blogs": blogs, "guide_categories": guide_categories}
-    
-    # (keep your user session logic here)
-    
+    # Auto-generate dynamic FAQs based on existing published blogs
+    auto_faqs = []
+    for b in blogs[:4]:
+        auto_faqs.append({
+            "question": f"What are the important insights regarding {b.title}?",
+            "answer": f"According to our expert guide on {b.category or 'Real Estate'}, {b.short_description or 'careful evaluation and verified documentation are key to ensuring a secure transaction in Nagpur.'}"
+        })
+
+    context = {
+        "blogs": blogs, 
+        "guide_categories": guide_categories,
+        "pills": pills,
+        "auto_faqs": auto_faqs
+    }
     return render(request, "home_page/blog.html", context)
 
-    
 
 def blog_details(request, slug):
-    # Search by slug instead of key
     seo = LocationSEO.objects.filter(slug=slug, pagetype="blog", is_active=True).first()
     if not seo:
         raise Http404("Blog not found")
         
     blog = seo.content_object
-    return render(request, "home_page/blog_details.html", {"seo": seo, "blog": blog})
+    
+    # Auto-generate FAQs specific to this blog details page
+    blog_faqs = [
+        {
+            "question": f"What are the primary takeaways from {blog.title}?",
+            "answer": f"This article covers critical aspects of {blog.category or 'Real Estate'}, offering professional recommendations tailored for Nagpur property seekers."
+        },
+        {
+            "question": f"How can KANISHKAIMPERIA assist with this?",
+            "answer": f"Our dedicated Relationship Managers and legal experts provide step-by-step assistance and verified consultation for all your property requirements."
+        }
+    ]
 
+    context = {
+        "seo": seo, 
+        "blog": blog,
+        "blog_faqs": blog_faqs
+    }
+    return render(request, "home_page/blog_details.html", context)
 
 
 
@@ -5077,6 +5223,90 @@ def resale_industrial_form(request):
 
 
 #######################End View Section For Resale Listing#################################
+
+
+
+
+
+
+#######################Start View Section For Resale Plot Listing#################################
+
+
+def residential_resale_plot_form(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_plot/residential_resale_plot_form.html",context)
+
+
+
+def resale_plot_commercial_form(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_plot/resale_plot_commercial_form.html",context)
+
+def resale_plot_agricultural_form(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_plot/resale_plot_agricultural_form.html",context)
+
+
+
+
+def resale_plot_industrial_form(request):
+    
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_plot/resale_plot_industrial_form.html",context)
+
+
+
+
+
+#######################End View Section For Resale Plot Listing#################################
+
 
 
 
@@ -5735,7 +5965,12 @@ def search_listings(entities, limit=5):
 
         try:
             field_names = [f.name for f in model._meta.get_fields()]
-            qs = model.objects.filter(is_deleted=False) if "is_deleted" in field_names else model.objects.all()
+            extra = {}
+            if "is_deleted" in field_names:
+                extra["is_deleted"] = False
+            if "approval_status" in field_names:
+                extra["approval_status"] = "Approved"
+            qs = model.objects.filter(**extra) if extra else model.objects.all()
         except Exception:
             continue
 

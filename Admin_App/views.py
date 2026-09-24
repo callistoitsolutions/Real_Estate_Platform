@@ -4099,7 +4099,7 @@ def Rm_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -4402,7 +4402,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # GENERATE USER ID
             # --------------------------------------------------
-            user_id = f"EF-{new_user.id}-{year_suffix}"
+            user_id = f"KI-{new_user.id}-{year_suffix}"
 
             new_user.user_id = user_id
             new_user.save()
@@ -4862,7 +4862,7 @@ def Landlord_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -5312,7 +5312,7 @@ def Tenant_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -5760,7 +5760,7 @@ def Buyer_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -6219,7 +6219,7 @@ def Agent_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -6680,7 +6680,7 @@ def Agency_Data(request):
                         
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = f"KI-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -7169,7 +7169,7 @@ def Vendor_Data(request):
                         year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
                         
                         # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        user_id = f"KI-{new_user.id}-{year_suffix}"
                         
                         # Update the user with the generated user_id
                         new_user.user_id = user_id
@@ -9973,7 +9973,7 @@ def global_recycle_bin(request):
     pg_deleted = calculate_retention(PGColivingProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
     resale_deleted = calculate_retention(ResaleResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
     commercial_resale_deleted = calculate_retention(CommercialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
-    plot_sale_deleted = calculate_retention(PlotSaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    
     industrial_resale_deleted = calculate_retention(IndustrialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
     agricultural_resale_deleted = calculate_retention(AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
 
@@ -9987,7 +9987,7 @@ def global_recycle_bin(request):
         'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
         'resale_deleted': resale_deleted, 'resale_count': len(resale_deleted),
         'commercial_resale_deleted': commercial_resale_deleted, 'commercial_resale_count': len(commercial_resale_deleted),
-        'plot_sale_deleted': plot_sale_deleted, 'plot_sale_count': len(plot_sale_deleted),
+       
         'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
         'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
 
@@ -9999,7 +9999,7 @@ def global_recycle_bin(request):
 
         'total_deleted_all': (
             len(rental_deleted) + len(commercial_deleted) + len(pg_deleted) +
-            len(resale_deleted) + len(commercial_resale_deleted) + len(plot_sale_deleted) +
+            len(resale_deleted) + len(commercial_resale_deleted) +  
             len(industrial_resale_deleted) + len(agricultural_resale_deleted) +
             len(industrial_plot_deleted) + len(agricultural_plot_deleted)
         )
@@ -21062,6 +21062,7 @@ def resale_residential_import_excel(request):
             'age of property': 'property_age',
             'facing direction': 'facing_direction',
             'occupancy status': 'occupancy_status',
+            'terrace details': 'terrace_details',
             'bhk': 'bhk',
             'super built-up area': 'super_builtup_area',
             'built-up area': 'builtup_area',
@@ -21069,6 +21070,7 @@ def resale_residential_import_excel(request):
             'plot area': 'plot_area',
             'building configuration': 'building_configuration',
             'total floors constructed': 'total_floors',
+            'floor number': 'floor_number',
             'bathrooms': 'bathrooms',
             'balconies': 'balconies',
             'covered parking': 'covered_parking',
@@ -21194,7 +21196,8 @@ def resale_residential_import_excel(request):
                 p_age            = get_val('property_age')
                 face             = get_val('facing_direction')
                 occ              = get_val('occupancy_status')
-                fl_no            = get_val('floor_no')
+                terr              = get_val('terrace_details')
+                
                 
                 bhk              = get_val('bhk')
                 sb_area          = get_val('super_builtup_area')
@@ -21203,6 +21206,8 @@ def resale_residential_import_excel(request):
                 plot             = get_val('plot_area')
                 bldg_cfg         = get_val('building_configuration')
                 tot_fl           = get_val('total_floors')
+                fl_no            = get_val('floor_number')
+            
                 baths            = get_val('bathrooms')
                 balcs            = get_val('balconies')
                 cov_pk           = get_val('covered_parking')
@@ -21430,6 +21435,7 @@ def resale_residential_import_excel(request):
                 prop.property_age = p_age
                 prop.facing_direction = face
                 prop.occupancy_status = occ
+                prop.terrace_details = terr
                 
                 prop.bhk = bhk
                 prop.super_builtup_area = sb_val
@@ -21438,6 +21444,8 @@ def resale_residential_import_excel(request):
                 prop.plot_area = p_val
                 prop.building_configuration = bldg_cfg
                 prop.total_floors = tf_val
+                prop.floor_number = fl_no
+
                 prop.bathrooms = baths_val
                 prop.balconies = balcs_val
                 prop.covered_parking = c_pk_val
@@ -21606,7 +21614,7 @@ def resale_residential_sample_excel(request):
                 ('Society Type *', 'Gated Community'), ('Tower/Wing Number', 'A Wing'),
                 ('Water Type *', 'Municipal Corporation Supply'), ('Furnishing Status *', 'Semi-Furnished'),
                 ('Age of Property (Years) *', '1-3 Years'), ('Facing Direction *', 'North-East'),
-                ('Occupancy Status', 'Vacant (Ready for Possession)')
+                ('Occupancy Status', 'Vacant (Ready for Possession)'),('Terrace Details', '500 sqft. private terrace'),
             ]
         },
         {
@@ -21615,7 +21623,7 @@ def resale_residential_sample_excel(request):
                 ('BHK *', '3 BHK'), ('Super Built-up Area (sq.ft) *', 1600.00),
                 ('Built-up Area (sq.ft) *', 1450.00), ('Carpet Area (sq.ft) *', 1120.00),
                 ('Plot Area (sq.ft)', ''), ('Building Configuration', 'G+12'),
-                ('Total Floors Constructed *', 12), ('Bathrooms *', 2), ('Balconies', 1),
+                ('Total Floors Constructed ', 12),('Floor Number ', 3), ('Bathrooms *', 2), ('Balconies', 1),
                 ('Covered Parking', 1), ('Open Parking Available? *', 'No')
             ]
         },
@@ -21787,6 +21795,7 @@ EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE = [
     {'field': 'property_age', 'label': 'Age of Property*', 'section_name': 'BASIC INFORMATION'},
     {'field': 'facing_direction', 'label': 'Facing Direction*', 'section_name': 'BASIC INFORMATION'},
     {'field': 'occupancy_status', 'label': 'Occupancy Status', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'terrace_details', 'label': 'Terrace Details', 'section_name': 'BASIC INFORMATION'},
 
     # Property Details
     {'field': 'bhk', 'label': 'BHK*', 'section_name': 'PROPERTY DETAILS'},
@@ -21795,7 +21804,8 @@ EXPORT_COLUMNS_BLUEPRINT_RENT_RESALE = [
     {'field': 'carpet_area', 'label': 'Carpet Area (sq.ft)*', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'plot_area', 'label': 'Plot Area (sq.ft)', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'building_configuration', 'label': 'Building Configuration', 'section_name': 'PROPERTY DETAILS'},
-    {'field': 'total_floors', 'label': 'Total Floors Constructed*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'total_floors', 'label': 'Total Floors Constructed', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'floor_number', 'label': 'Floor Number', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'bathrooms', 'label': 'Bathrooms*', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'balconies', 'label': 'Balconies', 'section_name': 'PROPERTY DETAILS'},
     {'field': 'covered_parking', 'label': 'Covered Parking', 'section_name': 'PROPERTY DETAILS'},
@@ -23350,10 +23360,13 @@ def import_commercial_data(request):
             'age of property': 'property_age',
             'furnishing status': 'furnishing_status',
             'facing direction': 'facing_direction',
+            'terrace details': 'terrace_details',
             'super built-up area': 'super_builtup_area',
             'built-up area': 'builtup_area',
             'carpet area': 'carpet_area',
             'plot area': 'plot_area',
+            'total floors constructed': 'total_floors',
+            'floor number': 'floor_number',
             'no. of staircases': 'no_staircases',
             'passenger lifts': 'passenger_lifts',
             'service lifts': 'service_lifts',
@@ -23487,11 +23500,14 @@ def import_commercial_data(request):
                 p_age        = get_val('property_age')
                 furn         = get_val('furnishing_status')
                 face         = get_val('facing_direction')
+                terr         = get_val('terrace_details')
                 
                 sb_area      = get_val('super_builtup_area')
                 b_area       = get_val('builtup_area')
                 c_area       = get_val('carpet_area')
                 plot         = get_val('plot_area')
+                t_floor         = get_val('total_floors')
+                floor         = get_val('floor_number')
                 
                 stair        = get_val('no_staircases', '0')
                 pass_l       = get_val('passenger_lifts', '0')
@@ -23683,11 +23699,14 @@ def import_commercial_data(request):
                 prop.property_age = p_age
                 prop.furnishing_status = furn
                 prop.facing_direction = face
+                prop.terrace_details = terr
                 
                 prop.super_builtup_area = sb_val
                 prop.builtup_area = b_val
                 prop.carpet_area = c_val
                 prop.plot_area = p_val
+                prop.total_floors = t_floor
+                prop.floor_number = floor
                 
                 prop.no_staircases = stair_val
                 prop.passenger_lifts = pass_val
@@ -23854,14 +23873,14 @@ def download_commercial_sample_excel(request):
                 ('Shop/Godown No/Unit No *', 'Unit-101'), ('Occupancy Status *', 'Vacant'),
                 ('Zone Type *', 'commercial'), ('Location Hub', 'central_business_district'),
                 ('Property Condition *', 'Brand New'), ('Age of Property *', 1),
-                ('Furnishing Status', 'Fully Furnished'), ('Facing Direction', 'North-East')
+                ('Furnishing Status', 'Fully Furnished'), ('Facing Direction', 'North-East'),('Terrace Details', '500 sqft private terrace')
             ]
         },
         {
             "title": "AREA MEASUREMENTS",
             "fields": [
                 ('Super Built-up Area (sq.ft) *', 2200.00), ('Built-up Area (sq.ft) *', 2000.00),
-                ('Carpet Area (sq.ft)', 1600.00), ('Plot Area (sq.ft)', '')
+                ('Carpet Area (sq.ft)', 1600.00), ('Plot Area (sq.ft)', ''),('Total Floors Constructed', 3),('Floor Number', 3)
             ]
         },
         {
@@ -24011,12 +24030,15 @@ EXPORT_COLUMNS_BLUEPRINT = [
     {'field': 'property_age', 'label': 'Age of Property *', 'section_name': 'BASIC INFORMATION'},
     {'field': 'furnishing_status', 'label': 'Furnishing Status', 'section_name': 'BASIC INFORMATION'},
     {'field': 'facing_direction', 'label': 'Facing Direction', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'terrace_details', 'label': 'Terrace Details', 'section_name': 'BASIC INFORMATION'},
 
     # Area Measurements
     {'field': 'super_builtup_area', 'label': 'Super Built-up Area (sq.ft) *', 'section_name': 'AREA MEASUREMENTS'},
     {'field': 'builtup_area', 'label': 'Built-up Area (sq.ft) *', 'section_name': 'AREA MEASUREMENTS'},
     {'field': 'carpet_area', 'label': 'Carpet Area (sq.ft)', 'section_name': 'AREA MEASUREMENTS'},
     {'field': 'plot_area', 'label': 'Plot Area (sq.ft)', 'section_name': 'AREA MEASUREMENTS'},
+    {'field': 'total_floors', 'label': 'Total Floor Constructed', 'section_name': 'AREA MEASUREMENTS'},
+    {'field': 'floor_number', 'label': 'Floor Number', 'section_name': 'AREA MEASUREMENTS'},
 
     # Commercial Specifications
     {'field': 'no_staircases', 'label': 'No. of Staircases', 'section_name': 'COMMERCIAL SPECIFICATIONS'},
@@ -30552,7 +30574,7 @@ def add_blog(request):
             reading_time=request.POST.get("reading_time"),
             category=request.POST.get("category"),
             status=request.POST.get("status", "published"),
-            author=request.POST.get("author") or "PropCRM Team", # Fallback if empty string sent
+            author=request.POST.get("author") or "KANISHKAIMPERIA Team", # Fallback if empty string sent
             published_date=published_date,
             short_description=request.POST.get("short_description"),
             content=request.POST.get("content"),
@@ -30756,6 +30778,42 @@ def download_blog_sample(request):
     return response
 
 
+
+
+
+
+
+def add_blog_category_pill(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        slug = request.POST.get('slug')
+        sort_order = request.POST.get('sort_order', 1)
+
+        # Check if a pill with this slug already exists to prevent IntegrityError
+        if BlogCategoryPill.objects.filter(slug=slug).exists():
+            messages.error(request, f"A category pill with the slug '{slug}' already exists. Please use a unique slug.")
+        else:
+            BlogCategoryPill.objects.create(
+                name=name,
+                slug=slug,
+                sort_order=sort_order
+            )
+            messages.success(request, "Category pill added successfully!")
+            return redirect('add_category_pill')
+            
+    return render(request, 'admin_user/Seo_Module/Blog_Pages/add_category_pill.html')
+
+
+def add_guide_category_card(request):
+    if request.method == 'POST':
+        GuideCategoryCard.objects.create(
+            name=request.POST.get('name'),
+            icon=request.POST.get('icon'),
+            article_count=request.POST.get('article_count', 0),
+            slug=request.POST.get('slug')
+        )
+        return redirect('add_guide_card')
+    return render(request, 'admin_user/Seo_Module/Blog_Pages/add_guide_card.html')
 
 
 #######################END View BLOG MODULE SECTION###################################
@@ -31094,10 +31152,109 @@ def download_service_sample(request):
 
 
 
+def add_service_highlight(request):
+    if request.method == 'POST':
+        ServiceHighlight.objects.create(
+            icon_class=request.POST.get('icon_class'),
+            title=request.POST.get('title'),
+            description=request.POST.get('description'),
+            order=request.POST.get('order', 0),
+            is_active=request.POST.get('is_active') == 'on'
+        )
+        return redirect('add_highlight')
+    return render(request, 'admin_user/Service_Type/Service_Pages/add_highlight.html')
 
 
 
+def add_services_banner_card(request):
+    if request.method == 'POST':
+        ServicesBannerCard.objects.create(
+            icon_class=request.POST.get('icon_class'),
+            color_variant=request.POST.get('color_variant', 'blue'),
+            eyebrow=request.POST.get('eyebrow'),
+            title=request.POST.get('title'),
+            description=request.POST.get('description'),
+            button_text=request.POST.get('button_text'),
+            button_url=request.POST.get('button_url', '#'),
+            order=request.POST.get('order', 0),
+            is_active=request.POST.get('is_active') == 'on'
+        )
+        return redirect('add_services_banner_card')
+    return render(request, 'admin_user/Service_Type/Service_Pages/add_banner_card.html')
 
+
+
+def add_services_banner_bullet(request):
+    banner_cards = ServicesBannerCard.objects.filter(is_active=True)
+    if request.method == 'POST':
+        banner_id = request.POST.get('banner')
+        banner_obj = get_object_or_404(ServicesBannerCard, id=banner_id)
+        ServicesBannerBullet.objects.create(
+            banner=banner_obj,
+            text=request.POST.get('text'),
+            order=request.POST.get('order', 0)
+        )
+        return redirect('add_services_banner_bullet')
+    context = {'banner_cards': banner_cards}
+    return render(request, 'admin_user/Service_Type/Service_Pages/add_banner_bullet.html', context)
+
+
+
+def add_service_detail_faq(request):
+    services = Service.objects.filter(status="active")
+    if request.method == 'POST':
+        service_id = request.POST.get('service')
+        service_obj = get_object_or_404(Service, id=service_id)
+        ServiceDetailFAQ.objects.create(
+            service=service_obj,
+            question=request.POST.get('question'),
+            answer=request.POST.get('answer'),
+            order=request.POST.get('order', 0),
+            is_active=request.POST.get('is_active') == 'on'
+        )
+        return redirect('services')
+    context = {'services': services}
+    return render(request, 'home_page/forms/add_service_faq.html', context)
+
+
+
+def add_service_sidebar_quicklink(request):
+    if request.method == 'POST':
+        ServiceSidebarQuickLink.objects.create(
+            text=request.POST.get('text'),
+            url=request.POST.get('url', '#'),
+            order=request.POST.get('order', 0),
+            is_active=request.POST.get('is_active') == 'on'
+        )
+        return redirect('add_service_sidebar_quicklink')
+    return render(request, 'admin_user/Service_Type/Service_Pages/add_quicklink.html')
+
+
+def add_service_benefit(request):
+    if request.method == 'POST':
+        ServiceBenefit.objects.create(
+            icon_class=request.POST.get('icon_class'),
+            title=request.POST.get('title'),
+            description=request.POST.get('description'),
+            order=request.POST.get('order', 0),
+            is_active=request.POST.get('is_active') == 'on'
+        )
+        return redirect('add_service_benefit')
+    return render(request, 'admin_user/Service_Type/Service_Pages/add_benefit.html')
+
+
+
+def add_service_process_step(request):
+    if request.method == 'POST':
+        ServiceProcessStep.objects.create(
+            step_number=request.POST.get('step_number'),
+            title=request.POST.get('title'),
+            description=request.POST.get('description'),
+            order=request.POST.get('order', 0),
+            is_active=request.POST.get('is_active') == 'on'
+        )
+        return redirect('add_service_process_step')
+    return render(request, 'admin_user/Service_Type/Service_Pages/add_process_step.html')
 
 
 
@@ -39944,3 +40101,118 @@ def agricultural_plot_resale_hard_delete(request, pk):
         
 
 #######################END View Agriculture Plot Resale Listing MODULE SECTION###################################
+
+
+#######################START View Home page  MODULE SECTIO####################################
+
+
+def add_property_category(request):
+    if request.method == "POST":
+        PropertyCategoryTile.objects.create(
+            title=request.POST.get("title"),
+            subtitle=request.POST.get("subtitle"),
+            image=request.FILES.get("image"),
+            listing_type=request.POST.get("listing_type"),
+            category_slug=request.POST.get("category_slug"),
+            extra_tag=request.POST.get("extra_tag", ""),
+            is_new=request.POST.get("is_new") == "on",
+            order=request.POST.get("order", 0),
+            is_active=request.POST.get("is_active") == "on",
+        )
+        messages.success(request, "Property category tile added successfully!")
+        return redirect("add_property_category")
+    return render(request, "admin_user/Home_Pages/add_property_category.html")
+
+
+def add_trust_highlight(request):
+    if request.method == "POST":
+        TrustHighlight.objects.create(
+            icon_class=request.POST.get("icon_class"),
+            title_line1=request.POST.get("title_line1"),
+            title_line2=request.POST.get("title_line2", ""),
+            order=request.POST.get("order", 0),
+            is_active=request.POST.get("is_active") == "on",
+        )
+        messages.success(request, "Trust highlight added successfully!")
+        return redirect("add_trust_highlight")
+    return render(request, "admin_user/Home_Pages/add_trust_highlight.html")
+
+
+def update_why_section(request):
+    instance = WhySection.objects.filter(pk=1).first()
+    if request.method == "POST":
+        if not instance:
+            instance = WhySection(pk=1)
+        instance.eyebrow = request.POST.get("eyebrow", "WHY KANISHKAIMPERIA")
+        instance.title_line1 = request.POST.get("title_line1", "A Smarter Way")
+        instance.title_line2 = request.POST.get("title_line2", "to Find Property")
+        instance.description = request.POST.get("description")
+        if request.FILES.get("video_image"):
+            instance.video_image = request.FILES.get("video_image")
+        instance.video_url = request.POST.get("video_url", "")
+        instance.save()
+        messages.success(request, "Why section updated successfully!")
+        return redirect("update_why_section")
+    return render(request, "admin_user/Home_Pages/update_why_section.html", {"instance": instance})
+
+def add_stat_highlight(request):
+    if request.method == "POST":
+        StatHighlight.objects.create(
+            icon_class=request.POST.get("icon_class"),
+            value_text=request.POST.get("value_text"),
+            label=request.POST.get("label"),
+            order=request.POST.get("order", 0),
+            is_active=request.POST.get("is_active") == "on",
+        )
+        messages.success(request, "Stat highlight added successfully!")
+        return redirect("add_stat_highlight")
+    return render(request, "admin_user/Home_Pages/add_stat_highlight.html")
+
+def add_value_proposition(request):
+    if request.method == "POST":
+        ValueProposition.objects.create(
+            icon_class=request.POST.get("icon_class"),
+            title=request.POST.get("title"),
+            subtitle=request.POST.get("subtitle"),
+            order=request.POST.get("order", 0),
+            is_active=request.POST.get("is_active") == "on",
+        )
+        messages.success(request, "Value proposition added successfully!")
+        return redirect("add_value_proposition")
+    return render(request, "admin_user/Home_Pages/add_value_proposition.html")
+
+
+def add_how_it_works(request):
+    if request.method == "POST":
+        HowItWorksStep.objects.create(
+            step_number=request.POST.get("step_number"),
+            title=request.POST.get("title"),
+            description=request.POST.get("description"),
+            order=request.POST.get("order", 0),
+            is_active=request.POST.get("is_active") == "on",
+        )
+        messages.success(request, "How it works step added successfully!")
+        return redirect("add_how_it_works")
+    return render(request, "admin_user/Home_Pages/add_how_it_works.html")
+
+
+def add_info_banner(request):
+    if request.method == "POST":
+        InfoBannerCard.objects.create(
+            icon_class=request.POST.get("icon_class"),
+            eyebrow=request.POST.get("eyebrow", ""),
+            title=request.POST.get("title"),
+            description=request.POST.get("description"),
+            button_text=request.POST.get("button_text"),
+            button_url=request.POST.get("button_url", "#"),
+            order=request.POST.get("order", 0),
+            is_active=request.POST.get("is_active") == "on",
+        )
+        messages.success(request, "Info banner card added successfully!")
+        return redirect("add_info_banner")
+    return render(request, "admin_user/Home_Pages/add_info_banner.html")
+
+
+
+
+#######################END View Home page  MODULE SECTIO####################################

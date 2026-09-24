@@ -428,20 +428,34 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
         <input type="number" name="bathrooms" placeholder="e.g., 2" required>
       </div>
       <div class="field">
-        <label>Balconies <span class="opt">(Optional)</span></label>
+        <label>Balconies <span class="opt"></span></label>
         <input type="number" name="balconies" placeholder="e.g., 1">
       </div>
+
+        <div class="field">
+        <label>Terrace Details <span class="opt"></span></label>
+        <input type="text" id="terrace_details" name="terrace_details"  placeholder="e.g., 500 sq.ft Private Terrace">
+      </div>
+
+      
     </div>
 
     <div class="fg fg-3" style="margin-top:16px;">
       <div class="field">
-        <label>Building Configuration <span class="opt">(Optional)</span></label>
+        <label>Building Configuration <span class="opt"></span></label>
         <input type="text" name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3">
       </div>
       <div class="field">
         <label>Total Floors Constructed <span class="req">*</span></label>
         <input type="number" name="total_floors" placeholder="e.g., 10" required>
       </div>
+
+    <div class="field">
+        <label>Floor Number <span class="req">*</span></label>
+        <input type="number" id="floor_number" name="floor_number" placeholder="e.g., 3" required>
+      </div>
+
+
       <div class="field">
         <label>Facing Direction <span class="opt">(Optional)</span></label>
         <select name="facing_direction">
@@ -833,7 +847,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Description</div><div class="sd-line"></div></div>
     <div class="fg">
       <div class="field">
-        <label>Describe Your Property <span class="req">*</span></label>
+        <label>Describe Your Property </label>
         <textarea name="rent_residential_desc" id="rent_residential_desc" rows="6" placeholder="Describe your property in detail — highlight key features, nearby landmarks, and what makes it special..." required oninput="updateChecklist()"></textarea>
         <div class="help">Min 80 characters recommended for better leads.</div>
       </div>

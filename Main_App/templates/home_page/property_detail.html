@@ -705,7 +705,6 @@ button { font-family: inherit; }
   <!-- ═══ HEADER BAR & PRICING ═══ -->
   <div class="property-header-card">
     <div>
-      <span class="badge-verified-glow"><i class="fas fa-certificate"></i> Verified {{ property_group|default:"Listing"|title }}</span>
       <h1 class="prop-headline">{{ p.title }}</h1>
       <div class="prop-subloc">
         <i class="fas fa-location-dot"></i>
@@ -788,7 +787,7 @@ button { font-family: inherit; }
     {% if p.facing or p.facing_direction or p.plot_facing %}
     <div class="fact-pill-box">
       <div class="fact-icon-wrap"><i class="fas fa-compass"></i></div>
-      <div class="fact-content"><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }}</strong><span>Facing</span></div>
+      <div class="fact-content"><strong>{{ p.facing|default:p.facing_direction|default:p.plot_facing }}</strong><span>Facing </span></div>
     </div>
     {% endif %}
   </div>
@@ -847,25 +846,30 @@ button { font-family: inherit; }
       <section class="bento-card" id="sec-details">
         <h2 class="bento-card-title"><i class="fas fa-list-check"></i> Property Specifications</h2>
         <div class="dense-specs-grid">
-          {% if property_group == 'rental' and category == 'residential' %}
-            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|default:"—" }}</div></div>
-            {% if p.bhk_type %}<div class="spec-tile"><div class="spec-tile-label">BHK</div><div class="spec-tile-val">{{ p.bhk_type }}</div></div>{% endif %}
-            {% if p.carpet_area %}<div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area }} sq.ft</div></div>{% endif %}
-            {% if p.balconies %}<div class="spec-tile"><div class="spec-tile-label">Balconies</div><div class="spec-tile-val">{{ p.balconies }}</div></div>{% endif %}
-            {% if p.total_floors %}<div class="spec-tile"><div class="spec-tile-label">Total Floors</div><div class="spec-tile-val">{{ p.total_floors }}</div></div>{% endif %}
-            {% if p.ownership_type %}<div class="spec-tile"><div class="spec-tile-label">Ownership</div><div class="spec-tile-val">{{ p.ownership_type }}</div></div>{% endif %}
-            {% if p.building_name %}<div class="spec-tile full"><div class="spec-tile-label">Building / Society</div><div class="spec-tile-val">{{ p.building_name }}</div></div>{% endif %}
+          
+         {% if property_group == 'rental' and category == 'residential' %}
+  <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|default:"—" }}</div></div>
+  {% if p.bhk_type %}<div class="spec-tile"><div class="spec-tile-label">BHK</div><div class="spec-tile-val">{{ p.bhk_type }}</div></div>{% endif %}
+  {% if p.carpet_area %}<div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area }} sq.ft</div></div>{% endif %}
+  {% if p.balconies %}<div class="spec-tile"><div class="spec-tile-label">Balconies</div><div class="spec-tile-val">{{ p.balconies }}</div></div>{% endif %}
+  {% if p.floor_number %}<div class="spec-tile"><div class="spec-tile-label">Floor Number</div><div class="spec-tile-val">{{ p.floor_number }}{% if p.total_floors %} / {{ p.total_floors }}{% endif %}</div></div>{% endif %}
+  {% if p.total_floors %}<div class="spec-tile"><div class="spec-tile-label">Total Floors</div><div class="spec-tile-val">{{ p.total_floors }}</div></div>{% endif %}
+  {% if p.ownership_type %}<div class="spec-tile"><div class="spec-tile-label">Ownership</div><div class="spec-tile-val">{{ p.ownership_type }}</div></div>{% endif %}
+  {% if p.terrace_details %}<div class="spec-tile full"><div class="spec-tile-label">Terrace Details</div><div class="spec-tile-val">{{ p.terrace_details }}</div></div>{% endif %}
+  {% if p.building_name %}<div class="spec-tile full"><div class="spec-tile-label">Building / Society</div><div class="spec-tile-val">{{ p.building_name }}</div></div>{% endif %}
 
-          {% elif property_group == 'rental' and category == 'commercial' %}
-            <div class="spec-tile"><div class="spec-tile-label">Property Type</div><div class="spec-tile-val">{{ p.property_type|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Building / Project</div><div class="spec-tile-val">{{ p.building_name|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Availability</div><div class="spec-tile-val">{{ p.availability_status|title|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Built-Up Area</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Ownership</div><div class="spec-tile-val">{{ p.ownership_type|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Passenger Lifts</div><div class="spec-tile-val">{{ p.passenger_lifts|default:"0" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Parking</div><div class="spec-tile-val">{{ p.private_parking|default:"0" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Seating</div><div class="spec-tile-val">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
+          
+{% elif property_group == 'rental' and category == 'commercial' %}
+  <div class="spec-tile"><div class="spec-tile-label">Property Type</div><div class="spec-tile-val">{{ p.property_type|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Building / Project</div><div class="spec-tile-val">{{ p.building_name|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Floor Number</div><div class="spec-tile-val">{{ p.floor_number|default:"—" }}{% if p.total_floors %} / {{ p.total_floors }}{% endif %}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Availability</div><div class="spec-tile-val">{{ p.availability_status|title|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Built-Up Area</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Ownership</div><div class="spec-tile-val">{{ p.ownership_type|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Passenger Lifts</div><div class="spec-tile-val">{{ p.passenger_lifts|default:"0" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Parking</div><div class="spec-tile-val">{{ p.private_parking|default:"0" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Seating</div><div class="spec-tile-val">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
 
           {% elif property_group == 'rental' and category == 'pg' %}
             <div class="spec-tile"><div class="spec-tile-label">PG For</div><div class="spec-tile-val">{{ p.pg_for|title }}</div></div>
@@ -876,26 +880,36 @@ button { font-family: inherit; }
             <div class="spec-tile"><div class="spec-tile-label">Notice Period</div><div class="spec-tile-val">{{ p.notice_period|default:"0" }} days</div></div>
             <div class="spec-tile full"><div class="spec-tile-label">Building / Society</div><div class="spec-tile-val">{{ p.building_name|default:"—" }}</div></div>
 
-          {% elif property_group == 'resale' and category == 'residential' %}
-            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Super Built-up</div><div class="spec-tile-val">{{ p.super_builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">BHK</div><div class="spec-tile-val">{{ p.bhk|upper|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Bathrooms</div><div class="spec-tile-val">{{ p.bathrooms|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Floor</div><div class="spec-tile-val">{{ p.floor_no|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Property Age</div><div class="spec-tile-val">{{ p.property_age|default:"0" }} yrs</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Furnishing</div><div class="spec-tile-val">{{ p.furnishing_status|title|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Parking</div><div class="spec-tile-val">{{ p.covered_parking|default:"0" }} cov / {{ p.open_parking|default:"0" }} open</div></div>
+          
+{% elif property_group == 'resale' and category == 'residential' %}
+  <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Super Built-up</div><div class="spec-tile-val">{{ p.super_builtup_area|default:"—" }} sq.ft</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">BHK</div><div class="spec-tile-val">{{ p.bhk|upper|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Bathrooms</div><div class="spec-tile-val">{{ p.bathrooms|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Floor</div><div class="spec-tile-val">{{ p.floor_no|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Property Age</div><div class="spec-tile-val">{{ p.property_age|default:"0" }} yrs</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Furnishing</div><div class="spec-tile-val">{{ p.furnishing_status|title|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Parking</div><div class="spec-tile-val">{{ p.covered_parking|default:"0" }} cov / {{ p.open_parking|default:"0" }} open</div></div>
+  {% if p.terrace_details %}<div class="spec-tile full"><div class="spec-tile-label">Terrace Details</div><div class="spec-tile-val">{{ p.terrace_details }}</div></div>{% endif %}
 
-          {% elif property_group == 'resale' and category == 'commercial' %}
-            <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Built-up Area</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Occupancy</div><div class="spec-tile-val">{{ p.occupancy_status|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Zone</div><div class="spec-tile-val">{{ p.zone_type|title|default:"—" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Property Age</div><div class="spec-tile-val">{{ p.property_age|default:"0" }} yrs</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Cabins/Meeting</div><div class="spec-tile-val">{{ p.num_cabins|default:"0" }} / {{ p.meeting_rooms|default:"0" }}</div></div>
-            <div class="spec-tile"><div class="spec-tile-label">Seating</div><div class="spec-tile-val">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
+
+
+          
+
+{% elif property_group == 'resale' and category == 'commercial' %}
+  <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Floor Number</div><div class="spec-tile-val">{{ p.floor_number|default:p.floor_no|default:"—" }}{% if p.total_floors %} / {{ p.total_floors }}{% endif %}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Built-up Area</div><div class="spec-tile-val">{{ p.builtup_area|default:"—" }} sq.ft</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Carpet Area</div><div class="spec-tile-val">{{ p.carpet_area|default:"—" }} sq.ft</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Occupancy</div><div class="spec-tile-val">{{ p.occupancy_status|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Zone</div><div class="spec-tile-val">{{ p.zone_type|title|default:"—" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Property Age</div><div class="spec-tile-val">{{ p.property_age|default:"0" }} yrs</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Cabins/Meeting</div><div class="spec-tile-val">{{ p.num_cabins|default:"0" }} / {{ p.meeting_rooms|default:"0" }}</div></div>
+  <div class="spec-tile"><div class="spec-tile-label">Seating</div><div class="spec-tile-val">{{ p.min_seats|default:"0" }}–{{ p.max_seats|default:"0" }}</div></div>
+
+
+
 
           {% elif property_group == 'resale' and category == 'industrial' %}
             <div class="spec-tile"><div class="spec-tile-label">Type</div><div class="spec-tile-val">{{ p.property_type|title|default:"—" }}</div></div>
@@ -1015,13 +1029,14 @@ button { font-family: inherit; }
 
       <!-- VERIFICATION -->
       <section class="bento-card" id="sec-verify">
-        <h2 class="bento-card-title"><i class="fas fa-circle-check"></i> Trust &amp; Verification</h2>
-        <div class="trust-grid">
-          <div class="trust-chip"><i class="fas fa-shield-check"></i><div><strong>Platform Verified</strong><span>Document checked</span></div></div>
-          <div class="trust-chip"><i class="fas fa-house-circle-check"></i><div><strong>Physical Inspection</strong><span>Property visited</span></div></div>
-          <div class="trust-chip"><i class="fas fa-location-dot"></i><div><strong>Geo Verified</strong><span>Confirmed coordinates</span></div></div>
-          <div class="trust-chip"><i class="fas fa-user-check"></i><div><strong>Direct Ownership</strong><span>Identity screened</span></div></div>
-        </div>
+<h2 class="bento-card-title"><i class="fas fa-circle-check"></i> Trust &amp; Quality Standards</h2>
+      
+<div class="trust-grid">
+  <div class="trust-chip"><i class="fas fa-shield-check"></i><div><strong>Quality Checked</strong><span>Document reviewed</span></div></div>
+  <div class="trust-chip"><i class="fas fa-house-circle-check"></i><div><strong>Physical Inspection</strong><span>Property visited</span></div></div>
+  <div class="trust-chip"><i class="fas fa-location-dot"></i><div><strong>Geo Confirmed</strong><span>Coordinates mapped</span></div></div>
+  <div class="trust-chip"><i class="fas fa-user-check"></i><div><strong>Direct Ownership</strong><span>Identity screened</span></div></div>
+</div>
       </section>
 
       <!-- FAQS -->

@@ -1051,6 +1051,10 @@ urlpatterns = [
     path('download-blog-sample/', views.download_blog_sample, name='download_blog_sample'),
 
 
+    path('admin-app/blogs/pill/add/', views.add_blog_category_pill, name='add_category_pill'),
+    path('admin-app/blogs/guide-card/add/', views.add_guide_category_card, name='add_guide_card'),
+
+
 
 #########################START URL SECTION Blogs##############################################################
 
@@ -1066,6 +1070,17 @@ urlpatterns = [
      path("services-list/", views.services_list, name="services_list"),
      path("delete-service/<int:service_id>/", views.delete_service, name="delete_service"),
      path("services/", views.services_list1, name="services_list1"),
+
+
+
+    path('admin/add/highlight/', views.add_service_highlight, name='add_service_highlight'),
+    path('admin/add/banner-card/', views.add_services_banner_card, name='add_services_banner_card'),
+    path('admin/add/banner-bullet/', views.add_services_banner_bullet, name='add_services_banner_bullet'),
+    path('admin/add/faq/', views.add_service_detail_faq, name='add_service_detail_faq'),
+    path('admin/add/quicklink/', views.add_service_sidebar_quicklink, name='add_service_sidebar_quicklink'),
+    path('admin/add/benefit/', views.add_service_benefit, name='add_service_benefit'),
+    path('admin/add/process-step/', views.add_service_process_step, name='add_service_process_step'),
+
      
     
     
@@ -1079,6 +1094,18 @@ urlpatterns = [
 
 #########################END URL SECTION Services Landing Page##############################################################
 
+
+
+
+    
+
+    path("admin/category/add/", views.add_property_category, name="add_property_category"),
+    path("admin/trust/add/", views.add_trust_highlight, name="add_trust_highlight"),
+    path("admin/why/update/", views.update_why_section, name="update_why_section"),
+    path("admin/stat/add/", views.add_stat_highlight, name="add_stat_highlight"),
+    path("admin/value/add/", views.add_value_proposition, name="add_value_proposition"),
+    path("admin/step/add/", views.add_how_it_works, name="add_how_it_works"),
+    path("admin/banner/add/", views.add_info_banner, name="add_info_banner"),
 
     
 ]

@@ -1,0 +1,28 @@
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Eyebrow</label>
+        <input type="text" name="eyebrow" class="form-control" maxlength="60" value="WHY KANISHKAIMPERIA" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Title Line 1</label>
+        <input type="text" name="title_line1" class="form-control" maxlength="60" value="A Smarter Way" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Title Line 2</label>
+        <input type="text" name="title_line2" class="form-control" maxlength="60" value="to Find Property" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Description</label>
+        <textarea name="description" class="form-control" rows="4" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Video Image</label>
+        <input type="file" name="video_image" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Video URL (Optional)</label>
+        <input type="url" name="video_url" class="form-control" placeholder="https://...">
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Update Why Section</button>
+</form>

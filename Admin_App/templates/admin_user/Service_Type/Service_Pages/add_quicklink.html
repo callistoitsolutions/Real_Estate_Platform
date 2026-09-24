@@ -1,0 +1,21 @@
+<form method="POST" action="">
+    {% csrf_token %}
+    <h4 class="mb-3">Add Sidebar Quick Link</h4>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Link Text</label>
+        <input type="text" name="text" class="form-control" maxlength="50" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-bold">URL</label>
+        <input type="text" name="url" class="form-control" value="#" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Order</label>
+        <input type="number" name="order" class="form-control" value="0">
+    </div>
+    <div class="form-check mb-3">
+        <input type="checkbox" name="is_active" class="form-check-input" id="ql_active" checked>
+        <label class="form-check-label fw-bold" for="ql_active">Is Active</label>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Save Quick Link</button>
+</form>

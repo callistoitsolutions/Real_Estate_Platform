@@ -1,0 +1,26 @@
+{% include "admin_user/admin_header.html" %}
+<div class="main-content" style="padding: 40px; max-width: 600px; margin: 0 auto;">
+    <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <h3>Add Guide Category Card</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Category Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Legal Guide" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Bootstrap Icon Class</label>
+                <input type="text" name="icon" class="form-control" placeholder="bi bi-shield-check" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Article Count</label>
+                <input type="number" name="article_count" class="form-control" value="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Slug</label>
+                <input type="text" name="slug" class="form-control" placeholder="e.g. legal-guide" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="background:#c9a227; border:none; font-weight:700;">Save Guide Card</button>
+        </form>
+    </div>
+</div>

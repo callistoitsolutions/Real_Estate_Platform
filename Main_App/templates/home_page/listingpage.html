@@ -3,9 +3,9 @@
 {% load static %}
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>{% if listing_type == 'sale' %}Properties for Sale{% else %}Properties for Rent{% endif %}{% if current_city %} in {{ current_city }}{% endif %} — KANISHKAIMPERIA </title>
+
 
 <!-- Existing Libraries -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +13,17 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+<title>{% if category == 'pg' %}PG{% else %}{{ category|title }}{% endif %} Properties for {% if listing_type == 'sale' %}Sale{% else %}Rent{% endif %} in {% if areas_list %}{{ areas_list|join:", "|title }}{% else %}{{ current_city|default:"Nagpur"|title }}{% endif %} | KANISHKAIMPERIA</title>
+<meta name="description" content="Browse {{ total|default:0 }} properties for {% if listing_type == 'sale' %}sale{% else %}rent{% endif %} in {% if areas_list %}{{ areas_list|join:', '|title }}{% else %}{{ current_city|default:'Nagpur'|title }}{% endif %}. Every listing checked by our team. Talk to a relationship manager or WhatsApp us.">
+{% with base=request.scheme|add:"://"|add:request.get_host|add:request.path %}
+<link rel="canonical" href="{{ base }}?type={{ listing_type }}{% if category %}&amp;category={{ category|urlencode }}{% endif %}{% if current_city %}&amp;city_filter={{ current_city|urlencode }}{% endif %}{% if request.GET.areas %}&amp;areas={{ request.GET.areas|urlencode }}{% endif %}{% if page_obj.number > 1 %}&amp;page={{ page_obj.number }}{% endif %}">
+{% endwith %}
+<meta property="og:title" content="Properties for {% if listing_type == 'sale' %}Sale{% else %}Rent{% endif %} in {{ current_city|default:'Nagpur'|title }} | KANISHKAIMPERIA">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","itemListElement":[
+{% for p in properties %}{"@type":"ListItem","position":{{ page_obj.start_index|add:forloop.counter0 }},"name":"{{ p.title|escapejs }}","url":"{{ request.scheme }}://{{ request.get_host }}{% url 'property_detail' listing_type=p.listing_type|lower category=p.url_category|slugify slug=p.title|slugify pk=p.id %}"}{% if not forloop.last %},{% endif %}{% endfor %}]}
+</script>
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -273,6 +283,38 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
 .fl-link { display: block; font-size: .85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: .2s; }
 .fl-link:hover { color: var(--primary); padding-left: 4px; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 20px; display: flex; justify-content: space-between; font-size: .8rem; flex-wrap: wrap; gap: 10px; max-width: 1340px; margin: 0 auto; }
+
+/* ===== FIX PACK ===== */
+:root{ --hdr-h:95px; --sub-h:62px; }          /* JS below keeps these exact */
+
+/* stack under the site header instead of behind it */
+.listing-subheader{ top:var(--hdr-h); }
+.filter-strip{ top:calc(var(--hdr-h) + var(--sub-h)); }
+#expandedSearchOverlay{ top:var(--hdr-h) !important; }
+
+/* overlay pills: always readable (normal / hover / selected) */
+.ov-pill{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:7px 14px;font-size:.8rem;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s;font-family:inherit;line-height:1.2}
+.ov-pill:hover{background:rgba(255,255,255,.16);color:#fff}
+.ov-pill.on{background:#fff;color:#0b1730;border-color:#fff;font-weight:800}
+.ov-pill.gold.on{background:linear-gradient(135deg,#f1d888,#c9a227);border-color:#c9a227;color:#0b1730}
+.ov-close{position:absolute;top:12px;right:16px;width:40px;height:40px;border-radius:50%;background:#fff;color:#0b1730;border:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 12px rgba(0,0,0,.25);cursor:pointer;z-index:5}
+#locInput{border:0;background:transparent;box-shadow:none}
+
+/* readable contact button (navy on gold, not white on gold) */
+.btn-contact{background:linear-gradient(135deg,#c9a227,#a5811c);color:#0b1730;font-weight:800;border:0;border-radius:8px;cursor:pointer}
+.btn-contact:hover{filter:brightness(1.08)}
+.card-cta{min-height:44px;min-width:44px;border-radius:8px}
+
+/* no tiny text on cards */
+.pc-luxury .text-\[9px\], .pc-luxury .text-\[10px\]{font-size:11px !important}
+
+/* mobile */
+@media(max-width:768px){
+  .ov-hero{padding-top:64px !important}
+  .filter-strip{position:static}          /* header + subheader + strip = too much sticky */
+  .fpill{min-height:40px}
+  .short-card{flex-basis:112px;width:112px;height:184px}
+}
 </style>
 </head>
 
@@ -301,29 +343,26 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
 
 <!-- ── EXPANDED SEARCH OVERLAY ── -->
 <!-- ── EXPANDED SEARCH OVERLAY ── -->
-<div id="expandedSearchOverlay" class="fixed inset-x-0 bottom-0 top-[72px] bg-black/60 z-[500] hidden flex-col">
-    <div class="w-full ef-search-hero py-5 px-4 relative flex flex-col items-center shadow-xl animate-fade-in-down border-b border-amber-500/20">
-       <button onclick="toggleSearchOverlay()" class="absolute top-3 right-4 bg-white text-brand-dark hover:bg-gray-100 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition">
-    <i class="bi bi-x text-xl font-bold"></i>
-</button>
+<div id="expandedSearchOverlay" class="fixed inset-x-0 bottom-0 bg-black/60 z-[500] hidden flex-col" role="dialog" aria-label="Search properties">
+    <div class="w-full ef-search-hero ov-hero py-5 px-4 relative flex flex-col items-center shadow-xl">
+        <button type="button" class="ov-close" onclick="toggleSearchOverlay()" aria-label="Close search"><i class="bi bi-x-lg"></i></button>
 
-        <!-- Toggle Row: I'm Looking to & Category Pills -->
-        <div class="w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-3 text-white mb-4 text-xs font-medium">
-            <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-                <span class="font-bold text-amber-300 uppercase tracking-wider text-[11px] shrink-0">Action:</span>
-                <button class="px-3 py-1 rounded-full border border-white/30 transition text-xs whitespace-nowrap {% if listing_type == 'sale' %}bg-white text-brand-dark shadow font-bold border-white{% else %}hover:bg-white/10{% endif %}" onclick="switchType('sale')">Buy/Resale</button>
-                <button class="px-3 py-1 rounded-full border border-white/30 transition text-xs whitespace-nowrap {% if listing_type == 'rent' %}bg-white text-brand-dark shadow font-bold border-white{% else %}hover:bg-white/10{% endif %}" onclick="switchType('rent')">Rent</button>
+        <div class="w-full max-w-4xl flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2 overflow-x-auto max-w-full pb-1">
+                <span class="font-bold text-amber-300 uppercase tracking-wider text-[11px] shrink-0">I want to:</span>
+                <button type="button" class="ov-pill {% if listing_type == 'sale' %}on{% endif %}" onclick="switchType('sale')">Buy / Resale</button>
+                <button type="button" class="ov-pill {% if listing_type == 'rent' %}on{% endif %}" onclick="switchType('rent')">Rent</button>
             </div>
-
-            <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'residential' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('residential')">Residential</button>
-                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'commercial' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('commercial')">Commercial</button>
-                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'pg' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('pg')">PG</button>
-                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap {% if category == 'plot' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('plot')">Plots</button>
-                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap hidden lg:block {% if category == 'industrial' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('industrial')">Industrial</button>
-                <button class="px-2.5 py-1 rounded-full border border-white/20 transition text-xs whitespace-nowrap hidden lg:block {% if category == 'agricultural' %}bg-amber-400 text-brand-dark font-bold border-amber-400{% else %}hover:bg-white/10{% endif %}" onclick="switchCategory('agricultural')">Agricultural</button>
+            <div class="flex items-center gap-2 overflow-x-auto max-w-full pb-1">
+                <button type="button" class="ov-pill gold {% if category == 'residential' %}on{% endif %}" onclick="switchCategory('residential')">Residential</button>
+                <button type="button" class="ov-pill gold {% if category == 'commercial' %}on{% endif %}" onclick="switchCategory('commercial')">Commercial</button>
+                <button type="button" class="ov-pill gold {% if category == 'pg' %}on{% endif %}" onclick="switchCategory('pg')">PG</button>
+                <button type="button" class="ov-pill gold {% if category == 'plot' %}on{% endif %}" onclick="switchCategory('plot')">Plots</button>
+                <button type="button" class="ov-pill gold {% if category == 'industrial' %}on{% endif %}" onclick="switchCategory('industrial')">Industrial</button>
+                <button type="button" class="ov-pill gold {% if category == 'agricultural' %}on{% endif %}" onclick="switchCategory('agricultural')">Agricultural</button>
             </div>
         </div>
+
 
         <!-- Search Bar Input Row -->
        <!-- Search Bar Input Row (Modified Styling) -->
@@ -583,6 +622,8 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
             </div>
             {% endif %}
 
+
+
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                 <div>
                     <div class="text-xs text-gray-500 font-medium mb-1">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of <strong class="text-gray-800">{{ total|default:"0" }}</strong> properties</div>
@@ -607,21 +648,33 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
                         <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
                     </select>
                 </div>
+
+                
             </div>
         </div>
 
    
 
         <!-- ── PROPERTY SHORTS RAIL ── -->
+<!-- ── PROPERTY SHORTS RAIL ── -->
 {% if properties %}
-<div class="shorts-section">
-  <div class="shorts-head">
-      <h2><i class="bi bi-play-circle-fill"></i> {{ current_city|title|default:"Featured" }} Shorts</h2>
-    <p>Quick video peeks of the best properties in this list</p>
+<div class="shorts-section relative">
+  <div class="shorts-head flex items-center justify-between">
+      <div>
+          <h2><i class="bi bi-play-circle-fill"></i> {{ current_city|title|default:"Featured" }} Shorts</h2>
+          <p>Quick video peeks of the best properties in this list</p>
+      </div>
+      <!-- Slider Navigation Buttons -->
+      <div class="hidden sm:flex items-center gap-2">
+          <button type="button" onclick="scrollShortsTrack(-1)" class="w-8 h-8 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-amber-50 hover:border-amber-500 shadow-sm transition"><i class="bi bi-chevron-left text-xs"></i></button>
+          <button type="button" onclick="scrollShortsTrack(1)" class="w-8 h-8 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-amber-50 hover:border-amber-500 shadow-sm transition"><i class="bi bi-chevron-right text-xs"></i></button>
+      </div>
   </div>
   <div class="shorts-track" id="shortsTrack"></div>
 </div>
 {% endif %}
+
+
         <div>
             {% for p in properties %}
          
@@ -634,6 +687,8 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
                             {% for img in p.images_list %}
                                 <img src="{{ img }}" alt="{{ p.title }}" loading="lazy" class="w-full h-full object-cover shrink-0 min-w-full">
                             {% endfor %}
+
+                            
                         {% elif p.image_url %}
                             <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy" class="w-full h-full object-cover shrink-0 min-w-full">
                         {% else %}
@@ -843,6 +898,9 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
                             </button>
                         </div>
                     </div>
+
+
+                    
                 </div>
             </div>
             {% empty %}
@@ -956,7 +1014,7 @@ footer { background: var(--navy); color: rgba(255,255,255,.65); margin-top: auto
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
-                <div class="fl-brand">🏠 KANISHKAIMPERIA</div>
+                <div class="fl-brand"> KANISHKAIMPERIA</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since</div>
                 <div class="fl-desc"><i class="bi bi-telephone"></i> +91 9175791501</div>
                 <div class="fl-desc"><i class="bi bi-envelope"></i> kanishkaimperia@gmail.com</div>
@@ -2034,6 +2092,31 @@ document.addEventListener('DOMContentLoaded', renderShortsRail);
 
 
 
+
+// keep sticky offsets exact (header shrinks on scroll)
+(function(){
+  const root=document.documentElement;
+  function sync(){
+    const h=document.querySelector('.premium-header'), s=document.querySelector('.listing-subheader');
+    if(h) root.style.setProperty('--hdr-h', h.offsetHeight+'px');
+    if(s) root.style.setProperty('--sub-h', s.offsetHeight+'px');
+  }
+  ['load','resize','scroll'].forEach(e=>window.addEventListener(e,sync,{passive:true}));
+  document.addEventListener('transitionend',sync); sync();
+})();
+// Esc closes the search overlay
+document.addEventListener('keydown',e=>{
+  const o=document.getElementById('expandedSearchOverlay');
+  if(e.key==='Escape' && o && !o.classList.contains('hidden')) toggleSearchOverlay();
+});
+
+
+function scrollShortsTrack(direction) {
+    const track = document.getElementById('shortsTrack');
+    if (!track) return;
+    // Scrolls horizontally by 300px per click
+    track.scrollBy({ left: direction * 300, behavior: 'smooth' });
+}
 </script>
 </body>
 </html>

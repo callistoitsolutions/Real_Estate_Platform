@@ -1,0 +1,22 @@
+{% include "admin_user/admin_header.html" %}
+<div class="main-content" style="padding: 40px; max-width: 600px; margin: 0 auto;">
+    <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <h3>Add Category Filter Pill</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Pill Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Buying Guide" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Slug</label>
+                <input type="text" name="slug" class="form-control" placeholder="e.g. buying-guide" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label font-weight-bold">Sort Order</label>
+                <input type="number" name="sort_order" class="form-control" value="1">
+            </div>
+            <button type="submit" class="btn btn-primary" style="background:#c9a227; border:none; font-weight:700;">Save Pill</button>
+        </form>
+    </div>
+</div>

@@ -1,270 +1,360 @@
 {% include 'home_page/header.html' %}
+{% load static %}
 
+{% block meta_tags %}
+<title>{{ seo.meta_title|default:blog.title }}</title>
+<meta name="description" content="{{ seo.meta_description|default:'' }}">
+<meta name="keywords" content="{{ seo.primary_keyword }}, {{ seo.secondary_keywords }}">
+<meta property="og:title" content="{{ seo.meta_title|default:blog.title }}">
+<meta property="og:description" content="{{ seo.meta_description }}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% if blog.featured_image %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ blog.featured_image.url }}">
+{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo.meta_title|default:blog.title }}">
+<meta name="twitter:description" content="{{ seo.meta_description }}">
+{% if blog.featured_image %}
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ blog.featured_image.url }}">
+{% endif %}
+{% if seo.schema_json %}
+<script type="application/ld+json">
+{{ seo.schema_json|safe }}
+</script>
+{% endif %}
+{% if seo.noindex %}
+<meta name="robots" content="noindex,nofollow">
+{% else %}
+<meta name="robots" content="index,follow">
+{% endif %}
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* Reset & Core */
-body { 
-    background-color: #fcfcfc; 
-    font-family: 'Inter', sans-serif; 
-    margin: 0;
-    color: #2d3748;
+:root{
+  --bg-main:#f8fafc;
+  --bg-card:#ffffff;
+  --primary:#006ce4;
+  --primary-dark:#0050a8;
+  --accent:#f59e0b;
+  --text-dark:#1e293b;
+  --text-body:#475569;
+  --text-muted:#64748b;
+  --border:#e2e8f0;
+  --navy: #0b1730;
+  --navy-2: #101f3d;
+  --gold: #c9a227;
+  --gold2: #a5811c;
+  --shadow-1:0 4px 12px rgba(0,0,0,.06);
+  --shadow-2:0 12px 30px rgba(0,0,0,.1);
+  --radius:12px;
 }
+*, *::before, *::after { box-sizing:border-box; }
+html { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+body{ font-family:'Poppins', sans-serif; background:var(--bg-main); color:var(--text-body); line-height:1.6; overflow-x: hidden; width: 100%; max-width: 100vw; margin: 0; padding: 0; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; height: auto; }
+table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-/* Editorial Hero */
-.article-hero { 
-    position: relative; 
-    width: 100%; 
-    height: 60vh; 
-    min-height: 400px; 
-    display: flex; 
-    align-items: flex-end; 
-    background-color: #000; 
-}
-.article-hero img { 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
-    opacity: 0.6; 
-}
-.article-hero-gradient { 
-    position: absolute; 
-    bottom: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 80%; 
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%); 
-}
-.hero-content-wrapper { 
-    position: relative; 
-    z-index: 10; 
-    max-width: 1000px; 
-    margin: 0 auto; 
-    padding: 0 30px 50px; 
-    width: 100%; 
-    color: #fff; 
-}
-.article-tag-category { 
-    background: #006ce4; 
-    color: #fff; 
-    padding: 6px 14px; 
-    font-size: 0.8rem; 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    border-radius: 4px; 
-    margin-right: 10px; 
-    display: inline-block;
-    margin-bottom: 20px;
-}
-.hero-title { 
-    font-size: clamp(2.5rem, 4vw, 3.5rem); 
-    font-weight: 900; 
-    line-height: 1.1; 
-    margin: 15px 0 25px; 
-}
-.author-meta-row { 
-    display: flex; 
-    align-items: center; 
-    gap: 15px; 
-    font-size: 0.95rem; 
-    color: rgba(255,255,255,0.8); 
-}
-.author-avatar { 
-    width: 50px; 
-    height: 50px; 
-    border-radius: 50%; 
-    background: #fff; 
-    color: #000; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-weight: 800; 
-    font-size: 1.2rem; 
-}
+.breadcrumb-bar { background: #fff; border-bottom: 1px solid var(--border); width: 100%; }
+.breadcrumb-bar .bb-inner { max-width: 1300px; margin: 0 auto; padding: 10px 15px; font-size: .8rem; color: var(--text-muted); font-weight: 500; word-break: break-word; }
+.breadcrumb-bar a { color: var(--text-muted); }
 
-/* Article Reading Area */
-.article-reading-container { 
-    max-width: 800px; 
-    margin: 60px auto; 
-    padding: 0 20px; 
-    background: #fff; 
-}
-.article-lead-text { 
-    font-size: 1.4rem; 
-    line-height: 1.7; 
-    color: #4a5568; 
-    margin-bottom: 40px; 
-    padding-bottom: 40px; 
-    border-bottom: 1px solid #e2e8f0; 
-}
-.article-prose { 
-    font-size: 1.15rem; 
-    line-height: 2; 
-}
+.page-hero{ background:linear-gradient(135deg,#0f172a,#1e293b); padding:35px 15px 30px; text-align:center; width: 100%; }
+@media(min-width: 768px) { .page-hero { padding: 46px 20px 38px; } }
+.page-hero h1{ font-size: clamp(1.4rem, 3.5vw, 2.1rem); font-weight:900; color:#fff; margin-bottom:12px; max-width:900px; margin-left:auto; margin-right:auto; word-break: break-word; }
+.meta-row{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+.meta-chip{ background:rgba(255,255,255,.12); color:#fff; padding:6px 12px; border-radius:30px; font-size:.75rem; font-weight:600; }
 
-/* Image Positioning Options */
-.inline-media-center { 
-    margin: 50px 0; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-}
-.inline-media-center img { 
-    width: 100%; 
-    height: auto; 
-    display: block; 
-}
-.inline-media-left { 
-    float: left; 
-    max-width: 350px; 
-    margin: 10px 30px 20px 0; 
-    border-radius: 8px; 
-}
-.inline-media-right { 
-    float: right; 
-    max-width: 350px; 
-    margin: 10px 0 20px 30px; 
-    border-radius: 8px; 
-}
+.content-wrap{ max-width:1300px; margin:auto; padding:20px 12px 40px; width: 100%; }
+@media(min-width: 768px) { .content-wrap { padding: 40px 20px 60px; } }
 
-/* Rebranded Topics/Keywords Section */
-.related-topics-wrapper {
-    margin-top: 60px;
-    padding: 30px;
-    background: #f8fafc;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-}
-.related-topics-wrapper h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.1rem;
-    color: #1a202c;
-    font-weight: 700;
-}
-.topic-pill {
-    display: inline-block;
-    background: #fff;
-    border: 1px solid #cbd5e1;
-    color: #475569;
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    transition: all 0.2s ease;
-}
-.topic-pill:hover {
-    background: #006ce4;
-    color: #fff;
-    border-color: #006ce4;
-}
+.content-grid{ display:grid; grid-template-columns:1fr; gap:20px; align-items: start; width: 100%; }
+@media(min-width: 992px){ .content-grid{ grid-template-columns:1fr 340px; gap:30px; } .sidebar { position: sticky; top: 20px; } }
 
-/* Editorial Footer */
-.editorial-footer { 
-    background: #111827; 
-    color: #9ca3af; 
-    padding: 70px 20px 30px; 
-    text-align: center;
-    margin-top: 60px;
-}
-.editorial-footer h3 { 
-    color: #fff; 
-    font-size: 1.5rem; 
-    margin-bottom: 20px; 
-}
-.editorial-footer a { 
-    color: #3b82f6; 
-    text-decoration: none; 
-}
+.main-card{ background:#fff; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; box-shadow:var(--shadow-1); width: 100%; }
+.blog-hero-image{ width:100%; height:200px; overflow:hidden; background:#f1f5f9; }
+@media(min-width: 768px){ .blog-hero-image{ height:360px; } }
+.blog-hero-image img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.blog-header{ padding:16px 16px 0; }
+@media(min-width: 768px) { .blog-header { padding: 32px 32px 0; } }
+.sh-badge{ display:inline-flex; align-items:center; gap:6px; background:rgba(0,108,228,.08); color:var(--primary); font-size:.75rem; font-weight:700; padding:6px 12px; border-radius:20px; margin-bottom:10px; }
+.sh-info h2{ font-size: clamp(1.15rem, 2.5vw, 1.6rem); font-weight:900; color:var(--text-dark); margin-bottom:8px; word-break: break-word; }
+.sh-info p{ color:var(--text-muted); font-size:.85rem; line-height:1.6; }
+
+.main-body{ padding:16px; }
+@media(min-width: 768px) { .main-body { padding: 32px; } }
+
+.author-bar{ display:flex; align-items:center; gap:12px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:20px; }
+.author-av{ width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); flex-shrink: 0; }
+.author-name{ font-weight:800; color:var(--text-dark); font-size:.85rem; }
+.author-role{ font-size:.72rem; color:var(--text-muted); }
+
+.blog-content{ color:var(--text-body); font-size:.9rem; line-height:1.75; overflow-wrap: break-word; word-break: break-word; width: 100%; }
+.blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4{ color:var(--text-dark); font-weight:800; margin:20px 0 10px; }
+.blog-content h2{ border-left:4px solid var(--primary); padding-left:10px; font-size: 1.15rem; }
+.blog-content p{ margin-bottom:14px; }
+.blog-content img{ max-width:100% !important; height: auto !important; border-radius:8px; margin:12px 0; display: block; }
+.blog-content iframe, .blog-content video, .blog-content embed { max-width: 100%; }
+.blog-content table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.blog-content ul, .blog-content ol{ padding-left:18px; margin-bottom:14px; }
+.blog-content li{ margin-bottom:6px; }
+.blog-content pre { max-width: 100%; overflow-x: auto; padding: 10px; background: #f1f5f9; border-radius: 8px; }
+.blog-content a { color: var(--primary); text-decoration: underline; word-break: break-word; }
+
+.faq-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border); width: 100%; }
+.faq-title { font-size: 1.05rem; font-weight: 800; color: var(--text-dark); margin-bottom: 12px; font-family: 'Playfair Display', serif; }
+.accordion-item { background: white; border: 1px solid var(--border) !important; border-radius: 10px !important; overflow: hidden; margin-bottom: 10px; width: 100%; }
+.accordion-button { background: white; color: var(--text-dark); font-weight: 700; font-size: .85rem; padding: 12px 14px; text-align: left; }
+.accordion-button:not(.collapsed) { background: #fbf4de; color: var(--gold2); box-shadow: none; }
+.accordion-body { background: white; color: var(--text-body); font-size: 0.82rem; line-height: 1.6; padding: 12px 14px; word-break: break-word; }
+
+.seo-section{ background:#f0f7ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px 16px; margin-top:20px; width: 100%; }
+.seo-section h6{ color:var(--primary); font-size:.8rem; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:6px; text-transform: uppercase; letter-spacing: .3px; }
+.kw-tags{ display:flex; flex-wrap:wrap; gap:8px; }
+.kw-tag{ background:#fff; border:1px solid #bfdbfe; color:var(--primary-dark); padding:5px 12px; border-radius:30px; font-size:.75rem; font-weight:600; transition: .2s; }
+.kw-tag:hover{ background:var(--primary); color:#fff; border-color:var(--primary); }
+
+.sidebar{ display:flex; flex-direction:column; gap:16px; width: 100%; }
+.sb-box{ background:#fff; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; box-shadow:var(--shadow-1); width: 100%; }
+.sb-head{ background:var(--text-dark); color:#fff; padding:10px 16px; font-size:.8rem; font-weight:800; }
+.sb-body{ padding:14px; }
+.info-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:.8rem; gap: 10px; }
+.info-row:last-child{ border-bottom:none; }
+.info-label{ color:var(--text-muted); flex-shrink: 0; }
+.info-val{ color:var(--text-dark); font-weight:700; text-align: right; word-break: break-word; }
+
+.cta-box{ background:linear-gradient(135deg,#4338ca,#4f46e5); border-radius:var(--radius); padding:18px; text-align:center; width: 100%; }
+.cta-box h5{ color:#fff; font-size:.95rem; font-weight:900; margin-bottom:6px; }
+.cta-box p{ color:rgba(255,255,255,.8); font-size:.8rem; margin-bottom:12px; }
+.btn-cta{ display:block; background:var(--accent); color:#1e293b; padding:10px; border-radius:8px; text-decoration:none; font-weight:800; font-size:.82rem; margin-bottom:8px; }
+.btn-cta-ghost{ display:block; border:1.5px solid rgba(255,255,255,.3); color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-size:.8rem; font-weight:600; }
+
+footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid rgba(255,255,255,.08); width: 100%; }
+.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
+.footer-newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 16px 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.footer-inner { max-width: 1200px; margin: 0 auto; padding: 25px 15px; }
+.footer-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
+@media(min-width: 580px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(min-width: 900px) { .footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; } }
+.fl-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.fl-brand img { height: 32px; width: auto; max-width: 120px; }
+.fl-brand span { font-family: "Playfair Display", serif; font-size: 1.05rem; font-weight: 800; color: #fff; }
+.fl-desc { font-size: .75rem; line-height: 1.55; margin-bottom: 6px; color: rgba(255,255,255,.55); }
+.fl-title { font-size: .72rem; font-weight: 700; color: var(--gold2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.fl-link { display: block; font-size: .75rem; color: rgba(255,255,255,.55); padding: 3px 0; text-decoration: none; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.08); padding: 12px 15px; display: flex; justify-content: space-between; font-size: .7rem; flex-wrap: wrap; gap: 6px; max-width: 1200px; margin: 0 auto; color: rgba(255,255,255,.4); }
 </style>
+{% endblock %}
 
-<header class="article-hero">
-    {% if blog.featured_image %}
-        <img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}">
-    {% endif %}
-    <div class="article-hero-gradient"></div>
-    
-    <div class="hero-content-wrapper">
-        <div>
-            {% for category in blog.categories.all %}
-                <span class="article-tag-category">{{ category }}</span>
-            {% empty %}
-                <span class="article-tag-category">Industry Insights</span>
-            {% endfor %}
+{% block content %}
+
+<div class="breadcrumb-bar">
+    <div class="bb-inner">
+        <a href="/">Home</a> <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+        <a href="{% url 'blog' %}">Guides</a> <i class="bi bi-chevron-right" style="font-size:.6rem;"></i>
+        <span class="bb-current">{{ blog.title }}</span>
+    </div>
+</div>
+
+<section class="page-hero">
+    <h1>{{ seo.meta_title|default:blog.title }}</h1>
+    <div class="meta-row">
+        {% if blog.category %}
+        <div class="meta-chip">{{ blog.category }}</div>
+        {% endif %}
+        <div class="meta-chip">{{ blog.reading_time|default:"5 Min Read" }}</div>
+        <div class="meta-chip">{{ blog.date_posted|date:"M d, Y" }}</div>
+    </div>
+</section>
+
+<div class="content-wrap">
+    <div class="content-grid">
+        <!-- MAIN -->
+        <main>
+            <div class="main-card">
+                <!-- IMAGE with alt forced to kanishkaimperia -->
+                <div class="blog-hero-image">
+                    {% if blog.featured_image %}
+                        <img src="{{ blog.featured_image.url }}" alt="kanishkaimperia">
+                    {% else %}
+                        <img src="{% static 'assets/img/default-blog.jpg' %}" alt="kanishkaimperia">
+                    {% endif %}
+                </div>
+
+                <!-- HEADER -->
+                <div class="blog-header">
+                    <div class="sh-badge">
+                        <i class="bi bi-journal-richtext"></i> Real Estate Blog
+                    </div>
+                    <div class="sh-info">
+                        <h2>{{ seo.meta_title|default:blog.title }}</h2>
+                        <p>{{ seo.meta_description }}</p>
+                    </div>
+                </div>
+
+                <!-- BODY -->
+                <div class="main-body">
+                    <!-- AUTHOR -->
+                    <div class="author-bar">
+                        <img src="{% static 'assets/img/person/person-f-8.webp' %}" class="author-av" alt="kanishkaimperia">
+                        <div>
+                            <div class="author-name">{{ blog.author|default:"KANISHKAIMPERIA Team" }}</div>
+                            <div class="author-role">Real Estate Content Author</div>
+                        </div>
+                    </div>
+
+                    <!-- CONTENT with safe filter -->
+                    <div class="blog-content">
+                        {{ blog.content|safe }}
+                    </div>
+
+                    <!-- Auto-Generated FAQs Section specific to this Blog -->
+                    {% if blog_faqs %}
+                    <div class="faq-section">
+                        <h4 class="faq-title">Frequently Asked Questions</h4>
+                        <div class="accordion" id="blogFaqAcc">
+                            {% for faq in blog_faqs %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading{{ faq.id }}">
+                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ faq.id }}">
+                                        {{ faq.question }}
+                                    </button>
+                                </h2>
+                                <div id="collapse{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ faq.id }}" data-bs-parent="#blogFaqAcc">
+                                    <div class="accordion-body">
+                                        {{ faq.answer }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- TAGS -->
+                    {% if blog.tags.all %}
+                    <div class="seo-section">
+                        <h6><i class="bi bi-tags-fill"></i> Tags</h6>
+                        <div class="kw-tags">
+                            {% for tag in blog.tags.all %}
+                            <span class="kw-tag">#{{ tag.name|default:tag }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- KEYWORDS -->
+                    {% if seo.primary_keyword or seo.secondary_keywords %}
+                    <div class="seo-section">
+                        <h6><i class="bi bi-tags-fill"></i> Related Keywords</h6>
+                        <div class="kw-tags">
+                            {% if seo.primary_keyword %}
+                            <span class="kw-tag">{{ seo.primary_keyword }}</span>
+                            {% endif %}
+                            {% if seo.secondary_keywords %}
+                                {% for kw in seo.secondary_keywords.split %}
+                                <span class="kw-tag">{{ kw|cut:"," }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sb-box">
+                <div class="sb-head">Article Information</div>
+                <div class="sb-body">
+                    <div class="info-row">
+                        <span class="info-label">Category</span>
+                        <span class="info-val">{{ blog.category|default:"General" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Reading Time</span>
+                        <span class="info-val">{{ blog.reading_time|default:"5 Min" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Author</span>
+                        <span class="info-val">{{ blog.author|default:"KANISHKAIMPERIA Team" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Published</span>
+                        <span class="info-val">{{ blog.date_posted|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-box">
+                <h5>Looking For Property?</h5>
+                <p>Explore verified listings in Nagpur with KANISHKAIMPERIA.</p>
+                <a href="/listingpage/" class="btn-cta">Browse Listings</a>
+                <a href="{% url 'blog' %}" class="btn-cta-ghost">Explore All Guides</a>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- Harmonized 5-Column Footer -->
+<footer>
+    <div class="footer-newsletter">
+        <div class="footer-newsletter-inner">
+            <div>
+                <h3>Stay Updated!</h3>
+                <p>Subscribe to get the latest property updates.</p>
+            </div>
+            <div class="footer-social d-flex gap-2">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-whatsapp"></i></a>
+                <a href="#"><i class="bi bi-twitter-x"></i></a>
+            </div>
         </div>
-        
-        <h1 class="hero-title">{{ blog.title }}</h1>
-        
-        <div class="author-meta-row">
-            <div class="author-avatar">
-                {{ blog.author.first_name|default:'P'|slice:":1" }}
+    </div>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">
+                    <img src="{% static 'images/kanishka-imperia-logo.png' %}" alt="kanishkaimperia" onerror="this.style.display='none'">
+                    <span>KANISHKAIMPERIA</span>
+                </div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents</div>
+                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 9175791501</div>
+                <div class="fl-desc"><i class="bi bi-envelope"></i> kanishkaimperia@gmail.com</div>
             </div>
             <div>
-                <strong style="color:#fff; display:block; font-size:1.05rem;">
-                    {{ blog.author.get_full_name|default:blog.author.username }}
-                </strong>
-                Published on {{ blog.created_at|date:"F d, Y" }}
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+            </div>
+            <div>
+                <div class="fl-title">Company</div>
+                <a href="{% url 'blog' %}" class="fl-link">News/Guide</a>
+                <a href="{% url 'services' %}" class="fl-link">Services</a>
+                <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
             </div>
         </div>
     </div>
-</header>
-
-<article class="article-reading-container">
-    {% if blog.description %}
-    <p class="article-lead-text">
-        {{ blog.description }}
-    </p>
-    {% endif %}
-
-    <div class="article-prose">
-        {% if blog.featured_image %}
-            {% if blog.img_position == 'left' %}
-                <img src="{{ blog.featured_image.url }}" class="inline-media-left shadow-sm" alt="Left Image">
-            {% elif blog.img_position == 'right' %}
-                <img src="{{ blog.featured_image.url }}" class="inline-media-right shadow-sm" alt="Right Image">
-            {% endif %}
-        {% endif %}
-
-        {{ blog.content|safe|linebreaksbr }}
-
-        {% if blog.featured_image and blog.img_position == "inline" or blog.img_position == "center" %}
-            <div class="inline-media-center">
-                <img src="{{ blog.featured_image.url }}" alt="Article Graphic">
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Redesigned Keywords Section (No SEO Jargon) -->
-    {% if blog.primary_keyword or blog.secondary_keywords %}
-    <div class="related-topics-wrapper">
-        <h4>Explore Related Topics</h4>
-        <div>
-            {% if blog.primary_keyword %}
-                <span class="topic-pill">{{ blog.primary_keyword }}</span>
-            {% endif %}
-            
-            {% if blog.secondary_keywords %}
-                <span class="topic-pill">{{ blog.secondary_keywords }}</span>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
-</article>
-
-<footer class="editorial-footer">
-    <div style="max-width: 600px; margin: 0 auto;">
-        <h3>KANISHKAIMPERIA Editorial</h3>
-        <p style="margin-bottom: 30px;">Delivering verified insights, market trends, and technical guides for modern real estate professionals.</p>
-        <div style="font-size: 0.9rem;">
-            <a href="/blog/">View all articles</a> &nbsp;|&nbsp; 
-            <a href="/subscribe/">Subscribe to Newsletter</a>
-        </div>
-        <div style="margin-top: 40px; font-size: 0.8rem; border-top: 1px solid #374151; padding-top: 20px;">
-            &copy; 2026 KANISHKAIMPERIA. All rights reserved.
-        </div>
+    <div class="footer-bottom">
+        <span>© 2026 KANISHKAIMPERIA · Nagpur, Maharashtra</span>
+        <span>Privacy Policy · Terms · Sitemap</span>
     </div>
 </footer>
+{% endblock %}

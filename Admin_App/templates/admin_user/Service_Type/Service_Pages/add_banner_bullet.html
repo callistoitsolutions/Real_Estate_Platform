@@ -1,0 +1,22 @@
+<form method="POST" action="">
+    {% csrf_token %}
+    <h4 class="mb-3">Add Banner Bullet Point</h4>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Select Banner Card</label>
+        <select name="banner" class="form-select" required>
+            <option value="">Choose banner...</option>
+            {% for card in banner_cards %}
+            <option value="{{ card.id }}">{{ card.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Bullet Text</label>
+        <input type="text" name="text" class="form-control" maxlength="100" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-bold">Order</label>
+        <input type="number" name="order" class="form-control" value="0">
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Save Bullet</button>
+</form>

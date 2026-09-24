@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sell Your Residential Plot — KANISHKAIMPERIA</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #006ce4;
+  --primary-dark: #0050a8;
+  --pr: #56ab2f;
+  --pr2: #468f25;
+  --pr-light: #eefbee;
+  --sec: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --bg: #f8fafc;
+  --success: #10b981;
+  --danger: #ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
+
+.sub-header{background:white;border-bottom:1px solid var(--border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-size:.8rem;flex-wrap:wrap;gap:8px;}
+.sub-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.nav-chip{font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(86,171,47,.12);color:var(--pr);border:1px solid rgba(86,171,47,.3);}
+.nav-back{font-weight:700;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:5px;transition:.2s;font-size:.8rem;}
+.nav-back:hover{color:var(--primary-dark);}
+
+.page-wrap{max-width:1220px;margin:0 auto;padding:20px 16px 70px;display:grid;grid-template-columns:1fr 320px;gap:22px;}
+.page-head{grid-column:1/-1;margin-bottom:2px;}
+.page-head h1{font-size:1.35rem;font-weight:900;color:var(--sec);display:flex;align-items:center;gap:8px;}
+.page-head p{font-size:.82rem;color:var(--muted);margin-top:4px;}
+
+.mobile-summary{display:none;grid-column:1/-1;background:linear-gradient(135deg,#f0f9e8,#eafbe0);border:1px solid #d3f0c3;border-radius:14px;padding:12px 16px;align-items:center;justify-content:space-between;gap:10px;font-size:.78rem;font-weight:700;color:#3f7a22;}
+
+.stepper{grid-column:1/-1;display:flex;align-items:center;gap:0;margin-bottom:4px;background:white;border:1px solid var(--border);border-radius:14px;padding:14px 18px;overflow-x:auto;}
+.step-item{display:flex;align-items:center;flex:1;min-width:max-content;}
+.step-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:900;flex-shrink:0;border:2px solid var(--border);background:white;color:var(--muted);transition:.3s;}
+.step-circle.active{background:var(--pr);color:white;border-color:var(--pr);box-shadow:0 0 0 4px rgba(86,171,47,.15);}
+.step-circle.done{background:var(--success);color:white;border-color:var(--success);}
+.step-label{font-size:.72rem;font-weight:700;margin-left:8px;color:var(--muted);transition:.3s;white-space:nowrap;}
+.step-label.active{color:var(--pr);}
+.step-label.done{color:var(--success);}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 10px;min-width:16px;}
+.step-line.done{background:var(--success);}
+
+.form-card{background:white;border-radius:16px;border:1px solid var(--border);padding:26px;box-shadow:0 4px 12px rgba(0,0,0,.03);}
+.card-head{margin-bottom:20px;}
+.card-head h2{font-size:1.02rem;font-weight:900;color:var(--sec);display:flex;align-items:center;gap:8px;}
+.card-head p{font-size:.78rem;color:var(--muted);margin-top:5px;line-height:1.5;}
+
+.section-divider{display:flex;align-items:center;gap:10px;margin:22px 0 15px;}
+.sd-line{flex:1;height:1px;background:var(--border);}
+.sd-label{font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap;background:white;padding:0 4px;display:flex;align-items:center;gap:6px;}
+
+.fg{display:grid;gap:16px;}
+.fg-2{grid-template-columns:1fr 1fr;}
+.fg-3{grid-template-columns:1fr 1fr 1fr;}
+.fg-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:.78rem;font-weight:700;color:#374151;display:flex;align-items:center;gap:5px;}
+.field label .req{color:var(--danger);margin-left:1px;}
+.field label .opt{font-size:.66rem;color:var(--muted);font-weight:400;margin-left:2px;}
+.field input[type="text"],.field input[type="number"],.field input[type="tel"],.field input[type="email"],.field input[type="url"],.field input[type="date"],.field select,.field textarea{
+  background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;font-size:.85rem;color:var(--sec);transition:.2s;width:100%;font-family:'Poppins',sans-serif;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--pr);background:white;box-shadow:0 0 0 3px rgba(86,171,47,.12);}
+.field input[readonly]{background:#f0fdf4;color:#15803d;font-weight:700;border-color:#bbf7d0;cursor:not-allowed;}
+.field textarea{resize:vertical;min-height:90px;line-height:1.55;}
+.field .help{font-size:.68rem;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:4px;}
+.field .prefix-wrap{position:relative;}
+.field .prefix-wrap .prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.82rem;font-weight:700;color:var(--muted);}
+.field .prefix-wrap input{padding-left:26px;}
+.field .suffix-wrap{position:relative;}
+.field .suffix-wrap .suffix{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.72rem;font-weight:700;color:var(--muted);}
+.field .suffix-wrap input{padding-right:42px;}
+.validation-error{border-color:var(--danger) !important;background:#fff5f5 !important;}
+.auto-field input{background:#f0fdf4;color:#166534;font-weight:800;border-color:#bbf7d0;}
+
+.radio-group-inline{display:flex;gap:16px;margin-top:5px;flex-wrap:wrap;}
+.radio-label{display:flex;align-items:center;gap:7px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--sec);background:var(--bg);border:1.5px solid var(--border);padding:8px 14px;border-radius:10px;transition:.2s;}
+.radio-label:hover{border-color:var(--pr);background:var(--pr-light);}
+.radio-label input{accent-color:var(--pr);width:16px;height:16px;cursor:pointer;}
+
+.chip-group{display:flex;flex-wrap:wrap;gap:9px;}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:.78rem;font-weight:600;color:var(--sec);background:var(--bg);cursor:pointer;transition:.2s;user-select:none;}
+.chip input{display:none;}
+.chip i{color:#94a3b8;font-size:.85rem;}
+.chip.checked{background:var(--pr-light);border-color:var(--pr);color:#2d6a17;}
+.chip.checked i{color:var(--pr);}
+.chip.checked::after{content:'\f00c';font-family:"Font Awesome 6 Free";font-weight:900;font-size:.65rem;color:var(--pr);margin-left:2px;}
+
+.photo-drop{border:2px dashed var(--border);border-radius:14px;padding:32px 18px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);}
+.photo-drop:hover{border-color:var(--pr);background:var(--pr-light);}
+.photo-drop input{display:none;}
+.photo-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+.photo-thumb{width:88px;height:78px;border-radius:9px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:white;position:relative;overflow:hidden;}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-thumb .remove-photo{position:absolute;top:3px;right:3px;width:18px;height:18px;background:rgba(239,68,68,.92);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;cursor:pointer;border:none;}
+.img-count-pill{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:var(--pr2);background:var(--pr-light);border:1px solid #d3f0c3;padding:4px 10px;border-radius:20px;margin-top:10px;}
+
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px;padding-top:20px;border-top:2px solid #f1f5f9;}
+.btn-continue{background:var(--pr);color:white;border:none;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;box-shadow:0 6px 16px rgba(86,171,47,.35);transition:.25s;flex-shrink:0;}
+.btn-continue:hover{background:var(--pr2);transform:translateX(3px);box-shadow:0 8px 20px rgba(86,171,47,.45);}
+.btn-continue:active{transform:translateX(1px) scale(.96);}
+.continue-wrap{display:flex;align-items:center;gap:12px;}
+.continue-text{display:flex;flex-direction:column;align-items:flex-end;}
+.continue-text .ct-label{font-size:.68rem;color:var(--muted);font-weight:600;}
+.continue-text .ct-step{font-size:.82rem;color:var(--sec);font-weight:800;}
+.btn-back-circle{background:white;color:var(--sec);border:1.5px solid var(--border);width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer;transition:.2s;flex-shrink:0;}
+.btn-back-circle:hover{border-color:var(--pr);color:var(--pr);background:var(--pr-light);}
+.btn-submit-final{background:linear-gradient(135deg,#56ab2f,#3f7a22);color:white;border:none;padding:15px 30px;border-radius:14px;font-weight:800;font-size:.92rem;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 20px rgba(86,171,47,.35);transition:.2s;}
+.btn-submit-final:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(86,171,47,.45);}
+
+.sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px;align-self:start;}
+.preview-card{background:white;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.04);}
+.pc-head{font-size:.78rem;font-weight:800;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.pc-mock{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.pcm-img{height:135px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;}
+.pcm-badges{position:absolute;top:9px;left:9px;display:flex;gap:5px;flex-wrap:wrap;}
+.pcm-badge{font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.02em;}
+.b-sale{background:rgba(255,255,255,.95);color:#0f172a;}
+.b-resi{background:var(--primary);color:white;}
+.pcm-price{position:absolute;bottom:9px;left:9px;background:rgba(15,23,42,.88);color:white;font-size:.85rem;font-weight:900;padding:4px 10px;border-radius:8px;}
+.pcm-body{padding:13px 14px;}
+.pcm-title{font-size:.86rem;font-weight:800;color:#0f172a;margin-bottom:4px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.pcm-loc{font-size:.72rem;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:4px;}
+.pcm-specs{display:flex;gap:12px;font-size:.72rem;color:#475569;font-weight:700;flex-wrap:wrap;}
+.pc-foot{font-size:.66rem;color:var(--muted);margin-top:10px;text-align:center;}
+
+.checklist-card{background:white;border-radius:16px;border:1px solid var(--border);padding:17px;box-shadow:0 4px 14px rgba(0,0,0,.04);}
+.cl-title{font-size:.8rem;font-weight:800;color:var(--sec);margin-bottom:11px;}
+.cl-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.77rem;color:var(--muted);border-bottom:1px solid #f8fafc;}
+.cl-item:last-child{border-bottom:none;}
+.cl-item i{font-size:.7rem;width:15px;color:#cbd5e1;transition:.2s;}
+.cl-item.done{color:var(--success);font-weight:600;}
+.cl-item.done i{color:var(--success);}
+
+.help-card{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:14px;padding:15px;font-size:.75rem;color:#1e40af;display:flex;gap:10px;align-items:flex-start;}
+.help-card i{font-size:1rem;margin-top:1px;}
+
+.step-content{display:none;}
+.step-content.active{display:block;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.form-badge{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;padding:4px 10px;border-radius:6px;}
+.fb-resale{background:#fef3c7;color:#b45309;border:1px solid #fde68a;}
+.fb-resi{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;}
+
+.inline-status{padding:11px 14px;border-radius:10px;font-size:.76rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.is-info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+
+@media(max-width:1024px){
+  .page-wrap{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .mobile-summary{display:flex;}
+}
+@media(max-width:768px){
+  .fg-2,.fg-3,.fg-4{grid-template-columns:1fr;}
+  .form-card{padding:18px;}
+  .page-head h1{font-size:1.15rem;}
+  .step-label{display:none;}
+  .continue-text{display:none;}
+  .btn-continue{width:50px;height:50px;font-size:1.1rem;}
+}
+@media(max-width:480px){
+  .sub-header{padding:10px 14px;}
+  .page-wrap{padding:14px 12px 60px;}
+  .stepper{padding:12px;}
+}
+
+.auth-step{display:none;animation:fadeUp .4s ease forwards;}
+.auth-step.active-step{display:block;}
+.otp-container{display:flex;gap:10px;justify-content:center;margin-bottom:20px;}
+.otp-input{width:50px;height:55px;text-align:center;font-size:1.5rem;font-weight:700;border-radius:10px;border:2px solid var(--border);background:white;}
+.otp-input:focus{border-color:var(--pr);outline:none;box-shadow:0 0 0 3px rgba(86,171,47,.12);}
+</style>
+</head>
+<body>
+
+{% include 'home_page/header.html' %}
+
+<div class="sub-header">
+  <div class="sub-header-left">
+    <span class="nav-chip"><i class="fas fa-clipboard-list"></i> Post Property</span>
+    <span class="form-badge fb-resale">💰 Resale</span>
+    <span class="form-badge fb-resi">🏡 Residential Plot</span>
+  </div>
+  <a href="{% url 'index' %}" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
+</div>
+
+<div class="page-wrap">
+
+  <div class="page-head">
+    <h1><i class="fas fa-map" style="color:var(--pr);"></i> Sell Your Residential Plot</h1>
+    <p>Takes about 4 minutes — list your plot for villa, row house or independent construction and connect with genuine buyers.</p>
+  </div>
+
+  <div class="mobile-summary" id="mobileSummary">
+    <span><i class="fas fa-rupee-sign"></i> <span id="ms_price">Price not set</span></span>
+    <span><i class="fas fa-ruler-combined"></i> <span id="ms_area">Area not set</span></span>
+    <span><i class="fas fa-images"></i> <span id="ms_photos">0 photos</span></span>
+  </div>
+
+  <div class="stepper" id="stepper">
+    <div class="step-item">
+      <div class="step-circle active" id="sc1">1</div>
+      <div class="step-label active" id="sl1">Plot Details</div>
+      <div class="step-line" id="line1"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-circle" id="sc2">2</div>
+      <div class="step-label" id="sl2">Pricing &amp; Legal</div>
+      <div class="step-line" id="line2"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-circle" id="sc3">3</div>
+      <div class="step-label" id="sl3">Amenities &amp; Location</div>
+      <div class="step-line" id="line3"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-circle" id="sc4">4</div>
+      <div class="step-label" id="sl4">Photos &amp; Publish</div>
+    </div>
+  </div>
+
+  <form method="POST" action="{% url 'plot_sale_add' %}" enctype="multipart/form-data" id="plotForm" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="listing_type" value="Resale">
+  <input type="hidden" name="category" value="Plot">
+  <input type="hidden" name="sub_category" value="Residential">
+  <input type="hidden" name="property_title" id="property_title">
+
+  <!-- ════════════ STEP 1 — PLOT DETAILS ════════════ -->
+  <div class="step-content active" id="step1">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-map-marked-alt" style="color:var(--pr);"></i> Tell us about the plot</h2>
+      <p>Start with size, zoning and layout details — these are the first filters buyers apply.</p>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-ruler-combined"></i> Basic Plot Information</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-2">
+      <div class="field">
+        <label>Plot / Survey Number <span class="req">*</span></label>
+        <input type="text" name="property_no" id="property_no" placeholder="e.g. Plot No. 42, Survey No. 123/B" required>
+        <div class="help" style="color:#b45309;"><i class="fas fa-lock"></i> Used only for verification — never shown publicly.</div>
+      </div>
+      <div class="field">
+        <label>What kind of plot is this? <span class="req">*</span></label>
+        <select class="form-select" name="property_type" id="property_type" required onchange="updatePreview()">
+          <option value="">Choose plot sub-category…</option>
+          <option value="open_plot">Open Plot (Standalone / Non-Layout)</option>
+          <option value="gated_community_plot">Gated Community Plot (Named Layout)</option>
+          <option value="corner_plot">Corner Plot (Double Road Access)</option>
+          <option value="row_house_plot">Row House Plot</option>
+          <option value="villa_plot">Villa / Independent Bungalow Plot</option>
+          <option value="township_plot">Township / Integrated Project Plot</option>
+          <option value="weekend_home_plot">Weekend Home / Second Home Plot</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>How big is the plot? <span class="req">*</span></label>
+        <div class="suffix-wrap">
+          <input type="number" name="plot_area" id="plot_area" placeholder="Total saleable area, e.g. 2400" required oninput="updatePreview()">
+          <span class="suffix">sq.ft</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-file-shield"></i> Zone &amp; Township Approvals</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Residential Zone <span class="req">*</span></label>
+        <select class="form-select" name="land_use" id="land_use" required>
+          <option value="">Which zone is it in?</option>
+          <option value="R1">R1 Zone (Low Density Residential)</option>
+          <option value="R2">R2 Zone (Medium Density Residential)</option>
+          <option value="R3">R3 Zone (High Density / Apartment)</option>
+          <option value="Township">Township / Integrated Township Zone</option>
+          <option value="Eco_Sensitive">Eco-Sensitive / Green Zone</option>
+          <option value="Mixed_Res_Com">Mixed Use — Residential + Commercial</option>
+        </select>
+        <div class="help">As per your town planning / development plan.</div>
+      </div>
+      <div class="field">
+        <label>NA (Non-Agricultural) Status <span class="req">*</span></label>
+        <select class="form-select" name="na_status" id="na_status" required>
+          <option value="">Select NA status</option>
+          <option value="NA Converted">NA Converted (Certificate Available)</option>
+          <option value="NA Applied">NA Order Applied (Pending)</option>
+          <option value="Non-NA">Non-NA (Requires Conversion)</option>
+          <option value="Not Applicable">Not Applicable (Urban Land)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Layout Approval Status</label>
+        <select class="form-select" name="layout_approval_status" id="layout_approval_status">
+          <option value="">Select status</option>
+          <option value="Approved Layout">Approved Layout (Authority Approved)</option>
+          <option value="Sanctioned Layout">Sanctioned Layout (Municipal Sanction)</option>
+          <option value="Self_Development">Self Development (Non-Layout)</option>
+          <option value="Layout Pending">Layout Approval Pending</option>
+          <option value="Not Applicable">Not Applicable</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg fg-3" style="margin-top:16px;">
+      <div class="field">
+        <label>Residential Zone Type</label>
+        <select class="form-select" name="residential_zone_type" id="residential_zone_type">
+          <option value="">Select zone type</option>
+          <option value="R1">R1 Zone (Low Density Residential)</option>
+          <option value="R2">R2 Zone (Medium Density Residential)</option>
+          <option value="R3">R3 Zone (High Density / Apartment)</option>
+          <option value="Township">Township / Integrated Township Zone</option>
+          <option value="Eco Sensitive">Eco-Sensitive / Green Zone</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Is it part of a gated community?</label>
+        <select class="form-select" name="gated_community" id="gated_community" onchange="toggleCond('layout_name_wrap', this.value==='yes')">
+          <option value="no">No — Open / Standalone Plot</option>
+          <option value="yes">Yes — Gated Community / Named Layout</option>
+        </select>
+      </div>
+      <div class="field" id="layout_name_wrap">
+        <label>Layout / Project Name</label>
+        <input type="text" name="layout_name" id="layout_name" placeholder="e.g. Green Valley Layout, Shree Nagar">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-vector-square"></i> Dimensions &amp; Shape</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Frontage / Width</label>
+        <div class="suffix-wrap"><input type="number" name="plot_frontage" id="plot_frontage" placeholder="e.g. 40" min="1"><span class="suffix">ft</span></div>
+        <div class="help">Width of the plot facing the road.</div>
+      </div>
+      <div class="field">
+        <label>Depth / Length</label>
+        <div class="suffix-wrap"><input type="number" name="plot_depth" id="plot_depth" placeholder="e.g. 60" min="1"><span class="suffix">ft</span></div>
+        <div class="help">Depth from front to rear of the plot.</div>
+      </div>
+      <div class="field">
+        <label>Plot Shape</label>
+        <select class="form-select" name="plot_shape" id="plot_shape">
+          <option value="">Select shape</option>
+          <option value="Rectangular">Rectangular</option>
+          <option value="Square">Square</option>
+          <option value="L-Shaped">L-Shaped</option>
+          <option value="Triangular">Triangular</option>
+          <option value="Irregular">Irregular / Odd</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-road"></i> Road &amp; Access</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Road Connectivity <span class="req">*</span></label>
+        <select class="form-select" name="road_connectivity" id="road_connectivity" required>
+          <option value="">How is it accessed?</option>
+          <option value="main_road">Main Road / State Highway</option>
+          <option value="internal_road">Internal Road (Layout / Society Road)</option>
+          <option value="corner_double">Corner Plot — Two Road Access</option>
+          <option value="service_road">Service Lane</option>
+          <option value="private_road">Private Access Road</option>
+          <option value="no_road">No Direct Road Access</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Road / Street Width</label>
+        <select class="form-select" name="road_width" id="road_width">
+          <option value="">Select width</option>
+          <option value="less_20">Less than 20 ft (Narrow Lane)</option>
+          <option value="20">20 ft (Standard Road)</option>
+          <option value="30">30 ft</option>
+          <option value="40">40 ft</option>
+          <option value="60">60 ft (Wide Road)</option>
+          <option value="100+">100 ft+ (DP / Highway Road)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Corner Plot (Two Road Access)?</label>
+        <select class="form-select" name="corner_plot" id="corner_plot">
+          <option value="no">No — Single Road Access</option>
+          <option value="yes">Yes — Corner Plot (Two Roads)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg fg-3" style="margin-top:16px;">
+      <div class="field">
+        <label><i class="fas fa-compass"></i> Plot Facing</label>
+        <select class="form-select" name="plot_facing" id="plot_facing">
+          <option value="">Which way does it face?</option>
+          <option value="North">North</option>
+          <option value="North-East">North-East (NE)</option>
+          <option value="East">East</option>
+          <option value="South-East">South-East (SE)</option>
+          <option value="South">South</option>
+          <option value="South-West">South-West (SW)</option>
+          <option value="West">West</option>
+          <option value="North-West">North-West (NW)</option>
+        </select>
+        <div class="help">Direction the entrance / main road faces — many buyers filter by this.</div>
+      </div>
+      <div class="field">
+        <label>Boundary Wall / Fencing</label>
+        <select class="form-select" name="plot_fencing" id="plot_fencing">
+          <option value="none">No Boundary / Open Plot</option>
+          <option value="partial">Partially Fenced / Walled</option>
+          <option value="full_compound">Full Compound Wall (All Sides)</option>
+          <option value="barbed_wire">Barbed Wire Fencing</option>
+          <option value="live_hedge">Live Hedge / Natural Boundary</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Possession / Occupancy Status</label>
+        <select class="form-select" name="current_possession_status" id="current_possession_status">
+          <option value="">When can buyer take possession?</option>
+          <option value="Vacant">Vacant (Immediate Possession)</option>
+          <option value="Self Occupied">Self Occupied (Owner in Possession)</option>
+          <option value="Caretaker Occupied">Caretaker / Watchman Occupied</option>
+          <option value="Under Construction">Under Construction / Foundation Done</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <div></div>
+      <div class="continue-wrap">
+        <div class="continue-text"><span class="ct-label">Next</span><span class="ct-step">Pricing &amp; Legal</span></div>
+        <button type="button" class="btn-continue" onclick="goToStep(2)" aria-label="Continue to Pricing & Legal"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════ STEP 2 — PRICING & LEGAL ════════════ -->
+  <div class="step-content" id="step2">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-indian-rupee-sign" style="color:var(--pr);"></i> Pricing &amp; ownership details</h2>
+      <p>Clear pricing and clean paperwork are the two biggest trust signals for plot buyers.</p>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-indian-rupee-sign"></i> Pricing</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-2">
+      <div class="field">
+        <label>What price are you expecting? <span class="req">*</span></label>
+        <div class="prefix-wrap"><span class="prefix">₹</span>
+          <input type="number" id="selling_price" name="selling_price" placeholder="Total amount, e.g. 3500000" required min="1" oninput="updatePreview()">
+        </div>
+      </div>
+      <div class="field auto-field">
+        <label><i class="fas fa-calculator"></i> Price per Sq.ft</label>
+        <input type="number" id="plot_price_per_sqft" name="plot_price_per_sqft" readonly placeholder="Calculated automatically…">
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Is the price negotiable?</label>
+        <div class="radio-group-inline">
+          <label class="radio-label"><input type="radio" name="price_negotiable" value="yes"> Yes, Negotiable</label>
+          <label class="radio-label"><input type="radio" name="price_negotiable" value="no" checked> Fixed Price</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Any additional charges?</label>
+        <select class="form-select" name="additional_charges" id="additional_charges">
+          <option value="none">No — All Inclusive Price</option>
+          <option value="stamp_extra">Stamp Duty &amp; Registration Extra</option>
+          <option value="development_charges">Development / Infra Charges Extra</option>
+          <option value="all_inclusive">All Inclusive — Final Price</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label id="brokerageLabel">Brokerage <span class="req">*</span></label>
+        <select class="form-select" name="brokerage_percentage" id="brokeragePercentage" required>
+          <option value="">Select an option</option>
+          <option value="No Brokerage">No Brokerage (Direct from Owner)</option>
+          <option value="1% of amount">1% of Sale Value</option>
+          <option value="1.5% of amount">1.5% of Sale Value</option>
+          <option value="2% of amount">2% of Sale Value</option>
+          <option value="Fixed Amount">Fixed Amount</option>
+          <option value="Negotiable">Negotiable</option>
+        </select>
+      </div>
+      <div class="field" id="manualBrokerageSection" style="display:none;">
+        <label>Enter Fixed Brokerage Amount</label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="manual_brokerage" placeholder="e.g. 25000"></div>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-gavel"></i> Ownership Details</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-2">
+      <div class="field">
+        <label>Ownership / Tenure Type</label>
+        <select class="form-select" name="ownership_type" id="ownership_type">
+          <option value="">Select ownership type</option>
+          <option value="freehold">Freehold (Full Ownership)</option>
+          <option value="leasehold">Leasehold (Govt / Trust Land)</option>
+          <option value="co-operative_society">Co-operative Housing Society Plot</option>
+          <option value="power_of_attorney">Power of Attorney (POA) Holder</option>
+          <option value="joint_ownership">Joint Ownership (Multiple Owners)</option>
+          <option value="huf">HUF Property</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Ownership Document Type</label>
+        <select class="form-select" name="ownership_document_type" id="ownership_document_type" onchange="toggleCond('other_document_type_wrap', this.value==='Other')">
+          <option value="">Which document do you hold?</option>
+          <option value="Registered Sale Deed">Registered Sale Deed</option>
+          <option value="Registered Agreement to Sale">Registered Agreement to Sale (ATS)</option>
+          <option value="Conveyance Deed">Conveyance Deed / Final Deed</option>
+          <option value="Gift Deed">Gift Deed</option>
+          <option value="Irrevocable Power of Attorney (POA)">Irrevocable POA</option>
+          <option value="Allotment Letter">Allotment Letter (Authority / Society)</option>
+          <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field" id="other_document_type_wrap" style="display:none;">
+        <label>Specify Document Type</label>
+        <input type="text" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-shield-halved"></i> Approvals &amp; Compliance</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>RERA Registration Status</label>
+        <select class="form-select" name="rera_status" id="rera_status">
+          <option value="">Select status</option>
+          <option value="Exempt">RERA Exempt (Most Resale Plots)</option>
+          <option value="Registered">RERA Registered</option>
+          <option value="Not Applicable">Not Applicable</option>
+        </select>
+        <div class="help">Most individual resale plots are RERA exempt.</div>
+      </div>
+      <div class="field">
+        <label>Title Clarity</label>
+        <select class="form-select" name="title_clearance" id="title_clearance">
+          <option value="">Select title status</option>
+          <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
+          <option value="Under Verification">Title Under Verification</option>
+          <option value="Legal Dispute">Title in Legal Dispute</option>
+          <option value="Encumbrance Exists">Encumbrance / Charge Exists</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Encumbrance / Charge Status</label>
+        <select class="form-select" name="property_encumbrance_status" id="property_encumbrance_status">
+          <option value="">Select status</option>
+          <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
+          <option value="Mortgaged">Mortgaged / Hypothecated</option>
+          <option value="Under Litigation">Under Court Litigation</option>
+          <option value="Government Acquisition Notice">Govt Acquisition Notice</option>
+          <option value="Other Claim Exists">Other Claim Exists</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-receipt"></i> Tax &amp; Loan Status</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-2">
+      <div class="field">
+        <label>Property Tax Status</label>
+        <select class="form-select" name="property_tax_status" id="property_tax_status" onchange="toggleCond('tax_due_wrap', this.value==='Partially Due' || this.value==='Pending')">
+          <option value="">Select status</option>
+          <option value="Fully Paid">Fully Paid (Up to Date)</option>
+          <option value="Partially Due">Partially Due</option>
+          <option value="Pending">Pending (Multiple Years Unpaid)</option>
+          <option value="Not Applicable">Not Applicable</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Existing Loan / Mortgage</label>
+        <select class="form-select" name="property_loan_status" id="property_loan_status" onchange="toggleCond('loan_running_wrap', this.value==='Loan Running')">
+          <option value="">Select loan status</option>
+          <option value="No Active Loan">No Active Loan (Loan-Free)</option>
+          <option value="Loan Running">Loan Running (To be closed before sale)</option>
+          <option value="Loan Closed">Loan Closed (NOC Available)</option>
+          <option value="Loan Status Not Available">Not Disclosed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;" id="tax_due_wrap">
+      <div class="field">
+        <label>Outstanding Tax Amount</label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g. 15000"></div>
+      </div>
+      <div class="field">
+        <label>Tax Pending Since</label>
+        <input type="date" name="pending_since" id="pending_since">
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-top:16px;" id="loan_running_wrap">
+      <div class="field">
+        <label>Lender Bank / NBFC Name</label>
+        <input type="text" name="financing_bank" id="financing_bank" placeholder="e.g. HDFC Bank, SBI, ICICI">
+      </div>
+      <div class="field">
+        <label>Outstanding Loan Amount</label>
+        <div class="prefix-wrap"><span class="prefix">₹</span><input type="number" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g. 1200000"></div>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>Sanctioning / Approving Authority</label>
+        <textarea name="sanctioning_authority" id="sanctioning_authority" rows="2" placeholder="e.g. Nagpur Municipal Corporation (NMC), MHADA, NIT Nagpur, CIDCO, Gram Panchayat…"></textarea>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button type="button" class="btn-back-circle" onclick="goToStep(1)" aria-label="Back"><i class="fas fa-chevron-left"></i></button>
+      <div class="continue-wrap">
+        <div class="continue-text"><span class="ct-label">Next</span><span class="ct-step">Amenities &amp; Location</span></div>
+        <button type="button" class="btn-continue" onclick="goToStep(3)" aria-label="Continue to Amenities & Location"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
+  <div class="step-content" id="step3">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-star" style="color:var(--pr);"></i> What's nearby, and where exactly is it?</h2>
+      <p>Listings with amenities, a good description and exact location get up to 3x more enquiries.</p>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-star"></i> Plot &amp; Layout Amenities</div><div class="sd-line"></div></div>
+
+    <div class="chip-group" id="amenitiesChips">
+      {% for amenities in ameneties_obj %}
+      <label class="chip" onclick="toggleChip(this)">
+        <input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}">
+        <i class="{{amenities.amenties_icon|default:'fas fa-check'}}"></i> {{amenities.amenties_name}}
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-map-marker-alt"></i> Nearby Facilities &amp; Landmarks</div><div class="sd-line"></div></div>
+
+    <div class="chip-group" id="facilitiesChips">
+      {% for facilities in facilities_obj %}
+      <label class="chip" onclick="toggleChip(this)">
+        <input type="checkbox" name="nearby_facilities[]" value="{{facilities.facilities_name}}">
+        <i class="{{facilities.facilities_icon|default:'fas fa-map-marker-alt'}}"></i> {{facilities.facilities_name}}
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-align-left"></i> Describe the Property</div><div class="sd-line"></div></div>
+
+    <div class="fg">
+      <div class="field">
+        <label>In your own words, tell buyers about this plot</label>
+        <textarea name="user_description" id="user_description" rows="5" placeholder="e.g. Corner plot in a gated layout, tar road on two sides, close to schools and the main highway, ready for immediate construction…" oninput="updateChecklist()"></textarea>
+        <div class="help"><i class="fas fa-lightbulb" style="color:#f59e0b;"></i> Mention connectivity, Vastu and investment potential — these get you more calls.</div>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-location-dot"></i> Exact Location</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Area Pincode <span class="req">*</span></label>
+        <input type="text" name="pincode" id="pincode" placeholder="e.g. 440015" maxlength="6" inputmode="numeric" required>
+        <div class="help">Enter your pincode first — city and localities load automatically.</div>
+      </div>
+      <div class="field">
+        <label>City / District <span class="req">*</span></label>
+        <input type="text" id="city" name="city" placeholder="e.g. Nagpur" required oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>State <span class="req">*</span></label>
+        <select class="form-select" name="state" id="state" required>
+          <option value="">Select State</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+          <option value="Assam">Assam</option>
+          <option value="Bihar">Bihar</option>
+          <option value="Chhattisgarh">Chhattisgarh</option>
+          <option value="Goa">Goa</option>
+          <option value="Gujarat">Gujarat</option>
+          <option value="Haryana">Haryana</option>
+          <option value="Himachal Pradesh">Himachal Pradesh</option>
+          <option value="Jharkhand">Jharkhand</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Kerala">Kerala</option>
+          <option value="Madhya Pradesh">Madhya Pradesh</option>
+          <option value="Maharashtra" selected>Maharashtra</option>
+          <option value="Manipur">Manipur</option>
+          <option value="Meghalaya">Meghalaya</option>
+          <option value="Mizoram">Mizoram</option>
+          <option value="Nagaland">Nagaland</option>
+          <option value="Odisha">Odisha</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Rajasthan">Rajasthan</option>
+          <option value="Sikkim">Sikkim</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Tripura">Tripura</option>
+          <option value="Uttar Pradesh">Uttar Pradesh</option>
+          <option value="Uttarakhand">Uttarakhand</option>
+          <option value="West Bengal">West Bengal</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+          <option value="Ladakh">Ladakh</option>
+          <option value="Puducherry">Puducherry</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>Locality / Neighbourhood <span class="req">*</span></label>
+        <select class="form-select" id="locality_area" required>
+          <option value="">-- Enter pincode first --</option>
+        </select>
+        <input type="text" class="form-control mt-2" id="locality_area_manual" placeholder="Type your locality / area name" style="display:none;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;">
+        <input type="hidden" name="locality" id="locality">
+        <div class="help">This is the primary location filter buyers search by.</div>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>Nearby Landmark <span class="opt">(optional)</span></label>
+        <input type="text" name="property_landmark" id="property_landmark" placeholder="e.g. Near Hingna T-Point, Opp. NIT Gate">
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>Full Address <span class="req">*</span></label>
+        <textarea name="address" id="address" rows="3" required placeholder="e.g. Plot No. 42, Layout No. 5, Manish Nagar, Wardha Road, Nagpur – 440015"></textarea>
+      </div>
+    </div>
+
+    <div class="fg fg-3" style="margin-top:16px;">
+      <div class="field">
+        <label>Google Maps Link <span class="opt">(recommended)</span></label>
+        <input type="url" name="google_maps_link" id="google_maps_link" placeholder="Paste your Google Maps pin link">
+      </div>
+      <div class="field">
+        <label>Latitude</label>
+        <input type="text" name="latitude" id="latitude" placeholder="e.g. 21.1458">
+      </div>
+      <div class="field">
+        <label>Longitude</label>
+        <input type="text" name="longitude" id="longitude" placeholder="e.g. 79.0882">
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button type="button" class="btn-back-circle" onclick="goToStep(2)" aria-label="Back"><i class="fas fa-chevron-left"></i></button>
+      <div class="continue-wrap">
+        <div class="continue-text"><span class="ct-label">Next</span><span class="ct-step">Photos &amp; Publish</span></div>
+        <button type="button" class="btn-continue" onclick="goToStep(4)" aria-label="Continue to Photos & Publish"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════ STEP 4 — PHOTOS & PUBLISH ════════════ -->
+  <div class="step-content" id="step4">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-camera" style="color:var(--pr);"></i> Add photos and publish your listing</h2>
+      <p>Listings with 5+ real photos get noticed first — a phone camera works perfectly fine.</p>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-images"></i> Plot Photos</div><div class="sd-line"></div></div>
+
+    <div class="photo-drop" onclick="document.getElementById('imageInput').click()" id="dropZone">
+      <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" onchange="handlePhotos(event)">
+      <div style="font-size:2.3rem;margin-bottom:8px;">📷</div>
+      <div style="font-size:.88rem;font-weight:700;color:var(--sec);">Tap to add photos, or drag &amp; drop here</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">Front view, full plot, road access, surroundings — up to 15 photos</div>
+    </div>
+    <div class="photo-preview" id="imagePreview"></div>
+    <span class="img-count-pill" id="imgCountPill"><i class="fas fa-image"></i> 0 photos added — add at least 3 to publish</span>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-file-shield"></i> Documents &amp; Video</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Encumbrance Certificate (EC) <span class="opt">(recommended)</span></label>
+        <input type="file" name="encumbrance_cert" id="encumbrance_cert" accept="image/*,application/pdf">
+        <div class="help">From Sub-Registrar Office — kept confidential.</div>
+      </div>
+      <div class="field">
+        <label>Layout Plan / NA Order Copy <span class="opt">(optional)</span></label>
+        <input type="file" name="layout_plan" id="layout_plan" accept="image/*,application/pdf">
+      </div>
+      <div class="field">
+        <label>A Short Walkthrough Video <span class="opt">(optional)</span></label>
+        <input type="file" name="property_video" id="property_video" accept="video/*">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-user"></i> How Can Buyers Reach You?</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-3">
+      <div class="field">
+        <label>Your Name <span class="req">*</span></label>
+        <input type="text" name="owner_name" id="comm_owner_name" placeholder="Full name" required>
+      </div>
+      <div class="field">
+        <label>Mobile Number <span class="req">*</span></label>
+        <input type="tel" name="owner_contact" id="comm_owner_contact" placeholder="10-digit mobile number" required pattern="[0-9]{10}">
+      </div>
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" name="owner_email" id="comm_owner_email" placeholder="you@example.com" required>
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>Residency Status <span class="req">*</span></label>
+        <div class="radio-group-inline">
+          <label class="radio-label"><input type="radio" name="comm_residency" value="resident" required checked> Resident Indian</label>
+          <label class="radio-label"><input type="radio" name="comm_residency" value="nri"> NRI</label>
+          <label class="radio-label"><input type="radio" name="comm_residency" value="pio"> PIO</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-globe"></i> Also Listed Elsewhere?</div><div class="sd-line"></div></div>
+
+    <div class="fg fg-2">
+      <div class="field">
+        <label>Is this property already listed on another portal?</label>
+        <div class="radio-group-inline">
+          <label class="radio-label"><input type="radio" name="listed_elsewhere" value="No" checked onclick="toggleCond('portalField', false)"> No</label>
+          <label class="radio-label"><input type="radio" name="listed_elsewhere" value="Yes" onclick="toggleCond('portalField', true)"> Yes</label>
+        </div>
+      </div>
+      <div class="field" id="portalField" style="display:none;">
+        <label>Which portal?</label>
+        <input type="text" name="portal_name" placeholder="e.g. Housing, 99acres, MagicBricks, NoBroker">
+      </div>
+    </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label"><i class="fas fa-id-badge"></i> Listing Uploaded By</div><div class="sd-line"></div></div>
+    <div class="fg fg-4">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="uploaded_by_name" id="display_up_name" value="{{ user_obj.user_name|default:'' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="uploaded_by_email" id="display_up_email" value="{{ user_obj.user_email|default:'' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Contact</label>
+        <input type="tel" name="uploaded_by_contact" id="display_up_mobile" value="{{ user_obj.user_phone|default:'' }}" readonly>
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <input type="text" name="uploaded_by_role" id="display_up_role" value="{{ user_obj.user_role|default:'' }}" readonly>
+      </div>
+    </div>
+    <div class="inline-status is-info" style="margin-top:12px;">
+      <i class="fas fa-info-circle"></i>
+      <span>These details are auto-filled from your login session and kept for verification.</span>
+    </div>
+
+    <div class="fg" style="margin-top:18px;">
+      <div class="field">
+        <label style="display:flex;align-items:flex-start;gap:8px;font-weight:600;">
+          <input type="checkbox" id="agreeTerms" style="margin-top:3px;accent-color:var(--pr);width:16px;height:16px;">
+          I agree to KANISHKAIMPERIA's <a href="#" style="color:var(--primary);">Terms of Service</a> and confirm the details provided are accurate.
+        </label>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button type="button" class="btn-back-circle" onclick="goToStep(3)" aria-label="Back"><i class="fas fa-chevron-left"></i></button>
+      <button type="button" class="btn-submit-final" onclick="publishListing()">
+        <i class="fas fa-paper-plane"></i> Publish My Listing
+      </button>
+    </div>
+  </div>
+  </div>
+
+  </form>
+
+  <!-- PREVIEW SIDEBAR -->
+  <div class="sidebar">
+    <div class="preview-card">
+      <div class="pc-head"><i class="fas fa-eye"></i> Live Preview — How Buyers Will See It</div>
+      <div class="pc-mock">
+        <div class="pcm-img">
+          🏡
+          <div class="pcm-badges">
+            <span class="pcm-badge b-sale">FOR SALE</span>
+            <span class="pcm-badge b-resi">RESIDENTIAL</span>
+          </div>
+          <div class="pcm-price" id="previewPrice">₹ —</div>
+        </div>
+        <div class="pcm-body">
+          <div class="pcm-title" id="previewTitle">Your Plot Headline</div>
+          <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:var(--pr);"></i> City, Locality</div>
+          <div class="pcm-specs">
+            <span id="prevArea">— sq.ft</span>
+            <span id="prevType">Plot Type: —</span>
+          </div>
+        </div>
+      </div>
+      <div class="pc-foot">This card updates live as you fill the form</div>
+    </div>
+
+    <div class="checklist-card">
+      <div class="cl-title">📋 Listing Checklist</div>
+      <div class="cl-item" id="cl-type"><i class="fas fa-circle"></i> Plot type selected</div>
+      <div class="cl-item" id="cl-area"><i class="fas fa-circle"></i> Plot area filled</div>
+      <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> City &amp; locality added</div>
+      <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Expected price set</div>
+      <div class="cl-item" id="cl-desc"><i class="fas fa-circle"></i> Description written</div>
+      <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Photos added</div>
+    </div>
+
+    <div class="help-card">
+      <i class="fas fa-headset"></i>
+      <div>Need help listing your plot? Call our team at <strong>+91 70572 05423</strong> — we'll do it for you, free.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- AUTH MODAL (unchanged logic) -->
+<div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+      <div class="modal-header border-0 pb-0" style="position:relative;">
+        <h5 class="modal-title" style="font-weight:800;color:#1e293b;">Continue to KANISHKAIMPERIA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position:absolute;right:20px;top:20px;"></button>
+      </div>
+      <div class="modal-body pt-3 pb-4 px-4">
+
+        <div id="step-1-email" class="auth-step active-step">
+          <p style="font-size:.9rem;color:#64748b;margin-bottom:20px;">Enter your email address to login or create a new account.</p>
+          <div class="mb-3">
+            <label style="font-size:.8rem;font-weight:700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="form-control" placeholder="you@example.com" style="border-radius:10px;padding:12px;background:#f8fafc;">
+          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background:var(--pr);color:white;font-weight:700;padding:12px;border-radius:10px;">
+            Continue <i class="fas fa-arrow-right ms-1"></i>
+          </button>
+        </div>
+
+        <div id="step-2-login" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:#64748b;font-size:.9rem;font-weight:600;margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size:.9rem;color:#64748b;margin-bottom:20px;">Welcome back! Please enter your password to continue.</p>
+          <div class="mb-3">
+            <label style="font-size:.8rem;font-weight:700;">Password <span class="text-danger">*</span></label>
+            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius:10px;padding:12px;background:#f8fafc;">
+          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background:var(--pr);color:white;font-weight:700;padding:12px;border-radius:10px;">Secure Login</button>
+        </div>
+
+        <div id="step-2-otp" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none;border:none;color:#64748b;font-size:.9rem;font-weight:600;margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size:.9rem;color:#64748b;margin-bottom:20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
+          <div class="otp-container">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background:#f97316;color:white;font-weight:700;padding:12px;border-radius:10px;">Verify OTP</button>
+        </div>
+
+        <div id="step-3-details" class="auth-step">
+          <p style="font-size:.9rem;color:#10b981;font-weight:600;margin-bottom:20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
+          <div class="mb-3">
+            <label style="font-size:.8rem;font-weight:700;">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius:10px;padding:10px;background:#f8fafc;">
+          </div>
+          <div class="mb-3">
+            <label style="font-size:.8rem;font-weight:700;">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius:10px;padding:10px;background:#f8fafc;" maxlength="10">
+          </div>
+          <div class="mb-3">
+            <label style="font-size:.8rem;font-weight:700;">I am a <span class="text-danger">*</span></label>
+            <select id="flow_reg_role" class="form-select" style="border-radius:10px;padding:10px;background:#f8fafc;" required>
+              <option value="SelectRole" selected disabled>Choose a role…</option>
+              <option value="Landlord">Landlord</option>
+              <option value="Agent">Agent</option>
+              <option value="Agency/Builder">Agencies / Builder</option>
+              <option value="Vendor">Vendor</option>
+            </select>
+          </div>
+          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background:#10b981;color:white;font-weight:700;padding:12px;border-radius:10px;">Create Account &amp; Continue</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let isLoggedIn = {% if user_obj %}true{% else %}false{% endif %};
+let pendingAction = null;
+let currentStep = 1;
+const totalSteps = 4;
+
+function toggleChip(label) {
+  const cb = label.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  label.classList.toggle('checked', cb.checked);
+}
+function toggleCond(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = show ? '' : 'none';
+}
+
+function goToStep(n) {
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  if (n === 2 && userStatus === false) {
+    pendingAction = function () { goToStep(2); };
+    goToStepAuth('step-1-email');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
+    return;
+  }
+  if (n > currentStep && !validateStep(currentStep)) return;
+
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('step' + n).classList.add('active');
+
+  for (let i = 1; i <= totalSteps; i++) {
+    const sc = document.getElementById('sc' + i);
+    const sl = document.getElementById('sl' + i);
+    const line = document.getElementById('line' + i);
+    if (sc) sc.className = 'step-circle';
+    if (sl) sl.className = 'step-label';
+    if (line) line.className = 'step-line';
+    if (i < n) {
+      if (sc) { sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>'; }
+      if (sl) sl.classList.add('done');
+      if (line) line.classList.add('done');
+    } else if (i === n) {
+      if (sc) { sc.classList.add('active'); sc.textContent = i; }
+      if (sl) sl.classList.add('active');
+    } else {
+      if (sc) sc.textContent = i;
+    }
+  }
+  currentStep = n;
+  document.getElementById('stepper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updatePreview();
+}
+
+function validateStep(step) {
+  const stepEl = document.getElementById('step' + step);
+  if (!stepEl) return true;
+  const required = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
+  let isValid = true, missing = [], firstInvalid = null;
+
+  stepEl.querySelectorAll('.validation-error').forEach(el => el.classList.remove('validation-error'));
+
+  required.forEach(field => {
+    field.classList.remove('validation-error');
+    if (field.type === 'radio') {
+      const checked = Array.from(stepEl.querySelectorAll(`[name="${field.name}"]`)).some(r => r.checked);
+      if (!checked) { isValid = false; const lbl = getLabel(field); if (lbl && !missing.includes(lbl)) missing.push(lbl); if (!firstInvalid) firstInvalid = field; }
+    } else if (!field.value || !field.value.trim()) {
+      isValid = false;
+      field.classList.add('validation-error');
+      const lbl = getLabel(field);
+      if (lbl && !missing.includes(lbl)) missing.push(lbl);
+      if (!firstInvalid) firstInvalid = field;
+    }
+  });
+
+  if (!isValid) {
+    if (firstInvalid) { firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (typeof firstInvalid.focus === 'function') firstInvalid.focus(); }
+    Swal.fire({
+      icon: 'warning', title: 'A Few Details Are Missing',
+      html: `<p>Please fill the following before continuing:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
+      confirmButtonColor: '#56ab2f'
+    });
+    return false;
+  }
+  return true;
+}
+function getLabel(field) {
+  return field.closest('.field')?.querySelector('label')?.textContent?.replace('*', '').trim() || '';
+}
+
+/* ── LIVE PREVIEW ── */
+function generateTitle() {
+  const area = document.getElementById('plot_area')?.value?.trim();
+  const typeEl = document.getElementById('property_type');
+  const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text.split('(')[0].trim() : 'Residential Plot';
+  const loc = document.getElementById('locality')?.value?.trim();
+  const city = document.getElementById('city')?.value?.trim();
+  if (!area) return '';
+  let t = Number(area).toLocaleString('en-IN') + ' sq.ft ' + typeText;
+  if (loc || city) t += ` in ${[loc, city].filter(Boolean).join(', ')}`;
+  return t;
+}
+
+function updatePreview() {
+  const area = document.getElementById('plot_area')?.value || '';
+  const price = document.getElementById('selling_price')?.value || '';
+  const city = document.getElementById('city')?.value || '';
+  const loc = document.getElementById('locality')?.value || '';
+  const typeEl = document.getElementById('property_type');
+  const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text.split('(')[0].trim() : '—';
+
+  const title = generateTitle();
+  const titleInput = document.getElementById('property_title');
+  if (titleInput) titleInput.value = title;
+
+  const pTitle = document.getElementById('previewTitle');
+  if (pTitle) pTitle.textContent = title || 'Your Plot Headline';
+  const pLoc = document.getElementById('previewLoc');
+  if (pLoc) pLoc.innerHTML = `<i class="fas fa-map-marker-alt" style="color:var(--pr);"></i> ${[city, loc].filter(Boolean).join(', ') || 'City, Locality'}`;
+  const pArea = document.getElementById('prevArea');
+  if (pArea) pArea.textContent = area ? Number(area).toLocaleString('en-IN') + ' sq.ft' : '— sq.ft';
+  const pType = document.getElementById('prevType');
+  if (pType) pType.textContent = 'Plot Type: ' + typeText;
+  const pPrice = document.getElementById('previewPrice');
+  if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ —';
+
+  const psf = document.getElementById('plot_price_per_sqft');
+  if (psf) {
+    if (price && area && parseFloat(area) > 0) psf.value = Math.round(parseFloat(price) / parseFloat(area));
+    else psf.value = '';
+  }
+
+  const msPrice = document.getElementById('ms_price');
+  if (msPrice) msPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : 'Price not set';
+  const msArea = document.getElementById('ms_area');
+  if (msArea) msArea.textContent = area ? area + ' sq.ft' : 'Area not set';
+
+  setCheck('cl-type', !!(typeEl && typeEl.value));
+  setCheck('cl-area', !!area);
+  setCheck('cl-location', !!city && !!loc);
+  setCheck('cl-price', !!price);
+}
+function updateChecklist() {
+  const desc = document.getElementById('user_description')?.value || '';
+  setCheck('cl-desc', desc.trim().length >= 40);
+}
+function setCheck(id, done) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'cl-item' + (done ? ' done' : '');
+  const icon = el.querySelector('i');
+  if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+}
+
+/* ── PHOTOS ── */
+let uploadedPhotoCount = 0;
+function handlePhotos(e) {
+  const files = Array.from(e.target.files).slice(0, 15);
+  const prev = document.getElementById('imagePreview');
+  prev.innerHTML = '';
+  uploadedPhotoCount = files.length;
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const th = document.createElement('div');
+      th.className = 'photo-thumb';
+      th.innerHTML = `<img src="${ev.target.result}"><button class="remove-photo" type="button" onclick="this.parentElement.remove(); uploadedPhotoCount--; refreshPhotoCount();"><i class="fas fa-times"></i></button>`;
+      prev.appendChild(th);
+    };
+    reader.readAsDataURL(f);
+  });
+  refreshPhotoCount();
+}
+function refreshPhotoCount() {
+  const pill = document.getElementById('imgCountPill');
+  const msPhotos = document.getElementById('ms_photos');
+  if (pill) {
+    pill.innerHTML = uploadedPhotoCount >= 3
+      ? `<i class="fas fa-check-circle"></i> ${uploadedPhotoCount} photos added — looking good!`
+      : `<i class="fas fa-image"></i> ${uploadedPhotoCount} photo${uploadedPhotoCount === 1 ? '' : 's'} added — add at least 3 to publish`;
+  }
+  if (msPhotos) msPhotos.textContent = uploadedPhotoCount + ' photos';
+  setCheck('cl-photos', uploadedPhotoCount > 0);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const zone = document.getElementById('dropZone');
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--pr)'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.style.borderColor = '';
+      const input = document.getElementById('imageInput');
+      input.files = e.dataTransfer.files;
+      handlePhotos({ target: input });
+    });
+  }
+
+  const brokerageSelect = document.getElementById('brokeragePercentage');
+  const manualBrokerage = document.getElementById('manualBrokerageSection');
+  if (brokerageSelect) {
+    brokerageSelect.addEventListener('change', function () {
+      manualBrokerage.style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    });
+  }
+
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+
+  updatePreview();
+});
+
+/* ── PUBLISH ── */
+function publishListing() {
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  if (userStatus === false) {
+    pendingAction = publishListing;
+    goToStepAuth('step-1-email');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
+    return;
+  }
+  if (!validateStep(4)) return;
+  if (!document.getElementById('agreeTerms').checked) {
+    Swal.fire({ icon: 'warning', title: 'Agreement Required', text: "Please agree to KANISHKAIMPERIA's Terms of Service before publishing.", confirmButtonColor: '#56ab2f' });
+    return;
+  }
+  if (uploadedPhotoCount < 3) {
+    Swal.fire({ icon: 'warning', title: 'Add More Photos', text: 'Please add at least 3 photos so buyers can see your plot clearly.', confirmButtonColor: '#56ab2f' });
+    return;
+  }
+  Swal.fire({
+    title: 'Submitting your listing…',
+    allowOutsideClick: false, allowEscapeKey: false, showConfirmButton: false,
+    didOpen: () => { Swal.showLoading(); }
+  });
+  document.getElementById('plotForm').submit();
+}
+
+/* ── PINCODE → LOCALITY LOOKUP (same behaviour as admin form) ── */
+function cleanText(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v).trim();
+  return ['undefined', 'null', 'none', 'nan'].includes(s.toLowerCase()) ? '' : s;
+}
+function syncLocalityFinal() {
+  const sel = document.getElementById('locality_area');
+  const manual = document.getElementById('locality_area_manual');
+  const hidden = document.getElementById('locality');
+  if (!sel || !manual || !hidden) return;
+  if (sel.value === '__other__') {
+    manual.style.display = 'block';
+    manual.required = true;
+    hidden.value = cleanText(manual.value);
+  } else {
+    manual.style.display = 'none';
+    manual.required = false;
+    hidden.value = cleanText(sel.value);
+  }
+  updatePreview();
+}
+function fillLocalities(list) {
+  const sel = document.getElementById('locality_area');
+  sel.innerHTML = '';
+  const clean = [...new Set((list || []).map(cleanText).filter(Boolean))];
+  if (clean.length) {
+    sel.add(new Option('-- Select Locality --', ''));
+    clean.forEach(l => sel.add(new Option(l, l)));
+  }
+  sel.add(new Option('✏️ My locality is not listed (enter manually)', '__other__'));
+  if (!clean.length) sel.value = '__other__';
+  syncLocalityFinal();
+}
+let lastLookedUpPincode = '';
+function lookupPincode() {
+  const pinField = document.getElementById('pincode');
+  const pin = pinField.value.trim();
+  if (pin.length !== 6 || pin === lastLookedUpPincode) return;
+  lastLookedUpPincode = pin;
+
+  fetch("{% url 'ajax_lookup_pincode' %}?pincode=" + pin)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        lastLookedUpPincode = '';
+        fillLocalities([]);
+        Swal.fire({ icon: 'warning', title: 'Pincode not found', text: data.error || 'Please enter your locality manually.', confirmButtonColor: '#56ab2f' });
+        return;
+      }
+      if (cleanText(data.city)) document.getElementById('city').value = data.city;
+      const apiState = cleanText(data.state).toLowerCase();
+      const stateSelect = document.getElementById('state');
+      if (stateSelect && apiState) {
+        for (const o of stateSelect.options) { if (o.value.toLowerCase() === apiState) { stateSelect.value = o.value; break; } }
+      }
+      fillLocalities(data.localities);
+    })
+    .catch(() => {
+      lastLookedUpPincode = '';
+      fillLocalities([]);
+      Swal.fire({ icon: 'error', title: 'Lookup failed', text: 'Could not verify pincode. Please enter your locality manually.', confirmButtonColor: '#56ab2f' });
+    });
+}
+document.addEventListener('DOMContentLoaded', function () {
+  const pin = document.getElementById('pincode');
+  if (pin) {
+    pin.addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+      if (this.value.length === 6) lookupPincode(); else lastLookedUpPincode = '';
+    });
+    pin.addEventListener('blur', lookupPincode);
+  }
+  document.getElementById('locality_area')?.addEventListener('change', syncLocalityFinal);
+  document.getElementById('locality_area_manual')?.addEventListener('input', syncLocalityFinal);
+});
+
+/* ── AUTH MODAL LOGIC (unchanged) ── */
+function updateHeaderNav(uName, uRole, uEmail, uMobile) {
+  const navRight = document.querySelector('.nav-right');
+  const loginBtn = navRight ? navRight.querySelector('a[href*="login"]') : null;
+  const dashboardUrls = {
+    "Landlord": "{% url 'landlord_dashboard' %}",
+    "Tenant": "{% url 'Tenant_App:tenant_Dashboard' %}",
+    "Buyer": "{% url 'Buyer_Dashboard' %}",
+    "Agent": "{% url 'agent_dashboard' %}",
+    "Agency/Builder": "{% url 'Agency_Dashboard' %}",
+    "Vendor": "{% url 'Vendors:vendors_Dashboard' %}"
+  };
+  const targetUrl = dashboardUrls[uRole] || "#";
+  if (loginBtn) {
+    const dropdownHTML = `
+      <div class="dropdown d-inline-block">
+        <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person"></i> Hello ${uName}-${uRole}
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius:12px;min-width:200px;">
+          <li><a class="dropdown-item py-2 fw-medium text-secondary" href="${targetUrl}"><i class="bi bi-send me-2 text-primary"></i> Access Dashboard</a></li>
+          <li><a class="dropdown-item py-2 fw-medium text-secondary" href="#"><i class="bi bi-heart me-2 text-danger"></i> Wishlist Properties</a></li>
+          <li><a class="dropdown-item py-2 fw-medium text-secondary" href="#"><i class="bi bi-search me-2 text-info"></i> Searched Properties</a></li>
+          <li><hr class="dropdown-divider" style="border-color:#f1f5f9;"></li>
+          <li><button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()"><i class="bi bi-door-closed me-2 text-warning"></i> Logout</button></li>
+        </ul>
+      </div>`;
+    loginBtn.outerHTML = dropdownHTML;
+    const newDropdown = document.getElementById('loginDropdown');
+    if (newDropdown && typeof bootstrap !== 'undefined') new bootstrap.Dropdown(newDropdown);
+  }
+  const nameField = document.getElementById('display_up_name');
+  const emailField = document.getElementById('display_up_email');
+  const mobileField = document.getElementById('display_up_mobile');
+  const roleField = document.getElementById('display_up_role');
+  if (nameField) nameField.value = uName;
+  if (emailField) emailField.value = uEmail;
+  if (roleField) roleField.value = uRole;
+  if (mobileField) mobileField.value = uMobile || "";
+}
+function goToStepAuth(stepId) {
+  $('.auth-step').removeClass('active-step').hide();
+  $('#' + stepId).addClass('active-step').fadeIn(250);
+}
+function moveToNext(current, event) {
+  if (current.value.length >= current.maxLength) { let next = $(current).next('.otp-input'); if (next.length) next.focus(); }
+  if (event.key === "Backspace" && current.value.length === 0) { let prev = $(current).prev('.otp-input'); if (prev.length) prev.focus(); }
+}
+function checkEmailExists(_this) {
+  let email = $('#flow_email').val().trim();
+  if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
+  let btnText = _this.innerHTML;
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
+  $.ajax({
+    type: "POST", url: "{% url 'Check_Email_Api' %}", data: { 'email': email },
+    success: function (response) {
+      $(_this).prop("disabled", false).html(btnText);
+      if (response.exists) goToStepAuth('step-2-login'); else sendOTP(email);
+    },
+    error: function () { $(_this).prop("disabled", false).html(btnText); Swal.fire("Error", "Server error.", "error"); }
+  });
+}
+function sendOTP(email) {
+  $('#display_otp_email').text(email);
+  goToStepAuth('step-2-otp');
+  $.ajax({ type: "POST", url: "{% url 'Send_Otp_Api' %}", data: { 'email': email } });
+}
+function processProgLogin(_this) {
+  let email = $('#flow_email').val();
+  let password = $('#flow_password').val();
+  if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
+  let btnText = _this.innerHTML;
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
+  $.ajax({
+    type: "POST", url: "{% url 'Prop_Login_Api' %}", data: { 'email': email, 'password': password },
+    success: function (response) {
+      if (response.status == '1') {
+        isLoggedIn = true;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+        updateHeaderNav(response.user_name || "User", response.user_role || "User", response.user_email || email, response.user_mobile || "");
+        if (typeof pendingAction === 'function') { let action = pendingAction; pendingAction = null; action(); }
+        else { Swal.fire("Success", "Logged in successfully!", "success"); }
+      } else {
+        $(_this).prop("disabled", false).html(btnText);
+        Swal.fire("Error", response.msg || "Incorrect password", "error");
+      }
+    }
+  });
+}
+function verifyOTP(_this) {
+  let otp = "";
+  $('.otp-input').each(function () { otp += $(this).val(); });
+  if (otp.length < 4) return Swal.fire("Wait", "Please enter the 4-digit OTP.", "info");
+  let btnText = _this.innerHTML;
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
+  $.ajax({
+    type: "POST", url: "{% url 'Verify_Otp_Api' %}", data: { 'email': $('#flow_email').val(), 'otp': otp },
+    success: function (response) {
+      $(_this).prop("disabled", false).html(btnText);
+      if (response.valid) goToStepAuth('step-3-details'); else Swal.fire("Error", "Invalid OTP. Try again.", "error");
+    }
+  });
+}
+function processProgRegistration(_this) {
+  let email = $('#flow_email').val();
+  let name = $('#flow_reg_name').val();
+  let mobile = $('#flow_reg_mobile').val();
+  let role = $('#flow_reg_role').val();
+  if (!name || !mobile || role === "SelectRole") return Swal.fire("Wait", "Please fill in all details.", "info");
+  let btnText = _this.innerHTML;
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
+  $.ajax({
+    type: "POST", url: "{% url 'Prop_Register_Api' %}", data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role },
+    success: function (response) {
+      if (response.status == '1') {
+        isLoggedIn = true;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+        updateHeaderNav(name, role, email, mobile);
+        if (typeof pendingAction === 'function') { let action = pendingAction; pendingAction = null; action(); }
+        else { Swal.fire("Success", "Account created!", "success"); }
+      } else {
+        $(_this).prop("disabled", false).html(btnText);
+        Swal.fire("Error", response.msg || "Registration failed.", "error");
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>

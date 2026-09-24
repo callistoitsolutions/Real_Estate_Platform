@@ -1,0 +1,44 @@
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Title</label>
+        <input type="text" name="title" class="form-control" maxlength="60" required placeholder="e.g. Buy Homes">
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Subtitle</label>
+        <input type="text" name="subtitle" class="form-control" maxlength="100" required placeholder="e.g. Resale & Ready Apartments">
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Image</label>
+        <input type="file" name="image" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Listing Type</label>
+        <select name="listing_type" class="form-select" required>
+            <option value="rent">Rent</option>
+            <option value="sale">Sale</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Category Slug</label>
+        <input type="text" name="category_slug" class="form-control" maxlength="30" required placeholder="residential, commercial, plot, pg, agricultural">
+        <div class="form-text">Value used in ?category= querystring</div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Extra Tag (Optional)</label>
+        <input type="text" name="extra_tag" class="form-control" maxlength="30" placeholder="e.g. luxury">
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" name="is_new" class="form-check-input" id="is_new">
+        <label class="form-check-label" for="is_new">Show 'NEW' ribbon</label>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Order</label>
+        <input type="number" name="order" class="form-control" value="0">
+    </div>
+    <div class="mb-3 form-check">
+        <input type="checkbox" name="is_active" class="form-check-input" id="is_active" checked>
+        <label class="form-check-label" for="is_active">Is Active</label>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Save Property Category Tile</button>
+</form>

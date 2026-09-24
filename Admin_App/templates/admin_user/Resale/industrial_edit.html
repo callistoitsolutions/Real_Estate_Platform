@@ -2689,11 +2689,7 @@
     var newImagesCount = window.totalImageCount ? window.totalImageCount() : 0;
     var grandTotalImages = existingImagesCount + newImagesCount;
 
-    if (grandTotalImages < 3) {
-        goToStep(4);
-        Swal.fire({ icon: 'error', title: 'Missing Images', text: 'Please have at least 3 property images uploaded or saved.' });
-        return;
-    }
+   
 
     var progressValue = 0;
     var loadingInterval;

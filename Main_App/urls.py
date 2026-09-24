@@ -185,6 +185,15 @@ urlpatterns = [
     path('resale/plot/', views.resale_plot_form, name='resale_plot_form'),
     path('resale/industrial/', views.resale_industrial_form, name='resale_industrial_form'),
 
+
+    
+    # ================= RESALE plot LISTING =================
+    path('resale/residential_plot/', views.residential_resale_plot_form, name='residential_resale_plot_form'),
+    path('resale/commercial_plot/', views.resale_plot_commercial_form, name='resale_plot_commercial_form'),
+    path('resale/agricultural_plot/', views.resale_plot_agricultural_form, name='resale_plot_agricultural_form'),
+   
+    path('resale/industrial_plot/', views.resale_plot_industrial_form, name='resale_plot_industrial_form'),
+
     #######################START URL SECTION OF POST PROPERTY####################################
 
    path('post_property', views.post_property, name='post_property'),
