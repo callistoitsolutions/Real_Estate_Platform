@@ -89,6 +89,9 @@ from openpyxl.comments import Comment
 
 
 from Main_App.registry import PROPERTY_REGISTRY
+from django.contrib.contenttypes.models import ContentType as _CT
+from Admin_App.badge_utils import BADGE_META, BADGE_CHOICES, all_property_models, live_q
+
 
 
 ########### Crime Officer Views#######
@@ -348,7 +351,6 @@ def global_search(request):
             # {'model': PGColivingProperty, 'label': 'PG / Co-living', 'url_name': 'pg_detail'},
             {'model': ResaleResidentialProperty, 'label': 'Residential (Resale)', 'url_name': 'residential_resale_detail'},
             {'model': ResaleResidentialProperty, 'label': 'Commercial (Resale)', 'url_name': 'commercial_resale_detail'},
-            {'model': PlotSaleProperty, 'label': 'Plot / Land', 'url_name': 'plot_detail'},
             {'model': IndustrialResaleProperty, 'label': 'Industrial', 'url_name': 'industrial_detail'},
             {'model': AgriculturalResaleProperty, 'label': 'Agricultural', 'url_name': 'agricultural_detail'},
         ]
@@ -4300,8 +4302,6 @@ def Update_RM(request,id):
 ########## Views start for ajax for add/update rm functionality #################4
 
 
-
-
 @csrf_exempt
 def User_Ajax(request):
 
@@ -4317,6 +4317,7 @@ def User_Ajax(request):
     # --------------------------------------------------
     # GET SELECTED SERVICES SEPARATELY
     # --------------------------------------------------
+
     selected_services = request.POST.getlist('services[]')
 
     # These fields are not User_Details model fields
@@ -4326,6 +4327,7 @@ def User_Ajax(request):
     # --------------------------------------------------
     # HANDLE OPERATIONAL SCOPE
     # --------------------------------------------------
+
     user_operational_scope = data.get('user_operational_scope')
 
     if user_operational_scope == 'all':
@@ -4349,6 +4351,7 @@ def User_Ajax(request):
     # ==================================================
     # ADD NEW VENDOR
     # ==================================================
+
     if data.get('id') == "":
 
         # Remove ID before creating new record
@@ -4368,6 +4371,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # CHECK DUPLICATE PHONE
         # --------------------------------------------------
+
         if User_Details.objects.filter(
             user_phone=data.get('user_phone')
         ).exists():
@@ -4380,6 +4384,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # CHECK DUPLICATE EMAIL
         # --------------------------------------------------
+
         elif User_Details.objects.filter(
             user_email=data.get('user_email')
         ).exists():
@@ -4394,6 +4399,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # CREATE USER
             # --------------------------------------------------
+
             current_year = datetime.now().year
             year_suffix = str(current_year)[-2:]
 
@@ -4402,6 +4408,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # GENERATE USER ID
             # --------------------------------------------------
+            
             user_id = f"KI-{new_user.id}-{year_suffix}"
 
             new_user.user_id = user_id
@@ -4410,6 +4417,7 @@ def User_Ajax(request):
             # ==================================================
             # SAVE SELECTED SERVICES
             # ==================================================
+
             for service_id in selected_services:
 
                 service_obj = Service.objects.filter(
@@ -4435,6 +4443,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # SUCCESS RESPONSE
             # --------------------------------------------------
+            
             return JsonResponse({
                 "status": "1",
                 "msg": "User Details added successfully",
@@ -4444,6 +4453,7 @@ def User_Ajax(request):
     # ==================================================
     # UPDATE EXISTING VENDOR
     # ==================================================
+
     else:
 
         try:
@@ -4462,6 +4472,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # PROFILE IMAGE
         # --------------------------------------------------
+
         if request.FILES.get('user_profile'):
 
             data['user_profile'] = request.FILES.get(
@@ -4478,6 +4489,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # REMOVE NON-MODEL FIELDS
         # --------------------------------------------------
+
         data.pop(
             'services[]',
             None
@@ -4497,6 +4509,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # UPDATE USER DETAILS
         # --------------------------------------------------
+
         for key, value in data.items():
 
             setattr(
@@ -4512,11 +4525,13 @@ def User_Ajax(request):
         # ==================================================
 
         # Remove old service mappings
+
         Vendor_Service.objects.filter(
             vendor=rm
         ).delete()
 
         # Add currently selected services
+
         for service_id in selected_services:
 
             service_obj = Service.objects.filter(
@@ -4542,6 +4557,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # SUCCESS RESPONSE
         # --------------------------------------------------
+
         return JsonResponse({
             "status": "1",
             "msg": "User Details updated successfully",
@@ -4560,6 +4576,7 @@ def Users_Bulk_Delete(request):
         delete_type = data.get('delete_type')
         
         #  BUG FIX 1: This was incorrectly pulling 'delete_type' before
+
         role = data.get('role') 
         
         # Base query: Get all users of the selected role
@@ -4906,6 +4923,7 @@ def Landlord_Data(request):
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
     
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
+
 
 ############ Views end for upload landlord data functionality via excel #######
 
@@ -6725,7 +6743,7 @@ def Agency_Data(request):
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 
-############# Views end for upload agency data functionality via excel ##################
+############# Views end for upload agency data functionality via excel ########
 
 
 ######### Views start for download sample excel for agency/builder #################
@@ -17726,10 +17744,12 @@ def industrial_resale_add(request):
                 user_description=request.POST.get('user_description'),
 
                 # Step 3: File Document Streams
+                
                 compliance_docs=request.FILES.get('compliance_docs'),
                 social_video=request.FILES.get('social_video'),
 
                 # Step 4: Contact Information
+
                 city=request.POST.get('city'),
                 locality_area=request.POST.get('locality_area'),   # FIXED KEY
                 Property_address=request.POST.get('Property_address'), # FIXED KEY
@@ -17740,6 +17760,7 @@ def industrial_resale_add(request):
                 residency_status=request.POST.get('residency_status'),
 
                 # Audit Session Metadata Tracks
+
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
                 uploaded_by_contact=uploader_phone,
@@ -17771,7 +17792,9 @@ def industrial_resale_add(request):
     ameneties_obj = Ameneties_Details.objects.all()
     facilities_obj = Facilities_Details.objects.all()
 
-    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'admin_obj': Admin_Login.objects.filter(id=admin_id).first() if admin_id else None}
+    user_obj = User_Details.objects.all()
+
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'admin_obj': Admin_Login.objects.filter(id=admin_id).first() if admin_id else None,'user_obj':user_obj}
 
     return render(request, 'admin_user/Resale/industrial_resale.html', context)
 
@@ -18062,6 +18085,7 @@ def Resale_Industrial_Ajax(request):
                     data[field] = None
             else:
                 data[field] = None
+
         
         # ============================================================
         # 5. CONVERT BOOLEAN/CHOICE FIELDS
@@ -18078,25 +18102,40 @@ def Resale_Industrial_Ajax(request):
         
         data['listed_elsewhere'] = 'Yes' if data.get('listed_elsewhere') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
 
+        
+
+
         # Extract video option before saving property
         video_option = data.get('video_option')
 
         # ============================================================
         # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
         # ============================================================
-        # ============================================================
-        # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
-        # ============================================================
+
         extra_keys_to_remove = [
             'csrfmiddlewaretoken', 'assigned_to_role',
-            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual'
+            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual',
+            'price_per_sqft_builtup',
+            'price_per_sqft_builtup_display',
+            'price_per_sqft_land_display'
         ]
+
         for k in extra_keys_to_remove:
             data.pop(k, None)
 
         keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
         for k in keys_to_remove:
             data.pop(k, None)
+
+        # ============================================================
+        # FIX: FORCE "undefined" OR BLANK DATES TO Python None
+        # ============================================================
+        
+        date_fields_to_clean = ['dc_conversion_date']
+        for d_field in date_fields_to_clean:
+            val = data.get(d_field)
+            if not val or str(val).strip().lower() in ['', 'undefined', 'none', 'null']:
+                data[d_field] = None
         
         # ============================================================
         # 7. CREATE OR UPDATE PROPERTY FIRST
@@ -19847,12 +19886,9 @@ def Resale_Resident_Ajax(request):
             # ============================================================
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # ============================================================
-            # ============================================================
-            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
-            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_building_name = (request.POST.get('building_name') or '').strip()
-            input_locality = (request.POST.get('locality') or request.POST.get('locality') or '').strip()
+            input_locality = (request.POST.get('locality') or '').strip() # Fixed duplicate getter
             input_pincode = (request.POST.get('pincode') or '').strip()
             input_state = (request.POST.get('state') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
@@ -19943,12 +19979,19 @@ def Resale_Resident_Ajax(request):
             data['nearby_facilities'] = ''
         
         # ============================================================
-        # 4. CONVERT NUMERIC FIELDS
+        # 4. CONVERT NUMERIC FIELDS (Added plot_area, construction_area, land_area)
         # ============================================================
+
+        # Remove UI display strings from data before model assignment
+        for ui_field in ['house_psf_plot_display', 'house_psf_const_display', 'farm_psf_builtup_display', 'farm_psf_land_display']:
+            data.pop(ui_field, None)
+
+            
         numeric_fields = [
             'super_builtup_area', 'builtup_area', 'carpet_area', 'plot_area', 
+            'construction_area', 'land_area',
             'total_floors', 'bathrooms', 'balconies', 
-            'covered_parking', 'selling_price', 'loan_amount', 
+            'selling_price', 'loan_amount', 
             'pending_tax_amount', 'manual_brokerage', 'price_per_sqft',
             'latitude', 'longitude'
         ]
@@ -19970,14 +20013,12 @@ def Resale_Resident_Ajax(request):
         data['any_legal_dispute'] = 'yes' if data.get('any_legal_dispute') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
         data['government_tax'] = 'yes' if data.get('government_tax') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
         data['price_negotiable'] = 'yes' if data.get('price_negotiable') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
-        data['open_parking'] = 'Yes' if data.get('open_parking') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
         data['listed_elsewhere'] = 'Yes' if data.get('listed_elsewhere') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
 
         # Extract video option before saving property
         video_option = data.get('video_option')
 
         # CLEANUP: Remove array/file keys from the 'data' dictionary 
-        # so they don't break the ORM unpack (**data) or setattr loop below
         keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
         for k in keys_to_remove:
             data.pop(k, None)
@@ -19988,7 +20029,6 @@ def Resale_Resident_Ajax(request):
         if is_update:
             try:
                 property_obj = ResaleResidentialProperty.objects.get(id=property_id)
-                # Dynamically set all processed fields to the existing object
                 for key, value in data.items():
                     setattr(property_obj, key, value)
                 property_obj.save()
@@ -20010,8 +20050,8 @@ def Resale_Resident_Ajax(request):
                 images_to_delete = ResalePropertyImage.objects.filter(id__in=deleted_image_ids, property=property_obj)
                 for img in images_to_delete:
                     if img.image:
-                        img.image.delete(save=False) # Delete physical file safely
-                    img.delete() # Delete DB record
+                        img.image.delete(save=False)
+                    img.delete()
                     
         # ============================================================
         # 7. HANDLE IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE)
@@ -20099,11 +20139,8 @@ def Resale_Resident_Ajax(request):
         
         property_video_link = data.get('property_video_link', '')
 
-        # ============================================================
-        # FIX: CORRECT VIDEO UPDATE LOGIC
-        # ============================================================
         if video_option == 'upload':
-            if uploaded_video:  # Only update if a NEW file was actually uploaded
+            if uploaded_video:
                 if uploaded_video.size > 20 * 1024 * 1024:
                     ResaleResidentialVideo.objects.update_or_create(
                         property=property_obj,
@@ -20142,7 +20179,7 @@ def Resale_Resident_Ajax(request):
         if hasattr(property_obj, 'generate_auto_descriptions'):
             property_obj.generate_auto_descriptions()
             
-        property_obj.save()  # Ensure Video & Floor Plan attachments get explicitly saved
+        property_obj.save()
         
         if hasattr(property_obj, 'generate_auto_faqs'):
             property_obj.generate_auto_faqs()
@@ -20636,12 +20673,13 @@ def resale_residential_view(request, pk):
 # SINGLE SOFT DELETE
 # ═════════════════════════════════════════════════════════════
 
-@require_POST
+@csrf_exempt
 def resale_residential_delete(request):
+
     # 1. Extract the ID from the AJAX POST payload
+    
     prop_id = request.POST.get('prop_id')
 
-    print("----------------------------",prop_id)
     
     if not prop_id:
         return JsonResponse({"status": "error", "message": "Property ID is missing."}, status=400)
@@ -40212,6 +40250,99 @@ def add_info_banner(request):
         return redirect("add_info_banner")
     return render(request, "admin_user/Home_Pages/add_info_banner.html")
 
+
+
+
+def badge_manager(request):
+    """Admin panel page: search a property -> tick badges -> save. Also lists all assigned badges."""
+    models_list = all_property_models()
+    model_map = {m._meta.label_lower: m for m in models_list}
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        who = request.session.get("admin_name") or request.session.get("user_name") or "admin"
+
+        if action == "assign":
+            model = model_map.get(request.POST.get("model_key"))
+            pk = (request.POST.get("pk") or "").strip()
+            if model and pk and model.objects.filter(pk=pk).exists():
+                ct = _CT.objects.get_for_model(model)
+                chosen = [b for b in request.POST.getlist("badges") if b in BADGE_META]
+                start = request.POST.get("start_date") or None
+                end = request.POST.get("end_date") or None
+                try:
+                    priority = int(request.POST.get("priority") or 0)
+                except ValueError:
+                    priority = 0
+                # remove un-ticked ones, upsert ticked ones
+                PropertyBadge.objects.filter(content_type=ct, object_id=pk).exclude(badge_type__in=chosen).delete()
+                for b in chosen:
+                    PropertyBadge.objects.update_or_create(
+                        content_type=ct, object_id=pk, badge_type=b,
+                        defaults={"is_active": True, "start_date": start, "end_date": end,
+                                  "priority": priority, "created_by": str(who)},
+                    )
+                messages.success(request, f"Badges saved for {pk}.")
+            else:
+                messages.error(request, "Property not found.")
+
+        elif action == "toggle":
+            b = PropertyBadge.objects.filter(pk=request.POST.get("badge_id")).first()
+            if b:
+                b.is_active = not b.is_active
+                b.save(update_fields=["is_active"])
+
+        elif action == "delete":
+            PropertyBadge.objects.filter(pk=request.POST.get("badge_id")).delete()
+            messages.success(request, "Badge removed.")
+
+        return redirect(request.get_full_path())
+
+    # ---------- search ----------
+    q = (request.GET.get("q") or "").strip()
+    results = []
+    if q:
+        for m in models_list:
+            names = {f.name for f in m._meta.get_fields()}
+            cond = Q(pk__icontains=q)
+            for fld in ("property_title", "locality", "locality_area", "city", "village"):
+                if fld in names:
+                    cond |= Q(**{f"{fld}__icontains": q})
+            flt = {}
+            if "is_deleted" in names:
+                flt["is_deleted"] = False
+            for o in m.objects.filter(cond, **flt)[:15]:
+                ct = _CT.objects.get_for_model(m)
+                current = {b.badge_type: b for b in PropertyBadge.objects.filter(content_type=ct, object_id=str(o.pk))}
+                results.append({
+                    "model_key": m._meta.label_lower, "pk": o.pk,
+                    "title": getattr(o, "property_title", None) or str(o),
+                    "city": getattr(o, "city", "") or getattr(o, "district", ""),
+                    "approval": getattr(o, "approval_status", ""),
+                    "model_name": m._meta.verbose_name,
+                    "current": current,
+                    "first": next(iter(current.values()), None),
+                })
+        results = results[:40]
+
+    # ---------- assigned badges table ----------
+    f_type = request.GET.get("type") or ""
+    assigned_qs = PropertyBadge.objects.select_related("content_type")
+    if f_type in BADGE_META:
+        assigned_qs = assigned_qs.filter(badge_type=f_type)
+    assigned = []
+    for b in assigned_qs[:300]:
+        model = b.content_type.model_class()
+        obj = model.objects.filter(pk=b.object_id).first() if model else None
+        assigned.append({
+            "b": b, "title": (getattr(obj, "property_title", None) or b.object_id) if obj else "(deleted property)",
+            "meta": BADGE_META[b.badge_type],
+        })
+
+    return render(request, "admin_user/badge_manager.html", {
+        "q": q, "results": results, "assigned": assigned, "f_type": f_type,
+        "badge_meta": BADGE_META,
+    })
 
 
 

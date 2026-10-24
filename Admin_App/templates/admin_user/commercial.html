@@ -622,13 +622,79 @@
     color: var(--success);
   }
 
-  @media (max-width: 1200px) {
+ @media (max-width: 1200px) {
     .page-wrap {
       grid-template-columns: 1fr;
     }
-
     .preview-sidebar {
       display: none;
+    }
+  }
+
+
+  @media (max-width: 991px) {
+    .main-content {
+      margin-left: 0 !important;
+      padding: 15px !important;
+      margin-top: 70px;
+    }
+    .form-container {
+      padding: 20px !important;
+      border-radius: 14px;
+    }
+    .property-banner-header {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    .btn-back-banner {
+      width: 100%;
+      justify-content: center;
+    }
+    .stepper {
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 10px 0;
+      gap: 15px;
+    }
+    .step-item {
+      min-width: max-content;
+    }
+    .section-body {
+      padding: 15px !important;
+    }
+    .img-cat-tabs {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .img-upload-guide {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .guide-arrow {
+      display: none !important;
+    }
+    .step-nav {
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
+    .step-nav button,
+    .step-nav .btn-next,
+    .step-nav .btn-prev,
+    .step-nav .btn-submit {
+      width: 100% !important;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .img-cat-tabs {
+      grid-template-columns: 1fr !important;
+    }
+    .form-title {
+      font-size: 1.2rem;
+    }
+    .banner-text h1 {
+      font-size: 1.25rem;
     }
   }
 
@@ -1148,7 +1214,7 @@
             <option value="">Select Property Type</option>
 
             <!-- Studio & Residential/Commercial Mix -->
-            <option value="studio_apartment">Studio Apartment</option>
+            {% comment %} <option value="studio_apartment">Studio Apartment</option> {% endcomment %}
             <option value="apartment">Apartment</option>
 
             <!-- Office -->
@@ -1194,7 +1260,7 @@
       </div>
 
       <!-- ADDED BHK FIELD HERE FOR THE VALIDATION RULE -->
-      <div class="col-md-6 mb-3" id="bhkFieldWrapper">
+      {% comment %} <div class="col-md-6 mb-3" id="bhkFieldWrapper">
         <label class="form-label">BHK Configuration <span class="required">*</span></label>
         <select class="form-select" name="bhk" id="bhk" required>
             <option value="">Select BHK</option>
@@ -1205,7 +1271,7 @@
             <option value="4 BHK">4 BHK</option>
             <option value="5+ BHK">5+ BHK</option>
         </select>
-      </div>
+      </div> {% endcomment %}
 
       <div class="col-md-6 mb-3">
         <label class="form-label">Building / Project Name <span class="required">*</span></label>

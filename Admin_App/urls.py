@@ -1107,6 +1107,8 @@ urlpatterns = [
     path("admin/step/add/", views.add_how_it_works, name="add_how_it_works"),
     path("admin/banner/add/", views.add_info_banner, name="add_info_banner"),
 
+    path('badge_manager', views.badge_manager, name="badge_manager"),
+
     
 ]
 

@@ -291,14 +291,35 @@
     .item-tag { background: white; border: 1px solid #dee2e6; border-radius: 20px; padding: 4px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
     .item-tag .remove-btn { cursor: pointer; color: #dc3545; margin-left: 4px; font-size: 12px; }
 
+   
+
     @media (max-width: 1200px) {
-        .page-wrapper { grid-template-columns: 1fr; display: flex; flex-direction: column; }
-        .preview-sidebar { display: flex; position: static; width: 100%; margin-top: 10px; }
+        .page-wrapper { display: flex; flex-direction: column; }
+        .page-wrapper > div:first-child {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 20px !important;
+        }
+        .preview-sidebar { position: static !important; width: 100% !important; max-height: none !important; margin-top: 10px; }
     }
     @media (max-width: 991px) {
-        .main-content { margin-left: 0 !important; padding: 20px; margin-top: var(--topbar-height); }
-        .form-container { padding: 20px; border-radius: 14px; }
+        .main-content { margin-left: 0 !important; padding: 15px !important; margin-top: var(--topbar-height); }
+        .form-container { padding: 16px !important; border-radius: 14px; }
+        .form-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .btn-back { width: 100%; justify-content: center; }
+        .stepper-wrapper { padding: 0 5px; justify-content: flex-start; gap: 15px; }
+        .section-body { padding: 15px !important; }
+        .img-cat-tabs { grid-template-columns: repeat(2, 1fr) !important; }
+        .img-upload-guide { flex-direction: column; align-items: flex-start; }
+        .guide-arrow { display: none !important; }
+        .form-footer { flex-direction: column-reverse; gap: 10px; }
+        .form-footer button { width: 100% !important; }
     }
+    @media (max-width: 480px) {
+        .img-cat-tabs { grid-template-columns: 1fr !important; }
+        .form-title { font-size: 1.15rem; }
+    }
+
     @media (max-width: 576px) {
         .main-content { padding: 12px; }
         .section-body { padding: 15px; }
@@ -430,6 +451,7 @@
                                         <select class="form-select form-control" name="property_type" id="property_type" required>
                                             <option value="">Select Property Type</option>
                                             <option value="Apartment">Apartment</option>
+                                            <option value="Flat">Flat</option>
                                             <option value="Studio Apartment">Studio Apartment</option>
                                             <option value="Penthouse">Penthouse</option>
                                             <option value="Duplex Apartment">Duplex Apartment</option>

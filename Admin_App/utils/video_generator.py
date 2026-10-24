@@ -3,68 +3,89 @@ if not hasattr(PIL.Image, 'ANTIALIAS'):
     PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
 
 import os
+import cv2
+import numpy as np
 from django.conf import settings
-from moviepy.editor import ImageClip, concatenate_videoclips
 
-def generate_property_slideshow(image_paths, output_relative_path, seconds_per_image=2.5, fade_duration=0.5):
+def generate_property_slideshow(image_paths, output_relative_path, seconds_per_image=2.5, fps=24):
     """
-    Shared video generator utility used across property listing modules 
-    (Residential, Commercial, and PG/Co-living).
+    Pure OpenCV property slideshow generator. Completely removes MoviePy and FFmpeg 
+    filter graph overhead to prevent 'Cannot allocate memory' and 'xfade' crashes.
     """
     if not image_paths:
         return None
 
-    clips = []
+    valid_images = []
+    processed_temp_files = []
+    
     try:
+        # 1. Preprocess and resize images to standard HD (1280x720) with letterboxing
+        
         for path in image_paths:
             if not os.path.exists(path):
                 continue
-            
-            # Initialize ImageClip and standardize height
-            clip = ImageClip(path).set_duration(seconds_per_image).resize(height=720)
-            
-            # Apply fades safely
-            if fade_duration > 0 and seconds_per_image > (2 * fade_duration):
-                clip = clip.fadein(fade_duration).fadeout(fade_duration)
-                
-            clips.append(clip)
+            try:
+                with PIL.Image.open(path) as img:
+                    img = img.convert('RGB')
+                    
+                    target_w, target_h = 1280, 720
+                    img.thumbnail((target_w, target_h), PIL.Image.LANCZOS)
+                    
+                    # Create a dark slate background canvas and paste centered
 
-        if not clips:
+                    new_img = PIL.Image.new("RGB", (target_w, target_h), (15, 23, 42))
+                    paste_x = (target_w - img.size[0]) // 2
+                    paste_y = (target_h - img.size[1]) // 2
+                    new_img.paste(img, (paste_x, paste_y))
+                    
+                    temp_path = path + "_cv_opt.jpg"
+                    new_img.save(temp_path, "JPEG", quality=90)
+                    processed_temp_files.append(temp_path)
+                    valid_images.append(temp_path)
+            except Exception as img_err:
+                print(f"IMAGE PREPROCESSING ERROR ({path}): {str(img_err)}")
+
+        if not valid_images:
             return None
 
-        # Concatenate clips using compose method with crossfade overlap padding
-        final = concatenate_videoclips(clips, method="compose", padding=-fade_duration)
-        
         output_abs_path = os.path.join(settings.MEDIA_ROOT, output_relative_path)
         os.makedirs(os.path.dirname(output_abs_path), exist_ok=True)
-        
-        final.write_videofile(
-            output_abs_path, 
-            fps=24, 
-            codec="libx264", 
-            audio=False, 
-            preset="medium", 
-            threads=2, 
-            logger=None
-        )
-        
+
+        # 2. Initialize OpenCV VideoWriter
+
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        video_writer = cv2.VideoWriter(output_abs_path, fourcc, fps, (1280, 720))
+
+        if not video_writer.isOpened():
+            print("ERROR: Failed to open OpenCV VideoWriter.")
+            return None
+
+        frames_per_image = int(fps * seconds_per_image)
+
+        # 3. Write frames directly into video stream
+
+        for img_path in valid_images:
+            frame_bgr = cv2.imread(img_path)
+            if frame_bgr is None:
+                continue
+            
+            for _ in range(frames_per_image):
+                video_writer.write(frame_bgr)
+
+        video_writer.release()
         return output_relative_path
 
     except Exception as e:
-        print(f"SLIDESHOW GENERATION ERROR: {str(e)}")
+        print(f"OPENCV SLIDESHOW GENERATION ERROR: {str(e)}")
         import traceback
         traceback.print_exc()
         return None
 
     finally:
-        # Resource cleanup to prevent handle leaks across listing modules
-        for c in clips:
+        # Clean up temporary processed image files
+        for temp_path in processed_temp_files:
             try:
-                c.close()
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
             except:
                 pass
-        try:
-            if 'final' in locals() and final:
-                final.close()
-        except:
-            pass

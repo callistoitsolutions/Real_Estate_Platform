@@ -5,13 +5,15 @@ from decimal import Decimal,InvalidOperation
 
 
 import uuid
-# 📂 Go to the VERY TOP of models.py
-from django.db import models, transaction # 🚀 MAKE SURE ", transaction" IS ADDED HERE
+#  Go to the VERY TOP of models.py
+from django.db import models, transaction #  MAKE SURE ", transaction" IS ADDED HERE
 
 
 
 
 import random
+
+
 
 
 
@@ -855,6 +857,24 @@ class ServiceProcessStep(models.Model):
 
     def __str__(self):
         return f"Step {self.step_number}: {self.title}"
+    
+    
+class ServiceCity(models.Model):
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE,
+        related_name="cities"
+    )
+    city_name = models.CharField(max_length=100)
+    city_slug = models.SlugField()
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "city_name"]
+
+    def __str__(self):
+        return f"{self.service.title} - {self.city_name}"
 
 
 ############### Models start for user details model ############################
@@ -1272,6 +1292,82 @@ class Subscription_Purchase_Details(models.Model):
         
     
 
+class PolishUserDescriptionMixin:
+    """
+    Mixin providing polish_user_description() to any model that has
+    a `user_description` TextField.
+    """
+    def polish_user_description(self):
+        import re
+        text = (self.user_description or "").strip()
+        if not text:
+            return text
+
+        # Remove HTML if any
+        text = re.sub(r"<[^>]+>", " ", text)
+
+        # Collapse multiple spaces and newlines
+        text = re.sub(r"\s+", " ", text).strip()
+
+        # "1 bhk", "2BHK", "3 bhk" → "1 BHK", "2 BHK", "3 BHK"
+        text = re.sub(r"(\d+)\s*bhk", lambda m: f"{m.group(1)} BHK", text, flags=re.IGNORECASE)
+
+        # "rk" pattern (1 RK) → "1 RK"
+        text = re.sub(r"(\d+)\s*rk\b", lambda m: f"{m.group(1)} RK", text, flags=re.IGNORECASE)
+
+        # "1600sqft", "1600 sq ft", "1600 sq.ft" → "1,600 sq.ft"
+        text = re.sub(r"(\d+)\s*sq\.?\s*ft", lambda m: f"{int(m.group(1)):,} sq.ft", text, flags=re.IGNORECASE)
+
+        # "bath" → "bathroom"
+        text = re.sub(r"\bbath\b", "bathroom", text, flags=re.IGNORECASE)
+
+        # "balcony" plural
+        text = re.sub(r"\bbalconys\b", "balconies", text, flags=re.IGNORECASE)
+
+        # Common typos
+        typos = {
+            r"\bflate\b": "flat",
+            r"\bfurnised\b": "furnished",
+            r"\bamenties\b": "amenities",
+            r"\bamenites\b": "amenities",
+            r"\bwifi\b": "Wi-Fi",
+            r"\bpaking\b": "parking",
+            r"\bcar parkin\b": "car parking",
+            r"\bsocity\b": "society",
+            r"\bhowes\b": "house",
+            r"\bcompund\b": "compound",
+        }
+        for pattern, replacement in typos.items():
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+        # "in price of 15000" → "priced at ₹15,000"
+        text = re.sub(
+            r"\bin price of\s+(\d+)",
+            lambda m: f"priced at ₹{int(m.group(1)):,}",
+            text,
+            flags=re.IGNORECASE,
+        )
+
+        # "price 15000" → "price ₹15,000"
+        text = re.sub(
+            r"\bprice\s+(\d{4,})",
+            lambda m: f"price ₹{int(m.group(1)):,}",
+            text,
+            flags=re.IGNORECASE,
+        )
+
+        # Capitalise first letter of each sentence
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        sentences = [s.strip().capitalize() for s in sentences if s.strip()]
+        text = " ".join(sentences)
+
+        # Ensure it ends with a period
+        if text and not text.endswith((".", "!", "?")):
+            text += "."
+
+        self.user_description = text
+        return text
+    
 ################################START MODEL SECTION OF THE RENTAL RESIDENTIAL LISTING####################
 
 
@@ -1288,7 +1384,7 @@ def generate_unique_rental_residential_id():
 # MAIN MODEL
 # ==========================================
 
-class RentalResidentialProperty(models.Model):
+class RentalResidentialProperty(PolishUserDescriptionMixin, models.Model):
 
     id = models.CharField(
         max_length=20,
@@ -1588,11 +1684,22 @@ class RentalResidentialProperty(models.Model):
     # AUTO DESCRIPTION GENERATOR
     # =====================================================
 
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+   
+
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         # NOTE: property_no is intentionally NEVER used below —
         # it's internal-only and must not leak into public text.
 
         p_type = self.property_type or "property"
+        bhk_str = self._format_bhk()          # e.g. "3 BHK" = self.property_type or "property"
         renting = f" ({self.renting_option})" if self.renting_option else ""
         locality = self.locality_area or "a prime location"
         city_str = f", {self.city}" if self.city else ""
@@ -1679,14 +1786,16 @@ class RentalResidentialProperty(models.Model):
 
     def save(self, *args, **kwargs):
 
-        title_parts = [self.bhk_type or "", self.property_type or "Property", "for Rent in"]
-        location = self.locality_area or ""
-        if self.city:
-            location = f"{location}, {self.city}" if location else self.city
-        title_parts.append(location)
-
-        self.property_title = " ".join(filter(bool, title_parts)).strip()[:255]
-
+                # Auto-title → "3 BHK Flat for Rent in Manish Nagar, Nagpur"
+        bhk_title  = self._format_bhk()
+        type_title = str(self.property_type).replace("_", " ").strip().title() if self.property_type else "Property"
+        location   = self.locality_area or ""
+        city_ctx   = f", {self.city}" if self.city else ""
+        location_ctx = f" in {location}{city_ctx}" if (location or self.city) else ""
+        self.property_title = (
+            " ".join(filter(bool, [bhk_title, type_title, "for Rent"]))
+            + location_ctx
+        )[:255]
            
 
     # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <
@@ -1695,6 +1804,7 @@ class RentalResidentialProperty(models.Model):
             self.property_unique_key = key_source.strip().lower().replace(" ", "")
 
         self.calculate_move_in_cost()
+        self.polish_user_description()
         self.generate_auto_descriptions()
 
         super(RentalResidentialProperty, self).save(*args, **kwargs)
@@ -1726,6 +1836,20 @@ class RentalResidentialProperty(models.Model):
     # =====================================================
     # AUTO FAQ GENERATOR
     # =====================================================
+    
+    def _format_bhk(self):
+        """'3', '3bhk', '3 BHK', '3BHK' -> '3 BHK' ; '5+bhk' -> '5+ BHK' ; '1rk' -> '1 RK'."""
+        import re
+        raw = str(self.bhk_type or "").strip()
+        if not raw or raw.lower() in ("undefined", "null", "none"):
+            return ""
+        if re.fullmatch(r"\d+\s*\+?", raw):                      # only a number was saved
+            raw = re.sub(r"\s+", "", raw) + " BHK"
+        raw = re.sub(r"(\d+)\s*(\+?)\s*bhk",
+                     lambda m: f"{m.group(1)}{m.group(2)} BHK", raw, flags=re.I)
+        raw = re.sub(r"(\d+)\s*(\+?)\s*rk\b",
+                     lambda m: f"{m.group(1)}{m.group(2)} RK", raw, flags=re.I)
+        return re.sub(r"\s+", " ", raw).strip()
 
     def format_area(self, value):
         if value is None:
@@ -1972,7 +2096,7 @@ from django.db import models
 def generate_commercial_rental_id():
     return f"KICPR-{uuid.uuid4().hex[:8].upper()}"
 
-class CommercialRentalProperty(models.Model):
+class CommercialRentalProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=20,
         primary_key=True,
@@ -2184,6 +2308,15 @@ class CommercialRentalProperty(models.Model):
         self.total_move_in_cost = round(total)
 
     # AUTO DESCRIPTIONS WITHOUT NEARBY FACILITIES
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         p_type = (self.property_type or "Commercial Space").replace("_", " ").title()
         p_cond = self.property_condition or "Well Maintained"
@@ -2266,7 +2399,7 @@ class CommercialRentalProperty(models.Model):
         # Enforce Backend Calculations & Descriptions
         self.calculate_move_in_cost()
         self.generate_auto_descriptions()
-
+        self.polish_user_description()
         # Build Unique Key Only on First Create
         if self._state.adding:
             key_source = f"{self.address}|{self.locality}|{self.city}|{self.property_type}|{self.monthly_rent}"
@@ -2477,7 +2610,7 @@ def generate_unique_pg_property_id():
     return f"KIPG-{uuid.uuid4().hex[:8].upper()}"
 
 
-class PGColivingProperty(models.Model):
+class PGColivingProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=20,
         primary_key=True,
@@ -2693,6 +2826,16 @@ class PGColivingProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE (now integrates nearby_facilities)
     # ═══════════════════════════════════════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         pg_target = self.pg_for or "Co-Living"
         loc = self.locality or "a prime location"
@@ -2757,7 +2900,7 @@ class PGColivingProperty(models.Model):
         # Enforce Backend Calculations & Descriptions
         self.calculate_move_in_cost()
         self.generate_auto_descriptions()
-
+        self.polish_user_description()
         # Build Unique Key Only on First Create
         if self._state.adding:
             key_source = f"{self.address}|{self.locality}|{self.city}|{self.property_no}|{self.pincode}"
@@ -2974,7 +3117,7 @@ def generate_resale_unique_property_id():
 
 
 
-class ResaleResidentialProperty(models.Model):
+class ResaleResidentialProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=50, 
         primary_key=True, 
@@ -2984,10 +3127,12 @@ class ResaleResidentialProperty(models.Model):
     )
 
     ############# Category Fields ###########################
+    
     listing_type = models.CharField(max_length=255, blank=True, null=True)
     category = models.CharField(max_length=255, blank=True, null=True)
 
     ############## Listed By Section ###############################
+
     listed_by_type = models.CharField(max_length=255, blank=True, null=True)
     assigned_to = models.CharField(max_length=255, blank=True, null=True)
     listed_by_id = models.CharField(max_length=255, blank=True, null=True)
@@ -3001,6 +3146,7 @@ class ResaleResidentialProperty(models.Model):
     duplicate_group_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   # <-- drives the brokerage label
 
     ############# Basic Information Section #############################
+
     property_title = models.CharField(max_length=255, blank=True, null=True)
     property_type = models.CharField(max_length=255, blank=True, null=True) 
     property_no = models.CharField(max_length=100, blank=True, null=True)
@@ -3011,30 +3157,63 @@ class ResaleResidentialProperty(models.Model):
     property_age = models.CharField(max_length=100, blank=True, null=True)      
     facing_direction = models.CharField(max_length=100, blank=True, null=True)      
     occupancy_status = models.CharField(max_length=100, blank=True, null=True)    
+    terrace_available = models.CharField(max_length=100, blank=True, null=True)    
     terrace_details = models.CharField(max_length=200, blank=True, null=True)      
 
     ################## Property Measurements Section ###########################
+
     super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     builtup_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
+    construction_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    land_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    land_area_unit = models.CharField(max_length=200, blank=True, null=True)
+
     building_configuration = models.CharField(max_length=100, blank=True, null=True)
     total_floors = models.CharField(max_length=5, null=True, blank=True)
     floor_number = models.CharField(max_length=5, null=True, blank=True)
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
+    owner_commission_percentage = models.CharField(max_length=100, blank=True, null=True)
     manual_brokerage = models.PositiveIntegerField(default=0, null=True, blank=True)
 
     ################## Property Configuration Section ###########################
+
     bhk = models.CharField(max_length=100, blank=True, null=True)
     bathrooms = models.IntegerField(default=0, null=True, blank=True) 
     balconies = models.IntegerField(default=0, null=True, blank=True) 
-    covered_parking = models.IntegerField(default=0, null=True, blank=True) 
-    open_parking = models.CharField(max_length=100, blank=True, null=True)
+    parking_status = models.CharField(max_length=100, blank=True, null=True)
+
+    ############# Floor and Room Details ########################
+
+    floor_details = models.TextField(blank=True, null=True)
+    room_details = models.TextField(blank=True, null=True)
+
+    ########## Plot,Compound,Legal & Floor Details #################
+
+    land_classification = models.CharField(max_length=100, blank=True, null=True)
+
+    farmhouse_construction_status = models.CharField(max_length=100, blank=True, null=True)
+    farmhouse_construction_type = models.CharField(max_length=100, blank=True, null=True)
+    farmhouse_construction_age = models.CharField(max_length=100, blank=True, null=True)
+    farmhouse_parking = models.CharField(max_length=100, blank=True, null=True)
+    farmhouse_electricity = models.CharField(max_length=100, blank=True, null=True)
+    farmhouse_swimming_pool = models.CharField(max_length=100, blank=True, null=True)
+
+    survey_number = models.CharField(max_length=100, blank=True, null=True)
+    satbara_available = models.CharField(max_length=100, blank=True, null=True)
+    boundary_status = models.CharField(max_length=100, blank=True, null=True)
+    compound_wall = models.CharField(max_length=100, blank=True, null=True)
+    road_width = models.CharField(max_length=100, blank=True, null=True)
+    approach_road_type = models.CharField(max_length=100, blank=True, null=True)
+    plot_frontage = models.CharField(max_length=100, blank=True, null=True)
+    corner_plot  = models.CharField(max_length=100, blank=True, null=True)
 
     ############# Legal and Pricing Section ##########################
-    no_of_owners = models.CharField(max_length=50, blank=True, null=True)   
-    ownership_status = models.CharField(max_length=50, blank=True, null=True)   
-    ownership_document_type = models.CharField(max_length=50, blank=True, null=True)   
+
+    no_of_owners = models.CharField(max_length=50, blank=True, null=True)         
+    ownership_status = models.CharField(max_length=50, blank=True, null=True)         
+    ownership_document_type = models.CharField(max_length=50, blank=True, null=True)         
     title_clarity_status = models.CharField(max_length=50, blank=True, null=True)   
     encumbrance_status = models.CharField(max_length=50, blank=True, null=True)   
     property_loan = models.CharField(max_length=5, blank=True, null=True, default='no')   
@@ -3050,9 +3229,14 @@ class ResaleResidentialProperty(models.Model):
     ################### Pricing Details ##############################
     selling_price = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
+    house_psf_plot_display = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
+    house_psf_const_display = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
+    farm_psf_builtup_display = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
+    farm_psf_land_display = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
     price_negotiable = models.CharField(max_length=5, default='yes', blank=True, null=True)
 
     ############# Amenities and Facilities Section ############################ 
+
     nearby_facilities = models.TextField(blank=True, null=True) 
     amenities = models.TextField(blank=True, null=True)
     property_summary = models.TextField(blank=True, null=True)
@@ -3060,6 +3244,7 @@ class ResaleResidentialProperty(models.Model):
     user_description = models.TextField(blank=True, null=True)
     
     ################ Location Details Section #############################
+
     city = models.CharField(max_length=100, blank=True, null=True)
     locality = models.CharField(max_length=150, blank=True, null=True)
     building_name = models.CharField(max_length=200, blank=True, null=True)
@@ -3073,6 +3258,7 @@ class ResaleResidentialProperty(models.Model):
     address = models.TextField(blank=True, null=True)
     
     ############## Property Images Docs and Videos Section ###########################
+
     floor_plan = models.ImageField(upload_to='properties/floor_plans/', null=True, blank=True) 
     video_option = models.CharField(max_length=200, blank=True, null=True)
     property_video = models.FileField(upload_to='properties/videos/', null=True, blank=True)
@@ -3091,6 +3277,7 @@ class ResaleResidentialProperty(models.Model):
     upload_file = models.FileField(upload_to='property_uploads/files/', blank=True, null=True)
 
     ############### Timestamp and other details ###########################
+
     is_deleted = models.BooleanField(default=False)
     is_duplicate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -3110,6 +3297,21 @@ class ResaleResidentialProperty(models.Model):
     # ═══════════════════════════════════════
     # HELPER: CLEAN TEXT FIELDS
     # ═══════════════════════════════════════
+    
+    def _format_bhk(self):
+        """'3', '3bhk', '3 BHK', '3BHK' -> '3 BHK' ; '5+bhk' -> '5+ BHK' ; '1rk' -> '1 RK'."""
+        import re
+        raw = str(self.bhk or "").strip()
+        if not raw or raw.lower() in ("undefined", "null", "none"):
+            return ""
+        if re.fullmatch(r"\d+\s*\+?", raw):                      # only a number was saved
+            raw = re.sub(r"\s+", "", raw) + " BHK"
+        raw = re.sub(r"(\d+)\s*(\+?)\s*bhk",
+                     lambda m: f"{m.group(1)}{m.group(2)} BHK", raw, flags=re.I)
+        raw = re.sub(r"(\d+)\s*(\+?)\s*rk\b",
+                     lambda m: f"{m.group(1)}{m.group(2)} RK", raw, flags=re.I)
+        return re.sub(r"\s+", " ", raw).strip()
+    
     def _clean_text_field(self, value):
         """Cleans list-like strings and returns a comma-separated string."""
         if not value:
@@ -3132,16 +3334,25 @@ class ResaleResidentialProperty(models.Model):
             return "0.00"
         try:
             return f"{Decimal(str(value)):.2f}"
-        except (InvalidOperation, ValueError, TypeError):
+        except (ValueError, TypeError, InvalidOperation):
             return str(value)
 
     # ═══════════════════════════════════════
     # AUTO DESCRIPTION GENERATOR
     # ═══════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         """Generates property summary and detailed description based on field data."""
         
-        bhk_str = str(self.bhk) if self.bhk else ""
+        bhk_str = self._format_bhk()
         p_type = str(self.property_type) if self.property_type else "Property"
         furnish = str(self.furnishing_status) if self.furnishing_status else "well-maintained"
         loc = str(self.locality) if self.locality else "a prime location"
@@ -3201,19 +3412,14 @@ class ResaleResidentialProperty(models.Model):
         long_desc += "</ul>"
 
         # --- Section B: Configurations ---
-        if any([self.bathrooms, self.balconies, self.covered_parking, self.open_parking]):
+        if any([self.bathrooms, self.balconies, self.parking_status]):
             long_desc += "<h3>Layout Configurations:</h3><ul>"
             if self.bathrooms:
                 long_desc += f"<li><strong>Bathrooms:</strong> {self.bathrooms} well-fitted bathroom(s).</li>"
             if self.balconies:
                 long_desc += f"<li><strong>Balconies:</strong> {self.balconies} spacious balcony(s) offering pleasant views.</li>"
-            if self.covered_parking or self.open_parking:
-                park_str = []
-                if self.covered_parking: 
-                    park_str.append(f"{self.covered_parking} covered")
-                if self.open_parking: 
-                    park_str.append(f"{self.open_parking} open")
-                long_desc += f"<li><strong>Parking:</strong> Includes {' and '.join(park_str)} dedicated parking spot(s).</li>"
+        
+                long_desc += f"<li><strong>Parking:</strong> Includes  {self.parking_status} dedicated parking spot(s).</li>"
             long_desc += "</ul>"
 
         # --- Section C: Amenities & Location ---
@@ -3245,15 +3451,19 @@ class ResaleResidentialProperty(models.Model):
 
         # 2. Automated Title Generation
                 # 2. Automated Title Generation — always regenerates, not just on create
-        bhk_string = str(self.bhk).upper() if self.bhk else ""
-        type_string = str(self.property_type).capitalize() if self.property_type else "Property"
+                # 2. Automated Title Generation — always regenerates, e.g. "3 BHK Flat for Sale in Besa, Nagpur"
+        bhk_title   = self._format_bhk()
+        type_title  = str(self.property_type).replace("_", " ").strip().title() if self.property_type else "Property"
         location_context = f" in {self.locality}" if self.locality else ""
-        city_context = f", {self.city}" if self.city else ""
-        self.property_title = f"{bhk_string} {type_string} for Sale{location_context}{city_context}".strip()
+        city_context     = f", {self.city}" if self.city else ""
+        self.property_title = (
+            " ".join(filter(None, [bhk_title, type_title, "for Sale"]))
+            + f"{location_context}{city_context}"
+        )[:255]
 
         # 3. Trigger Auto Description Generation BEFORE saving
         self.generate_auto_descriptions()
-
+        self.polish_user_description()
         # 4. Save Record
         super().save(*args, **kwargs)
         
@@ -3284,7 +3494,7 @@ class ResaleResidentialProperty(models.Model):
             brokerage_str = f" Professional commission applies via a system format of '{brokerage_val}'." if brokerage_val else " The pricing model avoids active external brokerage terms."
             
             faq_pool.append({
-                "question": f"What is the total acquisition cost, financial status, and transactional framework for this {self.bhk or 'residential'} layout?",
+                "question": f"What is the total acquisition cost, financial status, and transactional framework for this {self._format_bhk() or 'residential'} layout?",
                 "answer": f"The strategic market valuation is established at ₹{self._fmt_amount(price_val)}, arriving at an estimated valuation metric of ₹{self._fmt_amount(per_sqft_val)} per sq.ft. The asset ownership confirms that price flexibility is: '{self.price_negotiable or 'No'}'.{loan_str}{tax_str}{brokerage_str}"
             })
 
@@ -3293,7 +3503,7 @@ class ResaleResidentialProperty(models.Model):
             plot_str = f" alongside an expansive baseline plot layout tracking at {self._fmt_amount(self.plot_area)} sq.ft." if self.plot_area else "."
             faq_pool.append({
                 "question": "What are the structural measurement specifications and architectural interior configuration summaries?",
-                "answer": f"The space introduces a premium built-up area of {self._fmt_amount(self.builtup_area)} sq.ft. matched to a high-efficiency liveable carpet operational space of {self._fmt_amount(self.carpet_area)} sq.ft.{plot_str} Internal room configurations trace out a structural {self.bhk or 'spacious'} asset layout completed with {self.bathrooms or 0} master/guest bathrooms and {self.balconies or 0} exterior ventilation balconies."
+                "answer": f"The space introduces a premium built-up area of {self._fmt_amount(self.builtup_area)} sq.ft. matched to a high-efficiency liveable carpet operational space of {self._fmt_amount(self.carpet_area)} sq.ft.{plot_str} Internal room configurations trace out a structural {self._format_bhk() or 'spacious'} asset layout completed with {self.bathrooms or 0} master/guest bathrooms and {self.balconies or 0} exterior ventilation balconies."
             })
 
         # FAQ 3: Property Logistics, Elevation & Essential Utilities
@@ -3318,10 +3528,10 @@ class ResaleResidentialProperty(models.Model):
         })
 
         # FAQ 5: Parking Distribution & Community Infrastructure
-        if self.covered_parking or self.open_parking:
+        if self.parking_status:
             faq_pool.append({
                 "question": "What vehicle allocations and parking spaces are registered to this specific layout?",
-                "answer": f"The residential tracking matrix assigns a dedicated vehicle storage allowance, separating space variables into {self.covered_parking or 0} secure covered parking bays and {self.open_parking or 'shared'} open common parking zones."
+                "answer": f"The residential tracking matrix assigns a dedicated vehicle storage allowance, separating space variables into {self.parking_status} parking zones."
             })
 
         # FAQ 6: Geo-Location Framework & Feature Index
@@ -3407,7 +3617,7 @@ class ResaleResidentialVideo(models.Model):
 
 
 
-############## Models Start for Resale Commericial  Property  model ############################ 
+############## Models Start for Resale Commericial  Property  model ##############
 
 
 
@@ -3422,7 +3632,7 @@ def generate_property_id():
     return f"KICOM-{uuid.uuid4().hex[:8].upper()}"
 
 
-class CommercialResaleProperty(models.Model):
+class CommercialResaleProperty(PolishUserDescriptionMixin, models.Model):
 
     id = models.CharField(
         max_length=50,
@@ -3467,12 +3677,55 @@ class CommercialResaleProperty(models.Model):
     terrace_details = models.CharField(max_length=200,blank=True,null=True)
     bhk = models.CharField(max_length=50,blank=True,null=True)
 
+    ############ Dynamic Fields assets ###################################
+
+    ceiling_height = models.CharField(max_length=200,blank=True,null=True)
+    loading_docks = models.CharField(max_length=200,blank=True,null=True)
+    power_load = models.CharField(max_length=200,blank=True,null=True)
+
+    facade_width = models.CharField(max_length=200,blank=True,null=True)
+    retail_floor_level = models.CharField(max_length=200,blank=True,null=True)
+    signage_space = models.CharField(max_length=200,blank=True,null=True)
+    foot_traffic = models.CharField(max_length=200,blank=True,null=True)
+    backroom_storage = models.CharField(max_length=200,blank=True,null=True)
+    banquet_area = models.CharField(max_length=200,blank=True,null=True)
+    dining_capacity = models.CharField(max_length=200,blank=True,null=True)
+    banquet_ceiling_height = models.CharField(max_length=200,blank=True,null=True)
+    central_ac = models.CharField(max_length=200,blank=True,null=True)
+    pillarless = models.CharField(max_length=200,blank=True,null=True)
+    lawn_area = models.CharField(max_length=200,blank=True,null=True)
+    lawn_guest_capacity = models.CharField(max_length=200,blank=True,null=True)
+    mandap_setup = models.CharField(max_length=200,blank=True,null=True)
+    lawn_dressing_rooms = models.CharField(max_length=200,blank=True,null=True)
+    lawn_parking = models.CharField(max_length=200,blank=True,null=True)
+    patient_beds = models.CharField(max_length=200,blank=True,null=True)
+    operation_theaters = models.CharField(max_length=200,blank=True,null=True)
+    consultation_chambers = models.CharField(max_length=200,blank=True,null=True)
+    clinical_reg_status = models.CharField(max_length=200,blank=True,null=True)
+    bmw_clearance = models.CharField(max_length=200,blank=True,null=True)
+    tank_capacity = models.CharField(max_length=200,blank=True,null=True)
+    dispensing_nozzles = models.CharField(max_length=200,blank=True,null=True)
+    road_frontage = models.CharField(max_length=200,blank=True,null=True)
+    seating_covers = models.CharField(max_length=200,blank=True,null=True)
+    fssai_status = models.CharField(max_length=200,blank=True,null=True)
+    chimney_setup = models.CharField(max_length=200,blank=True,null=True)
+    kitchen_status = models.CharField(max_length=200,blank=True,null=True)
+    bar_license = models.CharField(max_length=200,blank=True,null=True)
+    kitchen_area = models.CharField(max_length=200,blank=True,null=True)
+
+
+    ############## Floor and Room Details Section ############################
+
+    floor_details = models.TextField(blank=True,null=True)
+    room_details = models.TextField(blank=True,null=True)
+
     ################# Area Measurements Section ##############################
 
     super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    plot_area_unit = models.CharField(max_length=20,blank=True, null=True)
     total_floors = models.CharField(max_length=5,blank=True, null=True)
     floor_number = models.CharField(max_length=5,blank=True, null=True)
 
@@ -3489,6 +3742,7 @@ class CommercialResaleProperty(models.Model):
     public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
 
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
+    owner_commission_percentage = models.CharField(max_length=100, blank=True, null=True)
     manual_brokerage = models.PositiveIntegerField(default=0, blank=True, null=True)
 
     ############### Ownership and Legal Details Section #######################
@@ -3512,7 +3766,8 @@ class CommercialResaleProperty(models.Model):
     ################# Pricing Details Section ################################
 
     selling_price = models.DecimalField(max_digits=15, decimal_places=2)
-    price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True) 
+    price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    price_per_sqft_plot = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
     ############# Ameneties and Neacby Facilities Section ############################
 
@@ -3588,6 +3843,15 @@ class CommercialResaleProperty(models.Model):
     # ═══════════════════════════════════════
     # AUTO DESCRIPTION GENERATOR
     # ═══════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         # Fetch safe fallbacks using exact model field names
         p_type = str(self.property_type).replace('_', ' ').title() if self.property_type else "Commercial Space"
@@ -3724,7 +3988,7 @@ class CommercialResaleProperty(models.Model):
         self.property_title = f"{type_lbl} for Sale{locality_ctx}".strip()
         # 3. Trigger Auto Description Generation BEFORE saving
         self.generate_auto_descriptions()
-
+        self.polish_user_description()
         # 4. Save Record
         super().save(*args, **kwargs)
 
@@ -4045,7 +4309,7 @@ def generate_industrial_id():
     return f"KIIND-{uuid.uuid4().hex[:8].upper()}"
 
 
-class IndustrialResaleProperty(models.Model):
+class IndustrialResaleProperty(PolishUserDescriptionMixin, models.Model):
     # ── SYSTEM CONTROL & IDENTIFICATION ──────────────────────────────
     id = models.CharField(
         max_length=50,
@@ -4085,24 +4349,64 @@ class IndustrialResaleProperty(models.Model):
     industrial_zone_classification = models.CharField(max_length=200, blank=True, null=True)
     main_road_connectivity = models.CharField(max_length=200, blank=True, null=True)
 
+    ############## Dynamic Fields Details ##########################
+
+    plot_frontage = models.CharField(max_length=200, blank=True, null=True)
+    boundary_fencing = models.CharField(max_length=200, blank=True, null=True)
+    corner_plot = models.CharField(max_length=200, blank=True, null=True)
+
+    ceiling_height = models.CharField(max_length=200, blank=True, null=True)
+    loading_docks = models.CharField(max_length=200, blank=True, null=True)
+    mezzanine_area = models.CharField(max_length=200, blank=True, null=True)
+
+    temp_range = models.CharField(max_length=200, blank=True, null=True)
+    puf_thickness = models.CharField(max_length=200, blank=True, null=True)
+    pallet_positions = models.CharField(max_length=200, blank=True, null=True)
+
+    etp_zld_status = models.CharField(max_length=200, blank=True, null=True)
+    peso_license = models.CharField(max_length=200, blank=True, null=True)
+
+    fssai_status = models.CharField(max_length=200, blank=True, null=True)
+    water_treatment_capacity = models.CharField(max_length=200, blank=True, null=True)
+
+    workforce_capacity = models.CharField(max_length=200, blank=True, null=True)
+    hvls_ventilation = models.CharField(max_length=200, blank=True, null=True)
+
+    bts_timeline = models.CharField(max_length=200, blank=True, null=True)
+    bts_structure = models.CharField(max_length=200, blank=True, null=True)
+
    ################# Utilities and Infrastructure Details #####################
     
     power_supply = models.BooleanField(default=False)
     kva_capacity = models.IntegerField(blank=True, null=True)
     connected_power_load = models.IntegerField(blank=True, null=True)
+    power_connection_type = models.CharField(max_length=200, blank=True, null=True)
     water_supply = models.CharField(max_length=50, blank=True, null=True)
     truck_accessibility = models.CharField(max_length=50, blank=True, null=True)
     loading_dock = models.CharField(max_length=50, blank=True, null=True)
     floor_load_capacity = models.CharField(max_length=50, blank=True, null=True)
     crane_heavy_machinery = models.BooleanField(default=False)
+    weighbridge_provision = models.BooleanField(default=False)
+    roofing_type = models.CharField(max_length=200, blank=True, null=True)
+    flooring_type = models.CharField(max_length=200, blank=True, null=True)
+    boundary_wall_height = models.CharField(max_length=50, blank=True, null=True)
     worker_housing_nearby = models.BooleanField(default=False)
+
+    ############# Future Expansion Section ######################
+
+    future_expansion_scope = models.CharField(max_length=50, blank=True, null=True)
+    open_sides = models.CharField(max_length=50, blank=True, null=True)
 
     ############## Pricing Details Section #############################
 
     selling_price= models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+
     price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    price_per_sqft_land = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+
     brokerage = models.CharField(max_length=20,blank=True,null=True)
     brokerage_percentage  = models.CharField(max_length=50, blank=True, null=True)
+    owner_commission_percentage  = models.CharField(max_length=50, blank=True, null=True)
     manual_brokerage  = models.CharField(max_length=100, blank=True, null=True)
 
 
@@ -4121,6 +4425,16 @@ class IndustrialResaleProperty(models.Model):
     government_tax = models.BooleanField(default=False)
     tax_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     tax_clearance_cert = models.BooleanField(default=False)
+
+    ########### Conditional Land and Zoning Section #######################
+
+    land_use_zoning = models.CharField(max_length=100, null=True, blank=True)
+    dc_conversion_order_no = models.CharField(max_length=100, null=True, blank=True)
+    dc_conversion_date = models.DateField(null=True, blank=True)
+    master_plan_reference = models.CharField(max_length=100, null=True, blank=True)
+    conversion_approval_status = models.CharField(max_length=50, null=True, blank=True)
+    exemption_approval = models.CharField(max_length=100, null=True, blank=True)
+    land_use_certificate = models.CharField(max_length=20, null=True, blank=True)
 
     ########## Industrial License and Compilance Details Section ##################
 
@@ -4213,6 +4527,7 @@ class IndustrialResaleProperty(models.Model):
             return str(value)
 
     # ── AUTO-FAQ GENERATOR (UPDATED FOR YOUR INDUSTRIAL RESALE MODEL) ──
+
     def generate_auto_faqs(self):
         self.faqs.all().delete()
         faq_pool = []
@@ -4223,6 +4538,7 @@ class IndustrialResaleProperty(models.Model):
         per_sqft_val = self.price_per_sqft or 0
 
         # FAQ 1 — Core Specs
+
         faq_pool.append({
             "question": "What is the total land area and specific property type of this industrial asset?",
             "answer": (
@@ -4236,6 +4552,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 2 — Pricing & Brokerage
+
         brokerage_text = ""
         if self.brokerage and self.brokerage_percentage:
             brokerage_text = f"A brokerage of {self.brokerage_percentage}% applies."
@@ -4254,6 +4571,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 3 — Power Supply
+
         if self.power_supply:
             faq_pool.append({
                 "question": "What is the heavy industrial power supply capacity available at this facility?",
@@ -4274,6 +4592,7 @@ class IndustrialResaleProperty(models.Model):
             })
 
         # FAQ 4 — Water Supply
+
         faq_pool.append({
             "question": "What is the status and type of water supply available for industrial operations?",
             "answer": (
@@ -4284,6 +4603,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 5 — Logistics & Truck Accessibility
+
         faq_pool.append({
             "question": "How is the truck accessibility and loading infrastructure at this facility?",
             "answer": (
@@ -4295,6 +4615,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 6 — Crane / Heavy Machinery
+
         faq_pool.append({
             "question": "Can this facility support heavy overhead cranes and large machinery operations?",
             "answer": (
@@ -4308,6 +4629,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 7 — Worker Housing
+
         faq_pool.append({
             "question": "Is worker housing or labour accommodation available near this industrial property?",
             "answer": (
@@ -4321,6 +4643,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 8 — Legal Dispute & Tax
+
         dispute_text = (
             f"There is an active legal dispute on record: {self.dispute_details or 'Details available on request'}. "
             if self.legal_dispute else
@@ -4342,6 +4665,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 9 — Loan / Mortgage
+
         faq_pool.append({
             "question": "Is there any active financial loan or mortgage registered against this property?",
             "answer": (
@@ -4355,6 +4679,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 10 — Ownership & Tenants
+
         ownership_text = (
             f"The property is held under {self.ownership_type or 'standard'} ownership with "
             f"{self.ownership_document_type or 'standard'} documentation. "
@@ -4372,6 +4697,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 11 — Factory License & Compliance
+
         faq_pool.append({
             "question": "What are the industrial licenses and compliance approvals in place?",
             "answer": (
@@ -4383,6 +4709,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 12 — Location & Accessibility
+
         faq_pool.append({
             "question": "Where exactly is this property located and what are the nearby facilities?",
             "answer": (
@@ -4395,6 +4722,7 @@ class IndustrialResaleProperty(models.Model):
         })
 
         # FAQ 13 — Amenities & Features
+
         amenities_str = self._clean_text_field(self.amenities)
         if amenities_str.strip():
             faq_pool.append({
@@ -4414,6 +4742,16 @@ class IndustrialResaleProperty(models.Model):
     # ═══════════════════════════════════════
     # AUTO DESCRIPTION GENERATOR
     # ═══════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         p_type = str(self.property_type).replace('_', ' ').title() if self.property_type else "Industrial Facility"
         loc = str(self.locality).strip() if self.locality else "a prime industrial zone"
@@ -4576,7 +4914,7 @@ class IndustrialResaleProperty(models.Model):
         locality_ctx = f" in {self.locality}" if self.locality else ""
         city_ctx = f", {self.city}" if self.city else ""
         self.property_title = f"{type_lbl} for Sale{locality_ctx}{city_ctx}".strip()
-
+        self.polish_user_description()
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
         self.generate_auto_faqs()
@@ -4659,8 +4997,10 @@ def generate_agri_id():
     return f"KIAGR-{uuid.uuid4().hex[:8].upper()}"
 
 
-class AgriculturalResaleProperty(models.Model):
+class AgriculturalResaleProperty(PolishUserDescriptionMixin, models.Model):
+
     # ── SYSTEM CONTROL & IDENTIFICATION ──────────────────────────
+    
     id = models.CharField(
         max_length=50,
         primary_key=True,
@@ -4934,6 +5274,15 @@ class AgriculturalResaleProperty(models.Model):
     # ═══════════════════════════════════════
     # AUTO DESCRIPTION GENERATOR
     # ═══════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         # Fetch safe fallbacks
         p_type = str(self.property_type).replace('_', ' ').title() if self.property_type else "Agricultural Land"
@@ -5061,7 +5410,7 @@ class AgriculturalResaleProperty(models.Model):
 
         # ---> Trigger Auto Description Generation BEFORE saving <---
         self.generate_auto_descriptions()
-
+        self.polish_user_description()
         # 3. Save Record
         super().save(*args, **kwargs)
 
@@ -5145,7 +5494,7 @@ def generate_residential_plot_id():
     return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
 
-class ResidentialPlotResaleProperty(models.Model):
+class ResidentialPlotResaleProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=20,
         primary_key=True,
@@ -5299,6 +5648,15 @@ class ResidentialPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE
     # ═══════════════════════════════════════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         p_type = (self.property_type or "Residential Plot").replace("_", " ").title()
         area_str = f"{self.plot_area} sq.ft" if self.plot_area else "Prime Plot Area"
@@ -5356,7 +5714,7 @@ class ResidentialPlotResaleProperty(models.Model):
         city_name = f", {self.city}" if self.city else ""
 
         self.property_title = f"{p_type} for Sale in {loc}{city_name}".strip()[:255]
-
+        self.polish_user_description()
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
         self.generate_auto_faqs()
@@ -5833,7 +6191,7 @@ class ResidentialPlotResaleActivityLog(models.Model):
 def generate_commercial_plot_id():
     return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
-class CommercialPlotResaleProperty(models.Model):
+class CommercialPlotResaleProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=20,
         primary_key=True,
@@ -5987,6 +6345,16 @@ class CommercialPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE (COMMERCIAL PLOT)
     # ═══════════════════════════════════════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         p_type = (self.property_type or "Commercial Plot").replace("_", " ").title()
         area_str = f"{self.plot_area} sq.ft" if self.plot_area else "Prime Commercial Area"
@@ -6062,7 +6430,7 @@ class CommercialPlotResaleProperty(models.Model):
            location_part = "Prime Location"
 
         self.property_title = f"{p_type} for Sale in {location_part}".strip()[:255]
-
+        self.polish_user_description()
         self.generate_auto_descriptions()
         super().save(*args, **kwargs)
         self.generate_auto_faqs()
@@ -6357,7 +6725,7 @@ class CommercialPlotResaleActivityLog(models.Model):
 def generate_industrial_plot_id():
     return f"KIIPR-{uuid.uuid4().hex[:8].upper()}"
 
-class IndustrialPlotResaleProperty(models.Model):
+class IndustrialPlotResaleProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=20,
         primary_key=True,
@@ -6526,6 +6894,16 @@ class IndustrialPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE
     # ═══════════════════════════════════════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         p_type = (self.property_type or "Industrial Plot").replace("_", " ").title()
         area_clean = self._clean_area()
@@ -6636,7 +7014,7 @@ class IndustrialPlotResaleProperty(models.Model):
 
         self.property_title = f"{p_type} for Sale in {location_part}".strip()[:255]
 
-        # Forces regeneration of summaries and descriptions with the correct formatting on every save/edit
+        self.polish_user_description()
         self.generate_auto_descriptions()
 
         # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <
@@ -6877,7 +7255,7 @@ def generate_agricultural_plot_id():
     return f"KIAPR-{uuid.uuid4().hex[:8].upper()}"
 
 
-class AgriculturalPlotResaleProperty(models.Model):
+class AgriculturalPlotResaleProperty(PolishUserDescriptionMixin, models.Model):
     id = models.CharField(
         max_length=20,
         primary_key=True,
@@ -7046,6 +7424,16 @@ class AgriculturalPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE
     # ═══════════════════════════════════════════════════════════════════════
+        # =====================================================
+    # USER DESCRIPTION POLISHER
+    # =====================================================
+
+    
+
+    # =====================================================
+    # AUTO DESCRIPTION GENERATOR
+    # =====================================================
+
     def generate_auto_descriptions(self):
         unit = self.agr_area_unit or "acre"
         area_clean = self._clean_area()
@@ -7142,7 +7530,7 @@ class AgriculturalPlotResaleProperty(models.Model):
         self.property_title = f"{p_type} for Sale in {location_part}".strip()[:255]
 
         self.generate_auto_descriptions()
-
+        self.polish_user_description()
         # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <
         if self._state.adding:
             key_source = f"{self.address}|{self.locality}|{self.city}|{self.plot_area}|{self.property_no}"
@@ -7365,5 +7753,38 @@ class PropertyInteraction(models.Model):
 
 
 
+class PropertyBadge(models.Model):
+    """One row = one badge on one property (any of the 11 property models)."""
+    BADGE_CHOICES = [
+        ("featured", "Featured"), ("sponsored", "Sponsored"), ("verified", "Verified"),
+        ("exclusive", "Exclusive"), ("popular", "Popular"), ("latest", "Latest"),
+    ]
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.CharField(max_length=50)          # property PK (strings like KIPRR-XXXX)
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    badge_type = models.CharField(max_length=20, choices=BADGE_CHOICES)
+    is_active = models.BooleanField(default=True)
+    start_date = models.DateField(null=True, blank=True, help_text="Leave blank = starts now")
+    end_date = models.DateField(null=True, blank=True, help_text="Leave blank = never expires")
+    priority = models.IntegerField(default=0, help_text="Higher = shown first in home sections")
+    note = models.CharField(max_length=200, blank=True, default="")
+    created_by = models.CharField(max_length=150, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("content_type", "object_id", "badge_type")
+        indexes = [models.Index(fields=["badge_type", "is_active"]),
+                   models.Index(fields=["content_type", "object_id"])]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.badge_type} → {self.object_id}"
+
+    @property
+    def is_live(self):
+        from django.utils import timezone
+        t = timezone.localdate()
+        return self.is_active and (not self.start_date or self.start_date <= t) and (not self.end_date or self.end_date >= t)
 
 

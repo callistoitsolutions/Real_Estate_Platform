@@ -746,8 +746,8 @@
     }
 
     .btn-next {
-        background: var(--primary-gradient);
-        color: white;
+        background-color:#57C785!important;
+        color: 1111   white;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
@@ -767,7 +767,6 @@
     }
 
     .btn-submit {
-        background: var(--primary-gradient);
         color: white;
         padding: 12px 35px;
         border-radius: 12px;
@@ -1238,6 +1237,352 @@
     color: #0f172a;
 }
 
+
+/* =====================================================================
+   UI REFRESH — modern look, interactive floating labels, mobile-first
+   (visual only — no ids / names / behaviour changed)
+   ===================================================================== */
+:root {
+    --ui-primary: #667eea;
+    --ui-primary-dark: #4f46e5;
+    --ui-border: #dfe4ee;
+    --ui-text: #1e293b;
+    --ui-muted: #94a3b8;
+    --ui-danger: #e74c3c;
+    --ui-radius: 12px;
+}
+
+/* ---------- Cards & sections ---------- */
+.form-container { padding: 32px; }
+.form-container .form-section {
+    border: 1px solid #e6eaf3;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(30, 41, 59, 0.05);
+    transition: box-shadow .25s ease;
+}
+.form-container .form-section:hover { box-shadow: 0 10px 28px rgba(102, 126, 234, 0.12); }
+.form-container .form-section .section-header {
+    padding: 14px 22px;
+    font-size: 1rem;
+    letter-spacing: .2px;
+}
+.form-container .form-section .section-header > i:first-child,
+.form-container .form-section .section-header > span > i:first-child {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    font-size: .9rem;
+}
+.form-container .form-section .section-body {
+    background: #fff;
+    padding: 14px 22px 20px;
+    border: none;
+}
+.form-container .row { --bs-gutter-x: 1.1rem; }
+.form-container .col-md-3,
+.form-container .col-md-4,
+.form-container .col-md-6,
+.form-container .col-md-12 { margin-bottom: 4px; }
+.form-container .mt-2 { margin-top: 1rem !important; }
+
+/* ---------- Inputs ---------- */
+.form-container .form-control,
+.form-container .form-select {
+    min-height: 52px;
+    border: 1.5px solid var(--ui-border);
+    border-radius: var(--ui-radius);
+    padding: 14px 16px;
+    font-size: .95rem;
+    color: var(--ui-text);
+    background-color: #fff;
+    box-shadow: none;
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.form-container .form-control:hover:not(:focus):not([readonly]),
+.form-container .form-select:hover:not(:focus) { border-color: #b8c2f5; }
+.form-container .form-control:focus,
+.form-container .form-select:focus {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, .14);
+}
+.form-container .form-control[readonly] { cursor: not-allowed; }
+.form-container select.form-control,
+.form-container .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 42px;
+    cursor: pointer;
+}
+.form-container textarea.form-control { min-height: 110px; padding-top: 16px; }
+
+/* ---------- Interactive floating labels ---------- */
+.form-container .fl { position: relative; }
+.form-container .fl > .form-label {
+    position: absolute;
+    left: 12px; top: 15px;
+    z-index: 3;
+    display: block;
+    max-width: calc(100% - 52px);
+    margin: 0 !important;
+    padding: 0 6px;
+    font-size: .93rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ui-muted);
+    background: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transition: top .18s ease, font-size .18s ease, color .18s ease, font-weight .18s ease, background .18s ease;
+}
+.form-container .fl > .form-label i { margin-right: 5px; font-size: .85em; opacity: .8; }
+
+/* floated state: focused, has value, or select (always shows a value) */
+.form-container .fl:focus-within > .form-label,
+.form-container .fl:has(> input:not(:placeholder-shown)) > .form-label,
+.form-container .fl:has(> textarea:not(:placeholder-shown)) > .form-label,
+.form-container .fl:has(> input[type="date"]) > .form-label,
+.form-container .fl:has(> select) > .form-label {
+    top: -9px;
+    font-size: .74rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #fff;
+}
+.form-container .fl:focus-within > .form-label { color: var(--ui-primary-dark); }
+.form-container .fl:has(> .input-error) > .form-label,
+.form-container .fl:has(> .is-invalid) > .form-label { color: var(--ui-danger); }
+
+/* placeholder only appears once the field is focused (label does the talking) */
+.form-container .fl > .form-control::placeholder { color: transparent; transition: color .2s ease; }
+.form-container .fl > .form-control:focus::placeholder { color: #c5cddb; }
+
+/* ---------- Pill radios (Yes / No etc.) ---------- */
+.form-container .form-group:not(.fl) > .form-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+.form-container .radio-group,
+.form-container .listed-by-radio-group { display: flex; flex-wrap: wrap; gap: 10px !important; }
+.form-container .radio-option,
+.form-container .listed-by-radio-group > label {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    margin: 0;
+    padding: 10px 20px;
+    border: 1.5px solid var(--ui-border);
+    border-radius: var(--ui-radius);
+    background: #fff;
+    color: #475569;
+    font-weight: 500;
+    font-size: .93rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all .2s ease;
+}
+.form-container .radio-option:hover,
+.form-container .listed-by-radio-group > label:hover { border-color: #a5b4fc; background: #f8f9ff; }
+.form-container .radio-option:has(input:checked),
+.form-container .listed-by-radio-group > label:has(input:checked) {
+    border-color: var(--ui-primary);
+    background: #eef2ff;
+    color: var(--ui-primary-dark);
+    font-weight: 600;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, .12);
+}
+.form-container .radio-option input,
+.form-container .listed-by-radio-group input { accent-color: var(--ui-primary); width: 18px; height: 18px; margin: 0; }
+
+/* ---------- Searchable select (Listed for other user) ---------- */
+.form-container .search-select-control {
+    min-height: 52px;
+    border: 1.5px solid var(--ui-border);
+    border-radius: var(--ui-radius);
+}
+.form-container .search-select-panel { max-width: 100%; }
+
+/* ---------- Buttons ---------- */
+.form-container .btn-step,
+.form-container .btn-submit { min-height: 48px; justify-content: center; }
+.form-container .btn-submit { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---------- Tablet & mobile ---------- */
+@media (max-width: 991px) {
+    .main-content { margin-left: 0 !important; padding: 14px; }
+    .page-wrapper { gap: 16px; }
+    .page-header { padding: 22px 20px; margin-bottom: 16px; border-radius: 16px; }
+    .page-title { font-size: 1.35rem; }
+    .page-subtitle { font-size: .85rem; }
+    .stepper-container { padding: 18px 12px; margin-bottom: 16px; border-radius: 16px; }
+    .form-container { padding: 16px; border-radius: 16px; }
+    .form-header { margin-bottom: 18px; padding-bottom: 14px; }
+    .form-title { font-size: 1.1rem; }
+    .form-title i { width: 38px; height: 38px; }
+}
+
+@media (max-width: 767px) {
+    .page-header-content { flex-direction: column; align-items: flex-start; }
+    .btn-back { width: 100%; justify-content: center; }
+
+    /* compact stepper */
+    .step-circle { width: 36px; height: 36px; font-size: .9rem; border-width: 2px; }
+    .step-line { top: 18px; height: 2px; }
+    .step-label { font-size: .64rem; line-height: 1.25; margin-top: 6px; padding: 0 2px; }
+
+    .form-container .form-section { border-radius: 14px; margin-bottom: 18px; }
+    .form-container .form-section .section-header { padding: 12px 16px; font-size: .95rem; }
+    .form-container .form-section .section-body { padding: 12px 14px 14px; }
+    .form-container .row { --bs-gutter-x: 0; }
+
+    /* 16px stops iOS from zooming on focus */
+    .form-container .form-control,
+    .form-container .form-select,
+    .form-container .search-select-input { font-size: 16px; }
+    .form-container .fl > .form-label { font-size: 15px; }
+
+    .form-container .radio-group,
+    .form-container .listed-by-radio-group { gap: 8px !important; }
+    .form-container .radio-option,
+    .form-container .listed-by-radio-group > label { flex: 1 1 calc(50% - 8px); justify-content: center; padding: 10px 12px; }
+
+    /* sticky nav bar so Next / Previous are always reachable */
+    .form-container .step-nav {
+        position: sticky; bottom: 0; z-index: 20;
+        margin: 18px -16px -16px; padding: 12px 16px;
+        background: rgba(255, 255, 255, .96);
+        backdrop-filter: blur(6px);
+        border-top: 1px solid #eef0f6;
+        border-radius: 0 0 16px 16px;
+    }
+    .form-container .step-nav > div:empty { display: none; }
+    .form-container .step-nav .btn-step { flex: 1; padding: 12px 14px; font-size: .92rem; }
+
+    .form-container .form-footer { flex-direction: column-reverse; gap: 10px; }
+    .form-container .form-footer .btn-step,
+    .form-container .form-footer .btn-submit { width: 100%; justify-content: center; }
+
+    /* image upload area */
+    .img-upload-guide { padding: 12px; }
+    .img-cat-tabs { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .img-cat-upload-area { padding: 24px 12px; }
+    .img-cat-preview { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .img-total-summary { padding: 12px 14px; }
+}
+
+@media (max-width: 400px) {
+    .step-label { font-size: .58rem; }
+    .form-container .radio-option,
+    .form-container .listed-by-radio-group > label { flex: 1 1 100%; }
+}
+
+/* ---------- v2: measurement labels fully visible + livelier placeholders ---------- */
+.form-container { container-type: inline-size; container-name: formbox; }
+
+/* resting label: more room for text (selects keep space for the chevron) */
+.form-container .fl > .form-label { font-size: .88rem; max-width: calc(100% - 26px); }
+.form-container .fl:has(> select) > .form-label { max-width: calc(100% - 26px); }
+.form-container .fl:has(> select:not(:focus)) > .form-label,
+.form-container .fl:focus-within > .form-label,
+.form-container .fl:has(> input:not(:placeholder-shown)) > .form-label,
+.form-container .fl:has(> textarea:not(:placeholder-shown)) > .form-label { font-size: .74rem; }
+
+/* when the form card is narrow, go 2 columns instead of squeezing 3-4 */
+@container formbox (max-width: 700px) {
+    .form-container .row > .col-md-3,
+    .form-container .row > .col-md-4 { flex: 0 0 auto; width: 50%; }
+}
+@container formbox (max-width: 480px) {
+    .form-container .row > .col-md-3,
+    .form-container .row > .col-md-4,
+    .form-container .row > .col-md-6 { width: 100%; }
+}
+
+/* placeholder fades + slides in once the label has floated up */
+.form-container .fl > .form-control::placeholder {
+    color: transparent;
+    opacity: 1;
+    transition: color .25s ease .05s;
+}
+.form-container .fl > .form-control:focus::placeholder { color: #a3aec2; }
+
+/* little life on the field itself */
+.form-container .fl:focus-within { transform: translateY(-1px); transition: transform .2s ease; }
+.form-container .fl > .form-control:focus,
+.form-container .fl > .form-select:focus { background-color: #fbfcff; }
+
+/* ---------- v3: consistent vertical rhythm so floating labels never collide ---------- */
+.form-container .row { --bs-gutter-y: 1.15rem; }
+.form-container .mt-2 { margin-top: 1.15rem !important; }
+.form-container .row > [class*="col-"].mt-2 { margin-top: 1.15rem !important; }
+
+/* ---------- v4: stop Bootstrap's negative row margin from collapsing the gap between stacked rows ---------- */
+.form-container .row { margin-top: 0 !important; }
+
+/* ================= AMENITIES MODAL ================= */
+.am-modal .modal-content { border: none; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 60px rgba(30,41,59,.3); }
+.am-header { background: var(--primary-gradient); color: #fff; border: none; padding: 18px 24px; }
+.am-header-left { display: flex; align-items: center; gap: 14px; }
+.am-header-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.am-header .modal-title { font-weight: 700; font-size: 1.15rem; }
+.am-subtitle { opacity: .85; font-size: .78rem; }
+.am-toolbar { display: flex; gap: 12px; align-items: center; padding: 14px 24px; background: #f8f9ff; border-bottom: 1px solid #eef0f6; }
+.am-search { position: relative; flex: 1; }
+.am-search i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: .85rem; }
+.am-search input { width: 100%; border: 1.5px solid #dfe4ee; border-radius: 12px; padding: 11px 14px 11px 38px; font-size: .92rem; background: #fff; transition: all .2s; }
+.am-search input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,.14); }
+.am-link-btn { border: none; background: none; color: #4f46e5; font-weight: 600; font-size: .85rem; cursor: pointer; white-space: nowrap; padding: 8px 10px; border-radius: 8px; }
+.am-link-btn:hover { background: #eef2ff; }
+.am-body { padding: 20px 24px; background: #fff; }
+.am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.am-card { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0; cursor: pointer; user-select: none; border: 1.5px solid #e6eaf3; border-radius: 14px; background: #fff; transition: all .2s ease; }
+.am-card input { position: absolute; opacity: 0; pointer-events: none; }
+.am-card:hover { border-color: #a5b4fc; background: #f8f9ff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102,126,234,.12); }
+.am-icon { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.am-name { flex: 1; font-size: .88rem; font-weight: 600; color: #334155; line-height: 1.25; }
+.am-tick { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: .6rem; color: transparent; transition: all .2s; }
+.am-card:has(input:checked) { border-color: #667eea; background: #eef2ff; box-shadow: 0 0 0 3px rgba(102,126,234,.12); }
+.am-card:has(input:checked) .am-icon { background: var(--primary-gradient); color: #fff; }
+.am-card:has(input:checked) .am-name { color: #3730a3; }
+.am-card:has(input:checked) .am-tick { background: #667eea; border-color: #667eea; color: #fff; }
+.am-empty { text-align: center; padding: 50px 0; color: #94a3b8; }
+.am-empty i { font-size: 2rem; margin-bottom: 8px; }
+.am-footer { background: #f8f9fa; border-top: 1px solid #eef0f6; padding: 14px 24px; }
+.am-btn { border: none; border-radius: 12px; padding: 11px 24px; font-weight: 600; font-size: .92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .2s; }
+.am-btn-ghost { background: #fff; color: #475569; border: 1.5px solid #dfe4ee; }
+.am-btn-ghost:hover { background: #fef2f2; color: #e74c3c; border-color: #fecaca; }
+.am-btn-apply { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(102,126,234,.3); }
+.am-btn-apply:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(102,126,234,.4); }
+.selected-items-display { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px; background: #f8f9ff; border: 1.5px dashed #c7d2fe; border-radius: 14px; min-height: 56px; align-items: center; justify-content: center; }
+.selected-items-display:has(.item-tag) { justify-content: flex-start; }
+.item-tag { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #3730a3; border: 1.5px solid #c7d2fe; border-radius: 30px; padding: 6px 8px 6px 12px; font-size: .82rem; font-weight: 600; box-shadow: 0 2px 6px rgba(102,126,234,.08); }
+.item-tag > i { color: #667eea; }
+.item-tag .remove-btn { cursor: pointer; color: #94a3b8; display: inline-flex; transition: color .2s; }
+.item-tag .remove-btn:hover { color: #e74c3c; }
+
+/* Fix: page-level ".modal-body{overflow:visible!important}" broke modal scrolling */
+.am-modal .modal-content { max-height: calc(100vh - 2rem); display: flex; flex-direction: column; }
+.am-modal .modal-body.am-body { overflow-y: auto !important; overflow-x: hidden !important; flex: 1 1 auto; min-height: 0; max-height: calc(100vh - 290px); }
+.am-modal .am-header, .am-modal .am-toolbar, .am-modal .am-footer { flex-shrink: 0; }
+.am-modal .am-body::-webkit-scrollbar { width: 8px; }
+.am-modal .am-body::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+@media (max-width: 575px) {
+    .am-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .am-card { padding: 10px; gap: 8px; }
+    .am-icon { width: 32px; height: 32px; }
+    .am-name { font-size: .8rem; }
+    .am-toolbar, .am-body, .am-footer { padding-left: 14px; padding-right: 14px; }
+}
+
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -1406,28 +1751,30 @@
                             
 
                                 <div class="col-md-6 mt-2">
-    <div class="form-group">
-        <label class="form-label">Property Type <span class="required">*</span></label>
-        <select class="form-select form-control" id="property_type" name="property_type" required>
-            <option value="">Select Property Type</option>
-            <option value="apartment">Apartment</option>
-            <option value="flat">Flat</option>
-            <option value="studio_apartment">Studio Apartment</option>
-            <option value="penthouse">Penthouse</option>
-            <option value="independent_house">Independent House</option>
-            <option value="villa">Villa</option>
-            <option value="bungalow">Bungalow</option>
-            <option value="farmhouse">Farm House</option>
-            <option value="independent_floor">Independent Floor</option>
-            <option value="builder_floor">Builder Floor Apartment</option>
-            <option value="duplex">Duplex</option>
-            <option value="triplex">Triplex</option>
-            <option value="row_house">Row House</option>
-            <option value="townhouse">Townhouse</option>
-            <option value="serviced_apartment">Serviced Apartment</option>
-        </select>
-    </div>
-</div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Property Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="property_type" name="property_type" required>
+                                            <option value="">Select Property Type</option>
+                                            <option value="apartment">Apartment</option>
+                                            <option value="flat">Flat</option>
+                                            <option value="studio_apartment">Studio Apartment</option>
+                                            <option value="penthouse">Penthouse</option>
+                                            <option value="independent_house">Independent House</option>
+                                            <option value="villa">Villa</option>
+                                            <option value="bungalow">Bungalow</option>
+                                            <option value="farmhouse">Farm House</option>
+                                            <option value="independent_floor">Independent Floor</option>
+                                            <option value="builder_floor">Builder Floor Apartment</option>
+                                            <option value="duplex">Duplex</option>
+                                            <option value="triplex">Triplex</option>
+                                            <option value="row_house">Row House</option>
+                                            <option value="townhouse">Townhouse</option>
+                                            <option value="serviced_apartment">Serviced Apartment</option>
+                                        </select>
+                                    </div>
+                                    
+                                </div>
 
 
                                 <div class="col-md-6 mt-2">
@@ -1440,7 +1787,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 mt-2">
+                                <div class="col-md-6 mt-2" data-pt-hide="independent_house bungalow farmhouse">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-city"></i> Society Type <span style="color:red;">*</span></label>
                                         <select class="form-select form-control" name="society_type" id="society_type" required>
@@ -1460,7 +1807,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mt-2">
+                                <div class="col-md-6 mt-2" data-pt="flat">
                                     <div class="form-group">
                                         <label class="form-label"> Tower/Wing Number</label>
                                         <input type="text" class="form-control" id="wing_no" name="wing_no" placeholder="A Wing">
@@ -1490,9 +1837,9 @@
                                         <label class="form-label">Furnishing Status <span class="required">*</span></label>
                                         <select class="form-select form-control" id="furnishing_status" name="furnishing_status" required>
                                             <option value="">Select furnishing</option>
-                                            <option value="unfurnished">Unfurnished</option>
-                                            <option value="semi">Semi-Furnished</option>
-                                            <option value="fully">Fully Furnished</option>
+                                            <option value="Unfurnished">Unfurnished</option>
+                                            <option value="Semi Furnished">Semi-Furnished</option>
+                                            <option value="Fully Furnished">Fully Furnished</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1505,8 +1852,8 @@
 
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-compass"></i> Facing Direction <span class="required">*</span></label>
-                                        <select class="form-select form-control" name="facing_direction" id="facing_direction" required>
+                                        <label class="form-label"><i class="fas fa-compass"></i> Facing Direction </label>
+                                        <select class="form-select form-control" name="facing_direction" id="facing_direction">
                                             <option value="">Select Direction</option>
                                             <option value="North">North</option>
                                             <option value="South">South</option>
@@ -1537,10 +1884,28 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Terrace Details </label>
-                                        <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required>
+                                <div class="col-md-12" data-pt="house multi farm penthouse">
+                                    <div class="row">
+                                        <div class="col-md-6 mt-2">
+                                            <div class="form-group">
+                                                <label class="form-label"><i class="fas fa-umbrella-beach"></i> Is Terrace Available?</label>
+                                                <div class="radio-group">
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="terrace_available" id="terraceNo" value="No" checked> No
+                                                    </label>
+                                                    <label class="radio-option">
+                                                        <input type="radio" name="terrace_available" id="terraceYes" value="Yes"> Yes
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mt-2" id="terrace_details_section" style="display:none;">
+                                            <div class="form-group">
+                                                <label class="form-label">Terrace Details <span class="required">*</span></label>
+                                                <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1550,50 +1915,90 @@
                     </div>
 
                     <div class="form-section">
+
                         <div class="section-header">
                             <i class="fas fa-ruler-combined"></i> Property Measurements
                         </div>
                         <div class="section-body">
                             <div class="row">
-                                 <div class="col-md-4 mt-2">
+                                
+                                <!-- Super Built-up Area (Visible ONLY for apartments, flats, etc.) -->
+
+                                <div class="col-md-4 mt-2" data-pt="apartment flat studio_apartment penthouse independent_floor builder_floor duplex triplex row_house townhouse serviced_apartment">
                                     <div class="form-group">
-                                        <label class="form-label">Super Built-up Area (sq.ft) <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="super_builtup_area" name="super_builtup_area" placeholder="e.g., 1200" required>
+                                        <label class="form-label">Super Built-up Area (sq.ft) </label>
+                                        <input type="number" class="form-control" id="super_builtup_area" name="super_builtup_area" placeholder="e.g., 1200">
                                     </div>
                                 </div>
-                                <div class="col-md-4 mt-2">
+
+                                <!-- Built-up Area (Visible for Flats AND Farmhouses) -->
+
+                                <div class="col-md-4 mt-2" data-pt-hide="independent_house villa bungalow">
                                     <div class="form-group">
                                         <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
                                         <input type="number" class="form-control" id="builtup_area" name="builtup_area" placeholder="e.g., 1200" required>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mt-2">
+
+                                <!-- Carpet Area (Visible ONLY for apartments/flats, hidden for houses & farmhouses) -->
+
+                                <div class="col-md-4 mt-2" data-pt-hide="independent_house villa bungalow farmhouse">
                                     <div class="form-group">
-                                        <label class="form-label">Carpet Area (sq.ft) <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="carpet_area" name="carpet_area" placeholder="e.g., 950" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Plot Area (sq.ft)</label>
-                                        <input type="number" class="form-control" id="plot_area" name="plot_area" placeholder="Optional">
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Building Configuration </label>
-                                        <input type="text" class="form-control" id="building_configuration" name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3">
+                                        <label class="form-label">Carpet Area (sq.ft) </label>
+                                        <input type="number" class="form-control" id="carpet_area" name="carpet_area" placeholder="e.g., 950">
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 mt-2">
+                                <!-- Plot Area (Visible ONLY for Independent House types) -->
+
+                                <div class="col-md-4 mt-2" data-pt="independent_house villa bungalow">
+                                    <div class="form-group">
+                                        <label class="form-label">Plot Area (sq.ft) <span class="required" id="plotAreaReq">*</span></label>
+                                        <input type="number" class="form-control" id="plot_area" name="plot_area" placeholder="e.g., 2000">
+                                    </div>
+                                </div>
+
+                                <!-- Construction Area (Visible ONLY for Independent House types) -->
+
+                                <div class="col-md-4 mt-2" data-pt="independent_house villa bungalow">
+                                    <div class="form-group">
+                                        <label class="form-label">Construction Area (sq.ft) <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="construction_area" name="construction_area" placeholder="e.g., 1500" required>
+                                    </div>
+                                </div>
+
+                                <!-- Land Area + Multi-Units (Visible ONLY for Farmhouse) -->
+
+                                <div class="col-md-4 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <div style="display: flex; gap: 8px;">
+                                            <input type="number" class="form-control" id="land_area" name="land_area" placeholder="Land Area" style="flex: 2;" required>
+                                            <select class="form-select form-control" id="land_area_unit" name="land_area_unit" style="flex: 1; padding-right: 24px; background-position: right 6px center;">
+                                                <option value="sq.ft">sq.ft</option>
+                                                <option value="sqyd">sqyd</option>
+                                                <option value="sqm">sqm</option>
+                                                <option value="acre">acre</option>
+                                                <option value="hectare">hectare</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2" data-pt="independent_house villa bungalow multi">
+                                    <div class="form-group">
+                                        <label class="form-label">Building Configuration </label>
+                                        <input type="text" class="form-control" id="building_configuration" name="building_configuration" placeholder="e.g., G, G+1, G+2">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2" data-pt-hide="farmhouse">
                                     <div class="form-group">
                                         <label class="form-label">Total Floors Constructed </label>
                                         <input type="number" class="form-control" id="total_floors" name="total_floors" placeholder="e.g., 3" required>
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 mt-2">
+                                <div class="col-md-4 mt-2" data-pt="apartment flat studio_apartment penthouse independent_floor builder_floor duplex triplex row_house townhouse serviced_apartment">
                                     <div class="form-group">
                                         <label class="form-label">Floor Number </label>
                                         <input type="number" class="form-control" id="floor_number" name="floor_number" placeholder="e.g., 3" required>
@@ -1601,9 +2006,8 @@
                                 </div>
 
                             </div>
-
-                            
                         </div>
+
                     </div>
 
                     <!-- Section 2: Property Configuration -->
@@ -1615,18 +2019,18 @@
                             <div class="row">
                                
 
-                                <div class="col-md-4 mt-2">
+                                <div class="col-md-4 mt-2" data-pt-hide="studio_apartment">
                                     <div class="form-group">
                                         <label class="form-label">BHK <span class="required">*</span></label>
                                         <select class="form-select form-control" id="bhk" name="bhk" required>
                                             <option value="">Select</option>
-                                            <option value="0bhk">0 BHK / Studio</option>
-                                            <option value="1rk">1 RK</option>
-                                            <option value="1bhk">1 BHK</option>
-                                            <option value="2bhk">2 BHK</option>
-                                            <option value="3bhk">3 BHK</option>
-                                            <option value="4bhk">4 BHK</option>
-                                            <option value="5+bhk">5+ BHK</option>
+                                            <option value="0 BHK">0 BHK / Studio</option>
+                                            <option value="1 RK">1 RK</option>
+                                            <option value="1 BHK">1 BHK</option>
+                                            <option value="2 BHK">2 BHK</option>
+                                            <option value="3 BHK">3 BHK</option>
+                                            <option value="4 BHK">4 BHK</option>
+                                            <option value="5+ BHK">5+ BHK</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1648,24 +2052,201 @@
                             <div class="row">
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Covered Parking</label>
-                                        <input type="number" class="form-control" id="covered_parking" name="covered_parking" min="0" value="0">
+                                        <label class="form-label">Parking Status</label>
+                                        <select class="form-select form-control" id="parking_status" name="parking_status">
+                                            <option value="">Select Parking Status</option>
+                                            <option value="open">Open</option>
+                                            <option value="covered">Covered</option>
+                                            <option value="both">Both</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-pt="house multi farm">
+                        <div class="section-header">
+                            <i class="fas fa-layer-group"></i> Floor &amp; Room Details
+                            <small style="font-weight:400; opacity:.85;">(Optional)</small>
+                        </div>
+                        <div class="section-body">
+                            <div class="form-group">
+                                <label class="form-label">Floor Details</label>
+                                <textarea class="form-control" id="floor_details" name="floor_details"
+                                    placeholder="e.g., Ground floor: 2 BHK with parking. First floor: 3 BHK with balcony. Second floor: terrace room."></textarea>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label class="form-label">Room Details</label>
+                                <textarea class="form-control" id="room_details" name="room_details"
+                                    placeholder="e.g., Master bedroom 14x12 with attached bath, hall 18x14, kitchen 10x10, pooja room, store room."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" data-pt="house farm">
+                        <div class="section-header">
+                            <i class="fas fa-road"></i> Plot, Compound, Legal &amp; Road Details
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <!-- Farmhouse Exclusive: Land Classification -->
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Land Classification <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="land_classification" name="land_classification">
+                                            <option value="">Select Classification</option>
+                                            <option value="Agricultural">Agricultural Land (Pure)</option>
+                                            <option value="NA">Non-Agricultural (NA) Converted</option>
+                                            <option value="Farmhouse Zone">Farmhouse Zone / Green Zone Approval</option>
+                                            <option value="Collector Sanctioned">Collector Sanctioned Layout</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 mt-2">
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
                                     <div class="form-group">
-                                        <label class="form-label">Open Parking Available?</label>
-                                        <div class="mt-2">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="open_parking" id="openParkingYes" value="Yes" onclick="toggleOpenParking(true)">
-                                                <label class="form-check-label" for="openParkingYes">Yes</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="open_parking" id="openParkingNo" value="No" checked onclick="toggleOpenParking(false)">
-                                                <label class="form-check-label" for="openParkingNo">No</label>
-                                            </div>
-                                        </div>
+                                        <label class="form-label">Construction Status</label>
+                                        <select class="form-select form-control" name="farmhouse_construction_status" id="farmhouse_construction_status">
+                                            <option value="">Select Status</option>
+                                            <option value="Ready to Move">Ready to Move</option>
+                                            <option value="Under Construction">Under Construction</option>
+                                            <option value="Bare Shell">Bare Shell</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Construction Type</label>
+                                        <select class="form-select form-control" name="farmhouse_construction_type" id="farmhouse_construction_type">
+                                            <option value="">Select Type</option>
+                                            <option value="RCC Framed Structure">RCC Framed Structure</option>
+                                            <option value="Load Bearing Brickwork">Load Bearing Brickwork</option>
+                                            <option value="Wooden / Log Cabin">Wooden / Log Cabin</option>
+                                            <option value="Steel Frame / Prefab">Steel Frame / Prefab</option>
+                                            <option value="Stone Masonry">Stone Masonry</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Construction Age (Years)</label>
+                                        <input type="number" class="form-control" name="farmhouse_construction_age" id="farmhouse_construction_age" min="0" placeholder="e.g., 3">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Parking Availability / Spaces</label>
+                                        <input type="text" class="form-control" name="farmhouse_parking" id="farmhouse_parking" placeholder="e.g., 4+ Covered / Open Cars">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Electricity Connection</label>
+                                        <select class="form-select form-control" name="farmhouse_electricity" id="farmhouse_electricity">
+                                            <option value="">Select Connection</option>
+                                            <option value="Single Phase">Single Phase</option>
+                                            <option value="Three Phase">Three Phase</option>
+                                            <option value="Solar Powered">Solar Powered</option>
+                                            <option value="Generator Backup Available">Generator Backup Available</option>
+                                            <option value="Not Available">Not Available</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Swimming Pool Available?</label>
+                                        <select class="form-select form-control" name="farmhouse_swimming_pool" id="farmhouse_swimming_pool">
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes - Private Pool</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Farmhouse Exclusive: Survey / Gut / Khasra Number -->
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Survey / Gut / Khasra No. <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="survey_number" name="survey_number" placeholder="e.g., Gut No. 145/2">
+                                    </div>
+                                </div>
+
+                                <!-- Farmhouse Exclusive: 7/12 Extract Availability -->
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">7/12 Extract (Satbara) / RoR Available?</label>
+                                        <select class="form-select form-control" id="satbara_available" name="satbara_available">
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Farmhouse Exclusive: Fencing / Boundary Status -->
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Fencing / Boundary Status</label>
+                                        <select class="form-select form-control" id="boundary_status" name="boundary_status">
+                                            <option value="">Select Fencing</option>
+                                            <option value="Barbed Wire">Barbed Wire Fencing</option>
+                                            <option value="Chain Link">Chain Link Fencing</option>
+                                            <option value="Stone Wall">Stone Wall / Compound Wall</option>
+                                            <option value="None">None</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Compound Wall</label>
+                                        <select class="form-select form-control" id="compound_wall" name="compound_wall">
+                                            <option value="">Select</option>
+                                            <option value="Full">Full Compound Wall</option>
+                                            <option value="Partial">Partial Compound Wall</option>
+                                            <option value="None">No Compound Wall</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Road Width (ft)</label>
+                                        <input type="number" class="form-control" id="road_width" name="road_width" placeholder="e.g., 30">
+                                    </div>
+                                </div>
+                                <!-- Farmhouse Exclusive: Approach Road Type -->
+                                <div class="col-md-6 mt-2" data-pt="farmhouse">
+                                    <div class="form-group">
+                                        <label class="form-label">Approach Road Type</label>
+                                        <select class="form-select form-control" id="approach_road_type" name="approach_road_type">
+                                            <option value="">Select Road Type</option>
+                                            <option value="Paved / Tar Road">Paved / Tar Road</option>
+                                            <option value="Dirt / Mud Road">Dirt / Mud Road</option>
+                                            <option value="Gravel Road">Gravel Road</option>
+                                            <option value="Highway Touch">Highway Touch</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Plot Frontage (ft)</label>
+                                        <input type="number" class="form-control" id="plot_frontage" name="plot_frontage" placeholder="e.g., 40">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Corner Plot?</label>
+                                        <select class="form-select form-control" id="corner_plot" name="corner_plot">
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -1701,7 +2282,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 mt-2">
+                                {% comment %} <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-user-shield"></i> Ownership Status</label>
                                         <select class="form-select form-control" name="ownership_status" id="ownership_status">
@@ -1714,10 +2295,10 @@
                                             <option value="Trust Owned">Trust Owned Property</option>
                                         </select>
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
                             </div>
 
-                            <div class="row">
+                            {% comment %} <div class="row">
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-file-contract"></i> Ownership Document Type</label>
@@ -1734,9 +2315,9 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
 
-                            <div class="row">
+                            {% comment %} <div class="row">
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-certificate"></i> Title Clarity Status</label>
@@ -1763,9 +2344,9 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
 
-                            <div class="row">
+                            {% comment %} <div class="row">
                                 <div class="col-md-12 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Loan on Property? <span class="required">*</span></label>
@@ -1785,7 +2366,7 @@
                                         <input type="number" class="form-control" id="loan_amount" name="loan_amount" placeholder="e.g., 2000000">
                                     </div>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
 
                             <div class="row">
                                 <div class="col-md-12 mt-2">
@@ -1801,15 +2382,15 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="conditional-section mt-2" id="res_tenant_details_section" style="display: none;">
+                                {% comment %} <div class="conditional-section mt-2" id="res_tenant_details_section" style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Tenant Details</label>
                                         <textarea class="form-control" id="tenant_details" name="tenant_details" placeholder="Tenant name, lease period, rent amount"></textarea>
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
                             </div>
 
-                            <div class="row">
+                            {% comment %} <div class="row">
                                 <div class="col-md-12 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
@@ -1829,7 +2410,7 @@
                                         <textarea class="form-control" id="res_dispute_details" name="dispute_details" placeholder="Describe the legal dispute"></textarea>
                                     </div>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
 
                             <div class="row">
                                 <div class="col-md-12 mt-2">
@@ -1846,12 +2427,12 @@
                                     </div>
                                 </div>
 
-                                <div class="conditional-section mt-2" id="res_tax_amount_section" style="display: none;">
+                                {% comment %} <div class="conditional-section mt-2" id="res_tax_amount_section" style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Pending Tax Amount (₹)</label>
                                         <input type="number" class="form-control" id="pending_tax_amount" name="pending_tax_amount" placeholder="e.g., 50000">
                                     </div>
-                                </div>
+                                </div> {% endcomment %}
                             </div>
 
                             <div class="row">
@@ -1869,9 +2450,11 @@
                     </div>
 
                     <div class="form-section">
+
                         <div class="section-header">
                             <i class="fas fa-indian-rupee-sign"></i> Pricing Details
                         </div>
+
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-4 mt-2">
@@ -1880,13 +2463,48 @@
                                         <input type="number" class="form-control" id="selling_price" name="selling_price" placeholder="e.g., 5000000" required>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mt-2">
+
+                                <!-- Standard Price per Sq.ft (Visible for Flats/Apartments) -->
+                                <div class="col-md-4 mt-2" data-pt-hide="independent_house villa bungalow row_house townhouse farmhouse">
                                     <div class="form-group">
                                         <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Sq.ft (Auto)</label>
                                         <input type="text" class="form-control" id="price_per_sqft_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
                                         <input type="hidden" id="price_per_sqft" name="price_per_sqft">
                                     </div>
                                 </div>
+
+                                <!-- House Price Box 1: Price per Sq.ft Plot Area (Visible ONLY for Houses) -->
+                                <div class="col-md-4 mt-2" data-pt="independent_house villa bungalow row_house townhouse" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Sq.ft Plot Area (Auto)</label>
+                                        <input type="text" class="form-control" id="house_psf_plot_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                                    </div>
+                                </div>
+
+                                <!-- House Price Box 2: Price per Sq.ft Construction Area (Visible ONLY for Houses) -->
+                                <div class="col-md-4 mt-2" data-pt="independent_house villa bungalow row_house townhouse" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Sq.ft Construction (Auto)</label>
+                                        <input type="text" class="form-control" id="house_psf_const_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                                    </div>
+                                </div>
+
+                                <!-- Farmhouse Price Box 1: Price per Built-up Area -->
+                                <div class="col-md-4 mt-2" data-pt="farmhouse" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Built-up Sq.ft (Auto)</label>
+                                        <input type="text" class="form-control" id="farm_psf_builtup_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                                    </div>
+                                </div>
+
+                                <!-- Farmhouse Price Box 2: Price per Selected Land Unit -->
+                                <div class="col-md-4 mt-2" data-pt="farmhouse" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per <span id="lblLandUnitText">Unit</span> (Auto)</label>
+                                        <input type="text" class="form-control" id="farm_psf_land_display" placeholder="Calculated automatically..." readonly style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                                    </div>
+                                </div>
+
                                 <div class="col-md-4 mb-3" id="brokerageSection">
                                     <label class="form-label mt-2" id="brokerageLabel">Brokerage <span class="required">*</span></label>
                                     <select class="form-select" name="brokerage_percentage" id="brokerage_percentage">
@@ -1904,6 +2522,20 @@
                                     <label class="form-label">Enter Fixed Brokerage</label>
                                     <input type="text" class="form-control" name="manual_brokerage" id="manual_brokerage" placeholder="e.g. Fixed Amount">
                                 </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label mt-2" id="ownerCommissionLabel">Owner/Landlord Service Commission <span class="required">*</span></label>
+                                    <select class="form-select" name="owner_commission_percentage" id="owner_commission_percentage">
+                                        <option value="">Select</option>
+                                        <option value="No Brokerage">No Brokerage</option>
+                                        <option value="1% of amount">1% of sale value</option>
+                                        <option value="1.5% of amount">1.5% of sale value</option>
+                                        <option value="2% of amount">2% of sale value</option>
+                                        {% comment %} <option value="Fixed Amount">Fixed Amount</option> {% endcomment %}
+                                        <option value="Negotiable">Negotiable</option>
+                                    </select>
+                                </div>
+
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Selling Price Negotiable?</label>
@@ -1915,6 +2547,7 @@
                                 </div>
                             </div>
                         </div>
+    
                     </div>
 
                     <div class="step-nav">
@@ -1929,7 +2562,7 @@
 
                 <!-- STEP 3: Amenities & Location -->
                 <div class="step-content" id="step3">
-                    <div class="form-section facility-theme">
+                    {% comment %} <div class="form-section facility-theme">
                         <div class="section-header">
                             <i class="fas fa-map-marker-alt"></i> Nearby Facilities
                         </div>
@@ -1953,7 +2586,7 @@
                                 {% endfor %}
                             </div>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
 
                     <div class="form-section">
                         <div class="section-header">
@@ -1999,6 +2632,7 @@
                         </div>
                         <div class="section-body">
                             <div class="row">
+                                
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">City <span class="required">*</span></label>
@@ -2014,11 +2648,11 @@
                                
                                
                                 <div class="col-md-6 mt-2">
-    <div class="form-group">
-        <label class="form-label">Locality / Area <span class="required">*</span></label>
-        <input type="text" class="form-control" name="locality" id="locality" placeholder="e.g., Koregaon Park" required>
-    </div>
-</div>
+                                    <div class="form-group">
+                                        <label class="form-label">Locality / Area <span class="required">*</span></label>
+                                        <input type="text" class="form-control" name="locality" id="locality" placeholder="e.g., Koregaon Park" required>
+                                    </div>
+                                </div>
 
 
 
@@ -2241,6 +2875,7 @@
                    <div class="form-section">
 
                         <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+                        
                         <div class="section-body">
                             <div class="row mb-3">
                                 <div class="col-md-12">
@@ -2343,7 +2978,7 @@
                         <button type="button" class="btn-step btn-prev" onclick="goToStep(3)" style="padding: 12px 35px; border-radius: 12px; border: 2px solid #e9ecef; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px;">
                             <i class="fas fa-arrow-left"></i> Previous Page
                         </button>
-                        <button type="button" class="btn-submit" onclick="Add_Rental(this)">
+                        <button type="button" class="btn-submit" onclick="Add_Rental(this)" style="background-color:#57C785!important;">
                             <i class="fas fa-save"></i> Submit Property
                         </button>
                     </div>
@@ -2398,19 +3033,40 @@
 
 <!-- Common Modal -->
 <div class="modal fade" id="itemsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable am-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header am-header">
+                <div class="am-header-left">
+                    <div class="am-header-icon"><i class="fas fa-star"></i></div>
+                    <div>
+                        <h5 class="modal-title mb-0"><span id="modalTitle">Select Items</span></h5>
+                        <small class="am-subtitle">Tap to select. You can pick as many as you like.</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
-                <div id="modalItemsList" class="row"></div>
+
+            <div class="am-toolbar">
+                <div class="am-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="modalSearch" placeholder="Search...">
+                </div>
+                <button type="button" class="am-link-btn" id="modalSelectAll"><i class="fas fa-check-double"></i> Select all</button>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span id="modalSelectedCount">0</span>)</button>
+
+            <div class="modal-body am-body">
+                <div id="modalItemsList" class="am-grid"></div>
+                <div id="modalNoResults" class="am-empty" style="display:none;">
+                    <i class="fas fa-search"></i>
+                    <p>No matching items found</p>
+                </div>
+            </div>
+
+            <div class="modal-footer am-footer">
+                <button type="button" class="am-btn am-btn-ghost" onclick="clearAll()"><i class="fas fa-eraser"></i> Clear All</button>
+                <button type="button" class="am-btn am-btn-apply btn-primary" data-bs-dismiss="modal">
+                    <i class="fas fa-check"></i> Apply (<span id="modalSelectedCount">0</span>)
+                </button>
             </div>
         </div>
     </div>
@@ -2421,10 +3077,24 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var yesRadio = document.getElementById('listed_yes');
-        var noRadio = document.getElementById('listed_no');
-        var portalField = document.getElementById('portalField');
+
+document.addEventListener('DOMContentLoaded', function () {
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+
+    // Event delegation to catch land area unit changes or inputs instantly
+
+    document.addEventListener('change', function (e) {
+        if (e.target && (e.target.id === 'land_area_unit' || e.target.id === 'land_area')) {
+            updatePreview();
+        }
+        });
+        document.addEventListener('input', function (e) {
+            if (e.target && e.target.id === 'land_area') {
+                updatePreview();
+            }
+        });
 
         function togglePortalField() {
             if (portalField) {
@@ -2436,10 +3106,12 @@
         if (noRadio) noRadio.addEventListener('change', togglePortalField);
 
         togglePortalField();
-    });
+});
+
 </script>
 
 <script>
+
     function updateBrokerageLabel(role) {
         var labelElement = document.getElementById('brokerageLabel');
         if (!labelElement) return;
@@ -2449,7 +3121,7 @@
 
         switch (normalizedRole) {
             case 'admin':
-                labelText = "EstateFlow Service Fee";
+                labelText = "Kanishka Imperia Service Fee";
                 break;
             case 'relationship manager':
             case 'landlord':
@@ -2469,9 +3141,11 @@
 
         labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
     }
+
 </script>
 
 <script>
+
     function Change_Fields() {
         var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
         if (!checkedInput) return;
@@ -2525,9 +3199,11 @@
             }
         }
     }
+
 </script>
 
 <script>
+
     (function () {
         var wrapper = document.getElementById('assignedToSearchSelect');
         var control = document.getElementById('assignedToControl');
@@ -2677,9 +3353,11 @@
             Change_Fields();
         }
     })();
+
 </script>
 
 <script>
+
     function get_user_data() {
         var assigned_to = $("#assigned_to").val();
         if (!assigned_to) {
@@ -2702,9 +3380,12 @@
             error: function (xhr, status, error) { console.error('Failed to fetch user data:', error); }
         });
     }
+
 </script>
 
 <script>
+    
+    let currentSection = null;
     $(document).ready(function () {
         const sections = ['amenities', 'facilities'];
 
@@ -2719,16 +3400,19 @@
             const container = $('#modalItemsList').empty();
             $(`.${section}-checkbox`).each(function () {
                 container.append(`
-        <div class="col-md-4 col-sm-6 mb-2">
-          <div class="form-check">
-            <input class="form-check-input modal-item-checkbox" type="checkbox" 
+        <label class="am-card" data-name="${String(this.value).toLowerCase()}">
+            <input type="checkbox" class="modal-item-checkbox"
                    value="${this.value}" data-icon="${$(this).data('icon')}"
                    ${this.checked ? 'checked' : ''}>
-            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
-          </div>
-        </div>
-      `);
+            <span class="am-icon"><i class="${$(this).data('icon')}"></i></span>
+            <span class="am-name">${this.value}</span>
+            <span class="am-tick"><i class="fas fa-check"></i></span>
+        </label>
+    `);
             });
+
+            $('#modalSearch').val('');
+            $('#modalNoResults').hide();
 
             updateModalCount();
             $('#itemsModal').modal('show');
@@ -2782,6 +3466,24 @@
 
         $(document).on('change', '.modal-item-checkbox', updateModalCount);
 
+        // live search inside modal
+        $('#modalSearch').on('input', function () {
+            const q = this.value.trim().toLowerCase();
+            let visible = 0;
+            $('#modalItemsList .am-card').each(function () {
+                const show = String($(this).data('name')).indexOf(q) !== -1;
+                $(this).toggle(show);
+                if (show) visible++;
+            });
+            $('#modalNoResults').toggle(visible === 0);
+        });
+
+        // select all (only visible / filtered ones)
+        $('#modalSelectAll').on('click', function () {
+            $('#modalItemsList .am-card:visible .modal-item-checkbox').prop('checked', true);
+            updateModalCount();
+        });
+
         $('#itemsModal .btn-primary').on('click', function () {
             if (!currentSection) return;
 
@@ -2797,6 +3499,7 @@
 </script>
 
 <script>
+
     let currentStep = 1;
 
     function goToStep(n) {
@@ -2833,6 +3536,7 @@
         currentStep = n;
 
         // Smoothly scroll to the top of the form container for both Next and Previous page clicks
+
         const formContainer = document.querySelector('.form-container');
         if (formContainer) {
             formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2844,6 +3548,7 @@
     }
 
     function validateStep(step) {
+
         const stepElement = document.getElementById('step' + step);
         const requiredFields = stepElement.querySelectorAll('[required]');
         let isValid = true;
@@ -2851,56 +3556,59 @@
         let firstInvalidElement = null;
 
         // 1. Clear previous error highlights
+
         stepElement.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
         stepElement.querySelectorAll('.radio-error-group').forEach(el => el.classList.remove('radio-error-group'));
 
-        // 2. Validate required inputs
-        requiredFields.forEach(field => {
-            if (field.type === 'radio') {
-                const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
-                const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+            // 2. Validate required inputs
 
-                if (!isChecked) {
+            requiredFields.forEach(field => {
+                if (field.type === 'radio') {
+                    const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+
+                    if (!isChecked) {
+                        isValid = false;
+                        const groupContainer = field.closest('.radio-group') || field.closest('.form-group') || field.closest('div');
+                        if (groupContainer) {
+                            groupContainer.classList.add('radio-error-group');
+                            if (!firstInvalidElement) firstInvalidElement = groupContainer;
+                        }
+
+                        const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                        if (label && !missingFields.includes(label)) missingFields.push(label);
+                    }
+                } else if (!field.value.trim()) {
                     isValid = false;
-                    const groupContainer = field.closest('.radio-group') || field.closest('.form-group') || field.closest('div');
-                    if (groupContainer) {
-                        groupContainer.classList.add('radio-error-group');
-                        if (!firstInvalidElement) firstInvalidElement = groupContainer;
+                    field.classList.add('input-error');
+
+                    if (field.id === 'assigned_to') {
+                        const control = document.getElementById('assignedToControl');
+                        if (control) {
+                            control.classList.add('input-error');
+                            if (!firstInvalidElement) firstInvalidElement = control;
+                        }
+                    } else {
+                        if (!firstInvalidElement) firstInvalidElement = field;
                     }
 
                     const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
                     if (label && !missingFields.includes(label)) missingFields.push(label);
                 }
-            } else if (!field.value.trim()) {
-                isValid = false;
-                field.classList.add('input-error');
+            });
 
-                if (field.id === 'assigned_to') {
-                    const control = document.getElementById('assignedToControl');
-                    if (control) {
-                        control.classList.add('input-error');
-                        if (!firstInvalidElement) firstInvalidElement = control;
-                    }
-                } else {
-                    if (!firstInvalidElement) firstInvalidElement = field;
-                }
-
-                const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
-                if (label && !missingFields.includes(label)) missingFields.push(label);
-            }
-        });
-
-        // 3. Carpet Area vs Built-up Area Check (Step 1)
+            // 3. Carpet Area vs Built-up Area Check (Step 1)
      
 
-// 3. Studio Apartment + BHK validation rule & Area Check (Step 1)
+    // 3. Studio Apartment + BHK validation rule & Area Check (Step 1)
+
     if (step === 1) {
         const propertyTypeSelect = document.getElementById('property_type');
         const bhkSelect = document.getElementById('bhk');
         if (propertyTypeSelect && bhkSelect) {
             const pType = propertyTypeSelect.value.toLowerCase();
             const bhkVal = bhkSelect.value;
-            if (pType.includes('studio') && bhkVal !== '0bhk') {
+            if (pType.includes('studio') && bhkVal !== '0 bhk') {
                 isValid = false;
                 bhkSelect.classList.add('input-error');
                 if (!firstInvalidElement) firstInvalidElement = bhkSelect;
@@ -2967,10 +3675,14 @@
         return true;
     }
 
+    
+
     function updatePreview() {
-        const price = document.getElementById('selling_price')?.value;
-        if (price) {
+        const price = parseFloat(document.getElementById('selling_price')?.value) || 0;
+        if (price > 0) {
             document.getElementById('previewPrice').textContent = '₹' + parseInt(price).toLocaleString('en-IN');
+        } else {
+            document.getElementById('previewPrice').textContent = '₹ —';
         }
 
         const bhk = document.getElementById('bhk')?.value;
@@ -2978,7 +3690,16 @@
             document.getElementById('prevBHK').textContent = bhk.toUpperCase();
         }
 
-        const area = document.getElementById('carpet_area')?.value;
+        const HOUSE_TYPES = ['independent_house', 'villa', 'bungalow', 'row_house', 'townhouse'];
+        const curType = document.getElementById('property_type')?.value || '';
+        const isHouse = HOUSE_TYPES.indexOf(curType) !== -1;
+        const isFarmhouse = (curType === 'farmhouse');
+
+        const area = isHouse
+            ? document.getElementById('construction_area')?.value
+            : isFarmhouse
+            ? document.getElementById('builtup_area')?.value
+            : document.getElementById('carpet_area')?.value;
         if (area) {
             document.getElementById('prevArea').textContent = area + ' sqft';
         }
@@ -3006,27 +3727,100 @@
             document.getElementById('previewTitle').textContent = autoTitle.trim();
         }
 
-        // Auto Calculate Price per Sq.ft
-        const builtUpArea = document.getElementById('builtup_area')?.value;
+        // ================= AUTO CALCULATE PRICE PER SQ.FT / UNIT =================
+        
         const psfDisplay = document.getElementById('price_per_sqft_display');
         const psfHidden = document.getElementById('price_per_sqft');
+        
+        const housePlotDisp = document.getElementById('house_psf_plot_display');
+        const houseConstDisp = document.getElementById('house_psf_const_display');
+        
+        const farmBuiltupDisp = document.getElementById('farm_psf_builtup_display');
+        const farmLandDisp = document.getElementById('farm_psf_land_display');
+        const lblLandUnitText = document.getElementById('lblLandUnitText');
 
-        if (price && builtUpArea && parseFloat(builtUpArea) > 0) {
-            const calculatedPsf = (parseFloat(price) / parseFloat(builtUpArea)).toFixed(2);
-            if (psfDisplay) psfDisplay.value = '₹ ' + parseFloat(calculatedPsf).toLocaleString('en-IN') + ' / sqft';
-            if (psfHidden) psfHidden.value = calculatedPsf;
-        } else {
-            if (psfDisplay) psfDisplay.value = '';
+        if (isHouse) {
+            // Independent House / Villa: Separate Plot Area PSF & Construction Area PSF
+            const plotA = parseFloat(document.getElementById('plot_area')?.value) || 0;
+            const consA = parseFloat(document.getElementById('construction_area')?.value) || 0;
+
+            // Box 1: Price per Sq.ft Plot Area
+            if (price > 0 && plotA > 0) {
+                const plotPsf = (price / plotA).toFixed(2);
+                if (housePlotDisp) housePlotDisp.value = '₹ ' + parseFloat(plotPsf).toLocaleString('en-IN') + ' / sqft (Plot)';
+            } else {
+                if (housePlotDisp) housePlotDisp.value = '';
+            }
+
+            // Box 2: Price per Sq.ft Construction Area
+            if (price > 0 && consA > 0) {
+                const constPsf = (price / consA).toFixed(2);
+                if (houseConstDisp) houseConstDisp.value = '₹ ' + parseFloat(constPsf).toLocaleString('en-IN') + ' / sqft (Const)';
+            } else {
+                if (houseConstDisp) houseConstDisp.value = '';
+            }
             if (psfHidden) psfHidden.value = '';
+        } else if (isFarmhouse) {
+            // Farmhouse: Built-up Area PSF + Unit-normalized Land Valuation Box
+            const builtupA = parseFloat(document.getElementById('builtup_area')?.value) || 0;
+            const landA = parseFloat(document.getElementById('land_area')?.value) || 0;
+            const unit = document.getElementById('land_area_unit')?.value || 'sq.ft';
+
+            if (lblLandUnitText) lblLandUnitText.textContent = unit;
+
+            // Box 1: Built-up Price
+            if (price > 0 && builtupA > 0) {
+                const bPsf = (price / builtupA).toFixed(2);
+                if (farmBuiltupDisp) farmBuiltupDisp.value = '₹ ' + parseFloat(bPsf).toLocaleString('en-IN') + ' / sqft (Built-up)';
+            } else {
+                if (farmBuiltupDisp) farmBuiltupDisp.value = '';
+            }
+
+            // Box 2: Land Unit Price with Scale Normalization
+            if (price > 0 && landA > 0) {
+                let multiplier = 1;
+                if (unit === 'sqyd') multiplier = 9;
+                else if (unit === 'sqm') multiplier = 10.7639;
+                else if (unit === 'acre') multiplier = 43560;
+                else if (unit === 'hectare') multiplier = 107639.1;
+
+                const pricePerUnit = (price / landA).toFixed(2);
+                if (farmLandDisp) {
+                    farmLandDisp.value = '₹ ' + parseFloat(pricePerUnit).toLocaleString('en-IN') + ' / ' + unit;
+                }
+            } else {
+                if (farmLandDisp) farmLandDisp.value = '';
+            }
+            if (psfHidden) psfHidden.value = '';
+        } else {
+            // Flat / Apartment: Super Built-up if filled, else Built-up Area
+            const builtA = parseFloat(document.getElementById('builtup_area')?.value) || 0;
+            const activeArea = builtA;
+            const labelType = 'Built-up';
+
+            if (price > 0 && activeArea > 0) {
+                const calculatedPsf = (price / activeArea).toFixed(2);
+                if (psfDisplay) psfDisplay.value = '₹ ' + parseFloat(calculatedPsf).toLocaleString('en-IN') + ' / sqft (' + labelType + ')';
+                if (psfHidden) psfHidden.value = calculatedPsf;
+            } else {
+                if (psfDisplay) psfDisplay.value = '';
+                if (psfHidden) psfHidden.value = '';
+            }
         }
 
         updateChecklist();
     }
 
+    
+
     function updateChecklist() {
         setCheck('cl-type', !!document.getElementById('property_type')?.value);
         setCheck('cl-bhk', !!document.getElementById('bhk')?.value);
-        setCheck('cl-area', !!document.getElementById('carpet_area')?.value);
+        var _t = document.getElementById('property_type')?.value || '';
+        var _house = ['independent_house', 'villa', 'bungalow', 'row_house', 'townhouse'].indexOf(_t) !== -1;
+        setCheck('cl-area', _house
+            ? (!!document.getElementById('plot_area')?.value && !!document.getElementById('construction_area')?.value)
+            : !!document.getElementById('carpet_area')?.value);
         setCheck('cl-price', !!document.getElementById('selling_price')?.value);
         setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality')?.value);
         setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
@@ -3058,6 +3852,7 @@
 
 
         // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+        
         const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
         const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
         const IMG_TOTAL_LIMIT = 20;
@@ -3375,6 +4170,7 @@
         var sources = [];
 
         // A. Check window.catFiles (Categorized Image Uploads)
+
         if (window.catFiles) {
             Object.keys(window.catFiles).forEach(function (cat) {
                 if (Array.isArray(window.catFiles[cat])) {
@@ -3388,6 +4184,7 @@
         }
 
         // B. Check standard file inputs
+
         var fileInputs = document.querySelectorAll('input[type="file"]:not(#videoInput)');
         fileInputs.forEach(function (input) {
             if (input.files && input.files.length > 0) {
@@ -3400,6 +4197,7 @@
         });
 
         // C. Fallback: Fetch rendered image elements (saved images or previews)
+
         var previewImgs = document.querySelectorAll('.img-cat-preview img, .existing-img-item img, #imagePreview img, #existingImagePreview img');
         previewImgs.forEach(function (img) {
             if (img.src && !img.src.includes('placeholder') && !img.src.startsWith('data:video')) {
@@ -3424,6 +4222,7 @@
         }
 
         // Load image objects asynchronously
+
         var loadedImages = [];
         var processed = 0;
 
@@ -3533,6 +4332,7 @@
     }
 
     // ── 5. TOGGLE PANELS & RADIO OPTIONS ──
+
     function toggleVideoOption() {
         if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
         if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
@@ -3636,9 +4436,12 @@
     }
 
     // ── 7. EXTERNAL VIDEO LINK EMBED PREVIEW ──
+
     function renderVideoPreview() {
         var linkInput = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+
         var frame = document.getElementById('rmVideoFrame');
+
         if (!linkInput || !frame) return;
 
         var url = linkInput.value.trim();
@@ -3749,10 +4552,6 @@
             { id: 'water_type', name: 'Water Type' },
             { id: 'furnishing_status', name: 'Furnishing Status' },
             { id: 'property_age', name: 'Age of Property' },
-            { id: 'facing_direction', name: 'Facing Direction' },
-            { id: 'super_builtup_area', name: 'Super Built-up Area' },
-            { id: 'builtup_area', name: 'Built-up Area' },
-            { id: 'carpet_area', name: 'Carpet Area' },
             { id: 'total_floors', name: 'Total Floors' },
             { id: 'bhk', name: 'BHK' },
             { id: 'bathrooms', name: 'Bathrooms' },
@@ -3765,8 +4564,32 @@
             { id: 'state', name: 'State' }
         ];
 
+        var curType = $('#property_type').val();
+        var HOUSE_TYPES = ['independent_house', 'villa', 'bungalow', 'row_house', 'townhouse'];
+        var isHouse = HOUSE_TYPES.indexOf(curType) !== -1;
+        var isFarmhouse = (curType === 'farmhouse');
+
+        if (isHouse) {
+            requiredFields.push({ id: 'plot_area', name: 'Plot Area' });
+            requiredFields.push({ id: 'construction_area', name: 'Construction Area' });
+        } else if (isFarmhouse) {
+            requiredFields.push({ id: 'land_area', name: 'Land Area' });
+            requiredFields.push({ id: 'builtup_area', name: 'Built-up Area' });
+            requiredFields.push({ id: 'land_classification', name: 'Land Classification' });
+            requiredFields.push({ id: 'survey_number', name: 'Survey / Gut / Khasra No.' });
+        } else {
+            requiredFields.push({ id: 'builtup_area', name: 'Built-up Area' });
+            requiredFields.push({ id: 'super_builtup_area', name: 'Super Built-up Area' });
+        }
+
         for (var i = 0; i < requiredFields.length; i++) {
             var field = $('#' + requiredFields[i].id);
+
+            if (field.closest('.pt-hidden').length || field.is(':hidden')) {
+                field.removeClass('is-invalid');
+                continue;
+            }
+
             if (!field.val() || field.val().trim() === '') {
                 isValid = false;
                 errorMessage += requiredFields[i].name + ', ';
@@ -3775,10 +4598,6 @@
                 field.removeClass('is-invalid');
             }
         }
-
-        
-
-       
 
         if (!isValid) {
             Swal.fire({
@@ -3851,56 +4670,104 @@
             }
         }
 
+        // Helper function to safely send numbers or omit empty strings so Decimal fields don't crash
+        function getNum(selector) {
+            var val = $(selector).val();
+            return (val !== undefined && val !== null && val.trim() !== '') ? val.trim() : '';
+        }
+
         var fd = new FormData();
         fd.append('id', '');
-        fd.append('listing_type','Resale');
-        fd.append('category','Residential');
-        fd.append('property_title', $('#property_title').val());
-        fd.append('property_type', $('#property_type').val());
-        fd.append('property_no', $('#property_no').val());
-        fd.append('society_type', $('#society_type').val());
-        fd.append('wing_no', $('#wing_no').val());
-        fd.append('water_type', $('#water_type').val());
-        fd.append('furnishing_status', $('#furnishing_status').val());
-        fd.append('property_age', $('#property_age').val());
-        fd.append('facing_direction', $('#facing_direction').val());
-        fd.append('occupancy_status', $('#occupancy_status').val());
-        fd.append('terrace_details', $('#terrace_details').val());
+        fd.append('listing_type', 'Resale');
+        fd.append('category', 'Residential');
+        fd.append('property_title', $('#property_title').val() || '');
+        fd.append('property_type', $('#property_type').val() || '');
+        fd.append('property_no', $('#property_no').val() || '');
+        fd.append('society_type', $('#society_type').val() || '');
+        fd.append('wing_no', $('#wing_no').val() || '');
+        fd.append('water_type', $('#water_type').val() || '');
+        fd.append('furnishing_status', $('#furnishing_status').val() || '');
+        fd.append('property_age', getNum('#property_age'));
+        fd.append('facing_direction', $('#facing_direction').val() || '');
+        fd.append('occupancy_status', $('#occupancy_status').val() || '');
+        
+        var terraceAvailable = $('input[name="terrace_available"]:checked').val() || 'No';
+        fd.append('terrace_available', terraceAvailable);
+        fd.append('terrace_details', terraceAvailable === 'Yes' ? $('#terrace_details').val() || '' : '');
+        fd.append('floor_details', $('#floor_details').val() || '');
+        fd.append('room_details', $('#room_details').val() || '');
 
-        fd.append('super_builtup_area', $('#super_builtup_area').val());
-        fd.append('builtup_area', $('#builtup_area').val());
-        fd.append('carpet_area', $('#carpet_area').val());
-        fd.append('plot_area', $('#plot_area').val());
-        fd.append('building_configuration', $('#building_configuration').val());
-        fd.append('total_floors', $('#total_floors').val());
-        fd.append('floor_number', $('#floor_number').val());
-        fd.append('brokerage_percentage', $('#brokerage_percentage').val());
-        fd.append('manual_brokerage', $('#manual_brokerage').val());
+        // Safe numeric area appends
 
-        fd.append('bhk', $('#bhk').val());
-        fd.append('bathrooms', $('#bathrooms').val());
-        fd.append('balconies', $('#balconies').val());
-        fd.append('covered_parking', $('#covered_parking').val());
-        fd.append('open_parking', $('input[name="open_parking"]:checked').val());
+        fd.append('super_builtup_area', getNum('#super_builtup_area'));
+        fd.append('builtup_area', getNum('#builtup_area'));
+        fd.append('carpet_area', getNum('#carpet_area'));
+        fd.append('plot_area', getNum('#plot_area_standard') || getNum('#plot_area'));
+        fd.append('construction_area', getNum('#construction_area'));
+        fd.append('land_area', getNum('#land_area'));
+        fd.append('land_area_unit', $('#land_area_unit').val() || 'sq.ft');
 
-        fd.append('no_of_owners', $('#no_of_owners').val());
-        fd.append('ownership_status', $('#ownership_status').val());
-        fd.append('ownership_document_type', $('#ownership_document_type').val());
-        fd.append('title_clarity_status', $('#title_clarity_status').val());
-        fd.append('encumbrance_status', $('#encumbrance_status').val());
-        fd.append('property_loan', $('input[name="property_loan"]:checked').val());
-        fd.append('loan_amount', $('#loan_amount').val());
-        fd.append('existing_tenants', $('input[name="existing_tenants"]:checked').val());
-        fd.append('tenant_details', $('#tenant_details').val());
-        fd.append('any_legal_dispute', $('input[name="any_legal_dispute"]:checked').val());
-        fd.append('dispute_details', $('#res_dispute_details').val());
-        fd.append('government_tax', $('input[name="government_tax"]:checked').val());
-        fd.append('pending_tax_amount', $('#pending_tax_amount').val());
-        fd.append('sanctioning_authority', $('#sanctioning_authority').val());
+        // Farmhouse Legal & Land Fields
+        fd.append('land_classification', $('#land_classification').val() || '');
 
-        fd.append('selling_price', $('#selling_price').val());
-        fd.append('price_per_sqft', $('#price_per_sqft').val());
-        fd.append('price_negotiable', $('#price_negotiable').val());
+        fd.append('farmhouse_construction_status', $('#farmhouse_construction_status').val() || '');
+        fd.append('farmhouse_construction_type', $('#farmhouse_construction_type').val() || '');
+        fd.append('farmhouse_construction_age', $('#farmhouse_construction_age').val() || '');
+        fd.append('farmhouse_parking', $('#farmhouse_parking').val() || '');
+        fd.append('farmhouse_electricity', $('#farmhouse_electricity').val() || '');
+        fd.append('farmhouse_swimming_pool', $('#farmhouse_swimming_pool').val() || '');
+
+        fd.append('survey_number', $('#survey_number').val() || '');
+        fd.append('satbara_available', $('#satbara_available').val() || '');
+        fd.append('boundary_status', $('#boundary_status').val() || '');
+        fd.append('approach_road_type', $('#approach_road_type').val() || '');
+        fd.append('compound_wall', $('#compound_wall').val() || '');
+        fd.append('road_width', $('#road_width').val() || '');
+        fd.append('plot_frontage', $('#plot_frontage').val() || '');
+        fd.append('corner_plot', $('#corner_plot').val() || '');
+
+        fd.append('building_configuration', $('#building_configuration').val() || '');
+        fd.append('total_floors', getNum('#total_floors'));
+        fd.append('floor_number', getNum('#floor_number'));
+        fd.append('brokerage_percentage', $('#brokerage_percentage').val() || '');
+        fd.append('manual_brokerage', $('#manual_brokerage').val() || '');
+        fd.append('owner_commission_percentage', $('#owner_commission_percentage').val() || '');
+
+        fd.append('bhk', $('#bhk').val() || '');
+        fd.append('bathrooms', getNum('#bathrooms'));
+        fd.append('balconies', getNum('#balconies'));
+        
+        var parkingStatus = $('#parking_status').val() || '';
+        fd.append('parking_status', parkingStatus);
+
+        fd.append('no_of_owners', getNum('#no_of_owners'));
+        fd.append('ownership_status', $('#ownership_status').val() || '');
+        fd.append('ownership_document_type', $('#ownership_document_type').val() || '');
+        fd.append('title_clarity_status', $('#title_clarity_status').val() || '');
+        fd.append('encumbrance_status', $('#encumbrance_status').val() || '');
+        fd.append('property_loan', $('input[name="property_loan"]:checked').val() || 'no');
+        fd.append('loan_amount', getNum('#loan_amount'));
+        fd.append('existing_tenants', $('input[name="existing_tenants"]:checked').val() || 'no');
+        fd.append('tenant_details', $('#tenant_details').val() || '');
+        fd.append('any_legal_dispute', $('input[name="any_legal_dispute"]:checked').val() || 'no');
+        fd.append('dispute_details', $('#res_dispute_details').val() || '');
+        fd.append('government_tax', $('input[name="government_tax"]:checked').val() || 'no');
+        fd.append('pending_tax_amount', getNum('#pending_tax_amount'));
+        fd.append('sanctioning_authority', $('#sanctioning_authority').val() || '');
+
+        fd.append('selling_price', getNum('#selling_price'));
+        fd.append('price_per_sqft', getNum('#price_per_sqft'));
+
+        fd.append('house_psf_plot_display', $('#house_psf_plot_display').val() || '');
+        fd.append('house_psf_const_display', $('#house_psf_const_display').val() || '');
+        fd.append('farm_psf_builtup_display', $('#farm_psf_builtup_display').val() || '');
+        fd.append('farm_psf_land_display', $('#farm_psf_land_display').val() || '');
+
+        fd.append('price_negotiable', $('#price_negotiable').val() || 'yes');
+        fd.append('compound_wall', $('#compound_wall').val() || '');
+        fd.append('road_width', getNum('#road_width'));
+        fd.append('plot_frontage', getNum('#plot_frontage'));
+        fd.append('corner_plot', $('#corner_plot').val() || '');
 
         var amenities = [];
         $('.amenities-checkbox:checked').each(function() {
@@ -3914,18 +4781,18 @@
         });
         fd.append('nearby_facilities', JSON.stringify(facilities));
 
-        fd.append('user_description', $('#user_description').val());
+        fd.append('user_description', $('#user_description').val() || '');
 
-        fd.append('city', $('#city').val());
-        fd.append('locality', $('#locality').val());
-        fd.append('building_name', $('#building_name').val());
-        fd.append('address', $('#address').val());
-        fd.append('pincode', $('#pincode').val());
-        fd.append('property_landmark', $('#property_landmark').val());
-        fd.append('state', $('#state').val());
+        fd.append('city', $('#city').val() || '');
+        fd.append('locality', $('#locality').val() || '');
+        fd.append('building_name', $('#building_name').val() || '');
+        fd.append('address', $('#address').val() || '');
+        fd.append('pincode', getNum('#pincode'));
+        fd.append('property_landmark', $('#property_landmark').val() || '');
+        fd.append('state', $('#state').val() || '');
         fd.append('google_maps_link', $('input[name="google_maps_link"]').val() || '');
-        fd.append('latitude', $('#latitude').val() || '');
-        fd.append('longitude', $('#longitude').val() || '');
+        fd.append('latitude', getNum('#latitude'));
+        fd.append('longitude', getNum('#longitude'));
         fd.append('property_video_link', $('#property_video_link').val() || '');
 
         const selectedVideoOption = document.querySelector('input[name="video_option"]:checked')?.value;
@@ -3969,14 +4836,14 @@
             fd.append('property_video', videoInput.files[0]);
         }
 
-        fd.append('listed_elsewhere', $('input[name="listed_elsewhere"]:checked').val());
-        fd.append('portal_name', $('#portal_name').val());
-        
+        fd.append('listed_elsewhere', $('input[name="listed_elsewhere"]:checked').val() || 'No');
 
-        fd.append('uploaded_by_name', $('#uploaded_by_name').val());
-        fd.append('uploaded_by_email', $('#uploaded_by_email').val());
-        fd.append('uploaded_by_contact', $('#uploaded_by_contact').val());
-        fd.append('uploaded_by_role', $('#uploaded_by_role').val());
+        fd.append('portal_name', $('#portal_name').val() || '');
+
+        fd.append('uploaded_by_name', $('#uploaded_by_name').val() || '');
+        fd.append('uploaded_by_email', $('#uploaded_by_email').val() || '');
+        fd.append('uploaded_by_contact', $('#uploaded_by_contact').val() || '');
+        fd.append('uploaded_by_role', $('#uploaded_by_role').val() || '');
 
         fd.append('upload_file_name', '');
         fd.append('listing_status', 'Draft');
@@ -4156,7 +5023,8 @@
 
 
 
-    // Studio Apartment + BHK Business Rule Logic
+// Studio Apartment + BHK Business Rule Logic
+
 document.addEventListener("DOMContentLoaded", function () {
     const propertyTypeSelect = document.getElementById("property_type");
     const bhkSelect = document.getElementById("bhk");
@@ -4167,9 +5035,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectedType = this.value.toLowerCase();
 
         if (selectedType.includes("studio")) {
-            bhkSelect.value = "0bhk";
+            bhkSelect.value = "0 bhk";
             Array.from(bhkSelect.options).forEach(option => {
-                if (option.value && option.value !== "0bhk") {
+                if (option.value && option.value !== "0 bhk") {
                     option.disabled = true;
                 } else {
                     option.disabled = false;
@@ -4179,23 +5047,169 @@ document.addEventListener("DOMContentLoaded", function () {
             Array.from(bhkSelect.options).forEach(option => {
                 option.disabled = false;
             });
-            if (bhkSelect.value === "0bhk") {
+            if (bhkSelect.value === "0 bhk") {
                 bhkSelect.value = "";
             }
         }
     });
 });
 
+</script>
 
+<script>
+(function () {
+    var PT_GROUPS = {
+        flat:  ['apartment', 'flat', 'studio_apartment', 'penthouse', 'serviced_apartment'],
+        floor: ['independent_floor', 'builder_floor'],
+        house: ['independent_house', 'villa', 'bungalow', 'row_house', 'townhouse'],
+        multi: ['duplex', 'triplex'],
+        farm:  ['farmhouse']
+    };
+    var lastType = '';
 
+    function groupsOf(type) {
+        return Object.keys(PT_GROUPS).filter(function (g) {
+            return PT_GROUPS[g].indexOf(type) !== -1;
+        });
+    }
+    function tokens(s) { return (s || '').split(/\s+/).filter(Boolean); }
+    function matches(list, type, groups) {
+        return list.some(function (k) { return k === type || groups.indexOf(k) !== -1; });
+    }
+    function clearField(f) {
+        if (f.type === 'radio' || f.type === 'checkbox') f.checked = f.defaultChecked;
+        else if (f.tagName === 'SELECT') f.selectedIndex = 0;
+        else f.value = '';
+    }
 
+    function setVisible(el, visible) {
+        var wasHidden = el.classList.contains('pt-hidden');
+        el.classList.toggle('pt-hidden', !visible);
+        el.style.display = visible ? '' : 'none';
 
+        el.querySelectorAll('input, select, textarea').forEach(function (f) {
+            if (!visible) {
+                if (f.required) { f.dataset.wasRequired = '1'; f.required = false; }
+                if (!wasHidden) clearField(f);
+                f.classList.remove('input-error');
+            } else if (f.dataset.wasRequired === '1') {
+                f.required = true;
+            }
+        });
+    }
 
+    function applyPropertyTypeRules() {
+        var sel = document.getElementById('property_type');
+        if (!sel) return;
+        var type = (sel.value || '').trim();
+        var groups = groupsOf(type);
 
+        document.querySelectorAll('[data-pt], [data-pt-hide]').forEach(function (el) {
+            var showList = tokens(el.getAttribute('data-pt'));
+            var hideList = tokens(el.getAttribute('data-pt-hide'));
+            var visible = true;
+            if (showList.length) visible = !!type && matches(showList, type, groups);
+            if (visible && hideList.length && type && matches(hideList, type, groups)) visible = false;
+            setVisible(el, visible);
+        });
 
+        // Plot Area: mandatory for house group, optional for farmhouse
+        var plot = document.getElementById('plot_area');
+        if (plot) {
+            var isHouseGrp = groups.indexOf('house') !== -1;
+            delete plot.dataset.wasRequired;
+            plot.required = isHouseGrp;
+            var plotReq = document.getElementById('plotAreaReq');
+            if (plotReq) plotReq.style.display = isHouseGrp ? '' : 'none';
+        }
 
+        // Studio apartment: BHK hidden and fixed to 0 BHK
+        var bhk = document.getElementById('bhk');
+        if (bhk) {
+            if (type === 'studio_apartment') bhk.value = '0bhk';
+            else if (lastType === 'studio_apartment' && bhk.value === '0bhk') bhk.value = '';
+        }
 
+        lastType = type;
+        if (typeof updatePreview === 'function') updatePreview();
+    }
 
+    document.addEventListener('DOMContentLoaded', function () {
+        var sel = document.getElementById('property_type');
+        if (!sel) return;
+        sel.addEventListener('change', applyPropertyTypeRules);
+        applyPropertyTypeRules();
+    });
+    window.applyPropertyTypeRules = applyPropertyTypeRules;
+})();
+</script>
+
+<script>
+/* UI refresh helpers: floating labels + terrace toggle (no existing logic touched) */
+document.addEventListener('DOMContentLoaded', function () {
+
+    // 1) Turn every "label followed by a text/number/select/textarea" into a floating-label field
+    document.querySelectorAll('.form-container label.form-label').forEach(function (lbl) {
+        var ctl = lbl.nextElementSibling;
+        var parent = lbl.parentElement;
+        if (!ctl || !parent) return;
+        var tag = ctl.tagName;
+        var ok = tag === 'SELECT' || tag === 'TEXTAREA' ||
+                 (tag === 'INPUT' && !/^(radio|checkbox|hidden|file)$/i.test(ctl.type));
+        if (ok) parent.classList.add('fl');
+    });
+
+    // 2) Is Terrace Available? -> show / hide terrace details
+    var radios  = document.querySelectorAll('input[name="terrace_available"]');
+    var section = document.getElementById('terrace_details_section');
+    var detail  = document.getElementById('terrace_details');
+    var typeSel = document.getElementById('property_type');
+
+    function syncTerrace() {
+        if (!section || !detail) return;
+        var checked = document.querySelector('input[name="terrace_available"]:checked');
+        var yes = checked && checked.value === 'Yes';
+        section.style.display = yes ? 'block' : 'none';
+        if (yes) {
+            detail.setAttribute('required', 'required');
+        } else {
+            detail.removeAttribute('required');
+            delete detail.dataset.wasRequired;   // stop the property-type rules re-enabling it
+            detail.value = '';
+            detail.classList.remove('input-error');
+        }
+    }
+    radios.forEach(function (r) { r.addEventListener('change', syncTerrace); });
+    // runs after the property-type rules (registered earlier) so state always ends consistent
+    if (typeSel) typeSel.addEventListener('change', syncTerrace);
+    syncTerrace();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var ONE_CRORE = 10000000;
+    var priceEl  = document.getElementById('selling_price');
+    var brokerEl = document.getElementById('brokerage_percentage');
+    var ownerEl  = document.getElementById('owner_commission_percentage');
+    if (!priceEl || !brokerEl || !ownerEl) return;
+
+    function applyCommissionByPrice() {
+        var price = parseFloat(priceEl.value);
+        if (!price || price <= 0) return;
+
+        // 1 crore or more -> 1%, below 1 crore -> 2%
+        var rate = (price >= ONE_CRORE) ? '1% of amount' : '2% of amount';
+
+        [brokerEl, ownerEl].forEach(function (sel) {
+            sel.value = rate;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    }
+
+    priceEl.addEventListener('input', applyCommissionByPrice);
+    priceEl.addEventListener('change', applyCommissionByPrice);
+});
 </script>
 
 </body>
