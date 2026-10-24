@@ -622,13 +622,79 @@
     color: var(--success);
   }
 
-  @media (max-width: 1200px) {
+ @media (max-width: 1200px) {
     .page-wrap {
       grid-template-columns: 1fr;
     }
-
     .preview-sidebar {
       display: none;
+    }
+  }
+
+
+  @media (max-width: 991px) {
+    .main-content {
+      margin-left: 0 !important;
+      padding: 15px !important;
+      margin-top: 70px;
+    }
+    .form-container {
+      padding: 20px !important;
+      border-radius: 14px;
+    }
+    .property-banner-header {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    .btn-back-banner {
+      width: 100%;
+      justify-content: center;
+    }
+    .stepper {
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 10px 0;
+      gap: 15px;
+    }
+    .step-item {
+      min-width: max-content;
+    }
+    .section-body {
+      padding: 15px !important;
+    }
+    .img-cat-tabs {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .img-upload-guide {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .guide-arrow {
+      display: none !important;
+    }
+    .step-nav {
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
+    .step-nav button,
+    .step-nav .btn-next,
+    .step-nav .btn-prev,
+    .step-nav .btn-submit {
+      width: 100% !important;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .img-cat-tabs {
+      grid-template-columns: 1fr !important;
+    }
+    .form-title {
+      font-size: 1.2rem;
+    }
+    .banner-text h1 {
+      font-size: 1.25rem;
     }
   }
 
@@ -1148,7 +1214,7 @@
             <option value="">Select Property Type</option>
 
             <!-- Studio & Residential/Commercial Mix -->
-            <option value="studio_apartment">Studio Apartment</option>
+            {% comment %} <option value="studio_apartment">Studio Apartment</option> {% endcomment %}
             <option value="apartment">Apartment</option>
 
             <!-- Office -->
@@ -1194,7 +1260,7 @@
       </div>
 
       <!-- ADDED BHK FIELD HERE FOR THE VALIDATION RULE -->
-      <div class="col-md-6 mb-3" id="bhkFieldWrapper">
+      {% comment %} <div class="col-md-6 mb-3" id="bhkFieldWrapper">
         <label class="form-label">BHK Configuration <span class="required">*</span></label>
         <select class="form-select" name="bhk" id="bhk" required>
             <option value="">Select BHK</option>
@@ -1205,7 +1271,7 @@
             <option value="4 BHK">4 BHK</option>
             <option value="5+ BHK">5+ BHK</option>
         </select>
-      </div>
+      </div> {% endcomment %}
 
       <div class="col-md-6 mb-3">
         <label class="form-label">Building / Project Name <span class="required">*</span></label>
@@ -1375,6 +1441,30 @@
         <label class="form-label">Property Landmark </label>
         <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="Enter Property Landmark">
       </div>
+
+
+
+            <div class="col-md-6 mb-3">
+        <label class="form-label">District <span class="required-star" style="color:red;">*</span></label>
+        <input type="text" class="form-control" name="district" id="district" placeholder="e.g. Nagpur" required>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Facing Direction</label>
+        <select class="form-select" name="facing_direction" id="facing_direction">
+          <option value="">Select Direction</option>
+          <option value="North">North</option>
+          <option value="South">South</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+          <option value="North-East">North-East</option>
+          <option value="North-West">North-West</option>
+          <option value="South-East">South-East</option>
+          <option value="South-West">South-West</option>
+          <option value="Corner">Corner Property</option>
+        </select>
+      </div>
+
 
       <div class="col-md-6 mb-3">
        
@@ -1571,14 +1661,17 @@
 
 
 
-                  <div class="col-md-4 mb-3"><label class="form-label">Staircases</label><input type="number"
-                      class="form-control" name="staircases" id="staircases" placeholder="e.g. 2"></div>
+                 
 
+                
+
+                
+                                    <!-- GENERAL BUILDING SPECS (Show for all) -->
+                  <div class="col-md-4 mb-3"><label class="form-label">Staircases</label><input type="number" class="form-control" name="staircases" id="staircases" placeholder="e.g. 2"></div>
                   <div class="col-md-4 mb-3">
                     <label class="form-label">Passenger Lifts</label>
                     <div class="number-stepper">
-                      <button type="button" class="stepper-btn"
-                        onclick="updateStepper('passenger_lifts', -1)">−</button>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts', -1)">−</button>
                       <span id="passenger_lifts_display">0</span>
                       <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts', 1)">+</button>
                       <input type="hidden" name="passenger_lifts" id="passenger_lifts" value="0">
@@ -1596,48 +1689,30 @@
                   <div class="col-md-4 mb-3">
                     <label class="form-label">Private Parking</label>
                     <div class="number-stepper">
-                      <button type="button" class="stepper-btn"
-                        onclick="updateStepper('private_parking', -1)">−</button>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_parking', -1)">−</button>
                       <span id="private_parking_display">0</span>
                       <button type="button" class="stepper-btn" onclick="updateStepper('private_parking', 1)">+</button>
                       <input type="hidden" name="private_parking" id="private_parking" value="0">
                     </div>
                   </div>
-
-                  <div class="col-md-6 mb-3"><label class="form-label">Minimum Seats Occupancy</label><input
-                      type="number" class="form-control" name="min_seats" id="min_seats" placeholder="e.g. 20"></div>
-
-                  <div class="col-md-6 mb-3"><label class="form-label">Maximum Seats Occupancy</label><input
-                      type="number" class="form-control" name="max_seats" id="max_seats" placeholder="e.g. 50"></div>
-
-                  <div class="col-md-6 mb-3"><label class="form-label">Cabins</label><input type="number"
-                      class="form-control" name="cabins" id="cabins" placeholder="e.g. 2"></div>
-
-                  <div class="col-md-6 mb-3"><label class="form-label">Meeting Rooms</label><input type="number"
-                      class="form-control" name="meeting_rooms" id="meeting_rooms" placeholder="e.g. 1"></div>
-
-                  <div class="col-md-6 mb-3">
+                  <div class="col-md-4 mb-3">
                     <label class="form-label">Private Washrooms</label>
                     <div class="number-stepper">
-                      <button type="button" class="stepper-btn"
-                        onclick="updateStepper('private_washroom', -1)">−</button>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_washroom', -1)">−</button>
                       <span id="private_washroom_display">0</span>
-                      <button type="button" class="stepper-btn"
-                        onclick="updateStepper('private_washroom', 1)">+</button>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_washroom', 1)">+</button>
                       <input type="hidden" name="private_washroom" id="private_washroom" value="0">
                     </div>
                   </div>
-                  <div class="col-md-6 mb-3">
+                  <div class="col-md-4 mb-3">
                     <label class="form-label">Public Washrooms</label>
                     <div class="number-stepper">
-                      <button type="button" class="stepper-btn"
-                        onclick="updateStepper('public_washroom', -1)">−</button>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom', -1)">−</button>
                       <span id="public_washroom_display">0</span>
                       <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom', 1)">+</button>
                       <input type="hidden" name="public_washroom" id="public_washroom" value="0">
                     </div>
                   </div>
-
                   <div class="col-md-12 mb-3">
                     <label class="form-label">Flooring Type</label>
                     <select class="form-select" name="flooring_type"  id="flooring_type">
@@ -1649,6 +1724,90 @@
                       <option value="ceramic">Ceramic Tiles</option>
                     </select>
                   </div>
+
+                  <!-- OFFICE SPECIFIC (Show only for office types) -->
+                  <div class="col-md-12" data-ct="office_space coworking_space business_center" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <h6 style="color: #667eea; font-weight: 700;"><i class="fas fa-briefcase"></i> Office Details</h6>
+                    <div class="row">
+                      <div class="col-md-6 mb-3"><label class="form-label">Minimum Seats Occupancy</label><input type="number" class="form-control" name="min_seats" id="min_seats" placeholder="e.g. 20"></div>
+                      <div class="col-md-6 mb-3"><label class="form-label">Maximum Seats Occupancy</label><input type="number" class="form-control" name="max_seats" id="max_seats" placeholder="e.g. 50"></div>
+                      <div class="col-md-6 mb-3"><label class="form-label">Cabins</label><input type="number" class="form-control" name="cabins" id="cabins" placeholder="e.g. 2"></div>
+                      <div class="col-md-6 mb-3"><label class="form-label">Meeting Rooms</label><input type="number" class="form-control" name="meeting_rooms" id="meeting_rooms" placeholder="e.g. 1"></div>
+                    </div>
+                  </div>
+
+                  <!-- RETAIL SPECIFIC (Show only for retail types) -->
+                  <div class="col-md-12" data-ct="shop showroom retail_space" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <h6 style="color: #667eea; font-weight: 700;"><i class="fas fa-store"></i> Retail Details</h6>
+                    <div class="row">
+                      <div class="col-md-6 mb-3"><label class="form-label">Storefront Glass Facade / Frontage (ft)</label><input type="text" class="form-control" name="facade_width" placeholder="e.g. 20 ft"></div>
+                      <div class="col-md-6 mb-3"><label class="form-label">Customer Foot Traffic Zone</label>
+                        <select class="form-select" name="foot_traffic">
+                          <option value="">Select Zone</option>
+                          <option value="Prime High Street Market">Prime High Street Market</option>
+                          <option value="Shopping Mall / Commercial Arcade">Shopping Mall / Commercial Arcade</option>
+                          <option value="Residential Catchment Area">Residential Catchment Area</option>
+                          <option value="Business District Retail">Business District Retail</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3"><label class="form-label">Signage / Branding Display Space</label>
+                        <select class="form-select" name="signage_space">
+                          <option value="">Select Signage</option>
+                          <option value="Dedicated Facade Signage Board">Dedicated Facade Signage Board</option>
+                          <option value="Mall Pylon / Directory Space">Mall Pylon / Directory Space</option>
+                          <option value="Standard Window Display">Standard Window Display</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3"><label class="form-label">Attached Storage / Backroom Area</label><input type="text" class="form-control" name="backroom_storage" placeholder="e.g. 200 sq.ft"></div>
+                    </div>
+                  </div>
+
+                  <!-- INDUSTRIAL SPECIFIC (Show only for industrial types) -->
+                  <div class="col-md-12" data-ct="warehouse godown industrial_shed factory industrial_building" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <h6 style="color: #667eea; font-weight: 700;"><i class="fas fa-boxes-stacked"></i> Industrial & Storage Details</h6>
+                    <div class="row">
+                      <div class="col-md-4 mb-3"><label class="form-label">Ceiling / Clear Height (ft)</label><input type="text" class="form-control" name="ceiling_height" placeholder="e.g. 24 ft"></div>
+                      <div class="col-md-4 mb-3"><label class="form-label">Loading Docks / Shutters</label><input type="text" class="form-control" name="loading_docks" placeholder="e.g. 2 Docks, 4 Shutters"></div>
+                      <div class="col-md-4 mb-3"><label class="form-label">Sanctioned Power Load (kW/kVA)</label><input type="text" class="form-control" name="power_load" placeholder="e.g. 100 kW"></div>
+                    </div>
+                  </div>
+
+
+                                    <!-- BANQUET & LAWN SPECIFIC (Show only for event types) -->
+                  <div class="col-md-12" data-ct="banquet_hall marriage_lawn hotel restaurant cafe" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                    <h6 style="color: #667eea; font-weight: 700;"><i class="fas fa-glass-cheers"></i> Event & Hospitality Details</h6>
+                    <div class="row">
+                      <div class="col-md-4 mb-3"><label class="form-label">Indoor Hall / Total Lawn Area (sq.ft)</label><input type="number" class="form-control" name="banquet_area" placeholder="e.g. 5000"></div>
+                      <div class="col-md-4 mb-3"><label class="form-label">Seating / Floating Capacity (Guests)</label><input type="number" class="form-control" name="dining_capacity" placeholder="e.g. 500"></div>
+                      <div class="col-md-4 mb-3"><label class="form-label">Kitchen / Scullery Area (sq.ft)</label><input type="number" class="form-control" name="kitchen_area" placeholder="e.g. 800"></div>
+                      
+                      <div class="col-md-4 mb-3"><label class="form-label">Pillarless Hall?</label>
+                        <select class="form-select" name="pillarless">
+                          <option value="">Select</option>
+                          <option value="Yes - Pillarless Hall">Yes - Pillarless Hall</option>
+                          <option value="No - Standard Layout">No - Standard Layout</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3"><label class="form-label">Centralized AC / HVAC</label>
+                        <select class="form-select" name="central_ac">
+                          <option value="">Select</option>
+                          <option value="Fully Centralized AC">Fully Centralized AC</option>
+                          <option value="Split / Cassette AC Units">Split / Cassette AC Units</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3"><label class="form-label">Liquor / Bar License Eligibility</label>
+                        <select class="form-select" name="bar_license">
+                          <option value="">Select</option>
+                          <option value="Eligible / Available">Eligible / Available</option>
+                          <option value="Not Applicable">Not Applicable</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+
                 </div>
               </div>
             </div>
@@ -1779,6 +1938,38 @@
                     <div class="col-md-4 mb-3">
                       <label class="form-label">Lock-in Period (months)</label>
                       <input type="number" class="form-control" name="lockin_period" id="lockin_period" placeholder="e.g. 11">
+                    </div>
+
+
+                                        <div class="col-md-4 mb-3">
+                      <label class="form-label">Fire Safety / NOC Status</label>
+                      <select class="form-select" name="fire_safety_noc" id="fire_safety_noc">
+                        <option value="">Select Status</option>
+                        <option value="Available">Available / Verified</option>
+                        <option value="Applied">Applied / In Process</option>
+                        <option value="Not Available">Not Available</option>
+                        <option value="Not Required">Not Required (Small Space)</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Agreement / Registration Terms</label>
+                      <select class="form-select" name="agreement_terms" id="agreement_terms">
+                        <option value="">Select Terms</option>
+                        <option value="Confirm in Written Agreement">Confirm in Written Agreement</option>
+                        <option value="Registered Agreement Required">Registered Agreement Required</option>
+                        <option value="Notarized Agreement">Notarized Agreement</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Police Verification Requirement</label>
+                      <select class="form-select" name="police_verification" id="police_verification">
+                        <option value="">Select Requirement</option>
+                        <option value="Required">Required</option>
+                        <option value="Not Required">Not Required</option>
+                        <option value="Check Local Rules">Check Applicable Local Rules</option>
+                      </select>
                     </div>
                     
                     <div class="col-md-4 mb-3">

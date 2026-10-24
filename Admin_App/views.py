@@ -348,7 +348,6 @@ def global_search(request):
             # {'model': PGColivingProperty, 'label': 'PG / Co-living', 'url_name': 'pg_detail'},
             {'model': ResaleResidentialProperty, 'label': 'Residential (Resale)', 'url_name': 'residential_resale_detail'},
             {'model': ResaleResidentialProperty, 'label': 'Commercial (Resale)', 'url_name': 'commercial_resale_detail'},
-            {'model': PlotSaleProperty, 'label': 'Plot / Land', 'url_name': 'plot_detail'},
             {'model': IndustrialResaleProperty, 'label': 'Industrial', 'url_name': 'industrial_detail'},
             {'model': AgriculturalResaleProperty, 'label': 'Agricultural', 'url_name': 'agricultural_detail'},
         ]
@@ -31333,44 +31332,107 @@ def industrial_plot_resale_add(request):
                 except:
                     return None
 
+            # ---------- AREA UNIT + AUTO CONVERSIONS ----------
+            input_area_unit       = (request.POST.get('area_unit') or 'sqm').strip()
+            input_plot_area_sqft  = to_decimal(request.POST.get('plot_area_sqft'))
+            input_plot_area_acres = to_decimal(request.POST.get('plot_area_acres'))
+
+            # ---------- EXTRA LOCATION FIELDS ----------
+            input_district_region = (request.POST.get('district_region') or '').strip()
+            input_taluka          = (request.POST.get('taluka') or '').strip()
+            input_mouza           = (request.POST.get('mouza') or '').strip()
+
+            # ---------- LATITUDE / LONGITUDE ----------
+            input_latitude  = (request.POST.get('plot_latitude') or request.POST.get('latitude') or '').strip()
+            input_longitude = (request.POST.get('plot_longitude') or request.POST.get('longitude') or '').strip()
+
+            # ---------- NEARBY FACILITIES FREE-TEXT ----------
+            input_nearby_fac_details = (request.POST.get('nearby_facilities_details') or '').strip()
+
+            # ---------- "OTHER" MIRRORING ----------
+            def pick(name):
+                """Prefer the hidden mirrored value, fall back to the raw POST value."""
+                return request.POST.get(f"{name}_hidden") or request.POST.get(name)
+
+            property_type_final               = pick('property_type')
+            land_use_final                    = pick('land_use')
+            industrial_zone_type_final        = pick('industrial_zone_type')
+            na_status_final                   = pick('na_status')
+            layout_approval_status_final      = pick('layout_approval_status')
+            industrial_fsi_final              = pick('industrial_fsi')
+            plot_shape_final                  = pick('plot_shape')
+            facing_final                      = pick('facing')
+            plot_road_facing_final            = pick('plot_road_facing')
+            road_width_final                  = pick('road_width')
+            corner_plot_final                 = pick('corner_plot') or 'no'
+            power_supply_final                = pick('power_supply')
+            industrial_water_supply_final     = pick('industrial_water_supply')
+            effluent_treatment_final          = pick('effluent_treatment')
+            industry_type_permissible_final   = pick('industry_type_permissible')
+            plot_fencing_final                = pick('plot_fencing')
+            loading_dock_final                = pick('loading_dock')
+            power_backup_transformer_final    = pick('power_backup_transformer')
+            current_possession_status_final   = pick('current_possession_status')
+            construction_type_final           = pick('construction_type')
+            construction_age_final            = pick('construction_age')
+            fire_access_compliance_final      = pick('fire_access_compliance')
+            additional_charges_final          = pick('additional_charges')
+            ownership_type_final              = pick('ownership_type')
+            ownership_document_type_final     = pick('ownership_document_type')
+            midc_allotment_final              = pick('midc_allotment')
+            midc_transfer_noc_final           = pick('midc_transfer_noc')
+            environmental_clearance_final     = pick('environmental_clearance')
+            rera_status_final                 = pick('rera_status')
+            title_clearance_final             = pick('title_clearance')
+            property_encumbrance_status_final = pick('property_encumbrance_status')
+            mpcb_consent_final                = pick('mpcb_consent')
+            factory_licence_final             = pick('factory_licence')
+            fire_noc_final                    = pick('fire_noc')
+            hazardous_storage_final           = pick('hazardous_storage')
+            occupancy_cert_final              = pick('occupancy_cert')
+            extract_7_12_status_final         = pick('extract_7_12_status')
+            mutation_status_final             = pick('mutation_status')
+            litigation_disclosure_final       = pick('litigation_disclosure')
+
             # ---------- AMENITIES & FACILITIES ----------
             amenities = ",".join(request.POST.getlist('amenities[]'))
-            nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+            nearby_facilities = (
+                ",".join(request.POST.getlist('nearby_facilities[]'))
+                or ",".join(request.POST.getlist('facilities[]'))
+            )
 
-            # ---------- UPLOADER IDENTIFICATION (Who submitted the HTML form) ----------
+            # ---------- UPLOADER IDENTIFICATION ----------
             if admin_obj:
-                uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
-                uploader_email = getattr(admin_obj, 'email', '')
+                uploader_name    = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+                uploader_email   = getattr(admin_obj, 'email', '')
                 uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
-                uploader_role = "Admin"
-                uploader_id = f"ADMIN_{admin_id}"
+                uploader_role    = "Admin"
+                uploader_id      = f"ADMIN_{admin_id}"
             elif user_obj:
-                uploader_name = user_obj.user_name
-                uploader_email = user_obj.user_email
+                uploader_name    = user_obj.user_name
+                uploader_email   = user_obj.user_email
                 uploader_contact = user_obj.user_phone
-                uploader_role = "User"
-                uploader_id = f"USER_{user_id}"
+                uploader_role    = "User"
+                uploader_id      = f"USER_{user_id}"
             else:
-                uploader_name, uploader_email, uploader_contact, uploader_role, uploader_id = "", "", "", "", ""
+                uploader_name = uploader_email = uploader_contact = uploader_role = uploader_id = ""
 
-            # ---------- LISTED BY IDENTIFICATION (Who owns/manages the listing) ----------
-            input_listed_by_id = (request.POST.get('listed_by_id') or uploader_id).strip()
-            input_listed_by_name = (request.POST.get('listed_by_name') or uploader_name).strip()
-            input_listed_by_email = (request.POST.get('listed_by_email') or uploader_email).strip().lower()
+            # ---------- LISTED BY IDENTIFICATION ----------
+            input_listed_by_id      = (request.POST.get('listed_by_id') or uploader_id).strip()
+            input_listed_by_name    = (request.POST.get('listed_by_name') or uploader_name).strip()
+            input_listed_by_email   = (request.POST.get('listed_by_email') or uploader_email).strip().lower()
             input_listed_by_contact = (request.POST.get('listed_by_contact') or uploader_contact).strip()
-            input_listed_by_role = (request.POST.get('listed_by_role') or uploader_role).strip()
+            input_listed_by_role    = (request.POST.get('listed_by_role') or uploader_role).strip()
 
-            # ==========================================================
-            # DUPLICATE DETECTION ENGINE (Checking LISTED BY, not UPLOADED BY)
-            # ==========================================================
-            input_property_no = (request.POST.get('property_no') or '').strip()
+            # ---------- DUPLICATE DETECTION INPUTS ----------
+            input_property_no            = (request.POST.get('property_no') or '').strip()
             input_industrial_estate_name = (request.POST.get('industrial_estate_name') or '').strip()
-            input_locality = (request.POST.get('locality') or '').strip()
-            input_pincode = (request.POST.get('pincode') or '').strip()
-            input_state = (request.POST.get('state') or '').strip()
-            input_city = (request.POST.get('city') or '').strip()
+            input_locality               = (request.POST.get('locality') or '').strip()
+            input_pincode                = (request.POST.get('pincode') or '').strip()
+            input_state                  = (request.POST.get('state') or '').strip()
+            input_city                   = (request.POST.get('city') or '').strip()
 
-        # Location validation check
+            # ---------- LOCATION VALIDATION ----------
             is_valid_location, location_error, _, _, _ = verify_pincode_location(
                 input_pincode, input_state, input_city, input_locality
             )
@@ -31380,69 +31442,71 @@ def industrial_plot_resale_add(request):
                     "message": location_error
                 }, status=400)
 
+            # ---------- BUILD FINGERPRINT KEY ----------
             fingerprint_key = generate_industrial_plot_fingerprint(
                 input_property_no,
                 input_industrial_estate_name,
                 input_locality,
-                input_pincode
+                input_pincode,
             )
 
-            # 1. Direct Case-Insensitive Query for same plot in same locality/estate
+            # ---------- DIRECT CASE-INSENSITIVE MATCH ----------
             direct_duplicates = IndustrialPlotResaleProperty.objects.filter(
                 is_deleted=False,
                 property_no__iexact=input_property_no,
-                locality__iexact=input_locality
+                locality__iexact=input_locality,
             )
             if input_industrial_estate_name:
-                direct_duplicates = direct_duplicates.filter(industrial_estate_name__iexact=input_industrial_estate_name)
+                direct_duplicates = direct_duplicates.filter(
+                    industrial_estate_name__iexact=input_industrial_estate_name
+                )
 
-            # Combine fingerprint match OR direct field match
+            # ---------- FINGERPRINT MATCH OR DIRECT MATCH ----------
             existing_duplicates = (
-                IndustrialPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False) | direct_duplicates
+                IndustrialPlotResaleProperty.objects.filter(
+                    property_unique_key=fingerprint_key,
+                    is_deleted=False,
+                )
+                | direct_duplicates
             ).distinct()
 
-            is_dup_flag = False
-            dup_group_id = fingerprint_key
-            total_dup_count = 1
-
+            # ---------- HARD BLOCK: SAME PERSON LISTING SAME PLOT ----------
             if existing_duplicates.exists():
-                # Level 1: Hard Block if LISTED BY the exact same person (ID, Email, OR Phone match)
                 for existing_prop in existing_duplicates:
-                    same_id = (existing_prop.listed_by_id and input_listed_by_id and
-                               existing_prop.listed_by_id.strip() == input_listed_by_id)
-
-                    same_email = (existing_prop.listed_by_email and input_listed_by_email and
-                                  existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
-
-                    same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
-                                    existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+                    same_id = (
+                        existing_prop.listed_by_id and input_listed_by_id
+                        and existing_prop.listed_by_id.strip() == input_listed_by_id
+                    )
+                    same_email = (
+                        existing_prop.listed_by_email and input_listed_by_email
+                        and existing_prop.listed_by_email.strip().lower() == input_listed_by_email
+                    )
+                    same_contact = (
+                        existing_prop.listed_by_contact and input_listed_by_contact
+                        and existing_prop.listed_by_contact.strip() == input_listed_by_contact
+                    )
 
                     if same_id or same_email or same_contact:
                         return JsonResponse({
                             'status': 'error',
-                            'message': f"Duplicate Blocked: This plot (No {input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}. Please edit the existing listing instead."
+                            'message': (
+                                f"Duplicate Blocked: This plot (No {input_property_no}) "
+                                f"is already listed by/for {input_listed_by_name or 'this user'}. "
+                                f"Please edit the existing listing instead."
+                            ),
                         })
 
-                # Level 2: Different Agent/User listing the exact same physical plot -> Allow save & Flag
-                is_dup_flag = True
-                total_dup_count = existing_duplicates.count() + 1
-                existing_duplicates.update(
-                    is_duplicate=True,
-                    duplicate_count=total_dup_count,
-                    duplicate_group_id=dup_group_id
-                )
+                # Different user listing the same physical plot — allow it.
+                # Reuse the existing group key so the model groups duplicates correctly.
+                fingerprint_key = existing_duplicates.first().property_unique_key or fingerprint_key
 
             # ---------- CREATE DATABASE OBJECT ----------
             prop = IndustrialPlotResaleProperty.objects.create(
                 property_unique_key=fingerprint_key,
-                is_duplicate=is_dup_flag,
-                duplicate_count=total_dup_count,
-                duplicate_group_id=dup_group_id if is_dup_flag else None,
 
                 listing_type="Resale",
                 category="Plot",
                 sub_category=request.POST.get('sub_category', 'Industrial'),
-              
 
                 listed_by_type=request.POST.get('listed_by_type'),
                 assigned_to=request.POST.get('assigned_to'),
@@ -31455,47 +31519,96 @@ def industrial_plot_resale_add(request):
                 property_title=request.POST.get('property_title'),
                 property_no=input_property_no,
 
+                # Area unit + conversions
+                area_unit=input_area_unit,
+                plot_area_sqft=input_plot_area_sqft,
+                plot_area_acres=input_plot_area_acres,
+                plot_unit_number=request.POST.get('plot_unit_number'),
+
                 plot_area=to_decimal(request.POST.get('plot_area')),
-                property_type=request.POST.get('property_type'),
-                land_use=request.POST.get('land_use'),
-                industrial_zone_type=request.POST.get('industrial_zone_type'),
+                property_type=property_type_final,
+                land_use=land_use_final,
+                industrial_zone_type=industrial_zone_type_final,
                 industrial_estate_name=input_industrial_estate_name,
-                na_status=request.POST.get('na_status'),
-                layout_approval_status=request.POST.get('layout_approval_status'),
-                industrial_fsi=request.POST.get('industrial_fsi'),
+                na_status=na_status_final,
+                layout_approval_status=layout_approval_status_final,
+                industrial_fsi=industrial_fsi_final,
 
                 plot_frontage=to_decimal(request.POST.get('plot_frontage')),
                 plot_depth=to_decimal(request.POST.get('plot_depth')),
-                plot_shape=request.POST.get('plot_shape'),
-                plot_road_facing=request.POST.get('plot_road_facing'),
-                road_width=request.POST.get('road_width'),
-                corner_plot=request.POST.get('corner_plot', 'no'),
+                plot_shape=plot_shape_final,
+                facing=facing_final,
+                plot_road_facing=plot_road_facing_final,
+                road_width=road_width_final,
+                corner_plot=corner_plot_final,
 
-                power_supply=request.POST.get('power_supply'),
+                power_supply=power_supply_final,
                 power_load_kva=to_int(request.POST.get('power_load_kva')),
-                industrial_water_supply=request.POST.get('industrial_water_supply'),
-                effluent_treatment=request.POST.get('effluent_treatment'),
-                industry_type_permissible=request.POST.get('industry_type_permissible'),
-                plot_fencing=request.POST.get('plot_fencing'),
-                loading_dock=request.POST.get('loading_dock'),
-                current_possession_status=request.POST.get('current_possession_status'),
+                power_backup_transformer=power_backup_transformer_final,
+                industrial_water_supply=industrial_water_supply_final,
+                effluent_treatment=effluent_treatment_final,
+                industry_type_permissible=industry_type_permissible_final,
+                plot_fencing=plot_fencing_final,
+                loading_dock=loading_dock_final,
+                current_possession_status=current_possession_status_final,
+
+                # Building & Construction (built property only)
+                usable_floor_area_sqft=to_decimal(request.POST.get('usable_floor_area_sqft')),
+                built_up_area_sqft=to_decimal(request.POST.get('built_up_area_sqft')),
+                total_land_area_sqft=to_decimal(request.POST.get('total_land_area_sqft')),
+                building_clear_height=to_decimal(request.POST.get('building_clear_height')),
+                number_of_floors=to_int(request.POST.get('number_of_floors')),
+                construction_type=construction_type_final,
+                construction_age=construction_age_final,
+                floor_load_capacity=request.POST.get('floor_load_capacity'),
+                crane_capacity=request.POST.get('crane_capacity'),
+                fire_access_compliance=fire_access_compliance_final,
 
                 selling_price=to_int(request.POST.get('selling_price')),
                 price_per_sqft=to_int(request.POST.get('price_per_sqft')),
                 price_negotiable=request.POST.get('price_negotiable', 'no'),
-                additional_charges=request.POST.get('additional_charges'),
+                additional_charges=additional_charges_final,
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 manual_brokerage=request.POST.get('manual_brokerage'),
 
-                ownership_type=request.POST.get('ownership_type'),
-                ownership_document_type=request.POST.get('ownership_document_type'),
+                # Pricing extras
+                booking_amount=to_int(request.POST.get('booking_amount')),
+                price_includes_excludes=request.POST.get('price_includes_excludes'),
+
+                landlord_owner_fee=request.POST.get('landlord_owner_fee'),
+                landlord_owner_fixed_amount=to_int(request.POST.get('landlord_owner_fixed_amount')),
+
+                ownership_type=ownership_type_final,
+                ownership_document_type=ownership_document_type_final,
                 other_document_type=request.POST.get('other_document_type'),
-                midc_allotment=request.POST.get('midc_allotment'),
-                midc_transfer_noc=request.POST.get('midc_transfer_noc'),
-                environmental_clearance=request.POST.get('environmental_clearance'),
-                rera_status=request.POST.get('rera_status'),
-                title_clearance=request.POST.get('title_clearance'),
-                property_encumbrance_status=request.POST.get('property_encumbrance_status'),
+                midc_allotment=midc_allotment_final,
+                midc_transfer_noc=midc_transfer_noc_final,
+                environmental_clearance=environmental_clearance_final,
+                rera_status=rera_status_final,
+                title_clearance=title_clearance_final,
+                property_encumbrance_status=property_encumbrance_status_final,
+
+                # Statutory consents
+                mpcb_consent=mpcb_consent_final,
+                factory_licence=factory_licence_final,
+                fire_noc=fire_noc_final,
+                hazardous_storage=hazardous_storage_final,
+                occupancy_cert=occupancy_cert_final,
+                layout_approval_ref=request.POST.get('layout_approval_ref'),
+
+                # Revenue record verification
+                extract_7_12_status=extract_7_12_status_final,
+                mutation_status=mutation_status_final,
+                na_order_number=request.POST.get('na_order_number'),
+
+                # Lease / transfer / litigation / occupancy
+                lease_term_remaining=to_int(request.POST.get('lease_term_remaining')),
+                transfer_fees_premium=to_int(request.POST.get('transfer_fees_premium')),
+                litigation_disclosure=litigation_disclosure_final,
+                tenant_lease_details=request.POST.get('tenant_lease_details'),
+                monthly_rent=to_int(request.POST.get('monthly_rent')),
+                utility_dues=to_int(request.POST.get('utility_dues')),
+                title_chain_notes=request.POST.get('title_chain_notes'),
 
                 property_tax_status=request.POST.get('property_tax_status'),
                 outstanding_tax_amount=to_int(request.POST.get('outstanding_tax_amount')),
@@ -31507,6 +31620,7 @@ def industrial_plot_resale_add(request):
 
                 amenities=amenities,
                 nearby_facilities=nearby_facilities,
+                nearby_facilities_details=input_nearby_fac_details,
                 user_description=request.POST.get('user_description'),
                 property_summary=request.POST.get('property_summary'),
                 property_description=request.POST.get('property_description'),
@@ -31514,18 +31628,30 @@ def industrial_plot_resale_add(request):
                 state=request.POST.get('state'),
                 city=request.POST.get('city'),
                 locality=input_locality,
+                district_region=input_district_region,
+                taluka=input_taluka,
+                mouza=input_mouza,
                 property_landmark=request.POST.get('property_landmark'),
                 pincode=input_pincode,
-                address=request.POST.get('address'),
+                address=request.POST.get('plot_address') or request.POST.get('address'),
                 google_maps_link=request.POST.get('google_maps_link'),
-                latitude=request.POST.get('latitude'),
-                longitude=request.POST.get('longitude'),
+                latitude=input_latitude,
+                longitude=input_longitude,
 
                 encumbrance_cert=request.FILES.get('encumbrance_cert'),
                 layout_plan=request.FILES.get('layout_plan'),
+                layout_plan_doc=request.FILES.get('layout_plan_doc'),
+
+                # Document uploads
+                mpcb_consent_doc=request.FILES.get('mpcb_consent_doc'),
+                fire_noc_doc=request.FILES.get('fire_noc_doc'),
 
                 listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
                 portal_name=request.POST.get('portal_name'),
+
+                # Status defaults (model also has defaults, but explicit here is safer)
+                listing_status=request.POST.get('listing_status', 'Draft'),
+                approval_status=request.POST.get('approval_status', 'Pending'),
 
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
@@ -31534,7 +31660,7 @@ def industrial_plot_resale_add(request):
                 upload_file_name=None,
             )
 
-            # ---------- IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE) ----------
+            # ---------- IMAGES MULTI-UPLOAD (CATEGORY WISE) ----------
             IMAGE_CATEGORY_FIELDS = {
                 'full_plot':         'plot_images_full_plot[]',
                 'main_entrance':     'plot_images_main_entrance[]',
@@ -31563,16 +31689,22 @@ def industrial_plot_resale_add(request):
                     )
                     saved_count += 1
 
-            # ---------- PLOT VIDEO (UPLOAD, RM LINK, OR AUTO SLIDESHOW) ----------
-            video_option = request.POST.get('video_option') or request.POST.get('video_source') or 'auto'
-            uploaded_video = request.FILES.get('property_video') or request.FILES.get('social_video')
+            # ---------- PLOT VIDEO ----------
+            video_option        = request.POST.get('video_option') or request.POST.get('video_source') or 'auto'
+            uploaded_video      = request.FILES.get('property_video') or request.FILES.get('social_video')
             property_video_link = request.POST.get('property_video_link', '').strip()
 
-            # 1. ALWAYS auto-generate the slideshow row if >= 3 photos exist
+            # 1. Auto slideshow row if >= 3 photos exist
             CATEGORY_ORDER = list(IMAGE_CATEGORY_FIELDS.keys())
-            saved_images = list(IndustrialPlotResaleImage.objects.filter(property=prop))
-            saved_images.sort(key=lambda img: (CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99, img.sequence_order))
-            image_paths = [img.image.path for img in saved_images if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)]
+            saved_images   = list(IndustrialPlotResaleImage.objects.filter(property=prop))
+            saved_images.sort(key=lambda img: (
+                CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99,
+                img.sequence_order
+            ))
+            image_paths = [
+                img.image.path for img in saved_images
+                if img.image and hasattr(img.image, 'path') and os.path.exists(img.image.path)
+            ]
 
             if len(image_paths) >= 3:
                 output_relative_path = f"industrial_plot/videos/auto_{prop.id}.mp4"
@@ -31591,7 +31723,7 @@ def industrial_plot_resale_add(request):
                     import traceback
                     traceback.print_exc()
 
-            # 2. Save Manual Upload Video as a separate row
+            # 2. Manual uploaded video
             if video_option == 'upload' and uploaded_video:
                 IndustrialPlotResaleVideo.objects.create(
                     property=prop,
@@ -31599,7 +31731,7 @@ def industrial_plot_resale_add(request):
                     source='uploaded'
                 )
 
-            # 3. Save RM Assisted Link Video as a separate row
+            # 3. RM-assisted link
             elif video_option == 'rm_assisted' and property_video_link:
                 IndustrialPlotResaleVideo.objects.create(
                     property=prop,
@@ -32717,23 +32849,23 @@ def industrial_plot_resale_view(request, pk):
 
 def industrial_plot_resale_edit(request, pk):
     admin_id = request.session.get('Admin_id')
-    user_id = request.session.get('User_id')
+    user_id  = request.session.get('User_id')
 
-    admin_obj = None
-    user_obj = None
+    admin_obj    = None
+    current_user = None
 
     if admin_id:
         admin_obj = Admin_Login.objects.filter(id=admin_id).first()
-    
-    if user_id:
-        # Get the single user for auth, but we need ALL users for the dropdown
-        current_user = User_Details.objects.filter(id=user_id).first()
-        
-    # Get ALL users for the "Listed By" dropdown
-    user_obj = User_Details.objects.all()
 
-    if not admin_obj and not user_obj:
+    if user_id:
+        current_user = User_Details.objects.filter(id=user_id).first()
+
+    # ✅ FIX 1 & 2 — correct auth check + safe current_user
+    if not admin_obj and not current_user:
         return render(request, 'home_page/Adminlogin.html')
+
+    # All users for the "Listed By" dropdown (independent of auth)
+    user_obj = User_Details.objects.all()
 
     prop = get_object_or_404(IndustrialPlotResaleProperty, id=pk, is_deleted=False)
 
@@ -32760,151 +32892,242 @@ def industrial_plot_resale_edit(request, pk):
                     return None
 
             amenities = ",".join(request.POST.getlist('amenities[]'))
-            nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+            nearby_facilities = (
+                ",".join(request.POST.getlist('nearby_facilities[]'))
+                or ",".join(request.POST.getlist('facilities[]'))
+            )
 
-            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_property_no            = (request.POST.get('property_no') or '').strip()
             input_industrial_estate_name = (request.POST.get('industrial_estate_name') or '').strip()
-            input_locality = (request.POST.get('locality') or '').strip()
-            input_pincode = (request.POST.get('pincode') or '').strip()
+            input_locality               = (request.POST.get('locality') or '').strip()
+            input_pincode                = (request.POST.get('pincode') or '').strip()
 
-            input_listed_by_id = (request.POST.get('listed_by_id') or '').strip()
-            input_listed_by_name = (request.POST.get('listed_by_name') or '').strip()
-            input_listed_by_email = (request.POST.get('listed_by_email') or '').strip().lower()
+            input_listed_by_id      = (request.POST.get('listed_by_id') or '').strip()
+            input_listed_by_name    = (request.POST.get('listed_by_name') or '').strip()
+            input_listed_by_email   = (request.POST.get('listed_by_email') or '').strip().lower()
             input_listed_by_contact = (request.POST.get('listed_by_contact') or '').strip()
-            input_listed_by_role = (request.POST.get('listed_by_role') or '').strip()
+            input_listed_by_role    = (request.POST.get('listed_by_role') or '').strip()
 
             # ---------- DUPLICATE CHECK (excluding this property itself) ----------
             fingerprint_key = generate_industrial_plot_fingerprint(
-                input_property_no, input_industrial_estate_name, input_locality, input_pincode
+                input_property_no,
+                input_industrial_estate_name,
+                input_locality,
+                input_pincode,
             )
 
             direct_duplicates = IndustrialPlotResaleProperty.objects.filter(
                 is_deleted=False,
                 property_no__iexact=input_property_no,
-                locality__iexact=input_locality
+                locality__iexact=input_locality,
             ).exclude(id=prop.id)
+
             if input_industrial_estate_name:
-                direct_duplicates = direct_duplicates.filter(industrial_estate_name__iexact=input_industrial_estate_name)
+                direct_duplicates = direct_duplicates.filter(
+                    industrial_estate_name__iexact=input_industrial_estate_name
+                )
 
             existing_duplicates = (
-                IndustrialPlotResaleProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False).exclude(id=prop.id)
+                IndustrialPlotResaleProperty.objects.filter(
+                    property_unique_key=fingerprint_key,
+                    is_deleted=False,
+                ).exclude(id=prop.id)
                 | direct_duplicates
             ).distinct()
 
-            for existing_prop in existing_duplicates:
-                same_id = (existing_prop.listed_by_id and input_listed_by_id and
-                           existing_prop.listed_by_id.strip() == input_listed_by_id)
-                same_email = (existing_prop.listed_by_email and input_listed_by_email and
-                              existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
-                same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
-                                existing_prop.listed_by_contact.strip() == input_listed_by_contact)
-                if same_id or same_email or same_contact:
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': f"Duplicate Blocked: This plot (No {input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}."
-                    })
+            if existing_duplicates.exists():
+                for existing_prop in existing_duplicates:
+                    same_id = (
+                        existing_prop.listed_by_id and input_listed_by_id
+                        and existing_prop.listed_by_id.strip() == input_listed_by_id
+                    )
+                    same_email = (
+                        existing_prop.listed_by_email and input_listed_by_email
+                        and existing_prop.listed_by_email.strip().lower() == input_listed_by_email
+                    )
+                    same_contact = (
+                        existing_prop.listed_by_contact and input_listed_by_contact
+                        and existing_prop.listed_by_contact.strip() == input_listed_by_contact
+                    )
+
+                    if same_id or same_email or same_contact:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': (
+                                f"Duplicate Blocked: This plot (No {input_property_no}) "
+                                f"is already listed by/for {input_listed_by_name or 'this user'}."
+                            ),
+                        })
+
+                # ✅ FIX 3 — reuse existing group key so this row stays grouped with siblings
+                fingerprint_key = existing_duplicates.first().property_unique_key or fingerprint_key
+
+            # ---------- pick() helper — reads _hidden mirror first ----------
+            def pick(name):
+                return request.POST.get(f"{name}_hidden") or request.POST.get(name)
 
             # ---------- UPDATE FIELDS ----------
             prop.property_unique_key = fingerprint_key
 
-            prop.listed_by_type = request.POST.get('listed_by_type')
-            prop.assigned_to = request.POST.get('assigned_to')
-            prop.listed_by_id = input_listed_by_id
-            prop.listed_by_name = input_listed_by_name
-            prop.listed_by_email = input_listed_by_email
+            prop.listed_by_type    = request.POST.get('listed_by_type')
+            prop.assigned_to       = request.POST.get('assigned_to')
+            prop.listed_by_id      = input_listed_by_id
+            prop.listed_by_name    = input_listed_by_name
+            prop.listed_by_email   = input_listed_by_email
             prop.listed_by_contact = input_listed_by_contact
-            prop.listed_by_role = input_listed_by_role
+            prop.listed_by_role    = input_listed_by_role
 
             prop.property_title = request.POST.get('property_title')
-            prop.property_no = input_property_no
+            prop.property_no    = input_property_no
 
-            prop.plot_area = to_decimal(request.POST.get('plot_area'))
-            prop.property_type = request.POST.get('property_type')
-            prop.land_use = request.POST.get('land_use')
-            prop.industrial_zone_type = request.POST.get('industrial_zone_type')
+            # Area unit + conversions
+            prop.area_unit          = request.POST.get('area_unit', 'sqm')
+            prop.plot_area_sqft     = to_decimal(request.POST.get('plot_area_sqft'))
+            prop.plot_area_acres    = to_decimal(request.POST.get('plot_area_acres'))
+            prop.plot_unit_number   = request.POST.get('plot_unit_number')
+            prop.plot_area          = to_decimal(request.POST.get('plot_area'))
+
+            # "Other" dropdown fields → use pick()
+            prop.property_type               = pick('property_type')
+            prop.land_use                    = pick('land_use')
+            prop.industrial_zone_type        = pick('industrial_zone_type')
+            prop.na_status                   = pick('na_status')
+            prop.layout_approval_status      = pick('layout_approval_status')
+            prop.industrial_fsi              = pick('industrial_fsi')
+            prop.plot_shape                  = pick('plot_shape')
+            prop.facing                      = pick('facing')
+            prop.plot_road_facing            = pick('plot_road_facing')
+            prop.road_width                  = pick('road_width')
+            prop.corner_plot                 = pick('corner_plot') or 'no'
+            prop.power_supply                = pick('power_supply')
+            prop.power_backup_transformer    = pick('power_backup_transformer')
+            prop.industrial_water_supply     = pick('industrial_water_supply')
+            prop.effluent_treatment          = pick('effluent_treatment')
+            prop.industry_type_permissible   = pick('industry_type_permissible')
+            prop.plot_fencing                = pick('plot_fencing')
+            prop.loading_dock                = pick('loading_dock')
+            prop.current_possession_status   = pick('current_possession_status')
+            prop.construction_type           = pick('construction_type')
+            prop.construction_age            = pick('construction_age')
+            prop.fire_access_compliance      = pick('fire_access_compliance')
+            prop.additional_charges          = pick('additional_charges')
+            prop.ownership_type              = pick('ownership_type')
+            prop.ownership_document_type     = pick('ownership_document_type')
+            prop.midc_allotment              = pick('midc_allotment')
+            prop.midc_transfer_noc           = pick('midc_transfer_noc')
+            prop.environmental_clearance     = pick('environmental_clearance')
+            prop.rera_status                 = pick('rera_status')
+            prop.title_clearance             = pick('title_clearance')
+            prop.property_encumbrance_status = pick('property_encumbrance_status')
+            prop.mpcb_consent                = pick('mpcb_consent')
+            prop.factory_licence             = pick('factory_licence')
+            prop.fire_noc                    = pick('fire_noc')
+            prop.hazardous_storage           = pick('hazardous_storage')
+            prop.occupancy_cert              = pick('occupancy_cert')
+            prop.extract_7_12_status         = pick('extract_7_12_status')
+            prop.mutation_status             = pick('mutation_status')
+            prop.litigation_disclosure       = pick('litigation_disclosure')
+
             prop.industrial_estate_name = input_industrial_estate_name
-            prop.na_status = request.POST.get('na_status')
-            prop.layout_approval_status = request.POST.get('layout_approval_status')
-            prop.industrial_fsi = request.POST.get('industrial_fsi')
+            prop.plot_frontage          = to_decimal(request.POST.get('plot_frontage'))
+            prop.plot_depth             = to_decimal(request.POST.get('plot_depth'))
+            prop.power_load_kva         = to_int(request.POST.get('power_load_kva'))
+            prop.nearby_facilities_details = request.POST.get('nearby_facilities_details')
 
-            prop.plot_frontage = to_decimal(request.POST.get('plot_frontage'))
-            prop.plot_depth = to_decimal(request.POST.get('plot_depth'))
-            prop.plot_shape = request.POST.get('plot_shape')
-            prop.plot_road_facing = request.POST.get('plot_road_facing')
-            prop.road_width = request.POST.get('road_width')
-            prop.corner_plot = request.POST.get('corner_plot', 'no')
+            # Building & Construction (built property only)
+            prop.usable_floor_area_sqft = to_decimal(request.POST.get('usable_floor_area_sqft'))
+            prop.built_up_area_sqft     = to_decimal(request.POST.get('built_up_area_sqft'))
+            prop.total_land_area_sqft   = to_decimal(request.POST.get('total_land_area_sqft'))
+            prop.building_clear_height  = to_decimal(request.POST.get('building_clear_height'))
+            prop.number_of_floors       = to_int(request.POST.get('number_of_floors'))
+            prop.floor_load_capacity    = request.POST.get('floor_load_capacity')
+            prop.crane_capacity         = request.POST.get('crane_capacity')
 
-            prop.power_supply = request.POST.get('power_supply')
-            prop.power_load_kva = to_int(request.POST.get('power_load_kva'))
-            prop.industrial_water_supply = request.POST.get('industrial_water_supply')
-            prop.effluent_treatment = request.POST.get('effluent_treatment')
-            prop.industry_type_permissible = request.POST.get('industry_type_permissible')
-            prop.plot_fencing = request.POST.get('plot_fencing')
-            prop.loading_dock = request.POST.get('loading_dock')
-            prop.current_possession_status = request.POST.get('current_possession_status')
+            # Pricing
+            prop.selling_price           = to_int(request.POST.get('selling_price'))
+            # ✅ FIX 4 — DON'T overwrite price_per_sqft from POST.
+            # The model's save() recomputes it from selling_price and plot_area_sqft.
+            # Leaving it untouched avoids wiping a valid value with a blank readonly field.
+            # prop.price_per_sqft = to_int(request.POST.get('price_per_sqft'))   # ← removed
+            prop.price_negotiable        = request.POST.get('price_negotiable', 'no')
+            prop.brokerage_percentage    = request.POST.get('brokerage_percentage')
+            prop.manual_brokerage        = request.POST.get('manual_brokerage')
+            prop.booking_amount          = to_int(request.POST.get('booking_amount'))
+            prop.price_includes_excludes = request.POST.get('price_includes_excludes')
+            prop.landlord_owner_fee          = request.POST.get('landlord_owner_fee')
+            prop.landlord_owner_fixed_amount = to_int(request.POST.get('landlord_owner_fixed_amount'))
 
-            prop.selling_price = to_int(request.POST.get('selling_price'))
-            prop.price_per_sqft = to_int(request.POST.get('price_per_sqft'))
-            prop.price_negotiable = request.POST.get('price_negotiable', 'no')
-            prop.additional_charges = request.POST.get('additional_charges')
-            prop.brokerage_percentage = request.POST.get('brokerage_percentage')
-            prop.manual_brokerage = request.POST.get('manual_brokerage')
-
-            prop.ownership_type = request.POST.get('ownership_type')
-            prop.ownership_document_type = request.POST.get('ownership_document_type')
+            # Legal & statutory extras
             prop.other_document_type = request.POST.get('other_document_type')
-            prop.midc_allotment = request.POST.get('midc_allotment')
-            prop.midc_transfer_noc = request.POST.get('midc_transfer_noc')
-            prop.environmental_clearance = request.POST.get('environmental_clearance')
-            prop.rera_status = request.POST.get('rera_status')
-            prop.title_clearance = request.POST.get('title_clearance')
-            prop.property_encumbrance_status = request.POST.get('property_encumbrance_status')
+            prop.layout_approval_ref = request.POST.get('layout_approval_ref')
+            prop.na_order_number     = request.POST.get('na_order_number')
 
-            prop.property_tax_status = request.POST.get('property_tax_status')
-            prop.outstanding_tax_amount = to_int(request.POST.get('outstanding_tax_amount'))
-            prop.pending_since = to_date(request.POST.get('pending_since'))
-            prop.property_loan_status = request.POST.get('property_loan_status')
-            prop.financing_bank = request.POST.get('financing_bank')
+            # Lease / transfer / occupancy
+            prop.lease_term_remaining  = to_int(request.POST.get('lease_term_remaining'))
+            prop.transfer_fees_premium = to_int(request.POST.get('transfer_fees_premium'))
+            prop.tenant_lease_details  = request.POST.get('tenant_lease_details')
+            prop.monthly_rent          = to_int(request.POST.get('monthly_rent'))
+            prop.utility_dues          = to_int(request.POST.get('utility_dues'))
+            prop.title_chain_notes     = request.POST.get('title_chain_notes')
+
+            # Tax / loan / authority
+            prop.property_tax_status     = request.POST.get('property_tax_status')
+            prop.outstanding_tax_amount  = to_int(request.POST.get('outstanding_tax_amount'))
+            prop.pending_since           = to_date(request.POST.get('pending_since'))
+            prop.property_loan_status    = request.POST.get('property_loan_status')
+            prop.financing_bank          = request.POST.get('financing_bank')
             prop.outstanding_loan_amount = to_int(request.POST.get('outstanding_loan_amount'))
-            prop.sanctioning_authority = request.POST.get('sanctioning_authority')
+            prop.sanctioning_authority   = request.POST.get('sanctioning_authority')
 
-            prop.amenities = amenities
+            # Amenities / description
+            prop.amenities         = amenities
             prop.nearby_facilities = nearby_facilities
-            prop.user_description = request.POST.get('user_description')
+            prop.user_description  = request.POST.get('user_description')
 
-            prop.state = request.POST.get('state')
-            prop.city = request.POST.get('city')
-            prop.locality = input_locality
+            # Location
+            prop.state             = request.POST.get('state')
+            prop.city              = request.POST.get('city')
+            prop.locality          = input_locality
+            prop.district_region   = request.POST.get('district_region')
+            prop.taluka            = request.POST.get('taluka')
+            prop.mouza             = request.POST.get('mouza')
             prop.property_landmark = request.POST.get('property_landmark')
-            prop.pincode = input_pincode
-            prop.address = request.POST.get('plot_address')
-            prop.google_maps_link = request.POST.get('google_maps_link')
-            prop.latitude = request.POST.get('plot_latitude')
-            prop.longitude = request.POST.get('plot_longitude')
+            prop.pincode           = input_pincode
+            prop.address           = request.POST.get('plot_address') or request.POST.get('address')
+            prop.google_maps_link  = request.POST.get('google_maps_link')
+            prop.latitude          = request.POST.get('plot_latitude') or request.POST.get('latitude')
+            prop.longitude         = request.POST.get('plot_longitude') or request.POST.get('longitude')
 
+            # Document uploads (only overwrite if a new file was selected)
             if request.FILES.get('encumbrance_cert'):
                 prop.encumbrance_cert = request.FILES.get('encumbrance_cert')
             if request.FILES.get('layout_plan'):
                 prop.layout_plan = request.FILES.get('layout_plan')
+            if request.FILES.get('layout_plan_doc'):
+                prop.layout_plan_doc = request.FILES.get('layout_plan_doc')
+            if request.FILES.get('mpcb_consent_doc'):
+                prop.mpcb_consent_doc = request.FILES.get('mpcb_consent_doc')
+            if request.FILES.get('fire_noc_doc'):
+                prop.fire_noc_doc = request.FILES.get('fire_noc_doc')
 
             prop.listed_elsewhere = request.POST.get('listed_elsewhere', 'No')
-            prop.portal_name = request.POST.get('portal_name')
-            # ... other fields ...
-            prop.listed_elsewhere = request.POST.get('listed_elsewhere', 'No')
-            prop.portal_name = request.POST.get('portal_name')
-            
-            # --- ADD THESE TWO LINES ---
-            prop.listing_status = request.POST.get('listing_status')
-            prop.approval_status = request.POST.get('approval_status')
+            prop.portal_name      = request.POST.get('portal_name')
 
-           
+            # Status flags
+            prop.listing_status  = request.POST.get('listing_status', 'Draft')
+            prop.approval_status = request.POST.get('approval_status', 'Pending')
 
-            prop.save()
+            prop.save()   # ← model.save() recomputes price_per_sqft, area conversions, duplicate flags, FAQs
 
             # ---------- REMOVE IMAGES MARKED FOR DELETION ----------
-            remove_image_ids = request.POST.getlist('delete_image_ids[]') or request.POST.getlist('remove_images[]')
+            remove_image_ids = (
+                request.POST.getlist('delete_image_ids[]')
+                or request.POST.getlist('remove_images[]')
+            )
             if remove_image_ids:
-                IndustrialPlotResaleImage.objects.filter(id__in=remove_image_ids, property=prop).delete()
+                IndustrialPlotResaleImage.objects.filter(
+                    id__in=remove_image_ids, property=prop
+                ).delete()
 
             # ---------- ADD NEWLY UPLOADED IMAGES (CATEGORY WISE) ----------
             IMAGE_CATEGORY_FIELDS = {
@@ -32922,13 +33145,16 @@ def industrial_plot_resale_edit(request, pk):
             }
 
             existing_count = IndustrialPlotResaleImage.objects.filter(property=prop).count()
-            saved_count = 0
+            saved_count    = 0
+
             for category, field_name in IMAGE_CATEGORY_FIELDS.items():
                 cat_images = request.FILES.getlist(field_name)
 
                 new_image_objs = []
                 if cat_images:
-                    start_seq = IndustrialPlotResaleImage.objects.filter(property=prop, category=category).count()
+                    start_seq = IndustrialPlotResaleImage.objects.filter(
+                        property=prop, category=category
+                    ).count()
                     for idx, img in enumerate(cat_images):
                         if existing_count + saved_count >= 25:
                             break
@@ -32941,8 +33167,7 @@ def industrial_plot_resale_edit(request, pk):
                         new_image_objs.append(new_obj)
                         saved_count += 1
 
-                # Apply the drag-and-drop order (existing + new images mixed),
-                # e.g. image_order_full_plot[] = ["existing:12", "new:0", "existing:14", ...]
+                # Apply drag-and-drop order (existing + new mixed)
                 order_tokens = request.POST.getlist(f'image_order_{category}[]')
                 for position, token in enumerate(order_tokens):
                     if token.startswith('existing:'):
@@ -32957,26 +33182,23 @@ def industrial_plot_resale_edit(request, pk):
                             new_image_objs[new_idx].save(update_fields=['sequence_order'])
 
             # ---------- VIDEO ----------
-            # Handle Video Deletion
             if request.POST.get('delete_current_video') == '1':
                 prop.video.filter(source='uploaded').delete()
 
-            video_option = request.POST.get('video_option') or 'auto'
-            uploaded_video = request.FILES.get('property_video')
-            property_video_link = request.POST.get('property_video_link', '').strip()
-            regenerate_slideshow = request.POST.get('regenerate_slideshow') == 'on'
+            video_option           = request.POST.get('video_option') or 'auto'
+            uploaded_video         = request.FILES.get('property_video')
+            property_video_link    = request.POST.get('property_video_link', '').strip()
+            regenerate_slideshow   = request.POST.get('regenerate_slideshow') == 'on'
 
             if uploaded_video:
-                # A real video file was attached in this request — always save it,
-                # regardless of what the (sometimes stale) radio value says.
                 IndustrialPlotResaleVideo.objects.update_or_create(
                     property=prop, source='uploaded',
-                    defaults={'video': uploaded_video, 'video_url': None}
+                    defaults={'video': uploaded_video, 'video_url': None},
                 )
             elif video_option == 'rm_assisted' and property_video_link:
                 IndustrialPlotResaleVideo.objects.update_or_create(
                     property=prop, source='rm_assisted',
-                    defaults={'video_url': property_video_link, 'video': None}
+                    defaults={'video_url': property_video_link, 'video': None},
                 )
             elif video_option == 'auto':
                 existing_auto = prop.video.filter(source='auto').first()
@@ -32985,7 +33207,7 @@ def industrial_plot_resale_edit(request, pk):
                     all_images = list(IndustrialPlotResaleImage.objects.filter(property=prop))
                     all_images.sort(key=lambda img: (
                         CATEGORY_ORDER.index(img.category) if img.category in CATEGORY_ORDER else 99,
-                        img.sequence_order
+                        img.sequence_order,
                     ))
                     image_paths = [
                         img.image.path for img in all_images
@@ -32998,35 +33220,38 @@ def industrial_plot_resale_edit(request, pk):
                             if result_path:
                                 IndustrialPlotResaleVideo.objects.update_or_create(
                                     property=prop, source='auto',
-                                    defaults={'video': result_path, 'video_url': None}
+                                    defaults={'video': result_path, 'video_url': None},
                                 )
                         except Exception:
                             import traceback
                             traceback.print_exc()
+
             return JsonResponse({
-    'status': 'success',
-    'message': "Industrial Plot Listing Updated Successfully",
-    "redirect_url": reverse('industrial_plot_resale_list')
-})
+                'status': 'success',
+                'message': "Industrial Plot Listing Updated Successfully",
+                'redirect_url': reverse('industrial_plot_resale_list'),
+            })
+
         except Exception as e:
             print("ERROR DETECTED:", str(e))
             return JsonResponse({
                 'status': 'error',
-                'message': f"Error while updating listing: {str(e)}"
+                'message': f"Error while updating listing: {str(e)}",
             })
 
     # ---------- GET: render prefilled form ----------
-    existing_images = IndustrialPlotResaleImage.objects.filter(property=prop).order_by('category', 'sequence_order')
+    existing_images = IndustrialPlotResaleImage.objects.filter(property=prop).order_by(
+        'category', 'sequence_order'
+    )
     images_by_category = {}
     for img in existing_images:
         images_by_category.setdefault(img.category, []).append(img)
-        
+
     existing_image_total = existing_images.count()
 
-    # Query existing videos to pass to template
     uploaded_video = prop.video.filter(source='uploaded').first()
-    auto_video = prop.video.filter(source='auto').first()
-    rm_video = prop.video.filter(source='rm_assisted').first()
+    auto_video     = prop.video.filter(source='auto').first()
+    rm_video       = prop.video.filter(source='rm_assisted').first()
 
     return render(request, 'admin_user/Reports/Resale_Plot/industrial_plot_resale_edit.html', {
         'admin_obj': admin_obj,
@@ -35847,105 +36072,150 @@ def industrial_plot_resale_add(request):
                 )
 
             # ---------- CREATE DATABASE OBJECT ----------
+            P = request.POST
+            F = request.FILES
+
             prop = IndustrialPlotResaleProperty.objects.create(
                 property_unique_key=fingerprint_key,
                 is_duplicate=is_dup_flag,
                 duplicate_count=total_dup_count,
                 duplicate_group_id=dup_group_id if is_dup_flag else None,
 
-                listing_type="Resale",
-                category="Plot",
-                sub_category=request.POST.get('sub_category', 'Industrial'),
-              
+                listing_type="Resale", category="Plot",
+                sub_category=P.get('sub_category', 'Industrial'),
 
-                listed_by_type=request.POST.get('listed_by_type'),
-                assigned_to=request.POST.get('assigned_to'),
+                listed_by_type=P.get('listed_by_type'),
+                assigned_to=P.get('assigned_to'),
                 listed_by_id=input_listed_by_id,
                 listed_by_name=input_listed_by_name,
                 listed_by_email=input_listed_by_email,
                 listed_by_contact=input_listed_by_contact,
                 listed_by_role=input_listed_by_role,
 
-                property_title=request.POST.get('property_title'),
+                property_title=P.get('property_title'),
                 property_no=input_property_no,
+                plot_unit_number=P.get('plot_unit_number'),
 
-                plot_area=to_decimal(request.POST.get('plot_area')),
-                property_type=request.POST.get('property_type'),
-                land_use=request.POST.get('land_use'),
-                industrial_zone_type=request.POST.get('industrial_zone_type'),
+                area_unit=P.get('area_unit') or 'sqm',
+                plot_area=to_decimal(P.get('plot_area')),
+                plot_area_sqft=to_decimal(P.get('plot_area_sqft')),
+                plot_area_acres=to_decimal(P.get('plot_area_acres')),
+
+                property_type=P.get('property_type'),
+                land_use=P.get('land_use'),
+                industrial_zone_type=P.get('industrial_zone_type'),
                 industrial_estate_name=input_industrial_estate_name,
-                na_status=request.POST.get('na_status'),
-                layout_approval_status=request.POST.get('layout_approval_status'),
-                industrial_fsi=request.POST.get('industrial_fsi'),
+                na_status=P.get('na_status'),
+                layout_approval_status=P.get('layout_approval_status'),
+                industrial_fsi=P.get('industrial_fsi'),
 
-                plot_frontage=to_decimal(request.POST.get('plot_frontage')),
-                plot_depth=to_decimal(request.POST.get('plot_depth')),
-                plot_shape=request.POST.get('plot_shape'),
-                plot_road_facing=request.POST.get('plot_road_facing'),
-                road_width=request.POST.get('road_width'),
-                corner_plot=request.POST.get('corner_plot', 'no'),
+                plot_frontage=to_decimal(P.get('plot_frontage')),
+                plot_depth=to_decimal(P.get('plot_depth')),
+                plot_shape=P.get('plot_shape'),
+                facing=P.get('facing'),
+                plot_road_facing=P.get('plot_road_facing'),
+                road_width=P.get('road_width'),
+                corner_plot=P.get('corner_plot') or 'no',
 
-                power_supply=request.POST.get('power_supply'),
-                power_load_kva=to_int(request.POST.get('power_load_kva')),
-                industrial_water_supply=request.POST.get('industrial_water_supply'),
-                effluent_treatment=request.POST.get('effluent_treatment'),
-                industry_type_permissible=request.POST.get('industry_type_permissible'),
-                plot_fencing=request.POST.get('plot_fencing'),
-                loading_dock=request.POST.get('loading_dock'),
-                current_possession_status=request.POST.get('current_possession_status'),
+                power_supply=P.get('power_supply'),
+                power_load_kva=to_int(P.get('power_load_kva')),
+                power_backup_transformer=P.get('power_backup_transformer'),
+                industrial_water_supply=P.get('industrial_water_supply'),
+                effluent_treatment=P.get('effluent_treatment'),
+                industry_type_permissible=P.get('industry_type_permissible'),
+                plot_fencing=P.get('plot_fencing'),
+                loading_dock=P.get('loading_dock'),
+                current_possession_status=P.get('current_possession_status'),
+                nearby_facilities_details=P.get('nearby_facilities_details'),
 
-                selling_price=to_int(request.POST.get('selling_price')),
-                price_per_sqft=to_int(request.POST.get('price_per_sqft')),
-                price_negotiable=request.POST.get('price_negotiable', 'no'),
-                additional_charges=request.POST.get('additional_charges'),
-                brokerage_percentage=request.POST.get('brokerage_percentage'),
-                manual_brokerage=request.POST.get('manual_brokerage'),
+                usable_floor_area_sqft=to_decimal(P.get('usable_floor_area_sqft')),
+                built_up_area_sqft=to_decimal(P.get('built_up_area_sqft')),
+                total_land_area_sqft=to_decimal(P.get('total_land_area_sqft')),
+                building_clear_height=to_decimal(P.get('building_clear_height')),
+                number_of_floors=to_int(P.get('number_of_floors')),
+                construction_type=P.get('construction_type'),
+                construction_age=P.get('construction_age'),
+                floor_load_capacity=P.get('floor_load_capacity'),
+                crane_capacity=P.get('crane_capacity'),
+                fire_access_compliance=P.get('fire_access_compliance'),
 
-                ownership_type=request.POST.get('ownership_type'),
-                ownership_document_type=request.POST.get('ownership_document_type'),
-                other_document_type=request.POST.get('other_document_type'),
-                midc_allotment=request.POST.get('midc_allotment'),
-                midc_transfer_noc=request.POST.get('midc_transfer_noc'),
-                environmental_clearance=request.POST.get('environmental_clearance'),
-                rera_status=request.POST.get('rera_status'),
-                title_clearance=request.POST.get('title_clearance'),
-                property_encumbrance_status=request.POST.get('property_encumbrance_status'),
+                selling_price=to_int(P.get('selling_price')),
+                price_negotiable=P.get('price_negotiable', 'no'),
+                additional_charges=P.get('additional_charges'),
+                booking_amount=to_int(P.get('booking_amount')),
+                price_includes_excludes=P.get('price_includes_excludes'),
+                brokerage_percentage=P.get('brokerage_percentage'),
+                manual_brokerage=P.get('manual_brokerage'),
+                landlord_owner_fee=P.get('landlord_owner_fee'),
+                landlord_owner_fixed_amount=to_int(P.get('landlord_owner_fixed_amount')),
 
-                property_tax_status=request.POST.get('property_tax_status'),
-                outstanding_tax_amount=to_int(request.POST.get('outstanding_tax_amount')),
-                pending_since=to_date(request.POST.get('pending_since')),
-                property_loan_status=request.POST.get('property_loan_status'),
-                financing_bank=request.POST.get('financing_bank'),
-                outstanding_loan_amount=to_int(request.POST.get('outstanding_loan_amount')),
-                sanctioning_authority=request.POST.get('sanctioning_authority'),
+                ownership_type=P.get('ownership_type'),
+                ownership_document_type=P.get('ownership_document_type'),
+                other_document_type=P.get('other_document_type'),
+                midc_allotment=P.get('midc_allotment'),
+                midc_transfer_noc=P.get('midc_transfer_noc'),
+                environmental_clearance=P.get('environmental_clearance'),
+                rera_status=P.get('rera_status'),
+                title_clearance=P.get('title_clearance'),
+                property_encumbrance_status=P.get('property_encumbrance_status'),
+
+                mpcb_consent=P.get('mpcb_consent'),
+                factory_licence=P.get('factory_licence'),
+                fire_noc=P.get('fire_noc'),
+                hazardous_storage=P.get('hazardous_storage'),
+                occupancy_cert=P.get('occupancy_cert'),
+                layout_approval_ref=P.get('layout_approval_ref'),
+
+                extract_7_12_status=P.get('extract_7_12_status'),
+                mutation_status=P.get('mutation_status'),
+                na_order_number=P.get('na_order_number'),
+
+                lease_term_remaining=to_int(P.get('lease_term_remaining')),
+                transfer_fees_premium=to_int(P.get('transfer_fees_premium')),
+                litigation_disclosure=P.get('litigation_disclosure'),
+                tenant_lease_details=P.get('tenant_lease_details'),
+                monthly_rent=to_int(P.get('monthly_rent')),
+                utility_dues=to_int(P.get('utility_dues')),
+                title_chain_notes=P.get('title_chain_notes'),
+
+                property_tax_status=P.get('property_tax_status'),
+                outstanding_tax_amount=to_int(P.get('outstanding_tax_amount')),
+                pending_since=to_date(P.get('pending_since')),
+                property_loan_status=P.get('property_loan_status'),
+                financing_bank=P.get('financing_bank'),
+                outstanding_loan_amount=to_int(P.get('outstanding_loan_amount')),
+                sanctioning_authority=P.get('sanctioning_authority'),
 
                 amenities=amenities,
                 nearby_facilities=nearby_facilities,
-                user_description=request.POST.get('user_description'),
-                property_summary=request.POST.get('property_summary'),
-                property_description=request.POST.get('property_description'),
+                user_description=P.get('user_description'),
 
-                state=request.POST.get('state'),
-                city=request.POST.get('city'),
+                state=P.get('state'),
+                city=P.get('city'),
                 locality=input_locality,
-                property_landmark=request.POST.get('property_landmark'),
+                district_region=P.get('district_region'),
+                taluka=P.get('taluka'),
+                mouza=P.get('mouza'),
+                property_landmark=P.get('property_landmark'),
                 pincode=input_pincode,
-                address=request.POST.get('address'),
-                google_maps_link=request.POST.get('google_maps_link'),
-                latitude=request.POST.get('latitude'),
-                longitude=request.POST.get('longitude'),
+                address=P.get('plot_address') or P.get('address'),
+                google_maps_link=P.get('google_maps_link'),
+                latitude=P.get('plot_latitude') or P.get('latitude'),
+                longitude=P.get('plot_longitude') or P.get('longitude'),
 
-                encumbrance_cert=request.FILES.get('encumbrance_cert'),
-                layout_plan=request.FILES.get('layout_plan'),
+                encumbrance_cert=F.get('encumbrance_cert'),
+                layout_plan=F.get('layout_plan'),
+                layout_plan_doc=F.get('layout_plan_doc'),
+                mpcb_consent_doc=F.get('mpcb_consent_doc'),
+                fire_noc_doc=F.get('fire_noc_doc'),
 
-                listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
-                portal_name=request.POST.get('portal_name'),
+                listed_elsewhere=P.get('listed_elsewhere', 'No'),
+                portal_name=P.get('portal_name'),
 
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
                 uploaded_by_contact=uploader_contact,
                 uploaded_by_role=uploader_role,
-                upload_file_name=None,
             )
 
             # ---------- IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE) ----------
@@ -37155,14 +37425,14 @@ def industrial_plot_resale_edit(request, pk):
         try:
             def to_int(val):
                 try:
-                    return int(val) if val else None
-                except:
+                    return int(float(val)) if val not in (None, '') else None
+                except (TypeError, ValueError):
                     return None
 
             def to_decimal(val):
                 try:
-                    return float(val) if val else None
-                except:
+                    return float(val) if val not in (None, '') else None
+                except (TypeError, ValueError):
                     return None
 
             def to_date(val):
@@ -39176,8 +39446,6 @@ def agricultural_plot_resale_add(request):
                 category="Plot",
                 sub_category=request.POST.get('sub_category', 'Agricultural'),
 
-                
-
                 listed_by_type=request.POST.get('listed_by_type'),
                 assigned_to=request.POST.get('assigned_to'),
                 listed_by_id=input_listed_by_id,
@@ -39186,25 +39454,50 @@ def agricultural_plot_resale_add(request):
                 listed_by_contact=input_listed_by_contact,
                 listed_by_role=input_listed_by_role,
 
+    # --- BASIC ---
                 property_no=input_property_no,
-
+                plot_unit_number=request.POST.get('plot_unit_number'),
                 plot_area=to_decimal(request.POST.get('plot_area')),
+                plot_area_sqft=to_decimal(request.POST.get('plot_area_sqft')),
+                plot_area_sqm=to_decimal(request.POST.get('plot_area_sqm')),
                 agr_area_unit=request.POST.get('agr_area_unit', 'acre'),
                 property_type=request.POST.get('property_type'),
                 land_use=request.POST.get('land_use'),
                 na_status=request.POST.get('na_status'),
                 layout_approval_status=request.POST.get('layout_approval_status'),
 
+    # --- DIMENSIONS ---
                 plot_frontage=to_decimal(request.POST.get('plot_frontage')),
                 plot_depth=to_decimal(request.POST.get('plot_depth')),
                 plot_shape=request.POST.get('plot_shape'),
+                contiguity=request.POST.get('contiguity'),
+                encroachment_status=request.POST.get('encroachment_status'),
                 plot_road_facing=request.POST.get('plot_road_facing'),
                 road_width=request.POST.get('road_width'),
+                access_width_ft=to_decimal(request.POST.get('access_width_ft')),
+                legal_access_rtw=request.POST.get('legal_access_rtw'),
                 corner_plot=request.POST.get('corner_plot', 'no'),
 
+    # --- SOIL / TOPO ---
                 soil_type=request.POST.get('soil_type'),
+                soil_depth=request.POST.get('soil_depth'),
+                land_slope=request.POST.get('land_slope'),
+                soil_erosion_status=request.POST.get('soil_erosion_status'),
+                rainfall_zone=request.POST.get('rainfall_zone'),
+                land_quality_notes=request.POST.get('land_quality_notes'),
+
+    # --- FARMING ---
                 current_crop=request.POST.get('current_crop'),
-                irrigation_source=request.POST.get('irrigation_source'),
+                current_crop_detail=request.POST.get('current_crop_detail'),
+                cropping_pattern=request.POST.get('cropping_pattern'),
+                orchard_type=request.POST.get('orchard_type'),
+                tree_count=to_int(request.POST.get('tree_count')),
+                tree_age_years=to_int(request.POST.get('tree_age_years')),
+                average_yield=to_decimal(request.POST.get('average_yield')),
+                annual_crop_income=to_int(request.POST.get('annual_crop_income')),
+                crop_rotation_history=request.POST.get('crop_rotation_history'),
+
+    # --- ELECTRICITY / TOPO ---
                 agr_electricity=request.POST.get('agr_electricity'),
                 highway_distance=request.POST.get('highway_distance'),
                 land_topography=request.POST.get('land_topography'),
@@ -39212,35 +39505,82 @@ def agricultural_plot_resale_add(request):
                 plot_fencing=request.POST.get('plot_fencing'),
                 current_possession_status=request.POST.get('current_possession_status'),
 
+    # --- PRICING ---
                 selling_price=to_int(request.POST.get('selling_price')),
                 price_negotiable=request.POST.get('price_negotiable', 'no'),
                 additional_charges=request.POST.get('additional_charges'),
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 manual_brokerage=request.POST.get('manual_brokerage'),
+                landlord_owner_fee=request.POST.get('landlord_owner_fee'),
+                landlord_owner_fixed_amount=to_int(request.POST.get('landlord_owner_fixed_amount')),
+                booking_amount=to_int(request.POST.get('booking_amount')),
+                other_charges=request.POST.get('other_charges'),
+                crop_insurance_status=request.POST.get('crop_insurance_status'),
+                price_includes_excludes=request.POST.get('price_includes_excludes'),
 
+    # --- WATER / IRRIGATION ---
+                irrigation_source=request.POST.get('irrigation_source'),
+                irrigation_season=request.POST.get('irrigation_season'),
+                canal_water_rights=request.POST.get('canal_water_rights'),
+                borewell_count=to_int(request.POST.get('borewell_count')),
+                borewell_depth_ft=to_int(request.POST.get('borewell_depth_ft')),
+                well_count=to_int(request.POST.get('well_count')),
+                farm_pond=request.POST.get('farm_pond'),
+                agri_pump_connection=request.POST.get('agri_pump_connection'),
+                pump_hp=to_decimal(request.POST.get('pump_hp')),
+                pump_electricity_status=request.POST.get('pump_electricity_status'),
+                groundwater_depth=request.POST.get('groundwater_depth'),
+                water_quality_notes=request.POST.get('water_quality_notes'),
+
+    # --- TENANCY ---
+                existing_occupant=request.POST.get('existing_occupant'),
+                lease_tenancy_status=request.POST.get('lease_tenancy_status'),
+                tenant_rights_status=request.POST.get('tenant_rights_status'),
+                annual_lease_income=to_int(request.POST.get('annual_lease_income')),
+                share_cropping_arrangement=request.POST.get('share_cropping_arrangement'),
+                tenant_declaration=request.POST.get('tenant_declaration'),
+
+    # --- ENVIRONMENTAL ---
+                protected_area_check=request.POST.get('protected_area_check'),
+                forest_eco_check=request.POST.get('forest_eco_check'),
+                flood_risk_check=request.POST.get('flood_risk_check'),
+                crz_check=request.POST.get('crz_check'),
+                tribal_gram_sabha_check=request.POST.get('tribal_gram_sabha_check'),
+
+    # --- LEGAL ---
                 ownership_type=request.POST.get('ownership_type'),
                 ownership_document_type=request.POST.get('ownership_document_type'),
                 other_document_type=request.POST.get('other_document_type'),
                 rera_status=request.POST.get('rera_status'),
                 title_clearance=request.POST.get('title_clearance'),
                 property_encumbrance_status=request.POST.get('property_encumbrance_status'),
-
                 satbara_available=request.POST.get('satbara_available'),
                 khate_utara=request.POST.get('khate_utara'),
                 section63_clearance=request.POST.get('section63_clearance'),
+                na_order_number=request.POST.get('na_order_number'),
+                maharera_number=request.POST.get('maharera_number'),
+                conversion_potential=request.POST.get('conversion_potential'),
+                permitted_use=request.POST.get('permitted_use'),
+                irrigation_cess_dues=to_int(request.POST.get('irrigation_cess_dues')),
+                agri_ceiling_declaration=request.POST.get('agri_ceiling_declaration'),
+                land_reforms_restrictions=request.POST.get('land_reforms_restrictions'),
+                litigation_disclosure=request.POST.get('litigation_disclosure'),
+                sanctioning_authority=request.POST.get('sanctioning_authority'),
 
+    # --- TAX / LOAN ---
                 property_tax_status=request.POST.get('property_tax_status'),
                 outstanding_tax_amount=to_int(request.POST.get('outstanding_tax_amount')),
                 pending_since=to_date(request.POST.get('pending_since')),
                 property_loan_status=request.POST.get('property_loan_status'),
                 financing_bank=request.POST.get('financing_bank'),
                 outstanding_loan_amount=to_int(request.POST.get('outstanding_loan_amount')),
-                sanctioning_authority=request.POST.get('sanctioning_authority'),
 
+    # --- DESCRIPTION / AMENITIES ---
                 amenities=amenities,
                 nearby_facilities=nearby_facilities,
                 user_description=request.POST.get('user_description'),
 
+    # --- LOCATION ---
                 state=request.POST.get('state'),
                 city=input_city,
                 locality=input_locality,
@@ -39250,19 +39590,25 @@ def agricultural_plot_resale_add(request):
                 google_maps_link=request.POST.get('google_maps_link'),
                 latitude=request.POST.get('latitude'),
                 longitude=request.POST.get('longitude'),
+                distance_to_mandi_km=to_decimal(request.POST.get('distance_to_mandi_km')),
+                distance_to_village_km=to_decimal(request.POST.get('distance_to_village_km')),
+                farm_machinery_frontage=request.POST.get('farm_machinery_frontage'),
 
+    # --- FILES ---
                 encumbrance_cert=request.FILES.get('encumbrance_cert'),
                 layout_plan=request.FILES.get('layout_plan'),
 
+    # --- STATUS ---
                 listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
                 portal_name=request.POST.get('portal_name'),
+                listing_status='Pending',
+                approval_status='Pending',
 
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
                 uploaded_by_contact=uploader_contact,
                 uploaded_by_role=uploader_role,
-                upload_file_name=None,
-            )
+                upload_file_name=None,)
 
             # ---------- IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE) ----------
             IMAGE_CATEGORY_FIELDS = {
@@ -40216,3 +40562,100 @@ def add_info_banner(request):
 
 
 #######################END View Home page  MODULE SECTIO####################################
+
+
+from django.contrib.contenttypes.models import ContentType as _CT
+from Admin_App.badge_utils import BADGE_META, BADGE_CHOICES, all_property_models, live_q
+
+
+
+def badge_manager(request):
+    """Admin panel page: search a property -> tick badges -> save. Also lists all assigned badges."""
+    models_list = all_property_models()
+    model_map = {m._meta.label_lower: m for m in models_list}
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        who = request.session.get("admin_name") or request.session.get("user_name") or "admin"
+
+        if action == "assign":
+            model = model_map.get(request.POST.get("model_key"))
+            pk = (request.POST.get("pk") or "").strip()
+            if model and pk and model.objects.filter(pk=pk).exists():
+                ct = _CT.objects.get_for_model(model)
+                chosen = [b for b in request.POST.getlist("badges") if b in BADGE_META]
+                start = request.POST.get("start_date") or None
+                end = request.POST.get("end_date") or None
+                try:
+                    priority = int(request.POST.get("priority") or 0)
+                except ValueError:
+                    priority = 0
+                # remove un-ticked ones, upsert ticked ones
+                PropertyBadge.objects.filter(content_type=ct, object_id=pk).exclude(badge_type__in=chosen).delete()
+                for b in chosen:
+                    PropertyBadge.objects.update_or_create(
+                        content_type=ct, object_id=pk, badge_type=b,
+                        defaults={"is_active": True, "start_date": start, "end_date": end,
+                                  "priority": priority, "created_by": str(who)},
+                    )
+                messages.success(request, f"Badges saved for {pk}.")
+            else:
+                messages.error(request, "Property not found.")
+
+        elif action == "toggle":
+            b = PropertyBadge.objects.filter(pk=request.POST.get("badge_id")).first()
+            if b:
+                b.is_active = not b.is_active
+                b.save(update_fields=["is_active"])
+
+        elif action == "delete":
+            PropertyBadge.objects.filter(pk=request.POST.get("badge_id")).delete()
+            messages.success(request, "Badge removed.")
+
+        return redirect(request.get_full_path())
+
+    # ---------- search ----------
+    q = (request.GET.get("q") or "").strip()
+    results = []
+    if q:
+        for m in models_list:
+            names = {f.name for f in m._meta.get_fields()}
+            cond = Q(pk__icontains=q)
+            for fld in ("property_title", "locality", "locality_area", "city", "village"):
+                if fld in names:
+                    cond |= Q(**{f"{fld}__icontains": q})
+            flt = {}
+            if "is_deleted" in names:
+                flt["is_deleted"] = False
+            for o in m.objects.filter(cond, **flt)[:15]:
+                ct = _CT.objects.get_for_model(m)
+                current = {b.badge_type: b for b in PropertyBadge.objects.filter(content_type=ct, object_id=str(o.pk))}
+                results.append({
+                    "model_key": m._meta.label_lower, "pk": o.pk,
+                    "title": getattr(o, "property_title", None) or str(o),
+                    "city": getattr(o, "city", "") or getattr(o, "district", ""),
+                    "approval": getattr(o, "approval_status", ""),
+                    "model_name": m._meta.verbose_name,
+                    "current": current,
+                    "first": next(iter(current.values()), None),
+                })
+        results = results[:40]
+
+    # ---------- assigned badges table ----------
+    f_type = request.GET.get("type") or ""
+    assigned_qs = PropertyBadge.objects.select_related("content_type")
+    if f_type in BADGE_META:
+        assigned_qs = assigned_qs.filter(badge_type=f_type)
+    assigned = []
+    for b in assigned_qs[:300]:
+        model = b.content_type.model_class()
+        obj = model.objects.filter(pk=b.object_id).first() if model else None
+        assigned.append({
+            "b": b, "title": (getattr(obj, "property_title", None) or b.object_id) if obj else "(deleted property)",
+            "meta": BADGE_META[b.badge_type],
+        })
+
+    return render(request, "admin_user/badge_manager.html", {
+        "q": q, "results": results, "assigned": assigned, "f_type": f_type,
+        "badge_meta": BADGE_META,
+    })

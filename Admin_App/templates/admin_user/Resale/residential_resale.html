@@ -1440,9 +1440,11 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-city"></i> Society Type <span style="color:red;">*</span></label>
+
+                                <div class="col-md-6 mt-2" data-pt-hide="independent_house bungalow farmhouse">
+    <div class="form-group">
+        <label class="form-label"><i class="fas fa-city"></i> Society Type <span style="color:red;">*</span></label>
+
                                         <select class="form-select form-control" name="society_type" id="society_type" required>
                                             <option value="">Select Society Type</option>
                                             <option value="Gated Community">Gated Community</option>
@@ -1460,9 +1462,10 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label"> Tower/Wing Number</label>
+                              
+                                <div class="col-md-6 mt-2" data-pt="flat">
+    <div class="form-group">
+        <label class="form-label"> Tower/Wing Number</label>
                                         <input type="text" class="form-control" id="wing_no" name="wing_no" placeholder="A Wing">
                                     </div>
                                 </div>
@@ -1537,9 +1540,11 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Terrace Details </label>
+                               
+                                <div class="col-md-6 mt-2" data-pt="house multi farm penthouse">
+    <div class="form-group">
+        <label class="form-label">Terrace Details </label>
+        <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace">
                                         <input type="text" class="form-control" id="terrace_details" name="terrace_details" placeholder="e.g: 500 sqft Private Terrace" required>
                                     </div>
                                 </div>
@@ -1555,9 +1560,9 @@
                         </div>
                         <div class="section-body">
                             <div class="row">
-                                 <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Super Built-up Area (sq.ft) <span class="required">*</span></label>
+                                <div class="col-md-4 mt-2" data-pt="flat floor multi">
+    <div class="form-group">
+        <label class="form-label">Super Built-up Area (sq.ft) <span class="required">*</span></label>
                                         <input type="number" class="form-control" id="super_builtup_area" name="super_builtup_area" placeholder="e.g., 1200" required>
                                     </div>
                                 </div>
@@ -1573,29 +1578,29 @@
                                         <input type="number" class="form-control" id="carpet_area" name="carpet_area" placeholder="e.g., 950" required>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Plot Area (sq.ft)</label>
+                               <div class="col-md-4 mt-2" data-pt="house farm">
+    <div class="form-group">
+        <label class="form-label">Plot Area (sq.ft)</label>
                                         <input type="number" class="form-control" id="plot_area" name="plot_area" placeholder="Optional">
                                     </div>
                                 </div>
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Building Configuration </label>
+                                <div class="col-md-4 mt-2" data-pt="house multi">
+    <div class="form-group">
+        <label class="form-label">Building Configuration </label>
                                         <input type="text" class="form-control" id="building_configuration" name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3">
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Total Floors Constructed </label>
+                              <div class="col-md-4 mt-2" data-pt-hide="farmhouse">
+    <div class="form-group">
+        <label class="form-label">Total Floors Constructed </label>
                                         <input type="number" class="form-control" id="total_floors" name="total_floors" placeholder="e.g., 3" required>
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Floor Number </label>
+                              <div class="col-md-4 mt-2" data-pt="flat floor multi">
+    <div class="form-group">
+        <label class="form-label">Floor Number </label>
                                         <input type="number" class="form-control" id="floor_number" name="floor_number" placeholder="e.g., 3" required>
                                     </div>
                                 </div>
@@ -1615,9 +1620,9 @@
                             <div class="row">
                                
 
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">BHK <span class="required">*</span></label>
+                               <div class="col-md-4 mt-2" data-pt-hide="studio_apartment">
+    <div class="form-group">
+        <label class="form-label">BHK <span class="required">*</span></label>
                                         <select class="form-select form-control" id="bhk" name="bhk" required>
                                             <option value="">Select</option>
                                             <option value="0bhk">0 BHK / Studio</option>
@@ -1668,6 +1673,69 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+                                <div class="form-section" data-pt="house multi">
+    <div class="section-header">
+        <i class="fas fa-layer-group"></i> Floor &amp; Room Details
+        <small style="font-weight:400; opacity:.85;">(Optional)</small>
+    </div>
+    <div class="section-body">
+        <div class="form-group">
+            <label class="form-label">Floor Details</label>
+            <textarea class="form-control" id="floor_details" name="floor_details"
+                placeholder="e.g., Ground floor: 2 BHK with parking. First floor: 3 BHK with balcony. Second floor: terrace room."></textarea>
+        </div>
+        <div class="form-group mt-3">
+            <label class="form-label">Room Details</label>
+            <textarea class="form-control" id="room_details" name="room_details"
+                placeholder="e.g., Master bedroom 14x12 with attached bath, hall 18x14, kitchen 10x10, pooja room, store room."></textarea>
+        </div>
+    </div>
+</div>
+
+                                <div class="form-section" data-pt="house farm">
+    <div class="section-header">
+        <i class="fas fa-road"></i> Plot, Compound & Road Details
+    </div>
+    <div class="section-body">
+        <div class="row">
+            <div class="col-md-6 mt-2">
+                <div class="form-group">
+                    <label class="form-label">Compound Wall</label>
+                    <select class="form-select form-control" id="compound_wall" name="compound_wall">
+                        <option value="">Select</option>
+                        <option value="Full">Full Compound Wall</option>
+                        <option value="Partial">Partial Compound Wall</option>
+                        <option value="None">No Compound Wall</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 mt-2">
+                <div class="form-group">
+                    <label class="form-label">Road Width (ft)</label>
+                    <input type="number" class="form-control" id="road_width" name="road_width" placeholder="e.g., 30">
+                </div>
+            </div>
+            <div class="col-md-6 mt-2">
+                <div class="form-group">
+                    <label class="form-label">Plot Frontage (ft)</label>
+                    <input type="number" class="form-control" id="plot_frontage" name="plot_frontage" placeholder="e.g., 40">
+                </div>
+            </div>
+            <div class="col-md-6 mt-2">
+                <div class="form-group">
+                    <label class="form-label">Corner Plot?</label>
+                    <select class="form-select form-control" id="corner_plot" name="corner_plot">
+                        <option value="">Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                             </div>
                         </div>
                     </div>
@@ -3765,16 +3833,24 @@
             { id: 'state', name: 'State' }
         ];
 
+       
         for (var i = 0; i < requiredFields.length; i++) {
-            var field = $('#' + requiredFields[i].id);
-            if (!field.val() || field.val().trim() === '') {
-                isValid = false;
-                errorMessage += requiredFields[i].name + ', ';
-                field.addClass('is-invalid');
-            } else {
-                field.removeClass('is-invalid');
-            }
-        }
+    var field = $('#' + requiredFields[i].id);
+
+    // skip fields hidden by property type
+    if (field.closest('.pt-hidden').length) {
+        field.removeClass('is-invalid');
+        continue;
+    }
+
+    if (!field.val() || field.val().trim() === '') {
+        isValid = false;
+        errorMessage += requiredFields[i].name + ', ';
+        field.addClass('is-invalid');
+    } else {
+        field.removeClass('is-invalid');
+    }
+}
 
         
 
@@ -3866,6 +3942,8 @@
         fd.append('facing_direction', $('#facing_direction').val());
         fd.append('occupancy_status', $('#occupancy_status').val());
         fd.append('terrace_details', $('#terrace_details').val());
+        fd.append('floor_details', $('#floor_details').val() || '');
+fd.append('room_details', $('#room_details').val() || '');
 
         fd.append('super_builtup_area', $('#super_builtup_area').val());
         fd.append('builtup_area', $('#builtup_area').val());
@@ -3901,6 +3979,10 @@
         fd.append('selling_price', $('#selling_price').val());
         fd.append('price_per_sqft', $('#price_per_sqft').val());
         fd.append('price_negotiable', $('#price_negotiable').val());
+        fd.append('compound_wall', $('#compound_wall').val() || '');
+fd.append('road_width', $('#road_width').val() || '');
+fd.append('plot_frontage', $('#plot_frontage').val() || '');
+fd.append('corner_plot', $('#corner_plot').val() || '');
 
         var amenities = [];
         $('.amenities-checkbox:checked').each(function() {
@@ -4196,6 +4278,84 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+</script>
+
+<script>
+(function () {
+    var PT_GROUPS = {
+        flat:  ['apartment', 'flat', 'studio_apartment', 'penthouse', 'serviced_apartment'],
+        floor: ['independent_floor', 'builder_floor'],
+        house: ['independent_house', 'villa', 'bungalow', 'row_house', 'townhouse'],
+        multi: ['duplex', 'triplex'],
+        farm:  ['farmhouse']
+    };
+    var lastType = '';
+
+    function groupsOf(type) {
+        return Object.keys(PT_GROUPS).filter(function (g) {
+            return PT_GROUPS[g].indexOf(type) !== -1;
+        });
+    }
+    function tokens(s) { return (s || '').split(/\s+/).filter(Boolean); }
+    function matches(list, type, groups) {
+        return list.some(function (k) { return k === type || groups.indexOf(k) !== -1; });
+    }
+    function clearField(f) {
+        if (f.type === 'radio' || f.type === 'checkbox') f.checked = f.defaultChecked;
+        else if (f.tagName === 'SELECT') f.selectedIndex = 0;
+        else f.value = '';
+    }
+
+    function setVisible(el, visible) {
+        var wasHidden = el.classList.contains('pt-hidden');
+        el.classList.toggle('pt-hidden', !visible);
+        el.style.display = visible ? '' : 'none';
+
+        el.querySelectorAll('input, select, textarea').forEach(function (f) {
+            if (!visible) {
+                if (f.required) { f.dataset.wasRequired = '1'; f.required = false; }
+                if (!wasHidden) clearField(f);
+                f.classList.remove('input-error');
+            } else if (f.dataset.wasRequired === '1') {
+                f.required = true;
+            }
+        });
+    }
+
+    function applyPropertyTypeRules() {
+        var sel = document.getElementById('property_type');
+        if (!sel) return;
+        var type = (sel.value || '').trim();
+        var groups = groupsOf(type);
+
+        document.querySelectorAll('[data-pt], [data-pt-hide]').forEach(function (el) {
+            var showList = tokens(el.getAttribute('data-pt'));
+            var hideList = tokens(el.getAttribute('data-pt-hide'));
+            var visible = true;
+            if (showList.length) visible = !!type && matches(showList, type, groups);
+            if (visible && hideList.length && type && matches(hideList, type, groups)) visible = false;
+            setVisible(el, visible);
+        });
+
+        // Studio apartment: BHK hidden and fixed to 0 BHK
+        var bhk = document.getElementById('bhk');
+        if (bhk) {
+            if (type === 'studio_apartment') bhk.value = '0bhk';
+            else if (lastType === 'studio_apartment' && bhk.value === '0bhk') bhk.value = '';
+        }
+
+        lastType = type;
+        if (typeof updatePreview === 'function') updatePreview();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var sel = document.getElementById('property_type');
+        if (!sel) return;
+        sel.addEventListener('change', applyPropertyTypeRules);
+        applyPropertyTypeRules();
+    });
+    window.applyPropertyTypeRules = applyPropertyTypeRules;
+})();
 </script>
 
 </body>

@@ -371,6 +371,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
       <input type="hidden" name="property_id" value="{{ property.id }}">
 
       <!-- ════════════ STEP 1 — PLOT DETAILS ════════════ -->
+          <!-- ════════════ STEP 1 — PLOT DETAILS ════════════ -->
       <div class="step-content active" id="step1">
 
         <div class="form-header">
@@ -378,52 +379,54 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         </div>
 
         <!-- LISTED BY -->
-      
-        <!-- LISTED BY -->
-<div class="form-section">
-  <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
-  <div class="section-body">
-    <div class="form-group">
-      <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="required-star">*</span></label>
-      <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
-          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-              <input type="radio" name="listed_by_type" id="listedBySelf" value="self" {% if property.listed_by_type == 'self' or not property.listed_by_type %}checked{% endif %} onchange="Change_Fields()"> Listed by Self
-          </label>
-          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-              <input type="radio" name="listed_by_type" id="listedByOther" value="other" {% if property.listed_by_type == 'other' %}checked{% endif %} onchange="Change_Fields()"> Listed for Other User
-          </label>
-      </div>
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
+          <div class="section-body">
+            <div class="form-group">
+              <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="required">*</span></label>
+              <div style="display:flex;gap:24px;margin-bottom:14px;margin-top:8px;">
+                <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.9rem;">
+                  <input type="radio" name="listed_by_type" id="listedBySelf" value="self" {% if property.listed_by_type == 'self' or not property.listed_by_type %}checked{% endif %} onchange="Change_Fields()" style="accent-color:#10b981;width:16px;height:16px;">
+                  Listed by Self
+                </label>
+                <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.9rem;">
+                  <input type="radio" name="listed_by_type" id="listedByOther" value="other" {% if property.listed_by_type == 'other' %}checked{% endif %} onchange="Change_Fields()" style="accent-color:#10b981;width:16px;height:16px;">
+                  Listed for Other User
+                </label>
+              </div>
+            </div>
 
-      <input type="hidden" id="selfUserId"    value="{{ admin_obj.id }}">
-      <input type="hidden" id="selfUserRole"  value="{{ admin_obj.role }}">
-      <input type="hidden" id="selfUserName"  value="{{ admin_obj.name }}">
-      <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
-      <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+            <input type="hidden" id="selfUserId"    value="{{ admin_obj.id }}">
+            <input type="hidden" id="selfUserRole"  value="{{ admin_obj.role }}">
+            <input type="hidden" id="selfUserName"  value="{{ admin_obj.name }}">
+            <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
+            <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
 
-      <div id="listedByOtherWrapper" style="{% if property.listed_by_type != 'other' %}display:none;{% endif %}">
-          <div class="search-select" id="assignedToSearchSelect">
-              <div class="search-select-control" id="assignedToControl" tabindex="0">
+            <div id="listedByOtherWrapper" style="{% if property.listed_by_type != 'other' %}display:none;{% endif %}">
+              <label class="form-label mt-2">Select Team Member <span class="required">*</span></label>
+              <div class="search-select" id="assignedToSearchSelect">
+                <div class="search-select-control" id="assignedToControl" tabindex="0">
                   <span class="search-select-value ss-placeholder" id="assignedToValueLabel" style="color:black;">
-                      {% if property.listed_by_id %}
-                          {% for user in user_obj %}
-                              {% if property.listed_by_id == user.user_id %}
-                                  {{ user.user_id }} - {{ user.user_name }} - {{ user.user_role }} - {{ user.user_phone }}
-                              {% endif %}
-                          {% endfor %}
-                      {% else %}
-                          -- Select Team Member --
-                      {% endif %}
+                    {% if property.listed_by_id %}
+                        {% for user in user_obj %}
+                            {% if property.listed_by_id == user.user_id %}
+                                {{ user.user_id }} - {{ user.user_name }} - {{ user.user_role }} - {{ user.user_phone }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        -- Select Team Member --
+                    {% endif %}
                   </span>
                   <i class="fas fa-chevron-down search-select-arrow"></i>
-              </div>
-              <div class="search-select-panel" id="assignedToPanel">
+                </div>
+                <div class="search-select-panel" id="assignedToPanel">
                   <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
                   <div class="search-select-options" id="assignedToOptions">
-                      {% regroup user_obj by user_role as grouped_users %}
-                      {% for group in grouped_users %}
+                    {% regroup user_obj by user_role as grouped_users %}
+                    {% for group in grouped_users %}
                       <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
                       {% for user in group.list %}
-                      <div class="search-select-option {% if property.listed_by_id == user.user_id %}selected{% endif %}"
+                        <div class="search-select-option {% if property.listed_by_id == user.user_id %}selected{% endif %}"
                           data-value="{{ user.id }}-{{user.user_role}}"
                           data-name="{{ user.user_name }}"
                           data-role="{{ user.user_role }}"
@@ -431,41 +434,38 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                           data-uid="{{ user.user_id }}"
                           data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
                           {{ user.user_id }} - {{user.user_name}} - {{user.user_role}} - {{user.user_phone}}
-                      </div>
+                        </div>
                       {% endfor %}
-                      {% endfor %}
-                      <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                    {% endfor %}
+                    <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
                   </div>
+                </div>
               </div>
+              <select id="assigned_to" name="assigned_to" data-initial="{{ property.assigned_to|default:'' }}" style="display:none;">
+                <option value="">-- Select --</option>
+                {% regroup user_obj by user_role as grouped_users %}
+                {% for group in grouped_users %}
+                  <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
+                    {% for user in group.list %}
+                      <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}" {% if property.assigned_to == user.id|stringformat:"s"|add:"-"|add:user.user_role %}selected{% endif %}>
+                        {{ user.user_name }} - {{ user.user_role }}
+                      </option>
+                    {% endfor %}
+                  </optgroup>
+                {% endfor %}
+              </select>
+              <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="{{ property.listed_by_role }}">
+            </div>
+
+            <div class="row mt-3" id="user_data_div">
+              <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-id-card"></i> ID</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" value="{{ property.listed_by_id }}" readonly></div>
+              <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" value="{{ property.listed_by_name }}" readonly></div>
+              <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" value="{{ property.listed_by_email }}" readonly></div>
+              <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" value="{{ property.listed_by_contact }}" readonly></div>
+              <div class="col-md-3 mt-3"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" value="{{ property.listed_by_role }}" readonly></div>
+            </div>
           </div>
-      </div>
-
-      <select id="assigned_to" name="assigned_to" data-initial="{{ property.assigned_to|default:'' }}" style="display:none;">
-          <option value="">-- Select Team Member --</option>
-          {% regroup user_obj by user_role as grouped_users %}
-          {% for group in grouped_users %}
-          <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
-              {% for user in group.list %}
-              <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
-                  {{ user.user_name }} - {{ user.user_role }}
-              </option>
-              {% endfor %}
-          </optgroup>
-          {% endfor %}
-      </select>
-
-      <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="{{ property.listed_by_role }}">
-    </div>
-
-    <div class="row mt-3" id="user_data_div">
-        <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-id-card"></i> ID</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" value="{{ property.listed_by_id }}" readonly style="background-color:#e9ecef;"></div>
-        <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" value="{{ property.listed_by_name }}" readonly style="background-color:#e9ecef;"></div>
-        <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" value="{{ property.listed_by_email }}" readonly style="background-color:#e9ecef;"></div>
-        <div class="col-md-3 mt-2"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" value="{{ property.listed_by_contact }}" readonly style="background-color:#e9ecef;"></div>
-        <div class="col-md-3 mt-3"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" value="{{ property.listed_by_role }}" readonly style="background-color:#e9ecef;"></div>
-    </div>
-  </div>
-</div>
+        </div>
 
         <!-- BASIC INFO -->
         <div class="form-section">
@@ -480,31 +480,65 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-6 mt-2">
                 <label class="form-label">Plot / Survey Number <span class="required">*</span></label>
                 <input type="text" class="form-control" name="property_no" id="property_no" value="{{ property.property_no }}" placeholder="e.g., MIDC Plot No. B-45, Sector 3" required>
-                <span style="font-size:.75rem;color:red;margin-top:4px;display:block;font-weight:bold;">
-                  <i class="fas fa-info-circle"></i> Required for verification — not shown publicly.
-                </span>
               </div>
+
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Plot / Unit Number</label>
+                <input type="text" class="form-control" name="plot_unit_number" id="plot_unit_number" value="{{ property.plot_unit_number|default:'' }}" placeholder="e.g., IND-101">
+              </div>
+
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Plot Area Unit <span class="required">*</span></label>
+                <select class="form-select form-control" name="area_unit" id="area_unit" required>
+                  <option value="sqm" {% if property.area_unit == 'sqm' or not property.area_unit %}selected{% endif %}>sq.m (Square Metres)</option>
+                  <option value="sqft" {% if property.area_unit == 'sqft' %}selected{% endif %}>sq.ft (Square Feet)</option>
+                  <option value="acre" {% if property.area_unit == 'acre' %}selected{% endif %}>Acre</option>
+                </select>
+              </div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Plot Area <span class="required">*</span></label>
                 <div class="input-with-unit">
                   <input type="number" class="form-control" name="plot_area" id="plot_area" value="{{ property.plot_area|floatformat:'0' }}" required min="1" placeholder="e.g., 2000">
-                  <span class="input-unit">sq.m</span>
+                 <span class="input-unit" id="plot_area_unit_label">sq.m</span>
                 </div>
                 <p class="hint-text">Industrial plots typically measured in square metres (sq.m)</p>
               </div>
+
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Plot Area (sq.ft) (Auto)</label>
+                <input type="number" class="form-control" id="plot_area_sqft" name="plot_area_sqft" value="{{ property.plot_area_sqft|floatformat:'2' }}" readonly style="background:#f8f9fa;">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Plot Area (acres) (Auto)</label>
+                <input type="number" class="form-control" id="plot_area_acres" name="plot_area_acres" value="{{ property.plot_area_acres|floatformat:'3' }}" readonly style="background:#f8f9fa;">
+              </div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Industrial Plot Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="property_type" id="property_type" required>
-                  <option value="">— Select Industrial Plot Type —</option>
-                  <option value="midc_industrial" {% if property.property_type == "midc_industrial" %}selected{% endif %}>MIDC Plot (Factory / Manufacturing)</option>
-                  <option value="warehouse_logistics" {% if property.property_type == "warehouse_logistics" %}selected{% endif %}>Warehouse / Cold Storage / Logistics Plot</option>
-                  <option value="sez_plot" {% if property.property_type == "sez_plot" %}selected{% endif %}>SEZ Plot (Special Economic Zone)</option>
-                  <option value="it_park_plot" {% if property.property_type == "it_park_plot" %}selected{% endif %}>IT Park / Technology Campus Plot</option>
-                  <option value="private_industrial" {% if property.property_type == "private_industrial" %}selected{% endif %}>Private Industrial Estate Plot</option>
-                  <option value="food_agro_processing" {% if property.property_type == "food_agro_processing" %}selected{% endif %}>Food Processing / Agro Industry Plot</option>
-                  <option value="mini_industrial" {% if property.property_type == "mini_industrial" %}selected{% endif %}>Mini Industrial Plot (Light Industry)</option>
-                  <option value="flatted_factory" {% if property.property_type == "flatted_factory" %}selected{% endif %}>Flatted Factory Unit (Multi-Level Industrial)</option>
-                </select>
+              
+                <select class="form-select form-control" id="property_type_select" name="property_type" required onchange="handleOther(this,'property_type'); toggleBuiltSection();">
+  <option value="">— Select Industrial Plot Type —</option>
+  <option value="MIDC Industrial Plot" {% if property.property_type == "MIDC Industrial Plot" %}selected{% endif %}>MIDC Industrial Plot</option>
+  <option value="industrial_shed" {% if property.property_type == "industrial_shed" %}selected{% endif %}>Industrial Shed</option>
+  <option value="factory_manufacturing" {% if property.property_type == "factory_manufacturing" %}selected{% endif %}>Factory / Manufacturing Unit</option>
+  <option value="industrial_building" {% if property.property_type == "industrial_building" %}selected{% endif %}>Industrial Building</option>
+  <option value="workshop_service" {% if property.property_type == "workshop_service" %}selected{% endif %}>Workshop / Service Unit</option>
+  <option value="engineering_fabrication" {% if property.property_type == "engineering_fabrication" %}selected{% endif %}>Engineering / Fabrication Unit</option>
+  <option value="cold_storage" {% if property.property_type == "cold_storage" %}selected{% endif %}>Cold Storage / Refrigerated Warehouse</option>
+  <option value="pharma_chemical" {% if property.property_type == "pharma_chemical" %}selected{% endif %}>Pharma / Chemical Industrial Unit</option>
+  <option value="it_electronics_mfg" {% if property.property_type == "it_electronics_mfg" %}selected{% endif %}>IT / Electronics Manufacturing Unit</option>
+  <option value="industrial_land_outside_midc" {% if property.property_type == "industrial_land_outside_midc" %}selected{% endif %}>Industrial Land Outside MIDC</option>
+  <option value="Warehouse / Godown" {% if property.property_type == "Warehouse / Godown" %}selected{% endif %}>Warehouse / Godown</option>
+  <option value="Logistics / Distribution Facility" {% if property.property_type == "Logistics / Distribution Facility" %}selected{% endif %}>Logistics / Distribution Facility</option>
+<option value="__other__" {% if property.property_type and property.property_type != "MIDC Industrial Plot" and property.property_type != "industrial_shed" and property.property_type != "factory_manufacturing" and property.property_type != "industrial_building" and property.property_type != "workshop_service" and property.property_type != "engineering_fabrication" and property.property_type != "cold_storage" and property.property_type != "pharma_chemical" and property.property_type != "it_electronics_mfg" and property.property_type != "industrial_land_outside_midc" and property.property_type != "Warehouse / Godown" and property.property_type != "Logistics / Distribution Facility" %}selected{% endif %}>Other (Specify below)</option>
+</select>
+
+
+<input type="text" class="form-control mt-2" name="property_type" id="property_type_other"
+       style="display:none;" placeholder="Specify industrial plot type" value="{{ property.property_type|default:'' }}" disabled>
+<input type="hidden" name="property_type" id="property_type_hidden" value="">
+
               </div>
             </div>
           </div>
@@ -517,68 +551,93 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Zone / Land Use <span class="required">*</span></label>
-                <select class="form-select form-control" name="land_use" id="land_use" required>
-                  <option value="">— Select Zone —</option>
-                  <option value="MIDC_Zone" {% if property.land_use == "MIDC_Zone" %}selected{% endif %}>MIDC Zone (Maharashtra Industrial Dev Corp)</option>
-                  <option value="SEZ_Zone" {% if property.land_use == "SEZ_Zone" %}selected{% endif %}>SEZ Zone (Special Economic Zone)</option>
-                  <option value="Light_Industrial" {% if property.land_use == "Light_Industrial" %}selected{% endif %}>Light Industrial Zone (LI)</option>
-                  <option value="Heavy_Industrial" {% if property.land_use == "Heavy_Industrial" %}selected{% endif %}>Heavy Industrial Zone (HI)</option>
-                  <option value="IT_ITES" {% if property.land_use == "IT_ITES" %}selected{% endif %}>IT / ITES Zone</option>
-                  <option value="Logistics_Hub" {% if property.land_use == "Logistics_Hub" %}selected{% endif %}>Logistics Hub / Multi-Modal Corridor</option>
-                  <option value="Food_Park" {% if property.land_use == "Food_Park" %}selected{% endif %}>Food Park / Agro Processing Zone</option>
-                  <option value="GIDC" {% if property.land_use == "GIDC" %}selected{% endif %}>GIDC (Gujarat Industrial Dev Corp)</option>
-                  <option value="Private_IE" {% if property.land_use == "Private_IE" %}selected{% endif %}>Private Industrial Estate Zone</option>
-                </select>
-                <p class="hint-text">As per development authority classification</p>
+
+<select class="form-select form-control" name="land_use" id="land_use_select" required onchange="handleOther(this,'land_use')">
+  <option value="">— Select Zone —</option>
+  <option value="MIDC_Zone" {% if property.land_use == "MIDC_Zone" %}selected{% endif %}>MIDC Zone</option>
+  <option value="SEZ_Zone" {% if property.land_use == "SEZ_Zone" %}selected{% endif %}>SEZ Zone</option>
+  <option value="Light_Industrial" {% if property.land_use == "Light_Industrial" %}selected{% endif %}>Light Industrial Zone (LI)</option>
+  <option value="Heavy_Industrial" {% if property.land_use == "Heavy_Industrial" %}selected{% endif %}>Heavy Industrial Zone (HI)</option>
+  <option value="IT_ITES" {% if property.land_use == "IT_ITES" %}selected{% endif %}>IT / ITES Zone</option>
+  <option value="Logistics_Hub" {% if property.land_use == "Logistics_Hub" %}selected{% endif %}>Logistics Hub / Multi-Modal Corridor</option>
+  <option value="Food_Park" {% if property.land_use == "Food_Park" %}selected{% endif %}>Food Park / Agro Processing Zone</option>
+  <option value="GIDC" {% if property.land_use == "GIDC" %}selected{% endif %}>GIDC</option>
+  <option value="Private_IE" {% if property.land_use == "Private_IE" %}selected{% endif %}>Private Industrial Estate Zone</option>
+  <option value="__other__">Other (Specify below)</option>
+</select>
+<input type="text" class="form-control mt-2" name="land_use" id="land_use_other" style="display:none;" placeholder="Specify zone" value="{{ property.land_use|default:'' }}" disabled>
+<input type="hidden" name="land_use" id="land_use_hidden" value="">
               </div>
+
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Zone Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="industrial_zone_type" id="industrial_zone_type" required>
-                  <option value="">— Select —</option>
-                  <option value="MIDC" {% if property.industrial_zone_type == "MIDC" %}selected{% endif %}>MIDC (Maharashtra Industrial Dev Corp)</option>
-                  <option value="SEZ" {% if property.industrial_zone_type == "SEZ" %}selected{% endif %}>SEZ (Special Economic Zone)</option>
-                  <option value="Private_Industrial_Estate" {% if property.industrial_zone_type == "Private_Industrial_Estate" %}selected{% endif %}>Private Industrial Estate / Park</option>
-                  <option value="Govt_Industrial_Area" {% if property.industrial_zone_type == "Govt_Industrial_Area" %}selected{% endif %}>Govt Industrial Area / GIDC</option>
-                  <option value="Light_Industrial" {% if property.industrial_zone_type == "Light_Industrial" %}selected{% endif %}>Light Industrial Zone (LI)</option>
-                  <option value="Heavy_Industrial" {% if property.industrial_zone_type == "Heavy_Industrial" %}selected{% endif %}>Heavy Industrial Zone (HI)</option>
-                  <option value="Flatted_Factory" {% if property.industrial_zone_type == "Flatted_Factory" %}selected{% endif %}>Flatted Factory Complex</option>
-                </select>
+
+<select class="form-select form-control" name="industrial_zone_type" id="industrial_zone_type_select" required onchange="handleOther(this,'industrial_zone_type')">
+  <option value="">— Select —</option>
+  <option value="MIDC" {% if property.industrial_zone_type == "MIDC" %}selected{% endif %}>MIDC</option>
+  <option value="SEZ" {% if property.industrial_zone_type == "SEZ" %}selected{% endif %}>SEZ</option>
+  <option value="Private_Industrial_Estate" {% if property.industrial_zone_type == "Private_Industrial_Estate" %}selected{% endif %}>Private Industrial Estate / Park</option>
+  <option value="Govt_Industrial_Area" {% if property.industrial_zone_type == "Govt_Industrial_Area" %}selected{% endif %}>Govt Industrial Area / GIDC</option>
+  <option value="Light_Industrial" {% if property.industrial_zone_type == "Light_Industrial" %}selected{% endif %}>Light Industrial Zone (LI)</option>
+  <option value="Heavy_Industrial" {% if property.industrial_zone_type == "Heavy_Industrial" %}selected{% endif %}>Heavy Industrial Zone (HI)</option>
+  <option value="Flatted_Factory" {% if property.industrial_zone_type == "Flatted_Factory" %}selected{% endif %}>Flatted Factory Complex</option>
+  <option value="__other__">Other (Specify below)</option>
+</select>
+<input type="text" class="form-control mt-2" name="industrial_zone_type" id="industrial_zone_type_other" style="display:none;" placeholder="Specify zone type" disabled>
+<input type="hidden" name="industrial_zone_type" id="industrial_zone_type_hidden" value="">
+
+
               </div>
+
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Estate / Park Name</label>
-                <input type="text" class="form-control" name="industrial_estate_name" id="industrial_estate_name" value="{{ property.industrial_estate_name }}" placeholder="e.g., Butibori MIDC, Hingna MIDC, Nagpur SEZ">
+                <input type="text" class="form-control" name="industrial_estate_name" id="industrial_estate_name" value="{{ property.industrial_estate_name }}" placeholder="e.g., Butibori MIDC">
               </div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">NA Status / Industrial Conversion <span class="required">*</span></label>
-                <select class="form-select form-control" name="na_status" id="na_status" required>
+            <select class="form-select form-control" name="na_status" id="na_status_select" required onchange="handleOther(this,'na_status')">
                   <option value="">— Select —</option>
                   <option value="NA_Industrial" {% if property.na_status == "NA_Industrial" %}selected{% endif %}>NA Converted for Industrial Use</option>
-                  <option value="MIDC_Allotted" {% if property.na_status == "MIDC_Allotted" %}selected{% endif %}>MIDC Allotted Land (NA Not Applicable)</option>
-                  <option value="Industrial_Zone" {% if property.na_status == "Industrial_Zone" %}selected{% endif %}>Already in Industrial Zone (NA Not Required)</option>
+                  <option value="MIDC_Allotted" {% if property.na_status == "MIDC_Allotted" %}selected{% endif %}>MIDC Allotted Land</option>
+                  <option value="Industrial_Zone" {% if property.na_status == "Industrial_Zone" %}selected{% endif %}>Already in Industrial Zone</option>
                   <option value="NA Applied" {% if property.na_status == "NA Applied" %}selected{% endif %}>NA Applied for Industrial Use</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+
+                <input type="text" class="form-control mt-2" name="na_status" id="na_status_other" style="display:none;" placeholder="Specify NA status" value="{{ property.na_status|default:'' }}" disabled>
+<input type="hidden" name="na_status" id="na_status_hidden" value="">
               </div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Industrial Authority / Estate Approval</label>
-                <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
+               <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status_select" onchange="handleOther(this,'layout_approval_status')">
                   <option value="">— Select —</option>
                   <option value="MIDC_Approved" {% if property.layout_approval_status == "MIDC_Approved" %}selected{% endif %}>MIDC Approved Plot</option>
                   <option value="SEZ_Approved" {% if property.layout_approval_status == "SEZ_Approved" %}selected{% endif %}>SEZ Board Approved</option>
                   <option value="Private_Sanctioned" {% if property.layout_approval_status == "Private_Sanctioned" %}selected{% endif %}>Private Industrial Estate — Sanctioned</option>
                   <option value="Approval_Pending" {% if property.layout_approval_status == "Approval_Pending" %}selected{% endif %}>Authority Approval Pending</option>
                   <option value="Direct_Sale" {% if property.layout_approval_status == "Direct_Sale" %}selected{% endif %}>Direct Industrial Land Sale</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+                <input type="text" class="form-control mt-2" name="layout_approval_status" id="layout_approval_status_other" style="display:none;" placeholder="Specify approval status" disabled>
+<input type="hidden" name="layout_approval_status" id="layout_approval_status_hidden" value="">
               </div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Permissible FSI / Coverage</label>
-                <select class="form-select form-control" name="industrial_fsi" id="industrial_fsi">
+                <select class="form-select form-control" name="industrial_fsi" id="industrial_fsi_select" onchange="handleOther(this,'industrial_fsi')">
                   <option value="">— Select —</option>
                   <option value="0.5" {% if property.industrial_fsi == "0.5" %}selected{% endif %}>0.5 (Low Density)</option>
                   <option value="1.0" {% if property.industrial_fsi == "1.0" %}selected{% endif %}>1.0 (Standard Industrial)</option>
                   <option value="1.5" {% if property.industrial_fsi == "1.5" %}selected{% endif %}>1.5</option>
                   <option value="2.0" {% if property.industrial_fsi == "2.0" %}selected{% endif %}>2.0 (High Density)</option>
                   <option value="As_per_Authority" {% if property.industrial_fsi == "As_per_Authority" %}selected{% endif %}>As per Authority Norms</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+                <input type="text" class="form-control mt-2" name="industrial_fsi" id="industrial_fsi_other" style="display:none;" placeholder="Specify FSI value" disabled>
+<input type="hidden" name="industrial_fsi" id="industrial_fsi_hidden" value="">
               </div>
             </div>
           </div>
@@ -588,7 +647,6 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         <div class="form-section">
           <div class="section-header"><i class="fas fa-ruler-combined"></i> Industrial Plot Specifications & Infrastructure</div>
           <div class="section-body">
-
             <div class="sub-section-title">Dimensions & Shape</div>
             <div class="row">
               <div class="col-md-4">
@@ -597,7 +655,6 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" value="{{ property.plot_frontage|floatformat:'0' }}" placeholder="e.g., 30" min="1">
                   <span class="input-unit">m</span>
                 </div>
-                <p class="hint-text">Road-facing width for vehicle / truck access</p>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Depth / Length (m)</label>
@@ -608,13 +665,34 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4">
                 <label class="form-label">Plot Shape</label>
-                <select class="form-select form-control" name="plot_shape" id="plot_shape">
+               <select class="form-select form-control" name="plot_shape" id="plot_shape_select" onchange="handleOther(this,'plot_shape')">
                   <option value="">— Select Shape —</option>
                   <option value="Rectangular" {% if property.plot_shape == "Rectangular" %}selected{% endif %}>Rectangular</option>
                   <option value="Square" {% if property.plot_shape == "Square" %}selected{% endif %}>Square</option>
                   <option value="L-Shaped" {% if property.plot_shape == "L-Shaped" %}selected{% endif %}>L-Shaped</option>
                   <option value="Irregular" {% if property.plot_shape == "Irregular" %}selected{% endif %}>Irregular / Odd</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+                <input type="text" class="form-control mt-2" name="plot_shape" id="plot_shape_other" style="display:none;" placeholder="Specify plot shape" disabled>
+<input type="hidden" name="plot_shape" id="plot_shape_hidden" value="">
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Plot Facing</label>
+               <select class="form-select form-control" name="facing" id="facing_select" onchange="handleOther(this,'facing')">
+                  <option value="">— Select —</option>
+                  <option value="East" {% if property.facing == "East" %}selected{% endif %}>East</option>
+                  <option value="West" {% if property.facing == "West" %}selected{% endif %}>West</option>
+                  <option value="North" {% if property.facing == "North" %}selected{% endif %}>North</option>
+                  <option value="South" {% if property.facing == "South" %}selected{% endif %}>South</option>
+                  <option value="North-East" {% if property.facing == "North-East" %}selected{% endif %}>North-East</option>
+                  <option value="North-West" {% if property.facing == "North-West" %}selected{% endif %}>North-West</option>
+                  <option value="South-East" {% if property.facing == "South-East" %}selected{% endif %}>South-East</option>
+                  <option value="South-West" {% if property.facing == "South-West" %}selected{% endif %}>South-West</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="facing" id="facing_other" style="display:none;" placeholder="Specify facing" disabled>
+<input type="hidden" name="facing" id="facing_hidden" value="">
               </div>
             </div>
 
@@ -622,7 +700,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Road Access & Entry <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
+                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing_select" required onchange="handleOther(this,'plot_road_facing')">
                   <option value="">— Select —</option>
                   <option value="NH_SH_Access" {% if property.plot_road_facing == "NH_SH_Access" %}selected{% endif %}>National / State Highway Direct Access</option>
                   <option value="MIDC_Road" {% if property.plot_road_facing == "MIDC_Road" %}selected{% endif %}>MIDC / Estate Internal Road (Paved)</option>
@@ -630,26 +708,34 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <option value="Railway_Siding" {% if property.plot_road_facing == "Railway_Siding" %}selected{% endif %}>Railway Siding Access Available</option>
                   <option value="Port_Connectivity" {% if property.plot_road_facing == "Port_Connectivity" %}selected{% endif %}>Port / Waterway Connectivity</option>
                   <option value="Double_Road" {% if property.plot_road_facing == "Double_Road" %}selected{% endif %}>Corner — Two Road Access</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+                <input type="text" class="form-control mt-2" name="plot_road_facing" id="plot_road_facing_other" style="display:none;" placeholder="Specify road access" disabled>
+<input type="hidden" name="plot_road_facing" id="plot_road_facing_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Road Width (Front of Plot)</label>
-                <select class="form-select form-control" name="road_width" id="road_width">
+               <select class="form-select form-control" name="road_width" id="road_width_select" onchange="handleOther(this,'road_width')">
                   <option value="">— Select —</option>
                   <option value="18m" {% if property.road_width == "18m" %}selected{% endif %}>18 m (Standard MIDC Road)</option>
                   <option value="24m" {% if property.road_width == "24m" %}selected{% endif %}>24 m (Wide MIDC Road)</option>
                   <option value="30m" {% if property.road_width == "30m" %}selected{% endif %}>30 m</option>
                   <option value="40m" {% if property.road_width == "40m" %}selected{% endif %}>40 m (Primary Industrial Road)</option>
                   <option value="NH_width" {% if property.road_width == "NH_width" %}selected{% endif %}>NH / SH Width (Varies)</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
-                <p class="hint-text">Wide road essential for truck / heavy vehicle movement</p>
+                <input type="text" class="form-control mt-2" name="road_width" id="road_width_other" style="display:none;" placeholder="Specify road width" disabled>
+<input type="hidden" name="road_width" id="road_width_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Corner Plot?</label>
-                <select class="form-select form-control" name="corner_plot" id="corner_plot">
+             <select class="form-select form-control" name="corner_plot" id="corner_plot_select" onchange="handleOther(this,'corner_plot')">
                   <option value="no" {% if property.corner_plot == "no" %}selected{% endif %}>No — Single Road Access</option>
                   <option value="yes" {% if property.corner_plot == "yes" %}selected{% endif %}>Yes — Corner Plot (Two Road Access)</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+                <input type="text" class="form-control mt-2" name="corner_plot" id="corner_plot_other" style="display:none;" placeholder="Specify corner status" disabled>
+<input type="hidden" name="corner_plot" id="corner_plot_hidden" value="">
               </div>
             </div>
 
@@ -657,14 +743,19 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Power Supply Available</label>
-                <select class="form-select form-control" name="power_supply" id="power_supply">
+                <select class="form-select form-control" name="power_supply" id="power_supply_select" onchange="handleOther(this,'power_supply')">
                   <option value="">— Select —</option>
                   <option value="3Phase_Available" {% if property.power_supply == "3Phase_Available" %}selected{% endif %}>3-Phase Industrial Power (Available)</option>
                   <option value="3Phase_Connection_Needed" {% if property.power_supply == "3Phase_Connection_Needed" %}selected{% endif %}>3-Phase — Connection Needed</option>
                   <option value="HT_Line" {% if property.power_supply == "HT_Line" %}selected{% endif %}>High Tension (HT) Line / Substation Nearby</option>
                   <option value="Single_Phase" {% if property.power_supply == "Single_Phase" %}selected{% endif %}>Single Phase Only</option>
                   <option value="No_Power" {% if property.power_supply == "No_Power" %}selected{% endif %}>No Power Connection</option>
+                    <option value="__other__">Other (Specify below)</option>
+
                 </select>
+
+                <input type="text" class="form-control mt-2" name="power_supply" id="power_supply_other" style="display:none;" placeholder="Specify power supply" disabled>
+<input type="hidden" name="power_supply" id="power_supply_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Power Load Sanctioned</label>
@@ -672,32 +763,53 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <input type="number" class="form-control" name="power_load_kva" id="power_load_kva" value="{{ property.power_load_kva }}" placeholder="e.g., 200">
                   <span class="input-unit">KVA</span>
                 </div>
-                <p class="hint-text">Leave blank if not yet sanctioned</p>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Power Backup / Transformer</label>
+<select class="form-select form-control" name="power_backup_transformer" id="power_backup_transformer_select" onchange="handleOther(this,'power_backup_transformer')">
+                  <option value="">— Select —</option>
+                  <option value="DG_Available" {% if property.power_backup_transformer == "DG_Available" %}selected{% endif %}>DG Set Available</option>
+                  <option value="Transformer_Available" {% if property.power_backup_transformer == "Transformer_Available" %}selected{% endif %}>Transformer Installed</option>
+                  <option value="Both_Available" {% if property.power_backup_transformer == "Both_Available" %}selected{% endif %}>Both DG + Transformer Available</option>
+                  <option value="Not_Available" {% if property.power_backup_transformer == "Not_Available" %}selected{% endif %}>Not Available</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="power_backup_transformer" id="power_backup_transformer_other" style="display:none;" placeholder="Specify power backup details" disabled>
+<input type="hidden" name="power_backup_transformer" id="power_backup_transformer_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Water Supply</label>
-                <select class="form-select form-control" name="industrial_water_supply" id="industrial_water_supply">
+                <select class="form-select form-control" name="industrial_water_supply" id="industrial_water_supply_select" onchange="handleOther(this,'industrial_water_supply')">
                   <option value="">— Select —</option>
                   <option value="MIDC_Water" {% if property.industrial_water_supply == "MIDC_Water" %}selected{% endif %}>MIDC / Authority Piped Water</option>
                   <option value="Municipal_Water" {% if property.industrial_water_supply == "Municipal_Water" %}selected{% endif %}>Municipal / Corporation Water</option>
                   <option value="Borewell_Available" {% if property.industrial_water_supply == "Borewell_Available" %}selected{% endif %}>Borewell Available on Plot</option>
                   <option value="Water_Tanker" {% if property.industrial_water_supply == "Water_Tanker" %}selected{% endif %}>Water Tanker Arrangement</option>
                   <option value="No_Water" {% if property.industrial_water_supply == "No_Water" %}selected{% endif %}>No Water Supply</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="industrial_water_supply" id="industrial_water_supply_other" style="display:none;" placeholder="Specify water supply" disabled>
+<input type="hidden" name="industrial_water_supply" id="industrial_water_supply_hidden" value="">
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Drain / Effluent Facility</label>
-                <select class="form-select form-control" name="effluent_treatment" id="effluent_treatment">
+               <select class="form-select form-control" name="effluent_treatment" id="effluent_treatment_select" onchange="handleOther(this,'effluent_treatment')">
                   <option value="">— Select —</option>
                   <option value="Common_ETP" {% if property.effluent_treatment == "Common_ETP" %}selected{% endif %}>Common ETP Available (Estate)</option>
                   <option value="Individual_ETP_Needed" {% if property.effluent_treatment == "Individual_ETP_Needed" %}selected{% endif %}>Individual ETP to be Set Up</option>
                   <option value="Drainage_Connected" {% if property.effluent_treatment == "Drainage_Connected" %}selected{% endif %}>Municipal Drainage Connected</option>
                   <option value="Not_Applicable" {% if property.effluent_treatment == "Not_Applicable" %}selected{% endif %}>Not Applicable (Dry Industry)</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="effluent_treatment" id="effluent_treatment_other" style="display:none;" placeholder="Specify effluent treatment" disabled>
+<input type="hidden" name="effluent_treatment" id="effluent_treatment_hidden" value="">
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Permissible Industry Type</label>
-                <select class="form-select form-control" name="industry_type_permissible" id="industry_type_permissible">
+              <select class="form-select form-control" name="industry_type_permissible" id="industry_type_permissible_select" onchange="handleOther(this,'industry_type_permissible')">
                   <option value="">— Select —</option>
                   <option value="Light_Non_Polluting" {% if property.industry_type_permissible == "Light_Non_Polluting" %}selected{% endif %}>Light Non-Polluting Industry</option>
                   <option value="Medium_Industry" {% if property.industry_type_permissible == "Medium_Industry" %}selected{% endif %}>Medium Scale Industry</option>
@@ -707,26 +819,43 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <option value="Food_Processing" {% if property.industry_type_permissible == "Food_Processing" %}selected{% endif %}>Food Processing / Agro Industry</option>
                   <option value="Chemical_Pharma" {% if property.industry_type_permissible == "Chemical_Pharma" %}selected{% endif %}>Chemical / Pharmaceutical</option>
                   <option value="Any_Industry" {% if property.industry_type_permissible == "Any_Industry" %}selected{% endif %}>Any Industry (As per MIDC Norms)</option>
+
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="industry_type_permissible" id="industry_type_permissible_other" style="display:none;" placeholder="Specify industry type" disabled>
+<input type="hidden" name="industry_type_permissible" id="industry_type_permissible_hidden" value="">
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Compound Wall / Security Fencing</label>
-                <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
+               <select class="form-select form-control" name="plot_fencing" id="plot_fencing_select" onchange="handleOther(this,'plot_fencing')">
                   <option value="none" {% if property.plot_fencing == "none" %}selected{% endif %}>No Boundary (Open Industrial Site)</option>
                   <option value="partial" {% if property.plot_fencing == "partial" %}selected{% endif %}>Partially Fenced</option>
                   <option value="full_compound" {% if property.plot_fencing == "full_compound" %}selected{% endif %}>Full RCC Compound Wall</option>
-                  <option value="security_fence" {% if property.plot_fencing == "security_fence" %}selected{% endif %}>Industrial Security Fencing (Chain Link / Razor Wire)</option>
+                  <option value="security_fence" {% if property.plot_fencing == "security_fence" %}selected{% endif %}>Industrial Security Fencing</option>
                   <option value="gate_guard" {% if property.plot_fencing == "gate_guard" %}selected{% endif %}>Full Boundary with Gate &amp; Security Post</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="plot_fencing" id="plot_fencing_other" style="display:none;" placeholder="Specify boundary type" disabled>
+<input type="hidden" name="plot_fencing" id="plot_fencing_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Loading / Unloading Facility</label>
-                <select class="form-select form-control" name="loading_dock" id="loading_dock">
+               <select class="form-select form-control" name="loading_dock" id="loading_dock_select" onchange="handleOther(this,'loading_dock')">
                   <option value="">— Select —</option>
                   <option value="Loading_Dock_Available" {% if property.loading_dock == "Loading_Dock_Available" %}selected{% endif %}>Loading Dock / Ramp Available</option>
                   <option value="Open_Ground_Loading" {% if property.loading_dock == "Open_Ground_Loading" %}selected{% endif %}>Open Ground Loading Space</option>
                   <option value="No_Loading_Facility" {% if property.loading_dock == "No_Loading_Facility" %}selected{% endif %}>No Dedicated Loading Facility</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="loading_dock" id="loading_dock_other" style="display:none;" placeholder="Specify loading facility" disabled>
+<input type="hidden" name="loading_dock" id="loading_dock_hidden" value="">
+              </div>
+              <div class="col-md-12 mt-3">
+                <label class="form-label">Nearby Facilities / Connectivity Details</label>
+                <textarea class="form-control" name="nearby_facilities_details" rows="2" placeholder="Enter verified schools, market, highway, railway, port...">{{ property.nearby_facilities_details }}</textarea>
               </div>
             </div>
 
@@ -734,17 +863,20 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-6 mt-2">
                 <label class="form-label">Current Plot / Shed Status</label>
-                <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
+               <select class="form-select form-control" name="current_possession_status" id="current_possession_status_select" onchange="handleOther(this,'current_possession_status')">
                   <option value="">— Select —</option>
                   <option value="Vacant_Ready" {% if property.current_possession_status == "Vacant_Ready" %}selected{% endif %}>Vacant — Ready for Industrial Construction</option>
                   <option value="Piling_Done" {% if property.current_possession_status == "Piling_Done" %}selected{% endif %}>Piling / Foundation Work Done</option>
                   <option value="Shed_Available" {% if property.current_possession_status == "Shed_Available" %}selected{% endif %}>Industrial Shed / Structure Available</option>
-                  <option value="Partially_Operational" {% if property.current_possession_status == "Partially_Operational" %}selected{% endif %}>Partially Operational (Equipment to be Removed)</option>
+                  <option value="Partially_Operational" {% if property.current_possession_status == "Partially_Operational" %}selected{% endif %}>Partially Operational</option>
                   <option value="Fully_Operational" {% if property.current_possession_status == "Fully_Operational" %}selected{% endif %}>Running Unit (Business Sale / Slump Sale)</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
-                <p class="hint-text">Indicates what buyer gets on possession</p>
+                <input type="text" class="form-control mt-2" name="current_possession_status" id="current_possession_status_other" style="display:none;" placeholder="Specify occupancy status" disabled>
+<input type="hidden" name="current_possession_status" id="current_possession_status_hidden" value="">
               </div>
             </div>
+
           </div>
         </div>
 
@@ -757,8 +889,89 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
       </div><!-- /step1 -->
 
       <!-- ════════════ STEP 2 — INFRASTRUCTURE & LEGAL ════════════ -->
+          <!-- ════════════ STEP 2 — INFRASTRUCTURE & LEGAL ════════════ -->
       <div class="step-content" id="step2">
         <div class="form-header"><div class="form-title">🏭 Edit Industrial Plot</div></div>
+
+        <!-- BUILDING & CONSTRUCTION -->
+        <div class="form-section" id="built_section" style="display:none;">
+          <div class="section-header warn-theme"><i class="fas fa-hard-hat"></i> Building &amp; Construction (Built Property Only)</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Usable Floor Area (sq.ft)</label>
+                <input type="number" class="form-control" name="usable_floor_area_sqft" value="{{ property.usable_floor_area_sqft }}" placeholder="e.g., 5000">
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Built-up Area (sq.ft)</label>
+                <input type="number" class="form-control" name="built_up_area_sqft" value="{{ property.built_up_area_sqft }}" placeholder="e.g., 6000">
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Total Land Area (sq.ft)</label>
+                <input type="number" class="form-control" name="total_land_area_sqft" value="{{ property.total_land_area_sqft }}">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Building Clear Height (ft)</label>
+                <input type="number" class="form-control" name="building_clear_height" value="{{ property.building_clear_height }}" placeholder="e.g., 30">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Number of Floors</label>
+                <input type="number" class="form-control" name="number_of_floors" value="{{ property.number_of_floors }}" placeholder="e.g., 2">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Construction Type</label>
+            <select class="form-select form-control" name="construction_type" id="construction_type_select" onchange="handleOther(this,'construction_type')">
+                  <option value="">— Select —</option>
+                  <option value="RCC" {% if property.construction_type == "RCC" %}selected{% endif %}>RCC</option>
+                  <option value="PEB" {% if property.construction_type == "PEB" %}selected{% endif %}>PEB (Pre-Engineered Building)</option>
+                  <option value="Steel_Shed" {% if property.construction_type == "Steel_Shed" %}selected{% endif %}>Steel Shed</option>
+                  <option value="Mixed" {% if property.construction_type == "Mixed" %}selected{% endif %}>Mixed</option>
+                  <option value="Open_Land" {% if property.construction_type == "Open_Land" %}selected{% endif %}>Open Land Only</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+                <input type="text" class="form-control mt-2" name="construction_type" id="construction_type_other" style="display:none;" placeholder="Specify construction type" disabled>
+<input type="hidden" name="construction_type" id="construction_type_hidden" value="">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Construction Age / Condition</label>
+               <select class="form-select form-control" name="construction_age" id="construction_age_select" onchange="handleOther(this,'construction_age')">
+                  <option value="">— Select —</option>
+                  <option value="New" {% if property.construction_age == "New" %}selected{% endif %}>New</option>
+                  <option value="Good" {% if property.construction_age == "Good" %}selected{% endif %}>Good</option>
+                  <option value="Average" {% if property.construction_age == "Average" %}selected{% endif %}>Average</option>
+                  <option value="Poor" {% if property.construction_age == "Poor" %}selected{% endif %}>Poor</option>
+                  <option value="Under_Construction" {% if property.construction_age == "Under_Construction" %}selected{% endif %}>Under Construction</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="construction_age" id="construction_age_other" style="display:none;" placeholder="Specify age/condition" disabled>
+<input type="hidden" name="construction_age" id="construction_age_hidden" value="">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Floor Load Capacity</label>
+                <input type="text" class="form-control" name="floor_load_capacity" value="{{ property.floor_load_capacity }}" placeholder="e.g., 500 kg/sqm">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Crane / Hoist Capacity</label>
+                <input type="text" class="form-control" name="crane_capacity" value="{{ property.crane_capacity }}" placeholder="e.g., 10 tonnes">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Fire Access / Emergency Exits</label>
+           <select class="form-select form-control" name="fire_access_compliance" id="fire_access_compliance_select" onchange="handleOther(this,'fire_access_compliance')">
+                  <option value="">— Select —</option>
+                  <option value="Compliant" {% if property.fire_access_compliance == "Compliant" %}selected{% endif %}>Compliant</option>
+                  <option value="Partial" {% if property.fire_access_compliance == "Partial" %}selected{% endif %}>Partial</option>
+                  <option value="Non_Compliant" {% if property.fire_access_compliance == "Non_Compliant" %}selected{% endif %}>Non-Compliant</option>
+                  <option value="To_Verify" {% if property.fire_access_compliance == "To_Verify" %}selected{% endif %}>To Verify</option>
+
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+                <input type="text" class="form-control mt-2" name="fire_access_compliance" id="fire_access_compliance_other" style="display:none;" placeholder="Specify compliance" disabled>
+<input type="hidden" name="fire_access_compliance" id="fire_access_compliance_hidden" value="">
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- PRICING -->
         <div class="form-section">
@@ -791,13 +1004,29 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-6 mt-3">
                 <label class="form-label">Additional Industrial Charges</label>
-                <select class="form-select form-control" name="additional_charges" id="additional_charges">
+              <select class="form-select form-control" name="additional_charges" id="additional_charges_select" onchange="handleOther(this,'additional_charges')">
                   <option value="none" {% if property.additional_charges == "none" %}selected{% endif %}>No Additional Charges</option>
                   <option value="midc_transfer" {% if property.additional_charges == "midc_transfer" %}selected{% endif %}>MIDC Transfer Premium / Charges Extra</option>
                   <option value="stamp_extra" {% if property.additional_charges == "stamp_extra" %}selected{% endif %}>Stamp Duty &amp; Registration Extra</option>
                   <option value="development_charges" {% if property.additional_charges == "development_charges" %}selected{% endif %}>Development / Infrastructure Charges Extra</option>
                   <option value="all_inclusive" {% if property.additional_charges == "all_inclusive" %}selected{% endif %}>All Inclusive (No Extra Cost)</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+<input type="text" class="form-control mt-2" name="additional_charges" id="additional_charges_other" style="display:none;" placeholder="Specify additional charges" value="{{ property.additional_charges|default:'' }}" disabled>
+<input type="hidden" name="additional_charges" id="additional_charges_hidden" value="{{ property.additional_charges|default:'none' }}">
+              </div>
+
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Booking Amount (₹)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="booking_amount" value="{{ property.booking_amount }}" placeholder="e.g., 200000">
+                  <span class="input-unit">₹</span>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Price Includes / Excludes</label>
+                <textarea class="form-control" name="price_includes_excludes" rows="2" placeholder="e.g., Includes machinery; GST extra; stamp duty extra">{{ property.price_includes_excludes }}</textarea>
               </div>
 
               <!-- BROKERAGE -->
@@ -813,6 +1042,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <option value="Negotiable" {% if property.brokerage_percentage == "Negotiable" %}selected{% endif %}>Negotiable</option>
                 </select>
               </div>
+
               <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:{% if property.brokerage_percentage == 'Fixed Amount' %}block{% else %}none{% endif %};">
                 <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
                 <div class="input-with-unit">
@@ -820,6 +1050,31 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <span class="input-unit">₹</span>
                 </div>
               </div>
+
+              <!-- LANDLORD / OWNER FEE -->
+              <div class="col-md-6 mt-3" id="landlordFeeSection" style="display:none;">
+                <label class="form-label">Landlord / Owner Service Fee <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Optional)</span></label>
+                <select class="form-select form-control" name="landlord_owner_fee" id="landlordOwnerFee" onchange="toggleLandlordFixedAmount()">
+                  <option value="">Select Fee Structure</option>
+                  <option value="0.5% of Sale Value" {% if property.landlord_owner_fee == "0.5% of Sale Value" %}selected{% endif %}>0.5% of Sale Value</option>
+                  <option value="1% of Sale Value" {% if property.landlord_owner_fee == "1% of Sale Value" %}selected{% endif %}>1% of Sale Value</option>
+                  <option value="1.5% of Sale Value" {% if property.landlord_owner_fee == "1.5% of Sale Value" %}selected{% endif %}>1.5% of Sale Value</option>
+                  <option value="2% of Sale Value" {% if property.landlord_owner_fee == "2% of Sale Value" %}selected{% endif %}>2% of Sale Value</option>
+                  <option value="2.5% of Sale Value" {% if property.landlord_owner_fee == "2.5% of Sale Value" %}selected{% endif %}>2.5% of Sale Value</option>
+                  <option value="3% of Sale Value" {% if property.landlord_owner_fee == "3% of Sale Value" %}selected{% endif %}>3% of Sale Value</option>
+                  <option value="Fixed Amount" {% if property.landlord_owner_fee == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+                  <option value="No Fee" {% if property.landlord_owner_fee == "No Fee" %}selected{% endif %}>No Fee / Direct Deal</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mt-3" id="landlordFixedAmountSection" style="display:{% if property.landlord_owner_fee == 'Fixed Amount' %}block{% else %}none{% endif %};">
+                <label class="form-label">Enter Fixed Owner Fee Amount (₹)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="landlord_owner_fixed_amount" id="landlordOwnerFixedAmount" value="{{ property.landlord_owner_fixed_amount }}" placeholder="e.g., 50000">
+                  <span class="input-unit">₹</span>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -833,162 +1088,323 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-6 mt-2">
                 <label class="form-label">Ownership / Tenure Type</label>
-                <select class="form-select form-control" name="ownership_type" id="ownership_type">
+                <select class="form-select form-control" name="ownership_type" id="ownership_type_select" onchange="handleOther(this,'ownership_type')">
                   <option value="">— Select Ownership —</option>
-                  <option value="midc_lease" {% if property.ownership_type == "midc_lease" %}selected{% endif %}>MIDC Leasehold (99-Year Lease — Transferable)</option>
+                  <option value="midc_lease" {% if property.ownership_type == "midc_lease" %}selected{% endif %}>MIDC Leasehold</option>
                   <option value="freehold" {% if property.ownership_type == "freehold" %}selected{% endif %}>Freehold Industrial Land (Private)</option>
                   <option value="sez_lease" {% if property.ownership_type == "sez_lease" %}selected{% endif %}>SEZ Developer Lease</option>
                   <option value="company_owned" {% if property.ownership_type == "company_owned" %}selected{% endif %}>Company / Corporate Asset Sale</option>
                   <option value="power_of_attorney" {% if property.ownership_type == "power_of_attorney" %}selected{% endif %}>Power of Attorney (POA) Holder</option>
+  <option value="__other__">Other (Specify below)</option>
+
                 </select>
+
+                <input type="text" class="form-control mt-2" name="ownership_type" id="ownership_type_other" style="display:none;" placeholder="Specify ownership type" disabled>
+<input type="hidden" name="ownership_type" id="ownership_type_hidden" value="">
               </div>
               <div class="col-md-6 mt-2">
                 <label class="form-label">Primary Title / Ownership Document</label>
-                <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
-                  <option value="">— Select Document Type —</option>
-                  <option value="MIDC_Allotment_Letter" {% if property.ownership_document_type == "MIDC_Allotment_Letter" %}selected{% endif %}>MIDC Allotment Letter (Original)</option>
-                  <option value="Transfer_Letter" {% if property.ownership_document_type == "Transfer_Letter" %}selected{% endif %}>MIDC Transfer Letter (Previous Owner)</option>
-                  <option value="Registered Sale Deed" {% if property.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
-                  <option value="Conveyance Deed" {% if property.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed / Final Deed</option>
-                  <option value="Lease Deed" {% if property.ownership_document_type == "Lease Deed" %}selected{% endif %}>Lease Deed</option>
-                  <option value="SEZ_Allotment" {% if property.ownership_document_type == "SEZ_Allotment" %}selected{% endif %}>SEZ Developer Allotment Letter</option>
-                  <option value="Court Decree" {% if property.ownership_document_type == "Court Decree" %}selected{% endif %}>Court Decree (Legal Settlement)</option>
-                  <option value="Other" {% if property.ownership_document_type == "Other" %}selected{% endif %}>Other (Specify below)</option>
-                </select>
+
+             <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type_select" onchange="handleOther(this,'ownership_document_type')">
+  <option value="">— Select Document Type —</option>
+  <option value="MIDC_Allotment_Letter" {% if property.ownership_document_type == "MIDC_Allotment_Letter" %}selected{% endif %}>MIDC Allotment Letter</option>
+  <option value="Transfer_Letter" {% if property.ownership_document_type == "Transfer_Letter" %}selected{% endif %}>MIDC Transfer Letter</option>
+  <option value="Registered Sale Deed" {% if property.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
+  <option value="Conveyance Deed" {% if property.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed / Final Deed</option>
+  <option value="Lease Deed" {% if property.ownership_document_type == "Lease Deed" %}selected{% endif %}>Lease Deed</option>
+<option value="SEZ_Allotment" {% if property.ownership_document_type == "SEZ_Allotment" %}selected{% endif %}>SEZ Developer Allotment Letter</option>
+  <option value="Court Decree" {% if property.ownership_document_type == "Court Decree" %}selected{% endif %}>Court Decree</option>
+  <option value="__other__">Other (Specify below)</option>
+</select>
+<input type="text" class="form-control mt-2" name="ownership_document_type" id="ownership_document_type_other" style="display:none;" placeholder="Specify document type" disabled>
+<input type="hidden" name="ownership_document_type" id="ownership_document_type_hidden" value="">
+
               </div>
-              <div class="col-md-6 mt-3" id="other_document_type_div" style="display:{% if property.ownership_document_type == 'Other' %}block{% else %}none{% endif %};">
-                <label class="form-label">Specify Other Ownership Document Type</label>
-                <input type="text" class="form-control" name="other_document_type" id="other_document_type" value="{{ property.other_document_type }}" placeholder="Describe your ownership document">
-              </div>
+            
             </div>
 
             <div class="sub-section-title mt-3">MIDC / Industrial Authority Compliance</div>
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">MIDC / Authority Allotment Letter</label>
-                <select class="form-select form-control" name="midc_allotment" id="midc_allotment">
+               <select class="form-select form-control" name="midc_allotment" id="midc_allotment_select" onchange="handleOther(this,'midc_allotment')">
                   <option value="Available" {% if property.midc_allotment == "Available" %}selected{% endif %}>Available (Original Allotment)</option>
-                  <option value="Transfer_Letter" {% if property.midc_allotment == "Transfer_Letter" %}selected{% endif %}>Transfer Letter (Previous Owner)</option>
+                  <option value="Transfer_Letter" {% if property.midc_allotment == "Transfer_Letter" %}selected{% endif %}>Transfer Letter</option>
                   <option value="Not_Available" {% if property.midc_allotment == "Not_Available" %}selected{% endif %}>Not Available</option>
-                  <option value="Not_Applicable" {% if property.midc_allotment == "Not_Applicable" %}selected{% endif %}>Not Applicable (Private Industrial Land)</option>
+                  <option value="Not_Applicable" {% if property.midc_allotment == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="midc_allotment" id="midc_allotment_other" style="display:none;" placeholder="Specify allotment" disabled>
+<input type="hidden" name="midc_allotment" id="midc_allotment_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">MIDC Transfer / NOC Status</label>
-                <select class="form-select form-control" name="midc_transfer_noc" id="midc_transfer_noc">
+            <select class="form-select form-control" name="midc_transfer_noc" id="midc_transfer_noc_select" onchange="handleOther(this,'midc_transfer_noc')">
                   <option value="">— Select —</option>
                   <option value="NOC_Available" {% if property.midc_transfer_noc == "NOC_Available" %}selected{% endif %}>NOC Available from MIDC</option>
                   <option value="NOC_Applied" {% if property.midc_transfer_noc == "NOC_Applied" %}selected{% endif %}>NOC Application Pending</option>
-                  <option value="Not_Required" {% if property.midc_transfer_noc == "Not_Required" %}selected{% endif %}>NOC Not Required (Private Plot)</option>
-                  <option value="Transfer_Pending" {% if property.midc_transfer_noc == "Transfer_Pending" %}selected{% endif %}>Transfer Pending with Authority</option>
+                  <option value="Not_Required" {% if property.midc_transfer_noc == "Not_Required" %}selected{% endif %}>NOC Not Required</option>
+                  <option value="Transfer_Pending" {% if property.midc_transfer_noc == "Transfer_Pending" %}selected{% endif %}>Transfer Pending</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+                <input type="text" class="form-control mt-2" name="midc_transfer_noc" id="midc_transfer_noc_other" style="display:none;" placeholder="Specify NOC" disabled>
+<input type="hidden" name="midc_transfer_noc" id="midc_transfer_noc_hidden" value="">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Environmental Clearance (EC)</label>
-                <select class="form-select form-control" name="environmental_clearance" id="environmental_clearance">
+               <select class="form-select form-control" name="environmental_clearance" id="environmental_clearance_select" onchange="handleOther(this,'environmental_clearance')">
                   <option value="">— Select —</option>
-                  <option value="Not_Required" {% if property.environmental_clearance == "Not_Required" %}selected{% endif %}>Not Required (Below Threshold)</option>
+                  <option value="Not_Required" {% if property.environmental_clearance == "Not_Required" %}selected{% endif %}>Not Required</option>
                   <option value="EC_Obtained" {% if property.environmental_clearance == "EC_Obtained" %}selected{% endif %}>EC Obtained</option>
                   <option value="EC_Applied" {% if property.environmental_clearance == "EC_Applied" %}selected{% endif %}>EC Application Pending</option>
-                  <option value="EC_Required" {% if property.environmental_clearance == "EC_Required" %}selected{% endif %}>EC Required — Not Yet Applied</option>
+                  <option value="EC_Required" {% if property.environmental_clearance == "EC_Required" %}selected{% endif %}>EC Required</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="environmental_clearance" id="environmental_clearance_other" style="display:none;" placeholder="Specify EC status" disabled>
+<input type="hidden" name="environmental_clearance" id="environmental_clearance_hidden" value="">
               </div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">RERA / Industrial Authority Status</label>
-                <select class="form-select form-control" name="rera_status" id="rera_status">
+             <select class="form-select form-control" name="rera_status" id="rera_status_select" onchange="handleOther(this,'rera_status')">
                   <option value="">— Select —</option>
                   <option value="MIDC_Allotted" {% if property.rera_status == "MIDC_Allotted" %}selected{% endif %}>MIDC Plot — Authority Allotted</option>
                   <option value="SEZ_Registered" {% if property.rera_status == "SEZ_Registered" %}selected{% endif %}>SEZ Registered Unit</option>
-                  <option value="Not Applicable" {% if property.rera_status == "Not Applicable" %}selected{% endif %}>RERA Not Applicable (Industrial)</option>
+                  <option value="Not Applicable" {% if property.rera_status == "Not Applicable" %}selected{% endif %}>RERA Not Applicable</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
-                <p class="hint-text">RERA typically does not apply to industrial plots</p>
+
+                <input type="text" class="form-control mt-2" name="rera_status" id="rera_status_other" style="display:none;" placeholder="Specify RERA status" disabled>
+<input type="hidden" name="rera_status" id="rera_status_hidden" value="">
               </div>
+
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Title Clarity / Marketability</label>
-                <select class="form-select form-control" name="title_clearance" id="title_clearance">
+                <select class="form-select form-control" name="title_clearance" id="title_clearance_select" onchange="handleOther(this,'title_clearance')">
                   <option value="">— Select —</option>
                   <option value="Clear & Marketable Title" {% if property.title_clearance == "Clear & Marketable Title" %}selected{% endif %}>Clear &amp; Marketable Title</option>
                   <option value="Under Verification" {% if property.title_clearance == "Under Verification" %}selected{% endif %}>Title Under Verification</option>
                   <option value="Legal Dispute" {% if property.title_clearance == "Legal Dispute" %}selected{% endif %}>Title in Legal Dispute</option>
                   <option value="Encumbrance Exists" {% if property.title_clearance == "Encumbrance Exists" %}selected{% endif %}>Encumbrance / Charge Exists</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="title_clearance" id="title_clearance_other" style="display:none;" placeholder="Specify title status" disabled>
+<input type="hidden" name="title_clearance" id="title_clearance_hidden" value="">
               </div>
+
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Encumbrance / Charge Status</label>
-                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
+              
+                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status_select" onchange="handleOther(this,'property_encumbrance_status')">
                   <option value="">— Select —</option>
                   <option value="No Encumbrance" {% if property.property_encumbrance_status == "No Encumbrance" %}selected{% endif %}>No Encumbrance (Clear EC)</option>
-                  <option value="Mortgaged" {% if property.property_encumbrance_status == "Mortgaged" %}selected{% endif %}>Mortgaged / Hypothecated (Bank / NBFC)</option>
+                  <option value="Mortgaged" {% if property.property_encumbrance_status == "Mortgaged" %}selected{% endif %}>Mortgaged</option>
                   <option value="Under Litigation" {% if property.property_encumbrance_status == "Under Litigation" %}selected{% endif %}>Under Court Litigation</option>
                   <option value="Government Acquisition Notice" {% if property.property_encumbrance_status == "Government Acquisition Notice" %}selected{% endif %}>Govt Acquisition Notice</option>
-                  <option value="Other Claim Exists" {% if property.property_encumbrance_status == "Other Claim Exists" %}selected{% endif %}>Other Claim / Charge Exists</option>
+                  <option value="Other Claim Exists" {% if property.property_encumbrance_status == "Other Claim Exists" %}selected{% endif %}>Other Claim Exists</option>
+                    <option value="__other__">Other (Specify below)</option>
                 </select>
+
+                <input type="text" class="form-control mt-2" name="property_encumbrance_status" id="property_encumbrance_status_other" style="display:none;" placeholder="Specify encumbrance" disabled>
+<input type="hidden" name="property_encumbrance_status" id="property_encumbrance_status_hidden" value="">
               </div>
             </div>
 
-            <div class="sub-section-title mt-3"> Property Tax & Loan Status</div>
+            <div class="sub-section-title mt-3">Statutory Consents (Industrial Compliance)</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">MPCB Consent to Establish / Operate</label>
+            <select class="form-select form-control" name="mpcb_consent" id="mpcb_consent_select" onchange="handleOther(this,'mpcb_consent')">
+                  <option value="">— Select —</option>
+                  <option value="Available" {% if property.mpcb_consent == "Available" %}selected{% endif %}>Available</option>
+                  <option value="Not_Available" {% if property.mpcb_consent == "Not_Available" %}selected{% endif %}>Not Available</option>
+                  <option value="Not_Applicable" {% if property.mpcb_consent == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                  <option value="To_Verify" {% if property.mpcb_consent == "To_Verify" %}selected{% endif %}>To Verify</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="mpcb_consent" id="mpcb_consent_other" style="display:none;" placeholder="Specify MPCB consent" disabled>
+<input type="hidden" name="mpcb_consent" id="mpcb_consent_hidden" value="">
+              </div>
+
+
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Factory / Industrial Licence</label>
+            <select class="form-select form-control" name="factory_licence" id="factory_licence_select" onchange="handleOther(this,'factory_licence')">
+                  <option value="">— Select —</option>
+                  <option value="Available" {% if property.factory_licence == "Available" %}selected{% endif %}>Available</option>
+                  <option value="Not_Available" {% if property.factory_licence == "Not_Available" %}selected{% endif %}>Not Available</option>
+                  <option value="Not_Applicable" {% if property.factory_licence == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                  <option value="To_Verify" {% if property.factory_licence == "To_Verify" %}selected{% endif %}>To Verify</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="factory_licence" id="factory_licence_other" style="display:none;" placeholder="Specify factory licence" disabled>
+<input type="hidden" name="factory_licence" id="factory_licence_hidden" value="">
+              </div>
+
+
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Fire NOC / Fire System</label>
+           <select class="form-select form-control" name="fire_noc" id="fire_noc_select" onchange="handleOther(this,'fire_noc')">
+                  <option value="">— Select —</option>
+                  <option value="Available" {% if property.fire_noc == "Available" %}selected{% endif %}>Available</option>
+                  <option value="Not_Available" {% if property.fire_noc == "Not_Available" %}selected{% endif %}>Not Available</option>
+                  <option value="Not_Applicable" {% if property.fire_noc == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                  <option value="To_Verify" {% if property.fire_noc == "To_Verify" %}selected{% endif %}>To Verify</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="fire_noc" id="fire_noc_other" style="display:none;" placeholder="Specify fire NOC" disabled>
+<input type="hidden" name="fire_noc" id="fire_noc_hidden" value="">
+              </div>
+
+
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Hazardous Material / Chemical Storage</label>
+              <select class="form-select form-control" name="hazardous_storage" id="hazardous_storage_select" onchange="handleOther(this,'hazardous_storage')">
+                  <option value="No" {% if property.hazardous_storage == "No" %}selected{% endif %}>No</option>
+                  <option value="Yes_Verified" {% if property.hazardous_storage == "Yes_Verified" %}selected{% endif %}>Yes — Permissions Verified</option>
+                  <option value="Not_Applicable" {% if property.hazardous_storage == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="hazardous_storage" id="hazardous_storage_other" style="display:none;" placeholder="Specify hazardous storage" disabled>
+<input type="hidden" name="hazardous_storage" id="hazardous_storage_hidden" value="">
+
+
+              </div>
+
+
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Completion / Occupancy Certificate</label>
+              
+                <select class="form-select form-control" name="occupancy_cert" id="occupancy_cert_select" onchange="handleOther(this,'occupancy_cert')">
+                  <option value="">— Select —</option>
+                  <option value="Available" {% if property.occupancy_cert == "Available" %}selected{% endif %}>Available</option>
+                  <option value="Not_Available" {% if property.occupancy_cert == "Not_Available" %}selected{% endif %}>Not Available</option>
+                  <option value="If_Applicable" {% if property.occupancy_cert == "If_Applicable" %}selected{% endif %}>If Applicable — Verify</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="occupancy_cert" id="occupancy_cert_other" style="display:none;" placeholder="Specify occupancy cert" disabled>
+<input type="hidden" name="occupancy_cert" id="occupancy_cert_hidden" value="">
+              </div>
+
+
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Layout / Building Plan Approval No.</label>
+                <input type="text" class="form-control" name="layout_approval_ref" value="{{ property.layout_approval_ref }}" placeholder="e.g., MIDC/NOC/2023/1234">
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Revenue Record Verification</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">7/12 Extract / Property Card</label>
+                <select class="form-select form-control" name="extract_7_12_status" id="extract_7_12_status_select" onchange="handleOther(this,'extract_7_12_status')">
+                  <option value="">— Select —</option>
+                  <option value="Verified" {% if property.extract_7_12_status == "Verified" %}selected{% endif %}>Verified</option>
+                  <option value="To_Verify" {% if property.extract_7_12_status == "To_Verify" %}selected{% endif %}>To Verify</option>
+                  <option value="Not_Applicable" {% if property.extract_7_12_status == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                  <option value="Not verified" {% if property.extract_7_12_status == "Not verified" %}selected{% endif %}>Not verified</option>
+                  <option value="__other__">Other (Specify below)</option>
+
+                </select>
+
+
+                <input type="text" class="form-control mt-2" name="extract_7_12_status" id="extract_7_12_status_other" style="display:none;" placeholder="Specify 7/12 status" disabled>
+<input type="hidden" name="extract_7_12_status" id="extract_7_12_status_hidden" value="">
+              </div>
+
+
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Mutation / Ferfar Status</label>
+               <select class="form-select form-control" name="mutation_status" id="mutation_status_select" onchange="handleOther(this,'mutation_status')">
+                  <option value="">— Select —</option>
+                  <option value="Verified" {% if property.mutation_status == "Verified" %}selected{% endif %}>Verified</option>
+                  <option value="To_Verify" {% if property.mutation_status == "To_Verify" %}selected{% endif %}>To Verify</option>
+                  <option value="Not_Applicable" {% if property.mutation_status == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="mutation_status" id="mutation_status_other" style="display:none;" placeholder="Specify mutation status" disabled>
+<input type="hidden" name="mutation_status" id="mutation_status_hidden" value="">
+              </div>
+
+
+              <div class="col-md-4 mt-2">
+                <label class="form-label">NA / Land-Use Order No.</label>
+                <input type="text" class="form-control" name="na_order_number" value="{{ property.na_order_number }}" placeholder="e.g., NA/2023/456">
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Lease Term / Remaining Term (Years)</label>
+                <input type="number" class="form-control" name="lease_term_remaining" value="{{ property.lease_term_remaining }}" placeholder="e.g., 75">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Transfer Fees / Premium (₹)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="transfer_fees_premium" value="{{ property.transfer_fees_premium }}" placeholder="e.g., 500000">
+                  <span class="input-unit">₹</span>
+                </div>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Litigation Disclosure</label>
+                <select class="form-select form-control" name="litigation_disclosure" id="litigation_disclosure_select" onchange="handleOther(this,'litigation_disclosure')">
+                  <option value="">— Select —</option>
+                  <option value="No_Litigation" {% if property.litigation_disclosure == "No_Litigation" %}selected{% endif %}>No Litigation</option>
+                  <option value="Under_Litigation" {% if property.litigation_disclosure == "Under_Litigation" %}selected{% endif %}>Under Litigation</option>
+                  <option value="Seller_Declaration" {% if property.litigation_disclosure == "Seller_Declaration" %}selected{% endif %}>Seller Declaration Only</option>
+                    <option value="__other__">Other (Specify below)</option>
+                </select>
+
+                <input type="text" class="form-control mt-2" name="litigation_disclosure" id="litigation_disclosure_other" style="display:none;" placeholder="Specify litigation status" disabled>
+<input type="hidden" name="litigation_disclosure" id="litigation_disclosure_hidden" value="">
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Occupancy &amp; Income (If Leased)</div>
             <div class="row">
               <div class="col-md-6 mt-2">
-                <label class="form-label">Industrial Property Tax / Assessment Status</label>
-                <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
-                  <option value="">— Select —</option>
-                  <option value="Fully Paid" {% if property.property_tax_status == "Fully Paid" %}selected{% endif %}>Fully Paid (All Industrial Dues Clear)</option>
-                  <option value="MIDC_Dues_Clear" {% if property.property_tax_status == "MIDC_Dues_Clear" %}selected{% endif %}>MIDC / Authority Dues Clear</option>
-                  <option value="Dues_Pending" {% if property.property_tax_status == "Dues_Pending" %}selected{% endif %}>MIDC / Authority Dues Pending</option>
-                  <option value="Under_Assessment" {% if property.property_tax_status == "Under_Assessment" %}selected{% endif %}>Under Municipal Assessment</option>
-                </select>
+                <label class="form-label">Tenant / Lease Details</label>
+                <textarea class="form-control" name="tenant_lease_details" rows="2" placeholder="Rent, deposit, term, lock-in...">{{ property.tenant_lease_details }}</textarea>
               </div>
-              <div id="tax_due_section" style="display:{% if property.property_tax_status == 'Dues_Pending' %}block{% else %}none{% endif %};" class="col-md-12 mt-0">
-                <div class="row">
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Outstanding Tax / Dues Amount (₹)</label>
-                    <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_tax_amount" value="{{ property.outstanding_tax_amount }}" placeholder="e.g., 50000">
-                      <span class="input-unit">₹</span>
-                    </div>
-                  </div>
-                  <div class="col-md-6 mt-3" id="pending_since_div" style="display:{% if property.property_tax_status == 'Dues_Pending' %}block{% else %}none{% endif %};">
-                    <label class="form-label">Dues Pending Since</label>
-                    <input type="date" class="form-control" name="pending_since" value="{{ property.pending_since|date:'Y-m-d' }}">
-                  </div>
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Monthly Rent (₹)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="monthly_rent" value="{{ property.monthly_rent }}" placeholder="e.g., 50000">
+                  <span class="input-unit">₹</span>
                 </div>
               </div>
               <div class="col-md-6 mt-3">
-                <label class="form-label">Existing Loan / Mortgage on Property</label>
-                <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
-                  <option value="">— Select Loan Status —</option>
-                  <option value="No Active Loan" {% if property.property_loan_status == "No Active Loan" %}selected{% endif %}>No Active Loan (Loan-Free Property)</option>
-                  <option value="Loan Running" {% if property.property_loan_status == "Loan Running" %}selected{% endif %}>Loan Running (To be closed before sale)</option>
-                  <option value="Loan Closed" {% if property.property_loan_status == "Loan Closed" %}selected{% endif %}>Loan Closed (NOC Available)</option>
-                  <option value="Loan Status Not Available" {% if property.property_loan_status == "Loan Status Not Available" %}selected{% endif %}>Not Disclosed</option>
-                </select>
-              </div>
-              <div id="loan_running_section" style="display:{% if property.property_loan_status == 'Loan Running' %}block{% else %}none{% endif %};" class="col-md-12 mt-0">
-                <div class="row">
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Lender Bank / NBFC Name</label>
-                    <input type="text" class="form-control" name="financing_bank" value="{{ property.financing_bank }}" placeholder="e.g., HDFC Bank, SBI, ICICI">
-                  </div>
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Outstanding Loan Amount (₹)</label>
-                    <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_loan_amount" value="{{ property.outstanding_loan_amount }}" placeholder="e.g., 5000000">
-                      <span class="input-unit">₹</span>
-                    </div>
-                  </div>
+                <label class="form-label">Utility Dues (₹)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="utility_dues" value="{{ property.utility_dues }}" placeholder="e.g., 25000">
+                  <span class="input-unit">₹</span>
                 </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Title Chain / Legal Notes</label>
+                <textarea class="form-control" name="title_chain_notes" rows="2" placeholder="Notes from legal review">{{ property.title_chain_notes }}</textarea>
               </div>
             </div>
 
             <div class="form-group mt-3">
               <label class="form-label">Industrial Authority / Estate Developer</label>
-              <textarea class="form-control" name="sanctioning_authority" rows="2"
-                placeholder="e.g., MIDC Nagpur, MIDC Butibori, Nagpur SEZ Ltd, Private Industrial Estate, GIDC, CIDCO Industrial">{{ property.sanctioning_authority }}</textarea>
+              <textarea class="form-control" name="sanctioning_authority" rows="2" placeholder="e.g., MIDC Nagpur, MIDC Butibori...">{{ property.sanctioning_authority }}</textarea>
             </div>
 
             <div class="inline-status is-warning mt-3">
               <i class="fas fa-triangle-exclamation"></i>
-              <span style="font-size:.8rem;">For MIDC plots, MIDC transfer NOC is mandatory before registration. Ensure NOC status is correct above.</span>
+              <span style="font-size:.8rem;">For MIDC plots, MIDC transfer NOC is mandatory before registration.</span>
             </div>
           </div>
         </div>
@@ -1082,6 +1498,20 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 <label class="form-label">Nearest Highway / Railway / Port Reference</label>
                 <input type="text" class="form-control" name="property_landmark" value="{{ property.property_landmark }}" placeholder="e.g., 2 km from Pune-Nashik Highway">
               </div>
+
+
+              <div class="col-md-4 mt-3">
+  <label class="form-label">District / Region <span class="required">*</span></label>
+  <input type="text" class="form-control" name="district_region" value="{{ property.district_region }}" placeholder="e.g., Nagpur Region" required>
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Taluka / Tehsil <span class="required">*</span></label>
+  <input type="text" class="form-control" name="taluka" value="{{ property.taluka }}" placeholder="e.g., Hingna" required>
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Mouza / Village</label>
+  <input type="text" class="form-control" name="mouza" value="{{ property.mouza }}" placeholder="e.g., Butibori">
+</div>
 
               <div class="col-md-6 mt-3">
                 <label class="form-label">City / District <span class="required">*</span></label>
@@ -1472,6 +1902,31 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 <input type="file" class="form-control" id="encumbrance_cert" name="encumbrance_cert" accept=".pdf,image/*">
                 <p class="hint-text">Upload only if you want to replace the existing document</p>
               </div>
+
+
+              <div class="col-md-3">
+  <label class="form-label">MPCB Consent Copy</label>
+  {% if property.mpcb_consent_doc %}
+  <p class="hint-text"><a href="{{ property.mpcb_consent_doc.url }}" target="_blank">View current file</a></p>
+  {% endif %}
+  <input type="file" class="form-control" name="mpcb_consent_doc" accept=".pdf,image/*">
+</div>
+<div class="col-md-3">
+  <label class="form-label">Fire NOC Copy</label>
+  {% if property.fire_noc_doc %}
+  <p class="hint-text"><a href="{{ property.fire_noc_doc.url }}" target="_blank">View current file</a></p>
+  {% endif %}
+  <input type="file" class="form-control" name="fire_noc_doc" accept=".pdf,image/*">
+</div>
+<div class="col-md-3">
+  <label class="form-label">Layout Plan / NA Order Copy</label>
+  {% if property.layout_plan_doc %}
+  <p class="hint-text"><a href="{{ property.layout_plan_doc.url }}" target="_blank">View current file</a></p>
+  {% endif %}
+  <input type="file" class="form-control" name="layout_plan_doc" accept=".pdf,image/*">
+</div>
+
+
              
             </div>
 
@@ -2244,26 +2699,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('video_rm')?.checked) renderVideoPreview();
 });
 
-/* ═══ CONDITIONAL TOGGLES ═══ */
-document.addEventListener('change', function(e) {
-  if (e.target.name==='ownership_document_type')
-    document.getElementById('other_document_type_div').style.display=e.target.value==='Other'?'block':'none';
-  if (e.target.id==='property_tax_status') {
-    const v=e.target.value;
-    document.getElementById('tax_due_section').style.display=(v==='Dues_Pending'||v==='Partially Due')?'block':'none';
-    document.getElementById('pending_since_div').style.display=v==='Dues_Pending'?'block':'none';
-  }
-  if (e.target.id==='property_loan_status')
-    document.getElementById('loan_running_section').style.display=e.target.value==='Loan Running'?'block':'none';
-  if (e.target.id==='brokeragePercentage')
-    document.getElementById('manualBrokerageSection').style.display=e.target.value==='Fixed Amount'?'block':'none';
-  if (e.target.name==='plot_road_facing') setCheck('cl-road', !!e.target.value);
-  if (e.target.name==='land_use')         setCheck('cl-zone', !!e.target.value);
-  if (e.target.name==='power_supply')     setCheck('cl-power',!!e.target.value);
-  if (e.target.name==='listed_elsewhere') {
-    document.getElementById('portalField').style.display = e.target.value==='Yes' ? 'block' : 'none';
-  }
-});
+
 
 ['plot_area','selling_price','city','locality'].forEach(id=>{
   const el=document.getElementById(id); if(el) el.addEventListener('input',updatePreview);
@@ -2394,6 +2830,31 @@ document.addEventListener('DOMContentLoaded', function(){
 
 document.getElementById('indPlotForm').addEventListener('submit',function(e){
   e.preventDefault();
+
+  // When "Other" is selected, disable _hidden so only _other submits
+  const allOtherFields = ['property_type','land_use','industrial_zone_type','na_status',
+    'layout_approval_status','industrial_fsi','plot_shape','facing','plot_road_facing',
+    'road_width','corner_plot','power_supply','power_backup_transformer',
+    'industrial_water_supply','effluent_treatment','industry_type_permissible',
+    'plot_fencing','loading_dock','current_possession_status','construction_type',
+    'construction_age','fire_access_compliance','additional_charges','ownership_type',
+    'ownership_document_type','midc_allotment','midc_transfer_noc',
+    'environmental_clearance','rera_status','title_clearance',
+    'property_encumbrance_status','mpcb_consent','factory_licence','fire_noc',
+    'hazardous_storage','occupancy_cert','extract_7_12_status','mutation_status',
+    'litigation_disclosure'];
+  allOtherFields.forEach(function (f) {
+    var sel = document.getElementById(f + '_select');
+    var hid = document.getElementById(f + '_hidden');
+    if (!sel || !hid) return;
+    if (sel.value === '__other__') {
+      hid.disabled = true;
+    } else {
+      hid.disabled = false;
+      hid.value = sel.value;
+    }
+  });
+
   for(let i=1;i<=4;i++){
     if(i!==currentStep){
       for(const f of document.getElementById('step'+i).querySelectorAll('[required]'))
@@ -2652,4 +3113,194 @@ function getChangedFieldsHtml_ind() {
 }
 
 document.addEventListener('DOMContentLoaded', captureInitialValues_ind);
+
+
+
+document.addEventListener('change', function(e) {
+
+  if (e.target.id === 'brokeragePercentage') {
+    document.getElementById('manualBrokerageSection').style.display = e.target.value === 'Fixed Amount' ? 'block' : 'none';
+  }
+  if (e.target.id === 'landlordOwnerFee') {
+    toggleLandlordFixedAmount();
+  }
+  if (e.target.name === 'listed_elsewhere') {
+    document.getElementById('portalField').style.display = e.target.value === 'Yes' ? 'block' : 'none';
+  }
+  if (e.target.id === 'plot_area' || e.target.id === 'area_unit') {
+    updateAreaConversions();
+  }
+  // ✅ Property tax / loan section toggles (moved back from deleted block)
+  if (e.target.id === 'property_tax_status') {
+    const v = e.target.value;
+    document.getElementById('tax_due_section').style.display = (v === 'Dues_Pending' || v === 'Partially Due') ? 'block' : 'none';
+    document.getElementById('pending_since_div').style.display = v === 'Dues_Pending' ? 'block' : 'none';
+  }
+  if (e.target.id === 'property_loan_status') {
+    document.getElementById('loan_running_section').style.display = e.target.value === 'Loan Running' ? 'block' : 'none';
+  }
+});
+
+function toggleLandlordFixedAmount() {
+  const feeType = document.getElementById('landlordOwnerFee').value;
+  const fixedSection = document.getElementById('landlordFixedAmountSection');
+  if (feeType === 'Fixed Amount') {
+    fixedSection.style.display = 'block';
+  } else {
+    fixedSection.style.display = 'none';
+    document.getElementById('landlordOwnerFixedAmount').value = '';
+  }
+}
+
+
+
+function updateAreaConversions() {
+  const areaVal = parseFloat(document.getElementById('plot_area')?.value || 0);
+  const unit = document.getElementById('area_unit')?.value || 'sqm';
+  let sqft = 0, acres = 0, label = 'sq.m';
+  
+  if (unit === 'sqm')      { sqft = areaVal * 10.7639; acres = areaVal / 4046.86; label = 'sq.m'; }
+  else if (unit === 'sqft'){ sqft = areaVal;           acres = areaVal / 43560;   label = 'sq.ft'; }
+  else if (unit === 'acre'){ sqft = areaVal * 43560;   acres = areaVal;           label = 'acre'; }
+
+  const sqftEl = document.getElementById('plot_area_sqft');
+  const acresEl = document.getElementById('plot_area_acres');
+  const labelEl = document.getElementById('plot_area_unit_label');
+  
+  if (sqftEl)  sqftEl.value = sqft ? sqft.toFixed(2) : '';
+  if (acresEl) acresEl.value = acres ? acres.toFixed(3) : '';
+  if (labelEl) labelEl.textContent = label;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateAreaConversions();
+  updateBrokerageLabel(document.getElementById('listed_by_role')?.value);
+});
+
+
+
+/* ═══ SHOW/HIDE BUILDING SECTION ═══ */
+function toggleBuiltSection() {
+  const propType = document.getElementById('property_type_select')?.value;
+  const builtTypes = [
+    'midc_industrial','warehouse_logistics','sez_plot','private_industrial',
+    'food_agro_processing','mini_industrial','flatted_factory',
+    'industrial_shed','factory_manufacturing','industrial_building',
+    'workshop_service','engineering_fabrication','cold_storage',
+    'pharma_chemical','it_electronics_mfg'
+  ];
+  const builtSection = document.getElementById('built_section');
+  if (builtSection) {
+    builtSection.style.display = builtTypes.includes(propType) ? 'block' : 'none';
+  }
+}
+document.addEventListener('DOMContentLoaded', toggleBuiltSection);
+
+
+
+
+// On page load, initialise all "Other" dropdowns to reflect existing DB values
+
+function handleOther(selectEl, fieldName) {
+  var otherInput  = document.getElementById(fieldName + '_other');
+  var hiddenInput = document.getElementById(fieldName + '_hidden');
+  if (!otherInput || !hiddenInput) return;
+
+  if (selectEl.value === '__other__') {
+    otherInput.style.display = 'block';
+    otherInput.disabled = false;
+    otherInput.required = selectEl.required;
+    hiddenInput.value = '__other__';
+    hiddenInput.disabled = false;
+    otherInput.focus();
+  } else {
+    otherInput.style.display = 'none';
+    otherInput.disabled = true;
+    otherInput.required = false;
+    hiddenInput.disabled = false;
+    hiddenInput.value = selectEl.value;
+  }
+}
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const otherFields = [
+    { f: 'property_type',              v: "{{ property.property_type|default:''|escapejs }}" },
+    { f: 'land_use',                   v: "{{ property.land_use|default:''|escapejs }}" },
+    { f: 'industrial_zone_type',       v: "{{ property.industrial_zone_type|default:''|escapejs }}" },
+    { f: 'na_status',                  v: "{{ property.na_status|default:''|escapejs }}" },
+    { f: 'layout_approval_status',     v: "{{ property.layout_approval_status|default:''|escapejs }}" },
+    { f: 'industrial_fsi',             v: "{{ property.industrial_fsi|default:''|escapejs }}" },
+    { f: 'plot_shape',                 v: "{{ property.plot_shape|default:''|escapejs }}" },
+    { f: 'facing',                     v: "{{ property.facing|default:''|escapejs }}" },
+    { f: 'plot_road_facing',           v: "{{ property.plot_road_facing|default:''|escapejs }}" },
+    { f: 'road_width',                 v: "{{ property.road_width|default:''|escapejs }}" },
+    { f: 'corner_plot',                v: "{{ property.corner_plot|default:''|escapejs }}" },
+    { f: 'power_supply',               v: "{{ property.power_supply|default:''|escapejs }}" },
+    { f: 'power_backup_transformer',   v: "{{ property.power_backup_transformer|default:''|escapejs }}" },
+    { f: 'industrial_water_supply',    v: "{{ property.industrial_water_supply|default:''|escapejs }}" },
+    { f: 'effluent_treatment',         v: "{{ property.effluent_treatment|default:''|escapejs }}" },
+    { f: 'industry_type_permissible',  v: "{{ property.industry_type_permissible|default:''|escapejs }}" },
+    { f: 'plot_fencing',               v: "{{ property.plot_fencing|default:''|escapejs }}" },
+    { f: 'loading_dock',               v: "{{ property.loading_dock|default:''|escapejs }}" },
+    { f: 'current_possession_status',  v: "{{ property.current_possession_status|default:''|escapejs }}" },
+    { f: 'construction_type',          v: "{{ property.construction_type|default:''|escapejs }}" },
+    { f: 'construction_age',           v: "{{ property.construction_age|default:''|escapejs }}" },
+    { f: 'fire_access_compliance',     v: "{{ property.fire_access_compliance|default:''|escapejs }}" },
+    { f: 'additional_charges',         v: "{{ property.additional_charges|default:''|escapejs }}" },
+    { f: 'ownership_type',             v: "{{ property.ownership_type|default:''|escapejs }}" },
+    { f: 'ownership_document_type',    v: "{{ property.ownership_document_type|default:''|escapejs }}" },
+    { f: 'midc_allotment',             v: "{{ property.midc_allotment|default:''|escapejs }}" },
+    { f: 'midc_transfer_noc',          v: "{{ property.midc_transfer_noc|default:''|escapejs }}" },
+    { f: 'environmental_clearance',    v: "{{ property.environmental_clearance|default:''|escapejs }}" },
+    { f: 'rera_status',                v: "{{ property.rera_status|default:''|escapejs }}" },
+    { f: 'title_clearance',            v: "{{ property.title_clearance|default:''|escapejs }}" },
+    { f: 'property_encumbrance_status',v: "{{ property.property_encumbrance_status|default:''|escapejs }}" },
+    { f: 'mpcb_consent',               v: "{{ property.mpcb_consent|default:''|escapejs }}" },
+    { f: 'factory_licence',            v: "{{ property.factory_licence|default:''|escapejs }}" },
+    { f: 'fire_noc',                   v: "{{ property.fire_noc|default:''|escapejs }}" },
+    { f: 'hazardous_storage',          v: "{{ property.hazardous_storage|default:''|escapejs }}" },
+    { f: 'occupancy_cert',             v: "{{ property.occupancy_cert|default:''|escapejs }}" },
+    { f: 'extract_7_12_status',        v: "{{ property.extract_7_12_status|default:''|escapejs }}" },
+    { f: 'mutation_status',            v: "{{ property.mutation_status|default:''|escapejs }}" },
+    { f: 'litigation_disclosure',      v: "{{ property.litigation_disclosure|default:''|escapejs }}" }
+  ];
+
+  otherFields.forEach(function (item) {
+    const sel = document.getElementById(item.f + '_select');
+    const oth = document.getElementById(item.f + '_other');
+    const hid = document.getElementById(item.f + '_hidden');
+    if (!sel || !oth || !hid) return;
+
+    let matched = false;
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === item.v && item.v && item.v !== '__other__') {
+        sel.selectedIndex = i;
+        matched = true;
+        break;
+      }
+    }
+
+    if (matched) {
+      hid.value = item.v;
+      hid.disabled = false;
+      oth.style.display = 'none';
+      oth.disabled = true;
+    } else if (item.v) {
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === '__other__') {
+          sel.selectedIndex = i;
+          break;
+        }
+      }
+      oth.value = item.v;
+      oth.style.display = 'block';
+      oth.disabled = false;
+      hid.value = '__other__';
+      hid.disabled = false;
+    }
+  });
+});
+
 </script>

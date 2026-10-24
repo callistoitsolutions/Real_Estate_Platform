@@ -383,7 +383,8 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
   <!-- FORM CONTAINER -->
   <div class="form-container">
-   <form action="{% url 'industrial_plot_resale_add' %}" method="POST" enctype="multipart/form-data" id="indPlotForm">
+
+    <form action="{% url 'industrial_plot_resale_add' %}" method="POST" enctype="multipart/form-data" id="indPlotForm" novalidate>
       {% csrf_token %}
       <input type="hidden" name="plot_type_main" value="industrial">
 
@@ -511,29 +512,67 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <i class="fas fa-info-circle"></i> Required for verification — not shown publicly.
                 </span>
               </div>
+
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Plot / Unit Number</label>
+  <input type="text" class="form-control" name="plot_unit_number" id="plot_unit_number" placeholder="e.g., IND-101">
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Plot Area Unit <span class="required">*</span></label>
+  <select class="form-select form-control" name="area_unit" id="area_unit" required>
+    <option value="sqm">sq.m (Square Metres)</option>
+    <option value="sqft">sq.ft (Square Feet)</option>
+    <option value="acre">Acre</option>
+  </select>
+</div>
+
               <div class="col-md-4 mt-3">
                 <label class="form-label">Plot Area <span class="required">*</span></label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_area" id="plot_area" required min="1" placeholder="e.g., 2000">
+
+                  <input type="number" class="form-control" name="plot_area" id="plot_area" required min="1" step="any" placeholder="e.g., 2000">
                   <span class="input-unit">sq.m</span>
                 </div>
                 <p class="hint-text">Industrial plots typically measured in square metres (sq.m)</p>
               </div>
+
+
               <div class="col-md-4 mt-3">
-                <label class="form-label">Industrial Plot Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="property_type" id="property_type" required>
-                  <option value="">— Select Industrial Plot Type —</option>
-                  <option value="midc_industrial">MIDC Plot (Factory / Manufacturing)</option>
-                  <option value="warehouse_logistics">Warehouse / Cold Storage / Logistics Plot</option>
-                  <option value="sez_plot">SEZ Plot (Special Economic Zone)</option>
-                  <option value="it_park_plot">IT Park / Technology Campus Plot</option>
-                  <option value="private_industrial">Private Industrial Estate Plot</option>
-                  <option value="food_agro_processing">Food Processing / Agro Industry Plot</option>
-                  <option value="mini_industrial">Mini Industrial Plot (Light Industry)</option>
-                  <option value="flatted_factory">Flatted Factory Unit (Multi-Level Industrial)</option>
-                </select>
-              </div>
+  <label class="form-label">Plot Area (sq.ft) (Auto)</label>
+  <input type="number" class="form-control" id="plot_area_sqft" name="plot_area_sqft" readonly style="background:#f8f9fa;">
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Plot Area (acres) (Auto)</label>
+  <input type="number" class="form-control" id="plot_area_acres" name="plot_area_acres" readonly style="background:#f8f9fa;">
+</div>
              
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Industrial Plot Type <span class="required">*</span></label>
+  <select class="form-select form-control" id="property_type_select" required
+          onchange="handleOther(this,'property_type'); toggleBuiltSection();">
+    <option value="">— Select Industrial Plot Type —</option>
+    <option value="MIDC Industrial Plot">MIDC Industrial Plot</option>
+    <option value="industrial_shed">Industrial Shed</option>
+    <option value="factory_manufacturing">Factory / Manufacturing Unit</option>
+    <option value="industrial_building">Industrial Building</option>
+    <option value="workshop_service">Workshop / Service Unit</option>
+    <option value="engineering_fabrication">Engineering / Fabrication Unit</option>
+    <option value="cold_storage">Cold Storage / Refrigerated Warehouse</option>
+    <option value="pharma_chemical">Pharma / Chemical Industrial Unit</option>
+    <option value="it_electronics_mfg">IT / Electronics Manufacturing Unit</option>
+    <option value="industrial_land_outside_midc">Industrial Land Outside MIDC</option>
+    <option value="Warehouse / Godown">Warehouse / Godown</option>
+    <option value="Logistics / Distribution Facility">Logistics / Distribution Facility</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="property_type" id="property_type_other"
+         style="display:none;" placeholder="Specify industrial plot type" disabled>
+  <input type="hidden" name="property_type" id="property_type_hidden" value="">
+</div>
+
+
             </div>
           </div>
         </div>
@@ -543,81 +582,141 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="section-header"><i class="fas fa-file-shield"></i> Industrial Zone, Estate &; Authority Details</div>
           <div class="section-body">
             <div class="row">
+            
+
               <div class="col-md-4 mt-2">
-                <label class="form-label">Industrial Zone / Land Use <span class="required">*</span></label>
-                <select class="form-select form-control" name="land_use" id="land_use" required>
-                  <option value="">— Select Zone —</option>
-                  <option value="MIDC_Zone">MIDC Zone (Maharashtra Industrial Dev Corp)</option>
-                  <option value="SEZ_Zone">SEZ Zone (Special Economic Zone)</option>
-                  <option value="Light_Industrial">Light Industrial Zone (LI)</option>
-                  <option value="Heavy_Industrial">Heavy Industrial Zone (HI)</option>
-                  <option value="IT_ITES">IT / ITES Zone</option>
-                  <option value="Logistics_Hub">Logistics Hub / Multi-Modal Corridor</option>
-                  <option value="Food_Park">Food Park / Agro Processing Zone</option>
-                  <option value="GIDC">GIDC (Gujarat Industrial Dev Corp)</option>
-                  <option value="Private_IE">Private Industrial Estate Zone</option>
-                </select>
-                <p class="hint-text">As per development authority classification</p>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Industrial Zone Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="industrial_zone_type" id="industrial_zone_type" required>
-                  <option value="">— Select —</option>
-                  <option value="MIDC">MIDC (Maharashtra Industrial Dev Corp)</option>
-                  <option value="SEZ">SEZ (Special Economic Zone)</option>
-                  <option value="Private_Industrial_Estate">Private Industrial Estate / Park</option>
-                  <option value="Govt_Industrial_Area">Govt Industrial Area / GIDC</option>
-                  <option value="Light_Industrial">Light Industrial Zone (LI)</option>
-                  <option value="Heavy_Industrial">Heavy Industrial Zone (HI)</option>
-                  <option value="Flatted_Factory">Flatted Factory Complex</option>
-                </select>
-              </div>
+  <label class="form-label">Industrial Zone / Land Use <span class="required">*</span></label>
+  <select class="form-select form-control" id="land_use_select" required
+          onchange="handleOther(this,'land_use')">
+    <option value="">— Select Zone —</option>
+    <option value="MIDC_Zone">MIDC Zone (Maharashtra Industrial Dev Corp)</option>
+    <option value="SEZ_Zone">SEZ Zone (Special Economic Zone)</option>
+    <option value="Light_Industrial">Light Industrial Zone (LI)</option>
+    <option value="Heavy_Industrial">Heavy Industrial Zone (HI)</option>
+    <option value="IT_ITES">IT / ITES Zone</option>
+    <option value="Logistics_Hub">Logistics Hub / Multi-Modal Corridor</option>
+    <option value="Food_Park">Food Park / Agro Processing Zone</option>
+    <option value="GIDC">GIDC (Gujarat Industrial Dev Corp)</option>
+    <option value="Private_IE">Private Industrial Estate Zone</option>
+    <option value="Industrial use claimed in sample; verify">Industrial use claimed in sample; verify</option>
+    <option value="Industrial - verify">Industrial - verify</option>
+    <option value="Zoning/estate status — verify">Zoning/estate status — verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="land_use" id="land_use_other"
+         style="display:none;" placeholder="Specify zone" disabled>
+  <input type="hidden" name="land_use" id="land_use_hidden" value="">
+  <p class="hint-text">As per development authority classification</p>
+</div>
+
+
+             
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Industrial Zone Type <span class="required">*</span></label>
+  <select class="form-select form-control" id="industrial_zone_type_select" required
+          onchange="handleOther(this,'industrial_zone_type')">
+    <option value="">— Select —</option>
+    <option value="MIDC">MIDC (Maharashtra Industrial Dev Corp)</option>
+    <option value="SEZ">SEZ (Special Economic Zone)</option>
+    <option value="Private_Industrial_Estate">Private Industrial Estate / Park</option>
+    <option value="Govt_Industrial_Area">Govt Industrial Area / GIDC</option>
+    <option value="Light_Industrial">Light Industrial Zone (LI)</option>
+    <option value="Heavy_Industrial">Heavy Industrial Zone (HI)</option>
+    <option value="Flatted_Factory">Flatted Factory Complex</option>
+    <option value="Industrial jurisdiction — verify">Industrial jurisdiction — verify</option>
+    <option value="Competent authority — verify">Competent authority — verify</option>
+    <option value="MIHAN/SEZ rules and allotment — verify">MIHAN/SEZ rules and allotment — verify</option>
+    <option value="Inside/outside estate boundary — verify">Inside/outside estate boundary — verify</option>
+    <option value="Legal access — verify">Legal access — verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="industrial_zone_type" id="industrial_zone_type_other"
+         style="display:none;" placeholder="Specify zone type" disabled>
+  <input type="hidden" name="industrial_zone_type" id="industrial_zone_type_hidden" value="">
+</div>
+
+
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Estate / Park Name</label>
                 <input type="text" class="form-control" name="industrial_estate_name" id="industrial_estate_name" placeholder="e.g., Butibori MIDC, Hingna MIDC, Nagpur SEZ">
               </div>
+              
+
               <div class="col-md-4 mt-3">
-                <label class="form-label">NA Status / Industrial Conversion <span class="required">*</span></label>
-                <select class="form-select form-control" name="na_status" id="na_status"  required>
-                  <option value="">— Select —</option>
-                  <option value="NA_Industrial">NA Converted for Industrial Use</option>
-                  <option value="MIDC_Allotted">MIDC Allotted Land (NA Not Applicable)</option>
-                  <option value="Industrial_Zone">Already in Industrial Zone (NA Not Required)</option>
-                  <option value="NA Applied">NA Applied for Industrial Use</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Industrial Authority / Estate Approval</label>
-                <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
-                  <option value="">— Select —</option>
-                  <option value="MIDC_Approved">MIDC Approved Plot</option>
-                  <option value="SEZ_Approved">SEZ Board Approved</option>
-                  <option value="Private_Sanctioned">Private Industrial Estate — Sanctioned</option>
-                  <option value="Approval_Pending">Authority Approval Pending</option>
-                  <option value="Direct_Sale">Direct Industrial Land Sale</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Permissible FSI / Coverage</label>
-                <select class="form-select form-control" name="industrial_fsi" id="industrial_fsi">
-                  <option value="">— Select —</option>
-                  <option value="0.5">0.5 (Low Density)</option>
-                  <option value="1.0">1.0 (Standard Industrial)</option>
-                  <option value="1.5">1.5</option>
-                  <option value="2.0">2.0 (High Density)</option>
-                  <option value="As_per_Authority">As per Authority Norms</option>
-                </select>
-              </div>
+  <label class="form-label">NA Status / Industrial Conversion <span class="required">*</span></label>
+  <select class="form-select form-control" id="na_status_select" required
+          onchange="handleOther(this,'na_status')">
+    <option value="">— Select —</option>
+    <option value="NA_Industrial">NA Converted for Industrial Use</option>
+    <option value="MIDC_Allotted">MIDC Allotted Land (NA Not Applicable)</option>
+    <option value="Industrial_Zone">Already in Industrial Zone (NA Not Required)</option>
+    <option value="NA Applied">NA Applied for Industrial Use</option>
+    <option value="Required status to be checked">Required status to be checked</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="Industrial tenure verify">Industrial tenure verify</option>
+    <option value="Industrial zoning claimed—verify">Industrial zoning claimed—verify</option>
+    <option value="Industrial conversion unknown">Industrial conversion unknown</option>
+    <option value="Industrial NA unknown">Industrial NA unknown</option>
+    <option value="NA unknown">NA unknown</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="na_status" id="na_status_other"
+         style="display:none;" placeholder="Specify NA status" disabled>
+  <input type="hidden" name="na_status" id="na_status_hidden" value="">
+</div>
+
+
+            <div class="col-md-4 mt-3">
+  <label class="form-label">Industrial Authority / Estate Approval</label>
+  <select class="form-select form-control" id="layout_approval_status_select"
+          onchange="handleOther(this,'layout_approval_status')">
+    <option value="">— Select —</option>
+    <option value="MIDC_Approved">MIDC Approved Plot</option>
+    <option value="SEZ_Approved">SEZ Board Approved</option>
+    <option value="Private_Sanctioned">Private Industrial Estate — Sanctioned</option>
+    <option value="Approval_Pending">Authority Approval Pending</option>
+    <option value="Direct_Sale">Direct Industrial Land Sale</option>
+    <option value="Pending verification">Pending verification</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="Documents claimed by owner - not verified">Documents claimed by owner - not verified</option>
+    <option value="Not applicable / verify with authority">Not applicable / verify with authority</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="layout_approval_status" id="layout_approval_status_other"
+         style="display:none;" placeholder="Specify approval status" disabled>
+  <input type="hidden" name="layout_approval_status" id="layout_approval_status_hidden" value="">
+</div>
+
+
+          <div class="col-md-4 mt-3">
+  <label class="form-label">Permissible FSI / Coverage</label>
+  <select class="form-select form-control" id="industrial_fsi_select"
+          onchange="handleOther(this,'industrial_fsi')">
+    <option value="">— Select —</option>
+    <option value="0.5">0.5 (Low Density)</option>
+    <option value="1.0">1.0 (Standard Industrial)</option>
+    <option value="1.5">1.5</option>
+    <option value="2.0">2.0 (High Density)</option>
+    <option value="As_per_Authority">As per Authority Norms</option>
+    <option value="Not supplied — verify">Not supplied — verify</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="industrial_fsi" id="industrial_fsi_other"
+         style="display:none;" placeholder="Specify FSI value" disabled>
+  <input type="hidden" name="industrial_fsi" id="industrial_fsi_hidden" value="">
+</div>
             </div>
           </div>
         </div>
 
         <!-- PLOT SPECIFICATIONS -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-ruler-combined"></i> Industrial Plot Specifications &amp; Infrastructure</div>
+          <div class="section-header"><i class="fas fa-ruler-combined"></i> Industrial Plot Specifications & Infrastructure</div>
           <div class="section-body">
 
-            <div class="sub-section-title">Dimensions &amp; Shape</div>
+            <div class="sub-section-title">Dimensions & Shape</div>
             <div class="row">
 
                <div class="col-md-4">
@@ -635,69 +734,141 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <span class="input-unit">m</span>
                 </div>
               </div>
+
+             
+
               <div class="col-md-4">
-                <label class="form-label">Plot Shape</label>
-                <select class="form-select form-control" name="plot_shape" id="plot_shape">
-                  <option value="">— Select Shape —</option>
-                  <option value="Rectangular">Rectangular</option>
-                  <option value="Square">Square</option>
-                  <option value="L-Shaped">L-Shaped</option>
-                  <option value="Irregular">Irregular / Odd</option>
-                </select>
-              </div>
+  <label class="form-label">Plot Shape</label>
+  <select class="form-select form-control" id="plot_shape_select"
+          onchange="handleOther(this,'plot_shape')">
+    <option value="">— Select Shape —</option>
+    <option value="Rectangular">Rectangular</option>
+    <option value="Square">Square</option>
+    <option value="L-Shaped">L-Shaped</option>
+    <option value="Irregular">Irregular / Odd</option>
+    <option value="Corner">Corner Plot</option>
+    <option value="Road-facing">Road-facing</option>
+    <option value="Farm_Parcel">Farm Parcel</option>
+    <option value="Regular">Regular</option>
+    <option value="Not specified">Not specified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="plot_shape" id="plot_shape_other"
+         style="display:none;" placeholder="Specify plot shape" disabled>
+  <input type="hidden" name="plot_shape" id="plot_shape_hidden" value="">
+</div>
+
+
+            
+
+<div class="col-md-4">
+  <label class="form-label">Plot Facing</label>
+  <select class="form-select form-control" id="facing_select"
+          onchange="handleOther(this,'facing')">
+    <option value="">— Select —</option>
+    <option value="East">East</option>
+    <option value="West">West</option>
+    <option value="North">North</option>
+    <option value="South">South</option>
+    <option value="North-East">North-East</option>
+    <option value="North-West">North-West</option>
+    <option value="South-East">South-East</option>
+    <option value="South-West">South-West</option>
+    <option value="Not_Specified">Not Specified</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="facing" id="facing_other"
+         style="display:none;" placeholder="Specify facing" disabled>
+  <input type="hidden" name="facing" id="facing_hidden" value="">
+</div>
              
             </div>
 
             <div class="sub-section-title mt-3">Road Access &amp; Entry</div>
             <div class="row">
+            
               <div class="col-md-4 mt-2">
-                <label class="form-label">Road Access &amp; Entry <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
-                  <option value="">— Select —</option>
-                  <option value="NH_SH_Access">National / State Highway Direct Access</option>
-                  <option value="MIDC_Road">MIDC / Estate Internal Road (Paved)</option>
-                  <option value="Service_Road">Service / Approach Road</option>
-                  <option value="Railway_Siding">Railway Siding Access Available</option>
-                  <option value="Port_Connectivity">Port / Waterway Connectivity</option>
-                  <option value="Double_Road">Corner — Two Road Access</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Road Width (Front of Plot)</label>
-                <select class="form-select form-control" name="road_width" id="road_width">
-                  <option value="">— Select —</option>
-                  <option value="18m">18 m (Standard MIDC Road)</option>
-                  <option value="24m">24 m (Wide MIDC Road)</option>
-                  <option value="30m">30 m</option>
-                  <option value="40m">40 m (Primary Industrial Road)</option>
-                  <option value="NH_width">NH / SH Width (Varies)</option>
-                </select>
-                <p class="hint-text">Wide road essential for truck / heavy vehicle movement</p>
-              </div>
+  <label class="form-label">Road Access &amp; Entry <span class="required">*</span></label>
+  <select class="form-select form-control" id="plot_road_facing_select" required
+          onchange="handleOther(this,'plot_road_facing')">
+    <option value="">— Select —</option>
+    <option value="NH_SH_Access">National / State Highway Direct Access</option>
+    <option value="MIDC_Road">MIDC / Estate Internal Road (Paved)</option>
+    <option value="Service_Road">Service / Approach Road</option>
+    <option value="Railway_Siding">Railway Siding Access Available</option>
+    <option value="Port_Connectivity">Port / Waterway Connectivity</option>
+    <option value="Double_Road">Corner — Two Road Access</option>
+    <option value="Public road access claimed - verify">Public road access claimed - verify</option>
+    <option value="Access to be legally confirmed">Access to be legally confirmed</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="plot_road_facing" id="plot_road_facing_other"
+         style="display:none;" placeholder="Specify road access" disabled>
+  <input type="hidden" name="plot_road_facing" id="plot_road_facing_hidden" value="">
+</div>
+             
 
-               <div class="col-md-4 mt-2">
-                <label class="form-label">Corner Plot?</label>
-                <select class="form-select form-control" name="corner_plot" id="corner_plot">
-                  <option value="no">No — Single Road Access</option>
-                  <option value="yes">Yes — Corner Plot (Two Road Access)</option>
-                </select>
-              </div>
+<div class="col-md-4 mt-2">
+  <label class="form-label">Road Width (Front of Plot)</label>
+  <select class="form-select form-control" id="road_width_select"
+          onchange="handleOther(this,'road_width')">
+    <option value="">— Select —</option>
+    <option value="18m">18 m (Standard MIDC Road)</option>
+    <option value="24m">24 m (Wide MIDC Road)</option>
+    <option value="30m">30 m</option>
+    <option value="40m">40 m (Primary Industrial Road)</option>
+    <option value="NH_width">NH / SH Width (Varies)</option>
+    <option value="To be measured">To be measured</option>
+    <option value="Seller to provide / verify">Seller to provide / verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="road_width" id="road_width_other"
+         style="display:none;" placeholder="Specify road width" disabled>
+  <input type="hidden" name="road_width" id="road_width_hidden" value="">
+  <p class="hint-text">Wide road essential for truck / heavy vehicle movement</p>
+</div>
+
+              
+<div class="col-md-4 mt-2">
+  <label class="form-label">Corner Plot?</label>
+  <select class="form-select form-control" id="corner_plot_select"
+          onchange="handleOther(this,'corner_plot')">
+    <option value="no">No — Single Road Access</option>
+    <option value="yes">Yes — Corner Plot (Two Road Access)</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="corner_plot" id="corner_plot_other"
+         style="display:none;" placeholder="Specify corner status" disabled>
+  <input type="hidden" name="corner_plot" id="corner_plot_hidden" value="">
+</div>
            
             </div>
 
             <div class="sub-section-title mt-3">Power &amp; Utilities</div>
             <div class="row">
+              
+
               <div class="col-md-4 mt-2">
-                <label class="form-label">Power Supply Available</label>
-                <select class="form-select form-control" name="power_supply" id="power_supply">
-                  <option value="">— Select —</option>
-                  <option value="3Phase_Available">3-Phase Industrial Power (Available)</option>
-                  <option value="3Phase_Connection_Needed">3-Phase — Connection Needed</option>
-                  <option value="HT_Line">High Tension (HT) Line / Substation Nearby</option>
-                  <option value="Single_Phase">Single Phase Only</option>
-                  <option value="No_Power">No Power Connection</option>
-                </select>
-              </div>
+  <label class="form-label">Power Supply Available</label>
+  <select class="form-select form-control" id="power_supply_select"
+          onchange="handleOther(this,'power_supply')">
+    <option value="">— Select —</option>
+    <option value="3Phase_Available">3-Phase Industrial Power (Available)</option>
+    <option value="3Phase_Connection_Needed">3-Phase — Connection Needed</option>
+    <option value="HT_Line">High Tension (HT) Line / Substation Nearby</option>
+    <option value="Single_Phase">Single Phase Only</option>
+    <option value="No_Power">No Power Connection</option>
+    <option value="Seller to provide and verify">Seller to provide and verify</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="power_supply" id="power_supply_other"
+         style="display:none;" placeholder="Specify power supply" disabled>
+  <input type="hidden" name="power_supply" id="power_supply_hidden" value="">
+</div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Power Load Sanctioned</label>
                 <div class="input-with-unit">
@@ -706,77 +877,164 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 </div>
                 <p class="hint-text">Leave blank if not yet sanctioned</p>
               </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Water Supply</label>
-                <select class="form-select form-control" name="industrial_water_supply" id="industrial_water_supply">
-                  <option value="">— Select —</option>
-                  <option value="MIDC_Water">MIDC / Authority Piped Water</option>
-                  <option value="Municipal_Water">Municipal / Corporation Water</option>
-                  <option value="Borewell_Available">Borewell Available on Plot</option>
-                  <option value="Water_Tanker">Water Tanker Arrangement</option>
-                  <option value="No_Water">No Water Supply</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Drain / Effluent Facility</label>
-                <select class="form-select form-control" name="effluent_treatment" id="effluent_treatment">
-                  <option value="">— Select —</option>
-                  <option value="Common_ETP">Common ETP Available (Estate)</option>
-                  <option value="Individual_ETP_Needed">Individual ETP to be Set Up</option>
-                  <option value="Drainage_Connected">Municipal Drainage Connected</option>
-                  <option value="Not_Applicable">Not Applicable (Dry Industry)</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Permissible Industry Type</label>
-                <select class="form-select form-control" name="industry_type_permissible" id="industry_type_permissible">
-                  <option value="">— Select —</option>
-                  <option value="Light_Non_Polluting">Light Non-Polluting Industry</option>
-                  <option value="Medium_Industry">Medium Scale Industry</option>
-                  <option value="Heavy_Industry">Heavy Industry</option>
-                  <option value="Warehouse_Logistics">Warehouse / Logistics / Storage</option>
-                  <option value="IT_Electronics">IT / Electronics / Assembly</option>
-                  <option value="Food_Processing">Food Processing / Agro Industry</option>
-                  <option value="Chemical_Pharma">Chemical / Pharmaceutical</option>
-                  <option value="Any_Industry">Any Industry (As per MIDC Norms)</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Compound Wall / Security Fencing</label>
-                <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
-                  <option value="none">No Boundary (Open Industrial Site)</option>
-                  <option value="partial">Partially Fenced</option>
-                  <option value="full_compound">Full RCC Compound Wall</option>
-                  <option value="security_fence">Industrial Security Fencing (Chain Link / Razor Wire)</option>
-                  <option value="gate_guard">Full Boundary with Gate &amp; Security Post</option>
-                </select>
-              </div>
+             
 
-                 <div class="col-md-4 mt-2">
-                <label class="form-label">Loading / Unloading Facility</label>
-                <select class="form-select form-control" name="loading_dock" id="loading_dock">
-                  <option value="">— Select —</option>
-                  <option value="Loading_Dock_Available">Loading Dock / Ramp Available</option>
-                  <option value="Open_Ground_Loading">Open Ground Loading Space</option>
-                  <option value="No_Loading_Facility">No Dedicated Loading Facility</option>
-                </select>
-              </div>
+              <div class="col-md-4 mt-2">
+  <label class="form-label">Water Supply</label>
+  <select class="form-select form-control" id="industrial_water_supply_select"
+          onchange="handleOther(this,'industrial_water_supply')">
+    <option value="">— Select —</option>
+    <option value="MIDC_Water">MIDC / Authority Piped Water</option>
+    <option value="Municipal_Water">Municipal / Corporation Water</option>
+    <option value="Borewell_Available">Borewell Available on Plot</option>
+    <option value="Water_Tanker">Water Tanker Arrangement</option>
+    <option value="No_Water">No Water Supply</option>
+    <option value="Seller to provide; verify lawful source">Seller to provide; verify lawful source</option>
+    <option value="Not provided">Not provided</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="industrial_water_supply" id="industrial_water_supply_other"
+         style="display:none;" placeholder="Specify water supply" disabled>
+  <input type="hidden" name="industrial_water_supply" id="industrial_water_supply_hidden" value="">
+</div>
+
+
+           
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Drain / Effluent Facility</label>
+  <select class="form-select form-control" id="effluent_treatment_select"
+          onchange="handleOther(this,'effluent_treatment')">
+    <option value="">— Select —</option>
+    <option value="Common_ETP">Common ETP Available (Estate)</option>
+    <option value="Individual_ETP_Needed">Individual ETP to be Set Up</option>
+    <option value="Drainage_Connected">Municipal Drainage Connected</option>
+    <option value="Not_Applicable">Not Applicable (Dry Industry)</option>
+    <option value="To verify">To verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="effluent_treatment" id="effluent_treatment_other"
+         style="display:none;" placeholder="Specify effluent treatment" disabled>
+  <input type="hidden" name="effluent_treatment" id="effluent_treatment_hidden" value="">
+</div>
+
+
+            
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Permissible Industry Type</label>
+  <select class="form-select form-control" id="industry_type_permissible_select"
+          onchange="handleOther(this,'industry_type_permissible')">
+    <option value="">— Select —</option>
+    <option value="Light_Non_Polluting">Light Non-Polluting Industry</option>
+    <option value="Medium_Industry">Medium Scale Industry</option>
+    <option value="Heavy_Industry">Heavy Industry</option>
+    <option value="Warehouse_Logistics">Warehouse / Logistics / Storage</option>
+    <option value="IT_Electronics">IT / Electronics / Assembly</option>
+    <option value="Food_Processing">Food Processing / Agro Industry</option>
+    <option value="Chemical_Pharma">Chemical / Pharmaceutical</option>
+    <option value="Any_Industry">Any Industry (As per MIDC Norms)</option>
+    <option value="Must match allotment, zoning and approvals">Must match allotment, zoning and approvals</option>
+    <option value="Only use supported by official records">Only use supported by official records</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="industry_type_permissible" id="industry_type_permissible_other"
+         style="display:none;" placeholder="Specify industry type" disabled>
+  <input type="hidden" name="industry_type_permissible" id="industry_type_permissible_hidden" value="">
+</div>
+
+
+             
+<div class="col-md-4 mt-3">
+  <label class="form-label">Compound Wall / Security Fencing</label>
+  <select class="form-select form-control" id="plot_fencing_select"
+          onchange="handleOther(this,'plot_fencing')">
+    <option value="none">No Boundary (Open Industrial Site)</option>
+    <option value="partial">Partially Fenced</option>
+    <option value="full_compound">Full RCC Compound Wall</option>
+    <option value="security_fence">Industrial Security Fencing (Chain Link / Razor Wire)</option>
+    <option value="gate_guard">Full Boundary with Gate &amp; Security Post</option>
+    <option value="Not fenced - verify">Not fenced - verify</option>
+    <option value="Partly fenced - verify">Partly fenced - verify</option>
+    <option value="Boundary markers to be confirmed">Boundary markers to be confirmed</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="plot_fencing" id="plot_fencing_other"
+         style="display:none;" placeholder="Specify boundary type" disabled>
+  <input type="hidden" name="plot_fencing" id="plot_fencing_hidden" value="">
+</div>
+
+                
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Loading / Unloading Facility</label>
+  <select class="form-select form-control" id="loading_dock_select"
+          onchange="handleOther(this,'loading_dock')">
+    <option value="">— Select —</option>
+    <option value="Loading_Dock_Available">Loading Dock / Ramp Available</option>
+    <option value="Open_Ground_Loading">Open Ground Loading Space</option>
+    <option value="No_Loading_Facility">No Dedicated Loading Facility</option>
+    <option value="Verify turning radius and road restrictions">Verify turning radius and road restrictions</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="loading_dock" id="loading_dock_other"
+         style="display:none;" placeholder="Specify loading facility" disabled>
+  <input type="hidden" name="loading_dock" id="loading_dock_hidden" value="">
+</div>
+
+
             </div>
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Power Backup / Transformer</label>
+  <select class="form-select form-control" id="power_backup_transformer_select"
+          onchange="handleOther(this,'power_backup_transformer')">
+    <option value="">— Select —</option>
+    <option value="DG_Available">DG Set Available</option>
+    <option value="Transformer_Available">Transformer Installed</option>
+    <option value="Both_Available">Both DG + Transformer Available</option>
+    <option value="Not_Available">Not Available</option>
+    <option value="Seller to provide and verify">Seller to provide and verify</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="Not provided">Not provided</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="power_backup_transformer" id="power_backup_transformer_other"
+         style="display:none;" placeholder="Specify e.g., 500 KVA transformer + DG" disabled>
+  <input type="hidden" name="power_backup_transformer" id="power_backup_transformer_hidden" value="">
+</div>
+
+
+<div class="col-md-12 mt-3">
+  <label class="form-label">Nearby Facilities / Connectivity Details</label>
+  <textarea class="form-control" name="nearby_facilities_details" id="nearby_facilities_details" rows="2" placeholder="Enter verified schools, market, highway, railway, port..."></textarea>
+</div>
 
             <div class="sub-section-title mt-3">Current Plot Status</div>
             <div class="row">
+             
+
               <div class="col-md-6 mt-2">
-                <label class="form-label">Current Plot / Shed Status</label>
-                <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
-                  <option value="">— Select —</option>
-                  <option value="Vacant_Ready">Vacant — Ready for Industrial Construction</option>
-                  <option value="Piling_Done">Piling / Foundation Work Done</option>
-                  <option value="Shed_Available">Industrial Shed / Structure Available</option>
-                  <option value="Partially_Operational">Partially Operational (Equipment to be Removed)</option>
-                  <option value="Fully_Operational">Running Unit (Business Sale / Slump Sale)</option>
-                </select>
-                <p class="hint-text">Indicates what buyer gets on possession</p>
-              </div>
+  <label class="form-label">Current Plot / Shed Status</label>
+  <select class="form-select form-control" id="current_possession_status_select"
+          onchange="handleOther(this,'current_possession_status')">
+    <option value="">— Select —</option>
+    <option value="Vacant_Ready">Vacant — Ready for Industrial Construction</option>
+    <option value="Piling_Done">Piling / Foundation Work Done</option>
+    <option value="Shed_Available">Industrial Shed / Structure Available</option>
+    <option value="Partially_Operational">Partially Operational (Equipment to be Removed)</option>
+    <option value="Fully_Operational">Running Unit (Business Sale / Slump Sale)</option>
+    <option value="Vacant / owner-occupied / leased — seller to confirm">Vacant / owner-occupied / leased — seller to confirm</option>
+    <option value="As per agreement - verify">As per agreement - verify</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="current_possession_status" id="current_possession_status_other"
+         style="display:none;" placeholder="Specify occupancy status" disabled>
+  <input type="hidden" name="current_possession_status" id="current_possession_status_hidden" value="">
+  <p class="hint-text">Indicates what buyer gets on possession</p>
+</div>
             </div>
 
           </div>
@@ -790,254 +1048,621 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         </div>
       </div><!-- /step1 -->
 
+     
+
       <!-- ════════════ STEP 2 — INFRASTRUCTURE & LEGAL ════════════ -->
-      <div class="step-content" id="step2">
-        <div class="form-header">
-                <div class="form-title">
-                  
-            🏭 Industrial Plot
-                </div>
-               
-            </div>
+<div class="step-content" id="step2">
+  <div class="form-header">
+    <div class="form-title">
+      🏭 Industrial Plot
+    </div>
+  </div>
 
-        <!-- PRICING -->
-        <div class="form-section">
-          <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
-          <div class="section-body">
-            <div class="row">
-              <div class="col-md-6 mt-2">
-                <label class="form-label"> Selling Price <span class="required">*</span></label>
-                <div class="input-with-unit">
-                  <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 15000000">
-                  <span class="input-unit">₹</span>
-                </div>
-              </div>
-              <div class="col-md-6 mt-2">
-                <label class="form-label">
-                  <i class="fas fa-calculator" style="color:#11998e"></i> Price per Sq.m
-                  <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span>
-                </label>
-                <div class="input-with-unit">
-                  <input type="number" class="form-control" id="plot_price_per_sqft" name="price_per_sqft" placeholder="Auto-filled…" readonly>
-                  <span class="input-unit">₹/sq.m</span>
-                </div>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Is the Price Negotiable?</label>
-                <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="price_negotiable" value="yes"> Yes, Negotiable</label>
-                  <label class="radio-option"><input type="radio" name="price_negotiable" value="no" checked> Fixed Price</label>
-                </div>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Additional Industrial Charges</label>
-                <select class="form-select form-control" name="additional_charges" id="additional_charges">
-                  <option value="none">No Additional Charges</option>
-                  <option value="midc_transfer">MIDC Transfer Premium / Charges Extra</option>
-                  <option value="stamp_extra">Stamp Duty &amp; Registration Extra</option>
-                  <option value="development_charges">Development / Infrastructure Charges Extra</option>
-                  <option value="all_inclusive">All Inclusive (No Extra Cost)</option>
-                </select>
-              </div>
+  <!-- 🆕 BUILDING & CONSTRUCTION (BUILT PROPERTY ONLY) -->
+  <div class="form-section" id="built_section" style="display:none;">
+    <div class="section-header warn-theme"><i class="fas fa-hard-hat"></i> Building &amp; Construction (Built Property Only)</div>
+    <div class="section-body">
+      <div class="row">
+        <div class="col-md-4 mt-2">
+          <label class="form-label">Usable Floor Area (sq.ft)</label>
+          <input type="number" class="form-control" name="usable_floor_area_sqft" id="usable_floor_area_sqft" placeholder="e.g., 5000">
+        </div>
+        <div class="col-md-4 mt-2">
+          <label class="form-label">Built-up Area (sq.ft)</label>
+          <input type="number" class="form-control" name="built_up_area_sqft" id="built_up_area_sqft" placeholder="e.g., 6000">
+        </div>
+        <div class="col-md-4 mt-2">
+          <label class="form-label">Total Land Area (sq.ft)</label>
+          <input type="number" class="form-control" name="total_land_area_sqft" id="total_land_area_sqft">
+        </div>
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Building Clear Height (ft)</label>
+          <input type="number" class="form-control" name="building_clear_height" id="building_clear_height" placeholder="e.g., 30">
+        </div>
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Number of Floors</label>
+          <input type="number" class="form-control" name="number_of_floors" id="number_of_floors" placeholder="e.g., 2">
+        </div>
+        
 
-              <!-- BROKERAGE -->
-              <div class="col-md-6 mt-3" id="brokerageSection">
-                <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
-                <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
-                  <option value="">Select</option>
-                  <option value="No Brokerage">No Brokerage (Direct from Owner)</option>
-                  <option value="1% of amount">1% of Sale Value</option>
-                  <option value="1.5% of amount">1.5% of Sale Value</option>
-                  <option value="2% of amount">2% of Sale Value</option>
-                  <option value="Fixed Amount">Fixed Amount</option>
-                  <option value="Negotiable">Negotiable</option>
-                </select>
-              </div>
-              <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:none;">
-                <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
-                <div class="input-with-unit">
-                  <input type="number" class="form-control" name="manual_brokerage" placeholder="e.g., 100000">
-                  <span class="input-unit">₹</span>
-                </div>
-              </div>
-            </div>
+        <div class="col-md-4 mt-3">
+  <label class="form-label">Construction Type</label>
+  <select class="form-select form-control" id="construction_type_select"
+          onchange="handleOther(this,'construction_type')">
+    <option value="">— Select —</option>
+    <option value="RCC">RCC</option>
+    <option value="PEB">PEB (Pre-Engineered Building)</option>
+    <option value="Steel_Shed">Steel Shed</option>
+    <option value="Mixed">Mixed</option>
+    <option value="Open_Land">Open Land Only</option>
+    <option value="RCC / PEB / shed / mixed — verify">RCC / PEB / shed / mixed — verify</option>
+    <option value="Other">Other — Verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="construction_type" id="construction_type_other"
+         style="display:none;" placeholder="Specify construction type" disabled>
+  <input type="hidden" name="construction_type" id="construction_type_hidden" value="">
+</div>
+
+
+       
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Construction Age / Condition</label>
+  <select class="form-select form-control" id="construction_age_select"
+          onchange="handleOther(this,'construction_age')">
+    <option value="">— Select —</option>
+    <option value="New">New</option>
+    <option value="Good">Good</option>
+    <option value="Average">Average</option>
+    <option value="Poor">Poor</option>
+    <option value="Under_Construction">Under Construction</option>
+    <option value="Seller to provide; inspect">Seller to provide; inspect</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="construction_age" id="construction_age_other"
+         style="display:none;" placeholder="Specify age/condition" disabled>
+  <input type="hidden" name="construction_age" id="construction_age_hidden" value="">
+</div>
+
+
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Floor Load Capacity</label>
+          <input type="text" class="form-control" name="floor_load_capacity" id="floor_load_capacity" placeholder="e.g., 500 kg/sqm">
+        </div>
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Crane / Hoist Capacity</label>
+          <input type="text" class="form-control" name="crane_capacity" id="crane_capacity" placeholder="e.g., 10 tonnes">
+        </div>
+
+      <div class="col-md-4 mt-3">
+  <label class="form-label">Fire Access / Emergency Exits</label>
+  <select class="form-select form-control" id="fire_access_compliance_select"
+          onchange="handleOther(this,'fire_access_compliance')">
+    <option value="">— Select —</option>
+    <option value="Compliant">Compliant</option>
+    <option value="Partial">Partial</option>
+    <option value="Non_Compliant">Non-Compliant</option>
+    <option value="To_Verify">To Verify</option>
+    <option value="Inspect and verify compliance">Inspect and verify compliance</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="fire_access_compliance" id="fire_access_compliance_other"
+         style="display:none;" placeholder="Specify fire access status" disabled>
+  <input type="hidden" name="fire_access_compliance" id="fire_access_compliance_hidden" value="">
+</div>
+
+        
+      </div>
+    </div>
+  </div>
+  <!-- 🆕 END BUILDING & CONSTRUCTION -->
+
+  <!-- PRICING -->
+  <div class="form-section">
+    <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+    <div class="section-body">
+      <div class="row">
+        <div class="col-md-6 mt-2">
+          <label class="form-label"> Selling Price <span class="required">*</span></label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 15000000">
+            <span class="input-unit">₹</span>
+          </div>
+        </div>
+        <div class="col-md-6 mt-2">
+          <label class="form-label">
+            <i class="fas fa-calculator" style="color:#11998e"></i> Price per Sq.m
+            <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span>
+          </label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" id="plot_price_per_sqft" name="price_per_sqft" placeholder="Auto-filled…" readonly>
+            <span class="input-unit">₹/sq.m</span>
+          </div>
+        </div>
+        <div class="col-md-6 mt-3">
+          <label class="form-label">Is the Price Negotiable?</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="price_negotiable" value="yes"> Yes, Negotiable</label>
+            <label class="radio-option"><input type="radio" name="price_negotiable" value="no" checked> Fixed Price</label>
           </div>
         </div>
 
-        <!-- LEGAL -->
-        <div class="form-section">
-          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &; Industrial Authority Details</div>
-          <div class="section-body">
+        <div class="col-md-6 mt-3">
+  <label class="form-label">Additional Industrial Charges</label>
+  <select class="form-select form-control" id="additional_charges_select"
+          onchange="handleOther(this,'additional_charges')">
+    <option value="none">No Additional Charges</option>
+    <option value="midc_transfer">MIDC Transfer Premium / Charges Extra</option>
+    <option value="stamp_extra">Stamp Duty &amp; Registration Extra</option>
+    <option value="development_charges">Development / Infrastructure Charges Extra</option>
+    <option value="all_inclusive">All Inclusive (No Extra Cost)</option>
+    <option value="Not provided - confirm applicable charges">Not provided - confirm applicable charges</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="additional_charges" id="additional_charges_other"
+         style="display:none;" placeholder="Specify additional charges" disabled>
+  <input type="hidden" name="additional_charges" id="additional_charges_hidden" value="none">
+</div>
 
-            <div class="sub-section-title">Ownership Details</div>
-            <div class="row">
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Ownership / Tenure Type</label>
-                <select class="form-select form-control" name="ownership_type" id="ownership_type">
-                  <option value="">— Select Ownership —</option>
-                  <option value="midc_lease">MIDC Leasehold (99-Year Lease — Transferable)</option>
-                  <option value="freehold">Freehold Industrial Land (Private)</option>
-                  <option value="sez_lease">SEZ Developer Lease</option>
-                  <option value="company_owned">Company / Corporate Asset Sale</option>
-                  <option value="power_of_attorney">Power of Attorney (POA) Holder</option>
-                </select>
-              </div>
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Primary Title / Ownership Document</label>
-                <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
-                  <option value="">— Select Document Type —</option>
-                  <option value="MIDC_Allotment_Letter">MIDC Allotment Letter (Original)</option>
-                  <option value="Transfer_Letter">MIDC Transfer Letter (Previous Owner)</option>
-                  <option value="Registered Sale Deed">Registered Sale Deed</option>
-                  <option value="Conveyance Deed">Conveyance Deed / Final Deed</option>
-                  <option value="Lease Deed">Lease Deed</option>
-                  <option value="SEZ_Allotment">SEZ Developer Allotment Letter</option>
-                  <option value="Court Decree">Court Decree (Legal Settlement)</option>
-                  <option value="Other">Other (Specify below)</option>
-                </select>
-              </div>
-              <div class="col-md-6 mt-3" id="other_document_type_div" style="display:none;">
-                <label class="form-label">Specify Other Ownership Document Type</label>
-                <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document">
-              </div>
-            </div>
-
-            <div class="sub-section-title mt-3">MIDC / Industrial Authority Compliance</div>
-            <div class="row">
-              <div class="col-md-4 mt-2">
-                <label class="form-label">MIDC / Authority Allotment Letter</label>
-                <select class="form-select form-control" name="midc_allotment" id="midc_allotment">
-                  <option value="Available">Available (Original Allotment)</option>
-                  <option value="Transfer_Letter">Transfer Letter (Previous Owner)</option>
-                  <option value="Not_Available">Not Available</option>
-                  <option value="Not_Applicable">Not Applicable (Private Industrial Land)</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">MIDC Transfer / NOC Status</label>
-                <select class="form-select form-control" name="midc_transfer_noc" id="midc_transfer_noc">
-                  <option value="">— Select —</option>
-                  <option value="NOC_Available">NOC Available from MIDC</option>
-                  <option value="NOC_Applied">NOC Application Pending</option>
-                  <option value="Not_Required">NOC Not Required (Private Plot)</option>
-                  <option value="Transfer_Pending">Transfer Pending with Authority</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Environmental Clearance (EC)</label>
-                <select class="form-select form-control" name="environmental_clearance" id="environmental_clearance">
-                  <option value="">— Select —</option>
-                  <option value="Not_Required">Not Required (Below Threshold)</option>
-                  <option value="EC_Obtained">EC Obtained</option>
-                  <option value="EC_Applied">EC Application Pending</option>
-                  <option value="EC_Required">EC Required — Not Yet Applied</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">RERA / Industrial Authority Status</label>
-                <select class="form-select form-control" name="rera_status" id="rera_status">
-                  <option value="">— Select —</option>
-                  <option value="MIDC_Allotted">MIDC Plot — Authority Allotted</option>
-                  <option value="SEZ_Registered">SEZ Registered Unit</option>
-                  <option value="Not Applicable">RERA Not Applicable (Industrial)</option>
-                </select>
-                <p class="hint-text">RERA typically does not apply to industrial plots</p>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Title Clarity / Marketability</label>
-                <select class="form-select form-control" name="title_clearance" id="title_clearance">
-                  <option value="">— Select —</option>
-                  <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
-                  <option value="Under Verification">Title Under Verification</option>
-                  <option value="Legal Dispute">Title in Legal Dispute</option>
-                  <option value="Encumbrance Exists">Encumbrance / Charge Exists</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Encumbrance / Charge Status</label>
-                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
-                  <option value="">— Select —</option>
-                  <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
-                  <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
-                  <option value="Under Litigation">Under Court Litigation</option>
-                  <option value="Government Acquisition Notice">Govt Acquisition Notice</option>
-                  <option value="Other Claim Exists">Other Claim / Charge Exists</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="sub-section-title mt-3"> Property Tax & Loan Status</div>
-            <div class="row">
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Industrial Property Tax / Assessment Status</label>
-                <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
-                  <option value="">— Select —</option>
-                  <option value="Fully Paid">Fully Paid (All Industrial Dues Clear)</option>
-                  <option value="MIDC_Dues_Clear">MIDC / Authority Dues Clear</option>
-                  <option value="Dues_Pending">MIDC / Authority Dues Pending</option>
-                  <option value="Under_Assessment">Under Municipal Assessment</option>
-                </select>
-              </div>
-              <div id="tax_due_section" style="display:none;" class="col-md-12 mt-0">
-                <div class="row">
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Outstanding Tax / Dues Amount (₹)</label>
-                    <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 50000">
-                      <span class="input-unit">₹</span>
-                    </div>
-                  </div>
-                  <div class="col-md-6 mt-3" id="pending_since_div" style="display:none;">
-                    <label class="form-label">Dues Pending Since</label>
-                    <input type="date" class="form-control" name="pending_since" id="pending_since">
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Existing Loan / Mortgage on Property</label>
-                <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
-                  <option value="">— Select Loan Status —</option>
-                  <option value="No Active Loan">No Active Loan (Loan-Free Property)</option>
-                  <option value="Loan Running">Loan Running (To be closed before sale)</option>
-                  <option value="Loan Closed">Loan Closed (NOC Available)</option>
-                  <option value="Loan Status Not Available">Not Disclosed</option>
-                </select>
-              </div>
-              <div id="loan_running_section" style="display:none;" class="col-md-12 mt-0">
-                <div class="row">
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Lender Bank / NBFC Name</label>
-                    <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
-                  </div>
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Outstanding Loan Amount (₹)</label>
-                    <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 5000000">
-                      <span class="input-unit">₹</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group mt-3">
-              <label class="form-label">Industrial Authority / Estate Developer</label>
-              <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2"
-                placeholder="e.g., MIDC Nagpur, MIDC Butibori, Nagpur SEZ Ltd, Private Industrial Estate, GIDC, CIDCO Industrial"></textarea>
-            </div>
-
-            <div class="inline-status is-warning mt-3">
-              <i class="fas fa-triangle-exclamation"></i>
-              <span style="font-size:.8rem;">For MIDC plots, MIDC transfer NOC is mandatory before registration. Ensure NOC status is correct above.</span>
-            </div>
+        <!-- 🆕 BOOKING AMOUNT + PRICE NOTES -->
+        <div class="col-md-6 mt-3">
+          <label class="form-label">Booking Amount (₹)</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" name="booking_amount" id="booking_amount" placeholder="e.g., 200000">
+            <span class="input-unit">₹</span>
           </div>
         </div>
-
-        <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
-          <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+        <div class="col-md-6 mt-3">
+          <label class="form-label">Price Includes / Excludes</label>
+          <textarea class="form-control" name="price_includes_excludes" id="price_includes_excludes" rows="2" placeholder="e.g., Includes machinery; GST extra; stamp duty extra"></textarea>
         </div>
-      </div><!-- /step2 -->
+
+        <!-- BROKERAGE -->
+        <div class="col-md-6 mt-3" id="brokerageSection">
+          <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+          <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+            <option value="">Select</option>
+            <option value="No Brokerage">No Brokerage (Direct from Owner)</option>
+            <option value="1% of amount">1% of Sale Value</option>
+            <option value="1.5% of amount">1.5% of Sale Value</option>
+            <option value="2% of amount">2% of Sale Value</option>
+            <option value="Fixed Amount">Fixed Amount</option>
+            <option value="Negotiable">Negotiable</option>
+          </select>
+        </div>
+
+
+
+        <!-- 🆕 NEW FIELDS: Landlord / Owner Fee -->
+<div class="col-md-6 mt-3" id="landlordFeeSection">
+  <label class="form-label">Landlord / Owner Service Fee <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Optional)</span></label>
+  <select class="form-select form-control" name="landlord_owner_fee" id="landlordOwnerFee" onchange="toggleLandlordFixedAmount()">
+    <option value="">Select Fee Structure</option>
+    
+     <option value="0.5% of Sale Value">0.5% of Sale Value</option>
+    <option value="1% of Sale Value">1% of Sale Value</option>
+    <option value="1.5% of Sale Value">1.5% of Sale Value</option>
+    <option value="2% of Sale Value">2% of Sale Value</option>
+    <option value="2.5% of Sale Value">2.5% of Sale Value</option>
+    <option value="3% of Sale Value">3% of Sale Value</option>
+    <option value="Fixed Amount">Fixed Amount</option>
+    <option value="No Fee">No Fee / Direct Deal</option>
+  </select>
+</div>
+
+<!-- 🆕 Fixed Amount Input Box (Hidden by default) -->
+<div class="col-md-6 mt-3" id="landlordFixedAmountSection" style="display: none;">
+  <label class="form-label">Enter Fixed Owner Fee Amount (₹)</label>
+  <div class="input-with-unit">
+    <input type="number" class="form-control" name="landlord_owner_fixed_amount" id="landlordOwnerFixedAmount" placeholder="e.g., 50000">
+    <span class="input-unit">₹</span>
+  </div>
+</div>
+        
+        <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:none;">
+          <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" name="manual_brokerage" placeholder="e.g., 100000">
+            <span class="input-unit">₹</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGAL -->
+  <div class="form-section">
+    <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &amp; Industrial Authority Details</div>
+    <div class="section-body">
+
+      <div class="sub-section-title">Ownership Details</div>
+      <div class="row">
+       
+
+        <div class="col-md-6 mt-2">
+  <label class="form-label">Ownership / Tenure Type</label>
+  <select class="form-select form-control" id="ownership_type_select"
+          onchange="handleOther(this,'ownership_type')">
+    <option value="">— Select Ownership —</option>
+    <option value="midc_lease">MIDC Leasehold (99-Year Lease — Transferable)</option>
+    <option value="freehold">Freehold Industrial Land (Private)</option>
+    <option value="sez_lease">SEZ Developer Lease</option>
+    <option value="company_owned">Company / Corporate Asset Sale</option>
+    <option value="power_of_attorney">Power of Attorney (POA) Holder</option>
+    <option value="Not confirmed — inspect title/allotment/lease">Not confirmed — inspect title/allotment/lease</option>
+    <option value="Individual owner">Individual owner</option>
+    <option value="Joint owners - verify">Joint owners - verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="ownership_type" id="ownership_type_other"
+         style="display:none;" placeholder="Specify ownership type" disabled>
+  <input type="hidden" name="ownership_type" id="ownership_type_hidden" value="">
+</div>
+       
+
+<div class="col-md-6 mt-2">
+  <label class="form-label">Primary Title / Ownership Document</label>
+  <select class="form-select form-control" id="ownership_document_type_select"
+          onchange="handleOther(this,'ownership_document_type')">
+    <option value="">— Select Document Type —</option>
+    <option value="MIDC_Allotment_Letter">MIDC Allotment Letter (Original)</option>
+    <option value="Transfer_Letter">MIDC Transfer Letter (Previous Owner)</option>
+    <option value="Registered Sale Deed">Registered Sale Deed</option>
+    <option value="Conveyance Deed">Conveyance Deed / Final Deed</option>
+    <option value="Lease Deed">Lease Deed</option>
+    <option value="SEZ_Allotment">SEZ Developer Allotment Letter</option>
+    <option value="Court Decree">Court Decree (Legal Settlement)</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="ownership_document_type" id="ownership_document_type_other"
+         style="display:none;" placeholder="Specify document type" disabled>
+  <input type="hidden" name="ownership_document_type" id="ownership_document_type_hidden" value="">
+</div>
+      </div>
+
+      <div class="sub-section-title mt-3">MIDC / Industrial Authority Compliance</div>
+      <div class="row">
+       
+
+        <div class="col-md-4 mt-2">
+  <label class="form-label">MIDC / Authority Allotment Letter</label>
+  <select class="form-select form-control" id="midc_allotment_select"
+          onchange="handleOther(this,'midc_allotment')">
+    <option value="Available">Available (Original Allotment)</option>
+    <option value="Transfer_Letter">Transfer Letter (Previous Owner)</option>
+    <option value="Not_Available">Not Available</option>
+    <option value="Not_Applicable">Not Applicable (Private Industrial Land)</option>
+    <option value="Not supplied — verify">Not supplied — verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="midc_allotment" id="midc_allotment_other"
+         style="display:none;" placeholder="Specify allotment status" disabled>
+  <input type="hidden" name="midc_allotment" id="midc_allotment_hidden" value="">
+</div>
+       
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">MIDC Transfer / NOC Status</label>
+  <select class="form-select form-control" id="midc_transfer_noc_select"
+          onchange="handleOther(this,'midc_transfer_noc')">
+    <option value="">— Select —</option>
+    <option value="NOC_Available">NOC Available from MIDC</option>
+    <option value="NOC_Applied">NOC Application Pending</option>
+    <option value="Not_Required">NOC Not Required (Private Plot)</option>
+    <option value="Transfer_Pending">Transfer Pending with Authority</option>
+    <option value="If required, obtain and verify">If required, obtain and verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="midc_transfer_noc" id="midc_transfer_noc_other"
+         style="display:none;" placeholder="Specify NOC status" disabled>
+  <input type="hidden" name="midc_transfer_noc" id="midc_transfer_noc_hidden" value="">
+</div>
+
+
+       <div class="col-md-4 mt-2">
+  <label class="form-label">Environmental Clearance (EC)</label>
+  <select class="form-select form-control" id="environmental_clearance_select"
+          onchange="handleOther(this,'environmental_clearance')">
+    <option value="">— Select —</option>
+    <option value="Not_Required">Not Required (Below Threshold)</option>
+    <option value="EC_Obtained">EC Obtained</option>
+    <option value="EC_Applied">EC Application Pending</option>
+    <option value="EC_Required">EC Required — Not Yet Applied</option>
+    <option value="Applicability and valid documents to verify">Applicability and valid documents to verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="environmental_clearance" id="environmental_clearance_other"
+         style="display:none;" placeholder="Specify EC status" disabled>
+  <input type="hidden" name="environmental_clearance" id="environmental_clearance_hidden" value="">
+</div>
+
+
+       
+<div class="col-md-4 mt-3">
+  <label class="form-label">RERA / Industrial Authority Status</label>
+  <select class="form-select form-control" id="rera_status_select"
+          onchange="handleOther(this,'rera_status')">
+    <option value="">— Select —</option>
+    <option value="MIDC_Allotted">MIDC Plot — Authority Allotted</option>
+    <option value="SEZ_Registered">SEZ Registered Unit</option>
+    <option value="Not Applicable">RERA Not Applicable (Industrial)</option>
+    <option value="Check applicability; not supplied">Check applicability; not supplied</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="rera_status" id="rera_status_other"
+         style="display:none;" placeholder="Specify RERA status" disabled>
+  <input type="hidden" name="rera_status" id="rera_status_hidden" value="">
+  <p class="hint-text">RERA typically does not apply to industrial plots</p>
+</div>
+
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Title Clarity / Marketability</label>
+  <select class="form-select form-control" id="title_clearance_select"
+          onchange="handleOther(this,'title_clearance')">
+    <option value="">— Select —</option>
+    <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
+    <option value="Under Verification">Title Under Verification</option>
+    <option value="Legal Dispute">Title in Legal Dispute</option>
+    <option value="Encumbrance Exists">Encumbrance / Charge Exists</option>
+    <option value="Not verified - check title chain and original documents">Not verified - check title chain</option>
+    <option value="Pending legal verification">Pending legal verification</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="title_clearance" id="title_clearance_other"
+         style="display:none;" placeholder="Specify title status" disabled>
+  <input type="hidden" name="title_clearance" id="title_clearance_hidden" value="">
+</div>
+
+     
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Encumbrance / Charge Status</label>
+  <select class="form-select form-control" id="property_encumbrance_status_select"
+          onchange="handleOther(this,'property_encumbrance_status')">
+    <option value="">— Select —</option>
+    <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
+    <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
+    <option value="Under Litigation">Under Court Litigation</option>
+    <option value="Government Acquisition Notice">Govt Acquisition Notice</option>
+    <option value="Other Claim Exists">Other Claim / Charge Exists</option>
+    <option value="Pending legal verification">Pending legal verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="Not checked — legal review required">Not checked — legal review required</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="property_encumbrance_status" id="property_encumbrance_status_other"
+         style="display:none;" placeholder="Specify encumbrance" disabled>
+  <input type="hidden" name="property_encumbrance_status" id="property_encumbrance_status_hidden" value="">
+</div>
+      </div>
+
+      <!-- 🆕 STATUTORY CONSENTS (INDUSTRIAL COMPLIANCE) -->
+      <div class="sub-section-title mt-3">Statutory Consents (Industrial Compliance)</div>
+      <div class="row">
+       
+
+        <div class="col-md-4 mt-2">
+  <label class="form-label">MPCB Consent to Establish / Operate</label>
+  <select class="form-select form-control" id="mpcb_consent_select"
+          onchange="handleOther(this,'mpcb_consent')">
+    <option value="">— Select —</option>
+    <option value="Available">Available (Number/Date Verified)</option>
+    <option value="Not_Available">Not Available</option>
+    <option value="Not_Applicable">Not Applicable (Below Threshold)</option>
+    <option value="To_Verify">To Verify</option>
+    <option value="For applicable activity; verify validity and conditions">For applicable activity; verify validity and conditions</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="mpcb_consent" id="mpcb_consent_other"
+         style="display:none;" placeholder="Specify MPCB consent details" disabled>
+  <input type="hidden" name="mpcb_consent" id="mpcb_consent_hidden" value="">
+  <p class="hint-text">Mandatory for most industrial activities</p>
+</div>
+
+
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Factory / Industrial Licence</label>
+  <select class="form-select form-control" id="factory_licence_select"
+          onchange="handleOther(this,'factory_licence')">
+    <option value="">— Select —</option>
+    <option value="Available">Available</option>
+    <option value="Not_Available">Not Available</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="To_Verify">To Verify</option>
+    <option value="Depends on activity; verify applicability">Depends on activity; verify applicability</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="factory_licence" id="factory_licence_other"
+         style="display:none;" placeholder="Specify factory licence" disabled>
+  <input type="hidden" name="factory_licence" id="factory_licence_hidden" value="">
+</div>
+        
+
+
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Fire NOC / Fire System</label>
+  <select class="form-select form-control" id="fire_noc_select"
+          onchange="handleOther(this,'fire_noc')">
+    <option value="">— Select —</option>
+    <option value="Available">Available</option>
+    <option value="Not_Available">Not Available</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="To_Verify">To Verify</option>
+    <option value="Applicability and valid documents to verify">Applicability and valid documents to verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="fire_noc" id="fire_noc_other"
+         style="display:none;" placeholder="Specify fire NOC status" disabled>
+  <input type="hidden" name="fire_noc" id="fire_noc_hidden" value="">
+</div>
+
+
+     <div class="col-md-4 mt-3">
+  <label class="form-label">Hazardous Material / Chemical Storage</label>
+  <select class="form-select form-control" id="hazardous_storage_select"
+          onchange="handleOther(this,'hazardous_storage')">
+    <option value="No">No</option>
+    <option value="Yes_Verified">Yes — Permissions Verified</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="Declare if applicable; verify permissions and safety systems">Declare if applicable; verify permissions and safety systems</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="hazardous_storage" id="hazardous_storage_other"
+         style="display:none;" placeholder="Specify hazardous storage" disabled>
+  <input type="hidden" name="hazardous_storage" id="hazardous_storage_hidden" value="">
+</div>
+
+
+      <div class="col-md-4 mt-3">
+  <label class="form-label">Completion / Occupancy Certificate</label>
+  <select class="form-select form-control" id="occupancy_cert_select"
+          onchange="handleOther(this,'occupancy_cert')">
+    <option value="">— Select —</option>
+    <option value="Available">Available</option>
+    <option value="Not_Available">Not Available</option>
+    <option value="If_Applicable">If Applicable — Verify</option>
+    <option value="If applicable; verify">If applicable; verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="occupancy_cert" id="occupancy_cert_other"
+         style="display:none;" placeholder="Specify occupancy cert status" disabled>
+  <input type="hidden" name="occupancy_cert" id="occupancy_cert_hidden" value="">
+</div>
+
+
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Layout / Building Plan Approval No.</label>
+          <input type="text" class="form-control" name="layout_approval_ref" id="layout_approval_ref" placeholder="e.g., MIDC/NOC/2023/1234">
+        </div>
+      </div>
+
+      <!-- 🆕 REVENUE RECORD VERIFICATION -->
+      <div class="sub-section-title mt-3">Revenue Record Verification</div>
+      <div class="row">
+
+      <div class="col-md-4 mt-2">
+  <label class="form-label">7/12 Extract / Property Card</label>
+  <select class="form-select form-control" id="extract_7_12_status_select"
+          onchange="handleOther(this,'extract_7_12_status')">
+    <option value="">— Select —</option>
+    <option value="Verified">Verified</option>
+    <option value="To_Verify">To Verify</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="extract_7_12_status" id="extract_7_12_status_other"
+         style="display:none;" placeholder="Specify 7/12 status" disabled>
+  <input type="hidden" name="extract_7_12_status" id="extract_7_12_status_hidden" value="">
+</div>
+       
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Mutation / Ferfar Status</label>
+  <select class="form-select form-control" id="mutation_status_select"
+          onchange="handleOther(this,'mutation_status')">
+    <option value="">— Select —</option>
+    <option value="Verified">Verified</option>
+    <option value="To_Verify">To Verify</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="mutation_status" id="mutation_status_other"
+         style="display:none;" placeholder="Specify mutation status" disabled>
+  <input type="hidden" name="mutation_status" id="mutation_status_hidden" value="">
+</div>
+
+
+        <div class="col-md-4 mt-2">
+          <label class="form-label">NA / Land-Use Order No.</label>
+          <input type="text" class="form-control" name="na_order_number" id="na_order_number" placeholder="e.g., NA/2023/456">
+        </div>
+      </div>
+
+      <!-- 🆕 LEASE TERM + TRANSFER FEES + LITIGATION -->
+      <div class="row">
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Lease Term / Remaining Term (Years)</label>
+          <input type="number" class="form-control" name="lease_term_remaining" id="lease_term_remaining" placeholder="e.g., 75">
+          <p class="hint-text">Only for MIDC / SEZ leasehold plots</p>
+        </div>
+        <div class="col-md-4 mt-3">
+          <label class="form-label">Transfer Fees / Premium (₹)</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" name="transfer_fees_premium" id="transfer_fees_premium" placeholder="e.g., 500000">
+            <span class="input-unit">₹</span>
+          </div>
+        </div>
+      
+
+        <div class="col-md-4 mt-3">
+  <label class="form-label">Litigation Disclosure</label>
+  <select class="form-select form-control" id="litigation_disclosure_select"
+          onchange="handleOther(this,'litigation_disclosure')">
+    <option value="">— Select —</option>
+    <option value="No_Litigation">No Litigation</option>
+    <option value="Under_Litigation">Under Litigation</option>
+    <option value="Seller_Declaration">Seller Declaration Only</option>
+    <option value="Seller declaration; verify">Seller declaration; verify</option>
+    <option value="Not completed">Not completed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="litigation_disclosure" id="litigation_disclosure_other"
+         style="display:none;" placeholder="Specify litigation status" disabled>
+  <input type="hidden" name="litigation_disclosure" id="litigation_disclosure_hidden" value="">
+</div>
+      </div>
+
+     
+
+      <!-- 🆕 OCCUPANCY & INCOME (IF LEASED) -->
+      <div class="sub-section-title mt-3">Occupancy &amp; Income (If Leased)</div>
+      <div class="row">
+        <div class="col-md-6 mt-2">
+          <label class="form-label">Tenant / Lease Details</label>
+          <textarea class="form-control" name="tenant_lease_details" id="tenant_lease_details" rows="2" placeholder="Rent, deposit, term, lock-in, expiry, transfer rights"></textarea>
+        </div>
+        <div class="col-md-6 mt-2">
+          <label class="form-label">Monthly Rent (₹)</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" name="monthly_rent" id="monthly_rent" placeholder="e.g., 50000">
+            <span class="input-unit">₹</span>
+          </div>
+        </div>
+        <div class="col-md-6 mt-3">
+          <label class="form-label">Utility Dues (₹)</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-control" name="utility_dues" id="utility_dues" placeholder="e.g., 25000">
+            <span class="input-unit">₹</span>
+          </div>
+        </div>
+        <div class="col-md-6 mt-3">
+          <label class="form-label">Title Chain / Legal Notes</label>
+          <textarea class="form-control" name="title_chain_notes" id="title_chain_notes" rows="2" placeholder="Notes from legal review"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group mt-3">
+        <label class="form-label">Industrial Authority / Estate Developer</label>
+        <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2"
+          placeholder="e.g., MIDC Nagpur, MIDC Butibori, Nagpur SEZ Ltd, Private Industrial Estate, GIDC, CIDCO Industrial"></textarea>
+      </div>
+
+      <div class="inline-status is-warning mt-3">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span style="font-size:.8rem;">For MIDC plots, MIDC transfer NOC is mandatory before registration. Ensure NOC status is correct above.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-nav">
+    <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+    <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+  </div>
+</div><!-- /step2 -->
 
       <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
       <div class="step-content" id="step3">
@@ -1141,6 +1766,20 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           placeholder="e.g., 2 km from Pune-Nashik Highway">
       </div>
 
+
+
+      <div class="col-md-4 mt-3">
+  <label class="form-label">District / Region <span class="required">*</span></label>
+  <input type="text" class="form-control" name="district_region" id="district_region" placeholder="e.g., Nagpur Region" required>
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Taluka / Tehsil <span class="required">*</span></label>
+  <input type="text" class="form-control" name="taluka" id="taluka" placeholder="e.g., Hingna" required>
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Mouza / Village</label>
+  <input type="text" class="form-control" name="mouza" id="mouza" placeholder="e.g., Butibori">
+</div>
       <!-- 4. City & State (Side by side) -->
       <div class="col-md-6 mt-3">
         <label class="form-label">City / District <span class="required">*</span></label>
@@ -1192,7 +1831,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
       <!-- 5. Pincode & Google Maps Link (Side by side) -->
       <div class="col-md-6 mt-3">
         <label class="form-label">PIN Code</label>
-        <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 411026" maxlength="6">
+      <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 411026" maxlength="6" required>
       </div>
       <div class="col-md-6 mt-3">
         <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
@@ -1416,6 +2055,21 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 <input type="file" class="form-control" id="encumbrance_cert" name="encumbrance_cert" accept=".pdf,image/*">
                 <p class="hint-text">Upload MIDC original allotment or transfer letter (PDF)</p>
               </div>
+
+
+              <div class="col-md-3">
+    <label class="form-label">MPCB Consent Copy</label>
+    <input type="file" class="form-control" name="mpcb_consent_doc" id="mpcb_consent_doc" accept=".pdf,image/*">
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Fire NOC Copy</label>
+    <input type="file" class="form-control" name="fire_noc_doc" id="fire_noc_doc" accept=".pdf,image/*">
+  </div>
+
+  <div class="col-md-3">
+  <label class="form-label">Layout Plan / NA Order Copy</label>
+  <input type="file" class="form-control" name="layout_plan_doc" id="layout_plan_doc" accept=".pdf,image/*">
+</div>
               
             </div>
 
@@ -1636,13 +2290,23 @@ function validateStep(step) {
   const stepEl=document.getElementById('step'+step);
   const required=stepEl.querySelectorAll('[required]');
   let missing=[];
+
   required.forEach(f => {
-    f.style.borderColor='';
-    if (!f.value.trim()) {
-      const lbl=f.closest('.col-md-4,.col-md-6,.col-md-12,.col-md-3,.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
-      missing.push(lbl||'Required field'); f.style.borderColor='#e74c3c';
+  f.style.borderColor='';
+  // Skip disabled "Other" text input (user didn't pick "Other")
+  if (f.id && f.id.endsWith('_other') && f.disabled) return;
+  // Skip the mirroring hidden input
+  if (f.type === 'hidden' && f.id && f.id.endsWith('_hidden')) return;
+  if (!f.value.trim()) {
+    const lbl=f.closest('.col-md-4,.col-md-6,.col-md-12,.col-md-3,.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
+    missing.push(lbl||'Required field'); f.style.borderColor='#e74c3c';
+    // Highlight the select too if it's an "Other" text field
+    if (f.id && f.id.endsWith('_other')) {
+      var sel = document.getElementById(f.id.replace('_other','_select'));
+      if (sel) sel.style.borderColor='#e74c3c';
     }
-  });
+  }
+});
   
   if (step===3) {
   // Amenities & Facilities are optional now — no validation required
@@ -1662,7 +2326,7 @@ function updatePreview() {
   const price = document.getElementById('selling_price')?.value || '';
   const city  = document.getElementById('city')?.value || '';
    const loc   = document.getElementById('locality_area_final')?.value || ''; 
-  const catEl = document.getElementById('property_type');
+ const catEl = document.getElementById('property_type_select');
   const catTxt= catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
 
   let autoTitle='';
@@ -1673,12 +2337,32 @@ function updatePreview() {
 
   document.getElementById('p_price').textContent=price?'₹'+parseInt(price).toLocaleString('en-IN'):'₹ 0';
   document.getElementById('p_area').textContent =area?`${Number(area).toLocaleString('en-IN')} sq.m`:'0 sq.m';
-  document.getElementById('p_cat').textContent  =catEl?.value?catTxt:'Industrial Plot';
+  
+  let displayCat = catTxt;
+if (catEl?.value === '__other__') {
+  displayCat = document.getElementById('property_type_other')?.value || 'Other';
+}
+document.getElementById('p_cat').textContent = catEl?.value ? displayCat : 'Industrial Plot';
   document.getElementById('p_loc').textContent  =(city||loc)?[city,loc].filter(Boolean).join(', '):'City, MIDC Area';
 
   const psf=document.getElementById('plot_price_per_sqft');
   if (price&&area&&parseFloat(area)>0) psf.value=Math.round(parseFloat(price)/parseFloat(area));
   else psf.value='';
+
+
+    // 🆕 Auto area conversion
+  const areaVal = parseFloat(document.getElementById('plot_area')?.value || 0);
+  const unit = document.getElementById('area_unit')?.value || 'sqm';
+  let sqft = 0, acres = 0;
+  
+  if (unit === 'sqm')      { sqft = areaVal * 10.7639; acres = areaVal / 4046.86; }
+  else if (unit === 'sqft'){ sqft = areaVal;           acres = areaVal / 43560; }
+  else if (unit === 'acre'){ sqft = areaVal * 43560;   acres = areaVal; }
+
+  const sqftEl = document.getElementById('plot_area_sqft');
+  const acresEl = document.getElementById('plot_area_acres');
+  if (sqftEl)  sqftEl.value = sqft ? sqft.toFixed(2) : '';
+  if (acresEl) acresEl.value = acres ? acres.toFixed(3) : '';
 
   setCheck('cl-area',  !!area);
   setCheck('cl-price', !!price);
@@ -1790,6 +2474,34 @@ function attachDragEvents(item, cat) {
     });
 }
 
+
+/* 🆕 Show/Hide Building & Construction section based on Property Type */
+function toggleBuiltSection() {
+  const propTypeSelect = document.getElementById('property_type_select');
+const propType = propTypeSelect?.value;
+  const builtTypes = [
+    'midc_industrial','warehouse_logistics','sez_plot','private_industrial',
+    'food_agro_processing','mini_industrial','flatted_factory',
+    'industrial_shed','factory_manufacturing','industrial_building',
+    'workshop_service','engineering_fabrication','cold_storage',
+    'pharma_chemical','it_electronics_mfg'
+  ];
+  
+  const builtSection = document.getElementById('built_section');
+  if (builtSection) {
+    if (builtTypes.includes(propType)) {
+      builtSection.style.display = 'block';
+    } else {
+      builtSection.style.display = 'none';
+    }
+  }
+}
+
+// Run when the property type changes
+document.getElementById('property_type')?.addEventListener('change', toggleBuiltSection);
+
+// Run once on page load (in case the page reloads with an already selected value)
+document.addEventListener('DOMContentLoaded', toggleBuiltSection);
 function renderAllCategories() {
     IMG_CATEGORIES.forEach(renderCategory);
     var total = totalImageCount();
@@ -2443,4 +3155,68 @@ document.addEventListener('DOMContentLoaded', function () {
     if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
     if (indPlotForm) indPlotForm.addEventListener('submit', syncLocalityFinal);
 });
+
+
+
+
+/* ============================================================
+   "Other" option helper — same name attribute, no DB change
+   ============================================================ */
+function handleOther(selectEl, fieldName) {
+  var otherInput  = document.getElementById(fieldName + '_other');
+  var hiddenInput = document.getElementById(fieldName + '_hidden');
+  if (!otherInput || !hiddenInput) return;
+
+  if (selectEl.value === '__other__') {
+    otherInput.style.display = 'block';
+    otherInput.disabled = false;
+    otherInput.required = selectEl.required;
+    hiddenInput.value = '';
+    hiddenInput.disabled = true;
+    otherInput.focus();
+  } else {
+    otherInput.style.display = 'none';
+    otherInput.disabled = true;
+    otherInput.required = false;
+    hiddenInput.disabled = false;
+    hiddenInput.value = selectEl.value;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  [
+    'property_type','land_use','industrial_zone_type','na_status',
+    'layout_approval_status','industrial_fsi','plot_shape','facing',
+    'plot_road_facing','road_width','corner_plot','power_supply',
+    'industrial_water_supply','effluent_treatment','industry_type_permissible',
+    'plot_fencing','loading_dock','power_backup_transformer','etp_stp',
+    'current_possession_status','construction_type','construction_age',
+    'fire_access_compliance','additional_charges','ownership_type',
+    'ownership_document_type','midc_allotment','midc_transfer_noc',
+    'environmental_clearance','rera_status','title_clearance',
+    'property_encumbrance_status','mpcb_consent','factory_licence',
+    'fire_noc','hazardous_storage','occupancy_cert',
+    'extract_7_12_status','mutation_status','litigation_disclosure',
+    'listing_verification_status','publication_status'
+  ].forEach(function (f) {
+    var sel = document.getElementById(f + '_select');
+    if (sel) handleOther(sel, f);
+  });
+});
+
+
+
+
+
+function toggleLandlordFixedAmount() {
+  const feeType = document.getElementById('landlordOwnerFee').value;
+  const fixedSection = document.getElementById('landlordFixedAmountSection');
+  
+  if (feeType === 'Fixed Amount') {
+    fixedSection.style.display = 'block';
+  } else {
+    fixedSection.style.display = 'none';
+    document.getElementById('landlordOwnerFixedAmount').value = ''; // clear if hidden
+  }
+}
         </script>

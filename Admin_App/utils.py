@@ -8,11 +8,11 @@ def generate_property_slideshow(image_paths, output_relative_path):
     os.makedirs(os.path.dirname(output_full_path), exist_ok=True)
 
     print("=" * 60)
-    print("🎬 GENERATING ROCK-SOLID PROFESSIONAL PROPERTY VIDEO")
+    print("[INFO] GENERATING ROCK-SOLID PROFESSIONAL PROPERTY VIDEO")
 
     valid_images = [p for p in image_paths if os.path.exists(p)]
     if not valid_images:
-        print("❌ ERROR: No valid images found on disk.")
+        print("[ERROR] No valid images found on disk.")
         return None
 
     slide_duration = 3.5
@@ -78,12 +78,12 @@ def generate_property_slideshow(image_paths, output_relative_path):
         output_full_path
     ]
 
-    print("🚀 Executing FFmpeg command...")
+    print("[INFO] Executing FFmpeg command...")
     try:
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        print("✅ SUCCESS: Smooth Professional Video rendered!")
+        print("[SUCCESS] Smooth Professional Video rendered!")
         return output_relative_path
     except subprocess.CalledProcessError as e:
-        print("❌ FFmpeg ERROR details:")
+        print("[ERROR] FFmpeg ERROR details:")
         print(e.stderr)
         return None

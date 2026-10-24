@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Property Badges</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+ body{background:#f4f6f9}
+ .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+ .prop-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0"><i class="bi bi-award-fill text-warning"></i> Property Badges</h3>
+    <a href="{% url 'admin_page' %}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  </div>
+
+  {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags|default:'info' }} py-2">{{ m }}</div>{% endfor %}{% endif %}
+
+  <!-- 1. SEARCH -->
+  <form method="get" class="input-group mb-3">
+    <input name="q" value="{{ q }}" class="form-control" placeholder="Search property by ID (e.g. KIPRR-1A2B3C4D), title, locality or city">
+    <button class="btn btn-dark"><i class="bi bi-search"></i> Search</button>
+  </form>
+
+  {% for r in results %}
+  <div class="prop-card">
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="action" value="assign">
+      <input type="hidden" name="model_key" value="{{ r.model_key }}">
+      <input type="hidden" name="pk" value="{{ r.pk }}">
+      <div class="d-flex flex-wrap justify-content-between mb-2">
+        <div><strong>{{ r.title }}</strong><br>
+          <small class="text-muted">{{ r.pk }} · {{ r.model_name }} · {{ r.city }} ·
+            <span class="badge {% if r.approval == 'Approved' %}bg-success{% else %}bg-secondary{% endif %}">{{ r.approval|default:"—" }}</span></small>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-3 mb-2">
+        {% for key, m in badge_meta.items %}
+        <label class="d-flex align-items-center gap-1">
+          <input type="checkbox" name="badges" value="{{ key }}" {% if key in r.current %}checked{% endif %}>
+          <span class="pill" style="background:{{ m.bg }};color:{{ m.fg }}"><i class="{{ m.icon }}"></i> {{ m.label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label small mb-0">Start date</label>
+          <input type="date" name="start_date" class="form-control form-control-sm" value="{{ r.first.start_date|date:'Y-m-d' }}"></div>
+        <div class="col-md-3"><label class="form-label small mb-0">End date</label>
+          <input type="date" name="end_date" class="form-control form-control-sm" value="{{ r.first.end_date|date:'Y-m-d' }}"></div>
+        <div class="col-md-2"><label class="form-label small mb-0">Priority</label>
+          <input type="number" name="priority" class="form-control form-control-sm" value="{{ r.first.priority|default:0 }}"></div>
+        <div class="col-md-2"><button class="btn btn-success btn-sm w-100"><i class="bi bi-check2"></i> Save badges</button></div>
+      </div>
+    </form>
+  </div>
+  {% empty %}
+    {% if q %}<div class="alert alert-warning">No property found for “{{ q }}”.</div>{% endif %}
+  {% endfor %}
+
+  <!-- 2. ASSIGNED -->
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+    <h5 class="mb-0">Assigned badges</h5>
+    <form method="get">
+      <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All types</option>
+        {% for key, m in badge_meta.items %}<option value="{{ key }}" {% if f_type == key %}selected{% endif %}>{{ m.label }}</option>{% endfor %}
+      </select>
+    </form>
+  </div>
+  <div class="table-responsive bg-white rounded border">
+  <table class="table table-sm align-middle mb-0">
+    <thead class="table-light"><tr><th>Property</th><th>Badge</th><th>Window</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for a in assigned %}
+      <tr>
+        <td><div>{{ a.title }}</div><small class="text-muted">{{ a.b.object_id }}</small></td>
+        <td><span class="pill" style="background:{{ a.meta.bg }};color:{{ a.meta.fg }}"><i class="{{ a.meta.icon }}"></i> {{ a.meta.label }}</span></td>
+        <td class="small">{{ a.b.start_date|date:"d M Y"|default:"now" }} → {{ a.b.end_date|date:"d M Y"|default:"no expiry" }}</td>
+        <td>{{ a.b.priority }}</td>
+        <td>{% if a.b.is_live %}<span class="badge bg-success">Live</span>{% elif a.b.is_active %}<span class="badge bg-warning text-dark">Scheduled / Expired</span>{% else %}<span class="badge bg-secondary">Off</span>{% endif %}</td>
+        <td class="text-end">
+          <form method="post" class="d-inline">{% csrf_token %}<input type="hidden" name="action" value="toggle"><input type="hidden" name="badge_id" value="{{ a.b.id }}"><button class="btn btn-outline-secondary btn-sm">{% if a.b.is_active %}Turn off{% else %}Turn on{% endif %}</button></form>
+          <form method="post" class="d-inline" onsubmit="return confirm('Remove this badge?')">{% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="badge_id" value="{{ a.b.id }}"><button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button></form>
+        </td>
+      </tr>
+    {% empty %}<tr><td colspan="6" class="text-center text-muted py-3">No badges assigned yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+</body></html>

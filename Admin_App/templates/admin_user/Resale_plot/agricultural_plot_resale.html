@@ -521,14 +521,39 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             </div>
             <div class="row">
               
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Gat / Gut / Khasra / Survey Number<span class="required">*</span></label>
-                <input type="text" class="form-control" name="property_no" id="property_no"
-                  placeholder="e.g., Gat No. 234, Khasra 45/B" required>
-                <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight: bold;">
-                  <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
-                </span>
-              </div>
+            
+
+<div class="col-md-3 mt-2">
+  <label class="form-label">Gat / Gut / Khasra / Survey Number<span class="required">*</span></label>
+  <input type="text" class="form-control" name="property_no" id="property_no"
+    placeholder="e.g., Gat No. 234" required>
+  <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight: bold;">
+    <i class="fas fa-info-circle"></i> Required for verification, not shown publicly.
+  </span>
+</div>
+
+<div class="col-md-3 mt-2">
+  <label class="form-label">Plot / Unit Number</label>
+  <input type="text" class="form-control" name="plot_unit_number" id="plot_unit_number"
+    placeholder="e.g., AGR-101 / Plot 7">
+</div>
+
+<!-- DELETE THIS ENTIRE BLOCK from Basic Agricultural Land Information -->
+
+<div class="col-md-3 mt-2">
+  <label class="form-label">Area in sq ft <span style="font-weight:400;font-size:.75rem;color:var(--muted)">(auto)</span></label>
+  <input type="text" class="form-control" name="plot_area_sqft" id="plot_area_sqft_display" readonly
+    placeholder="Auto-calculated">
+</div>
+
+<div class="col-md-3 mt-2">
+  <label class="form-label">Area in sq m <span style="font-weight:400;font-size:.75rem;color:var(--muted)">(auto)</span></label>
+  <input type="text" class="form-control" name="plot_area_sqm" id="plot_area_sqm_display" readonly
+    placeholder="Auto-calculated">
+</div>
+
+
+
 
               <div class="col-md-4 mt-3">
                 <label class="form-label">Land Area (acre) <span class="required">*</span></label>
@@ -539,20 +564,28 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 </div>
                 <p class="hint-text">Total land area — you can change the measurement unit below</p>
               </div>
+           
               <div class="col-md-4 mt-3">
-                <label class="form-label">Agricultural Land Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="property_type" id="property_type" required>
-                  <option value="">— Select Land Type —</option>
-                  <option value="farm_land">Farm Land (Open Agricultural)</option>
-                  <option value="orchard_plantation">Orchard / Fruit Farm (Mango, Orange, etc.)</option>
-                  <option value="irrigated_land">Irrigated Farm Land (Canal / Borewell)</option>
-                  <option value="rain_fed_land">Rain-Fed (Seasonal / Kharif)</option>
-                  <option value="horticulture_land">Horticulture / Vegetable Farm</option>
-                  <option value="poultry_land">Poultry / Dairy / Animal Husbandry Land</option>
-                  <option value="agro_tourism_land">Agro Tourism / Farm Stay Land</option>
-                  <option value="na_converted_farm">NA Converted Agricultural Land (Development Ready)</option>
-                </select>
-              </div>
+  <label class="form-label">Agricultural Land Type <span class="required">*</span></label>
+  <select class="form-select form-control" id="property_type_select" required
+          onchange="handleOther(this,'property_type')">
+    <option value="">— Select Land Type —</option>
+    <option value="farm_land">Farm Land (Open Agricultural)</option>
+    <option value="orchard_plantation">Orchard / Fruit Farm (Mango, Orange, etc.)</option>
+    <option value="irrigated_land">Irrigated Farm Land (Canal / Borewell)</option>
+    <option value="rain_fed_land">Rain-Fed (Seasonal / Kharif)</option>
+    <option value="horticulture_land">Horticulture / Vegetable Farm</option>
+    <option value="poultry_land">Poultry / Dairy / Animal Husbandry Land</option>
+    <option value="agro_tourism_land">Agro Tourism / Farm Stay Land</option>
+    <option value="na_converted_farm">NA Converted Agricultural Land (Development Ready)</option>
+    <option value="Agricultural Land">Agricultural Land</option>
+    <option value="Farm parcel">Farm Parcel</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="property_type" id="property_type_other"
+         style="display:none;" placeholder="Specify land type" disabled>
+  <input type="hidden" name="property_type" id="property_type_hidden" value="">
+</div>
             </div><!-- /row -->
           </div>
         </div>
@@ -562,42 +595,267 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="section-header"><i class="fas fa-file-shield"></i> Revenue Classification & Legal Status</div>
           <div class="section-body">
             <div class="row">
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Revenue / Land Classification <span class="required">*</span></label>
-                <select class="form-select form-control" name="land_use" id="land_use" required>
-                  <option value="">— Select Classification —</option>
-                  <option value="Agricultural">Agricultural / Shetkari Land</option>
-                  <option value="Revenue_Forest">Revenue Forest / Jungle Land</option>
-                  <option value="Gairan">Gairan / Grazing Land (Govt Owned)</option>
-                  <option value="Waste_Land">Waste / Barren Land</option>
-                  <option value="Converted_NA">NA Converted (Non-Agricultural)</option>
-                  <option value="Garden_Land">Garden / Horticultural Land</option>
-                  <option value="Paddy_Field">Paddy / Rice Land (Wetland)</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">NA Conversion Status <span class="required">*</span></label>
-                <select class="form-select form-control" name="na_status" id="na_status" required>
-                  <option value="">— Select —</option>
-                  <option value="Non-NA">Non-NA — Pure Agricultural Land</option>
-                  <option value="NA Converted">NA Converted (Certificate Available — Development Ready)</option>
-                  <option value="NA Applied">NA Application Submitted (Pending)</option>
-                  <option value="Partial_NA">Partial NA Conversion Done</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Revenue / Panchayat Sanction</label>
-                <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
-                  <option value="">— Select —</option>
-                  <option value="Revenue_Land">Revenue Land (7/12 Clear)</option>
-                  <option value="Gram_Panchayat_NOC">Gram Panchayat NOC Available</option>
-                  <option value="Forest_Clearance_Pending">Forest Clearance Pending</option>
-                  <option value="Not Applicable">Not Applicable</option>
-                </select>
-              </div>
+            <div class="col-md-4 mt-2">
+  <label class="form-label">Revenue / Land Classification <span class="required">*</span></label>
+  <select class="form-select form-control" id="land_use_select" required
+          onchange="handleOther(this,'land_use')">
+    <option value="">— Select Classification —</option>
+    <option value="Agricultural">Agricultural / Shetkari Land</option>
+    <option value="Revenue_Forest">Revenue Forest / Jungle Land</option>
+    <option value="Gairan">Gairan / Grazing Land (Govt Owned)</option>
+    <option value="Waste_Land">Waste / Barren Land</option>
+    <option value="Converted_NA">NA Converted (Non-Agricultural)</option>
+    <option value="Garden_Land">Garden / Horticultural Land</option>
+    <option value="Paddy_Field">Paddy / Rice Land (Wetland)</option>
+    <option value="Agricultural - verify">Agricultural - verify</option>
+    <option value="Agricultural claimed">Agricultural claimed</option>
+    <option value="Agricultural/non-NA claimed">Agricultural/non-NA claimed</option>
+    <option value="Agricultural/non-NA verify">Agricultural/non-NA verify</option>
+    <option value="Agricultural/NA unknown">Agricultural/NA unknown</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="land_use" id="land_use_other"
+         style="display:none;" placeholder="Specify classification" disabled>
+  <input type="hidden" name="land_use" id="land_use_hidden" value="">
+</div>
+
+
+            <div class="col-md-4 mt-2">
+  <label class="form-label">NA Conversion Status <span class="required">*</span></label>
+  <select class="form-select form-control" id="na_status_select" required
+          onchange="handleOther(this,'na_status')">
+    <option value="">— Select —</option>
+    <option value="Non-NA">Non-NA — Pure Agricultural Land</option>
+    <option value="NA Converted">NA Converted (Certificate Available — Development Ready)</option>
+    <option value="NA Applied">NA Application Submitted (Pending)</option>
+    <option value="Partial_NA">Partial NA Conversion Done</option>
+    <option value="Agricultural land; NA conversion not implied">Agricultural land; NA conversion not implied</option>
+    <option value="Conversion status not verified">Conversion status not verified</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="Agricultural/non-NA claimed">Agricultural/non-NA claimed</option>
+    <option value="Agricultural/non-NA verify">Agricultural/non-NA verify</option>
+    <option value="Agricultural claimed">Agricultural claimed</option>
+    <option value="Agricultural/NA unknown">Agricultural/NA unknown</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="na_status" id="na_status_other"
+         style="display:none;" placeholder="Specify NA status" disabled>
+  <input type="hidden" name="na_status" id="na_status_hidden" value="">
+</div>
+
+
+            <div class="col-md-4 mt-2">
+  <label class="form-label">Revenue / Panchayat Sanction</label>
+  <select class="form-select form-control" id="layout_approval_status_select"
+          onchange="handleOther(this,'layout_approval_status')">
+    <option value="">— Select —</option>
+    <option value="Revenue_Land">Revenue Land (7/12 Clear)</option>
+    <option value="Gram_Panchayat_NOC">Gram Panchayat NOC Available</option>
+    <option value="Forest_Clearance_Pending">Forest Clearance Pending</option>
+    <option value="Not Applicable">Not Applicable</option>
+    <option value="Pending verification">Pending verification</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="Documents claimed by owner - not verified">Documents claimed by owner - not verified</option>
+    <option value="Not applicable / verify with authority">Not applicable / verify with authority</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="layout_approval_status" id="layout_approval_status_other"
+         style="display:none;" placeholder="Specify sanction status" disabled>
+  <input type="hidden" name="layout_approval_status" id="layout_approval_status_hidden" value="">
+</div>
             </div><!-- /row -->
           </div>
         </div>
+
+        <!-- ═══════ NEW SECTION: SOIL, TOPOGRAPHY & LAND QUALITY ═══════ -->
+<div class="form-section">
+  <div class="section-header info-theme"><i class="fas fa-mountain"></i> Soil, Topography & Land Quality</div>
+  <div class="section-body">
+
+    <div class="sub-section-title">Soil Characteristics</div>
+    <div class="row">
+      
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Soil Type <span class="required">*</span></label>
+  <select class="form-select form-control" id="soil_type_select" required
+          onchange="handleOther(this,'soil_type')">
+    <option value="">— Select —</option>
+    <option value="Black_Cotton">Black Cotton Soil (Regur)</option>
+    <option value="Red_Laterite">Red / Laterite Soil</option>
+    <option value="Alluvial">Alluvial Soil</option>
+    <option value="Sandy_Loam">Sandy Loam</option>
+    <option value="Rocky_Stony">Rocky / Stony</option>
+    <option value="Mixed">Mixed Soil</option>
+    <option value="Farm parcel">Farm parcel (as per survey)</option>
+    <option value="Irregular">Irregular</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="soil_type" id="soil_type_other"
+         style="display:none;" placeholder="Specify soil type" disabled>
+  <input type="hidden" name="soil_type" id="soil_type_hidden" value="">
+</div>
+
+
+
+      <div class="col-md-4 mt-2">
+        <label class="form-label">Soil Depth</label>
+        <select class="form-select form-control" name="soil_depth" id="soil_depth">
+          <option value="">— Select —</option>
+          <option value="Shallow">Shallow (&lt; 1 ft)</option>
+          <option value="Medium">Medium (1 – 3 ft)</option>
+          <option value="Deep">Deep (&gt; 3 ft)</option>
+          <option value="Not_Verified">Not Verified</option>
+        </select>
+      </div>
+      
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Land Slope</label>
+  <select class="form-select form-control" id="land_slope_select"
+          onchange="handleOther(this,'land_slope')">
+    <option value="">— Select —</option>
+    <option value="Flat">Flat (0–2%)</option>
+    <option value="Gentle">Gentle (2–5%)</option>
+    <option value="Moderate">Moderate (5–10%)</option>
+    <option value="Steep">Steep (&gt; 10%)</option>
+    <option value="Irregular">Irregular</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="land_slope" id="land_slope_other"
+         style="display:none;" placeholder="Specify slope" disabled>
+  <input type="hidden" name="land_slope" id="land_slope_hidden" value="">
+</div>
+
+     <div class="col-md-4 mt-3">
+  <label class="form-label">Soil Erosion / Conservation Status</label>
+  <select class="form-select form-control" id="soil_erosion_status_select"
+          onchange="handleOther(this,'soil_erosion_status')">
+    <option value="">— Select —</option>
+    <option value="None">None — Stable Soil</option>
+    <option value="Mild">Mild Erosion</option>
+    <option value="Severe">Severe Erosion</option>
+    <option value="Conserved">Conserved (Contour Bunding / Terracing)</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="soil_erosion_status" id="soil_erosion_status_other"
+         style="display:none;" placeholder="Specify erosion status" disabled>
+  <input type="hidden" name="soil_erosion_status" id="soil_erosion_status_hidden" value="">
+</div>
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Rainfall Zone / Average Rainfall</label>
+        <input type="text" class="form-control" name="rainfall_zone" id="rainfall_zone"
+          placeholder="e.g., Medium rainfall zone, 1000–1200 mm">
+      </div>
+      <div class="col-md-12 mt-3">
+        <label class="form-label">Land Quality Notes</label>
+        <textarea class="form-control" name="land_quality_notes" id="land_quality_notes" rows="3"
+          placeholder="e.g., Fertile black soil, well-drained, previously under cotton/soybean rotation. No waterlogging. No rock outcrops."></textarea>
+        <p class="hint-text">Describe fertility, drainage, past crop history, any known limitations.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ NEW SECTION: FARMING, CROPS & YIELD DETAILS ═══════ -->
+<div class="form-section">
+  <div class="section-header"><i class="fas fa-seedling"></i> Farming, Crops & Yield Details</div>
+  <div class="section-body">
+
+    <div class="sub-section-title">Current Farming</div>
+    <div class="row">
+     
+
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Current Crop / Plantation</label>
+  <select class="form-select form-control" id="current_crop_detail_select"
+          onchange="handleOther(this,'current_crop_detail')">
+    <option value="">— Select —</option>
+    <option value="No_Crop_Vacant">No Crop — Vacant / Fallow Land</option>
+    <option value="Cotton">Cotton</option>
+    <option value="Soybean">Soybean</option>
+    <option value="Wheat">Wheat</option>
+    <option value="Rice_Paddy">Rice / Paddy</option>
+    <option value="Sugarcane">Sugarcane</option>
+    <option value="Vegetable_Garden">Vegetable / Horticulture</option>
+    <option value="Mango_Orchard">Mango Orchard</option>
+    <option value="Orange_Orchard">Orange / Citrus Orchard</option>
+    <option value="Teak_Timber">Teak / Timber Plantation</option>
+    <option value="Mixed_Orchard">Mixed Orchard / Fruit Farm</option>
+    <option value="Agricultural - verify">Agricultural - verify</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="current_crop_detail" id="current_crop_detail_other"
+         style="display:none;" placeholder="Specify crop" disabled>
+  <input type="hidden" name="current_crop_detail" id="current_crop_detail_hidden" value="">
+</div>
+
+
+      <div class="col-md-4 mt-2">
+        <label class="form-label">Cropping Pattern (Kharif / Rabi / Zaid)</label>
+        <input type="text" class="form-control" name="cropping_pattern" id="cropping_pattern"
+          placeholder="e.g., Kharif: Cotton, Rabi: Wheat, Zaid: Vegetables">
+      </div>
+      
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Orchard Type (if applicable)</label>
+  <select class="form-select form-control" id="orchard_type_select"
+          onchange="handleOther(this,'orchard_type')">
+    <option value="">— Select —</option>
+    <option value="None">None — No Orchard</option>
+    <option value="Mango">Mango</option>
+    <option value="Orange">Orange / Citrus</option>
+    <option value="Guava">Guava</option>
+    <option value="Pomegranate">Pomegranate</option>
+    <option value="Sitafal">Sitafal (Custard Apple)</option>
+    <option value="Mixed">Mixed Orchard</option>
+    <option value="Farm parcel">Farm parcel</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="orchard_type" id="orchard_type_other"
+         style="display:none;" placeholder="Specify orchard type" disabled>
+  <input type="hidden" name="orchard_type" id="orchard_type_hidden" value="">
+</div>
+
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Tree Count (number of trees)</label>
+        <input type="number" class="form-control" name="tree_count" id="tree_count" min="0"
+          placeholder="e.g., 120">
+        <p class="hint-text">If orchard / plantation exists on the land</p>
+      </div>
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Tree Age (average years)</label>
+        <input type="number" class="form-control" name="tree_age_years" id="tree_age_years" min="0"
+          placeholder="e.g., 8">
+      </div>
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Average Annual Yield (quintals/acre)</label>
+        <input type="number" class="form-control" name="average_yield" id="average_yield" min="0" step="any"
+          placeholder="e.g., 12">
+      </div>
+
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Annual Crop Income (INR)</label>
+        <div class="input-with-unit">
+          <input type="number" class="form-control" name="annual_crop_income" id="annual_crop_income" min="0"
+            placeholder="e.g., 150000">
+          <span class="input-unit">₹</span>
+        </div>
+        <p class="hint-text">Average annual income from crops/orchard — helps buyers calculate ROI</p>
+      </div>
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Crop Rotation History (last 3 years)</label>
+        <textarea class="form-control" name="crop_rotation_history" id="crop_rotation_history" rows="2"
+          placeholder="e.g., 2023: Cotton→Wheat, 2022: Soybean→Gram, 2021: Cotton→Jowar"></textarea>
+      </div>
+    </div>
+
+  </div>
+</div>
 
         <!-- ── PLOT SPECIFICATIONS ── -->
         <div class="form-section">
@@ -623,45 +881,119 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 </div>
                 <p class="hint-text">Depth from front to rear of land</p>
               </div>
+            
               <div class="col-md-4">
-                <label class="form-label">Plot Shape</label>
-                <select class="form-select form-control" name="plot_shape" id="plot_shape">
-                  <option value="">— Select Shape —</option>
-                  <option value="Rectangular">Rectangular</option>
-                  <option value="Square">Square</option>
-                  <option value="L-Shaped">L-Shaped</option>
-                  <option value="Triangular">Triangular</option>
-                  <option value="Irregular">Irregular / Odd</option>
-                </select>
-              </div>
+  <label class="form-label">Plot Shape</label>
+  <select class="form-select form-control" id="plot_shape_select"
+          onchange="handleOther(this,'plot_shape')">
+    <option value="">— Select Shape —</option>
+    <option value="Rectangular">Rectangular</option>
+    <option value="Square">Square</option>
+    <option value="L-Shaped">L-Shaped</option>
+    <option value="Triangular">Triangular</option>
+    <option value="Irregular">Irregular / Odd</option>
+    <option value="Corner">Corner</option>
+    <option value="Road-facing">Road-facing</option>
+    <option value="Regular">Regular</option>
+    <option value="Farm parcel">Farm parcel</option>
+    <option value="Not specified">Not specified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="plot_shape" id="plot_shape_other"
+         style="display:none;" placeholder="Specify plot shape" disabled>
+  <input type="hidden" name="plot_shape" id="plot_shape_hidden" value="">
+</div>
+
+          
+<div class="col-md-4 mt-2">
+  <label class="form-label">Contiguity (Parcel Structure)</label>
+  <select class="form-select form-control" id="contiguity_select"
+          onchange="handleOther(this,'contiguity')">
+    <option value="">— Select —</option>
+    <option value="Single_Parcel">Single Contiguous Parcel</option>
+    <option value="Multiple_Fragments">Multiple Fragments (2+ pieces)</option>
+    <option value="Split_By_Road">Split by Road / Canal</option>
+    <option value="Split_By_Third_Party">Split by Third-Party Land</option>
+    <option value="Field parcel">Field parcel</option>
+    <option value="Irregular">Irregular</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="contiguity" id="contiguity_other"
+         style="display:none;" placeholder="Specify contiguity" disabled>
+  <input type="hidden" name="contiguity" id="contiguity_hidden" value="">
+</div>
+
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Encroachment Status</label>
+  <select class="form-select form-control" id="encroachment_status_select"
+          onchange="handleOther(this,'encroachment_status')">
+    <option value="">— Select —</option>
+    <option value="None">None — Fully Clear</option>
+    <option value="Minor">Minor Encroachment (Small Area)</option>
+    <option value="Major">Major Encroachment (Significant Area)</option>
+    <option value="Disputed">Disputed / Under Claim</option>
+    <option value="Not_Verified">Not Verified</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="encroachment_status" id="encroachment_status_other"
+         style="display:none;" placeholder="Specify encroachment status" disabled>
+  <input type="hidden" name="encroachment_status" id="encroachment_status_hidden" value="">
+</div>
+
+
             </div>
 
             <!-- ROAD ACCESS -->
             <div class="sub-section-title mt-3">Road & Access</div>
             <div class="row">
+             
               <div class="col-md-4 mt-2">
-                <label class="form-label">Road / Track Access to Land <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
-                  <option value="">— Select —</option>
-                  <option value="highway_frontage">National / State Highway Direct Frontage</option>
-                  <option value="village_road">Village / Grameen Road Access</option>
-                  <option value="kaccha_track">Kachha Track / Mud Road Access</option>
-                  <option value="canal_road">Canal / River Road Access</option>
-                  <option value="landlocked">Land-Locked (Access via Other Land / Agreement)</option>
-                  <option value="railway_near">Near Railway Track / Station</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Access Road / Track Width</label>
-                <select class="form-select form-control" name="road_width" id="road_width">
-                  <option value="">— Select —</option>
-                  <option value="less_10ft">Less than 10 ft (Narrow Kachha Track)</option>
-                  <option value="10_20ft">10 – 20 ft (Village Road)</option>
-                  <option value="20_40ft">20 – 40 ft (Pucca Road)</option>
-                  <option value="40ft_plus">40 ft+ (Highway / Wide Road)</option>
-                </select>
-                <p class="hint-text">Width of the road / track abutting the land</p>
-              </div>
+  <label class="form-label">Road / Track Access to Land <span class="required">*</span></label>
+  <select class="form-select form-control" id="plot_road_facing_select" required
+          onchange="handleOther(this,'plot_road_facing')">
+    <option value="">— Select —</option>
+    <option value="highway_frontage">National / State Highway Direct Frontage</option>
+    <option value="village_road">Village / Grameen Road Access</option>
+    <option value="kaccha_track">Kachha Track / Mud Road Access</option>
+    <option value="canal_road">Canal / River Road Access</option>
+    <option value="landlocked">Land-Locked (Access via Other Land / Agreement)</option>
+    <option value="railway_near">Near Railway Track / Station</option>
+    <option value="Public road access claimed - verify">Public road access claimed - verify</option>
+    <option value="Access to be legally confirmed">Access to be legally confirmed</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="plot_road_facing" id="plot_road_facing_other"
+         style="display:none;" placeholder="Specify road access" disabled>
+  <input type="hidden" name="plot_road_facing" id="plot_road_facing_hidden" value="">
+</div>
+
+
+           
+<div class="col-md-4 mt-2">
+  <label class="form-label">Access Road / Track Width</label>
+  <select class="form-select form-control" id="road_width_select"
+          onchange="handleOther(this,'road_width')">
+    <option value="">— Select —</option>
+    <option value="less_10ft">Less than 10 ft (Narrow Kachha Track)</option>
+    <option value="10_20ft">10 – 20 ft (Village Road)</option>
+    <option value="20_40ft">20 – 40 ft (Pucca Road)</option>
+    <option value="40ft_plus">40 ft+ (Highway / Wide Road)</option>
+    <option value="To be measured">To be measured</option>
+    <option value="Seller to provide / verify">Seller to provide / verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="road_width" id="road_width_other"
+         style="display:none;" placeholder="Specify road width" disabled>
+  <input type="hidden" name="road_width" id="road_width_hidden" value="">
+  <p class="hint-text">Width of the road / track abutting the land</p>
+</div>
+
+
               <div class="col-md-4 mt-2">
                 <label class="form-label">Corner Plot (Two Road Access)?</label>
                 <select class="form-select form-control" name="corner_plot">
@@ -669,6 +1001,37 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <option value="yes">Yes — Corner Plot (Two Roads)</option>
                 </select>
               </div>
+
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Access Width (ft)</label>
+  <div class="input-with-unit">
+    <input type="number" class="form-control" name="access_width_ft" id="access_width_ft" min="0"
+      placeholder="e.g., 20">
+    <span class="input-unit">ft</span>
+  </div>
+  <p class="hint-text">Exact width of approach road / track</p>
+</div>
+
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Legal Access / Right of Way</label>
+  <select class="form-select form-control" id="legal_access_rtw_select"
+          onchange="handleOther(this,'legal_access_rtw')">
+    <option value="">— Select —</option>
+    <option value="Confirmed">Confirmed — Legal Easement Exists</option>
+    <option value="Verbal">Verbal Arrangement Only</option>
+    <option value="Pending">Legal Access Pending / Disputed</option>
+    <option value="None">No Legal Access — Landlocked</option>
+    <option value="Public road access claimed - verify">Public road access claimed - verify</option>
+    <option value="Access to be legally confirmed">Access to be legally confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="legal_access_rtw" id="legal_access_rtw_other"
+         style="display:none;" placeholder="Specify legal access" disabled>
+  <input type="hidden" name="legal_access_rtw" id="legal_access_rtw_hidden" value="">
+</div>
+
             </div>
 
             <!-- AGRICULTURAL: LAND DETAILS -->
@@ -685,118 +1048,160 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 </select>
               </div>
               
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Soil Type</label>
-                <select class="form-select form-control" name="soil_type" id="soil_type">
-                  <option value="">— Select —</option>
-                  <option value="Black_Cotton">Black Cotton Soil (Regur)</option>
-                  <option value="Red_Laterite">Red / Laterite Soil</option>
-                  <option value="Alluvial">Alluvial Soil</option>
-                  <option value="Sandy_Loam">Sandy Loam</option>
-                  <option value="Rocky_Stony">Rocky / Stony</option>
-                  <option value="Mixed">Mixed Soil</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Current Crop / Plantation</label>
-                <select class="form-select form-control" name="current_crop" id="current_crop">
-                  <option value="">— Select —</option>
-                  <option value="No_Crop_Vacant">No Crop — Vacant / Fallow Land</option>
-                  <option value="Cotton">Cotton</option>
-                  <option value="Soybean">Soybean</option>
-                  <option value="Wheat">Wheat</option>
-                  <option value="Rice_Paddy">Rice / Paddy</option>
-                  <option value="Sugarcane">Sugarcane</option>
-                  <option value="Vegetable_Garden">Vegetable / Horticulture</option>
-                  <option value="Mango_Orchard">Mango Orchard</option>
-                  <option value="Orange_Orchard">Orange / Citrus Orchard</option>
-                  <option value="Teak_Timber">Teak / Timber Plantation</option>
-                  <option value="Mixed_Orchard">Mixed Orchard / Fruit Farm</option>
-                  <option value="Other">Other (mention in description)</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Irrigation / Water Source</label>
-                <select class="form-select form-control" name="irrigation_source" id="irrigation_source">
-                  <option value="">— Select —</option>
-                  <option value="Canal_Irrigation">Canal / Dam Irrigation (Assured)</option>
-                  <option value="Borewell">Borewell (On Plot)</option>
-                  <option value="Open_Well">Open Well (On Plot)</option>
-                  <option value="Drip_Installed">Drip Irrigation System Installed</option>
-                  <option value="Rain_Fed">Rain-Fed Only (Seasonal)</option>
-                  <option value="Lift_Irrigation">Lift Irrigation (Shared Canal)</option>
-                  <option value="No_Water_Source">No Water Source</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Electricity on Land</label>
-                <select class="form-select form-control" name="agr_electricity" id="agr_electricity">
-                  <option value="">— Select —</option>
-                  <option value="Agricultural_Pump_Connection">Agricultural Pump Connection (Available)</option>
-                  <option value="Connection_Possible">Connection Possible from Nearby Line</option>
-                  <option value="No_Electricity">No Electricity on Land</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Distance from Nearest Highway / Road</label>
-                <select class="form-select form-control" name="highway_distance" id="highway_distance">
-                  <option value="">— Select —</option>
-                  <option value="0-1km">0 – 1 km (Very Close)</option>
-                  <option value="1-3km">1 – 3 km</option>
-                  <option value="3-5km">3 – 5 km</option>
-                  <option value="5-10km">5 – 10 km</option>
-                  <option value="10km+">More than 10 km</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Land Level / Topography</label>
-                <select class="form-select form-control" name="land_topography" id="land_topography">
-                  <option value="">— Select —</option>
-                  <option value="Level_Flat">Level / Flat (Ready to Cultivate)</option>
-                  <option value="Slightly_Undulating">Slightly Undulating</option>
-                  <option value="Sloped_Terraced">Sloped / Terraced</option>
-                  <option value="Low_Lying">Low Lying (Prone to Waterlogging)</option>
-                  <option value="Elevated_High">Elevated / High Ground</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Is Land Under Any Government Scheme?</label>
-                <select class="form-select form-control" name="govt_scheme" id="govt_scheme">
-                  <option value="No">No</option>
-                  <option value="Forest_Clearance_Required">Forest Clearance Required</option>
-                  <option value="Revenue_Forest">Revenue Forest Land</option>
-                  <option value="Tribal_Land">Tribal / Adivasi Land (Restricted Sale)</option>
-                  <option value="Gairan_Land">Gairan / Grazing Land (Govt)</option>
-                </select>
-              </div>
+             
+         <div class="col-md-4 mt-3">
+  <label class="form-label">Current Crop / Plantation</label>
+  <select class="form-select form-control" id="current_crop_select"
+          onchange="handleOther(this,'current_crop')">
+    <option value="">— Select —</option>
+    <option value="No_Crop_Vacant">No Crop — Vacant / Fallow Land</option>
+    <option value="Cotton">Cotton</option>
+    <option value="Soybean">Soybean</option>
+    <option value="Wheat">Wheat</option>
+    <option value="Rice_Paddy">Rice / Paddy</option>
+    <option value="Sugarcane">Sugarcane</option>
+    <option value="Vegetable_Garden">Vegetable / Horticulture</option>
+    <option value="Mango_Orchard">Mango Orchard</option>
+    <option value="Orange_Orchard">Orange / Citrus Orchard</option>
+    <option value="Teak_Timber">Teak / Timber Plantation</option>
+    <option value="Mixed_Orchard">Mixed Orchard / Fruit Farm</option>
+    <option value="Agricultural - verify">Agricultural - verify</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="current_crop" id="current_crop_other"
+         style="display:none;" placeholder="Specify crop" disabled>
+  <input type="hidden" name="current_crop" id="current_crop_hidden" value="">
+</div>
+
+            
+
+            
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Electricity on Land</label>
+  <select class="form-select form-control" id="agr_electricity_select"
+          onchange="handleOther(this,'agr_electricity')">
+    <option value="">— Select —</option>
+    <option value="Agricultural_Pump_Connection">Agricultural Pump Connection (Available)</option>
+    <option value="Connection_Possible">Connection Possible from Nearby Line</option>
+    <option value="No_Electricity">No Electricity on Land</option>
+    <option value="Borewell / source claimed - verify">Borewell / source claimed - verify</option>
+    <option value="Not provided">Not provided</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="agr_electricity" id="agr_electricity_other"
+         style="display:none;" placeholder="Specify electricity status" disabled>
+  <input type="hidden" name="agr_electricity" id="agr_electricity_hidden" value="">
+</div>
+
+
+            
+<div class="col-md-4 mt-3">
+  <label class="form-label">Distance from Nearest Highway / Road</label>
+  <select class="form-select form-control" id="highway_distance_select"
+          onchange="handleOther(this,'highway_distance')">
+    <option value="">— Select —</option>
+    <option value="0-1km">0 – 1 km (Very Close)</option>
+    <option value="1-3km">1 – 3 km</option>
+    <option value="3-5km">3 – 5 km</option>
+    <option value="5-10km">5 – 10 km</option>
+    <option value="10km+">More than 10 km</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="highway_distance" id="highway_distance_other"
+         style="display:none;" placeholder="Specify distance" disabled>
+  <input type="hidden" name="highway_distance" id="highway_distance_hidden" value="">
+</div>
+
+
+           <div class="col-md-4 mt-3">
+  <label class="form-label">Land Level / Topography</label>
+  <select class="form-select form-control" id="land_topography_select"
+          onchange="handleOther(this,'land_topography')">
+    <option value="">— Select —</option>
+    <option value="Level_Flat">Level / Flat (Ready to Cultivate)</option>
+    <option value="Slightly_Undulating">Slightly Undulating</option>
+    <option value="Sloped_Terraced">Sloped / Terraced</option>
+    <option value="Low_Lying">Low Lying (Prone to Waterlogging)</option>
+    <option value="Elevated_High">Elevated / High Ground</option>
+    <option value="Field parcel">Field parcel</option>
+    <option value="Irregular">Irregular</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="land_topography" id="land_topography_other"
+         style="display:none;" placeholder="Specify topography" disabled>
+  <input type="hidden" name="land_topography" id="land_topography_hidden" value="">
+</div>
+
+
+            <div class="col-md-4 mt-3">
+  <label class="form-label">Is Land Under Any Government Scheme?</label>
+  <select class="form-select form-control" id="govt_scheme_select"
+          onchange="handleOther(this,'govt_scheme')">
+    <option value="No">No</option>
+    <option value="Forest_Clearance_Required">Forest Clearance Required</option>
+    <option value="Revenue_Forest">Revenue Forest Land</option>
+    <option value="Tribal_Land">Tribal / Adivasi Land (Restricted Sale)</option>
+    <option value="Gairan_Land">Gairan / Grazing Land (Govt)</option>
+    <option value="Agricultural - verify">Agricultural - verify</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="govt_scheme" id="govt_scheme_other"
+         style="display:none;" placeholder="Specify government scheme" disabled>
+  <input type="hidden" name="govt_scheme" id="govt_scheme_hidden" value="">
+</div>
             </div>
 
             <!-- PHYSICAL DETAILS (Common) -->
             <div class="sub-section-title mt-3">Other Physical Details</div>
             <div class="row">
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Land Demarcation / Boundary</label>
-                <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
-                  <option value="none">No Boundary — Open Land (Unmarked)</option>
-                  <option value="stone_markers">Stone / Concrete Boundary Markers Placed</option>
-                  <option value="partial_hedge">Partial Live Hedge / Thorny Fencing</option>
-                  <option value="full_hedge">Full Live Hedge / Natural Boundary</option>
-                  <option value="barbed_wire">Barbed Wire Fencing (All / Partial)</option>
-                  <option value="stone_wall">Stone Wall Boundary</option>
-                </select>
-              </div>
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Current Land Use / Occupancy</label>
-                <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
-                  <option value="">— Select —</option>
-                  <option value="Vacant_Fallow">Vacant / Fallow — Immediate Possession</option>
-                  <option value="Under_Cultivation">Under Cultivation (Owner Farming)</option>
-                  <option value="Tenant_Farming">Tenant / Crop-Share Farming</option>
-                  <option value="Orchard_Standing">Orchard / Plantation Standing (Trees on Land)</option>
-                  <option value="Caretaker">Caretaker / Watchman Arrangement</option>
-                </select>
-                <p class="hint-text">Indicates when the buyer can take physical possession</p>
-              </div>
+
+           <div class="col-md-6 mt-2">
+  <label class="form-label">Land Demarcation / Boundary</label>
+  <select class="form-select form-control" id="plot_fencing_select"
+          onchange="handleOther(this,'plot_fencing')">
+    <option value="none">No Boundary — Open Land (Unmarked)</option>
+    <option value="stone_markers">Stone / Concrete Boundary Markers Placed</option>
+    <option value="partial_hedge">Partial Live Hedge / Thorny Fencing</option>
+    <option value="full_hedge">Full Live Hedge / Natural Boundary</option>
+    <option value="barbed_wire">Barbed Wire Fencing (All / Partial)</option>
+    <option value="stone_wall">Stone Wall Boundary</option>
+    <option value="Not fenced - verify">Not fenced - verify</option>
+    <option value="Partly fenced - verify">Partly fenced - verify</option>
+    <option value="Boundary markers to be confirmed">Boundary markers to be confirmed</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="plot_fencing" id="plot_fencing_other"
+         style="display:none;" placeholder="Specify boundary type" disabled>
+  <input type="hidden" name="plot_fencing" id="plot_fencing_hidden" value="">
+</div>
+
+             <div class="col-md-6 mt-2">
+  <label class="form-label">Current Land Use / Occupancy</label>
+  <select class="form-select form-control" id="current_possession_status_select"
+          onchange="handleOther(this,'current_possession_status')">
+    <option value="">— Select —</option>
+    <option value="Vacant_Fallow">Vacant / Fallow — Immediate Possession</option>
+    <option value="Under_Cultivation">Under Cultivation (Owner Farming)</option>
+    <option value="Tenant_Farming">Tenant / Crop-Share Farming</option>
+    <option value="Orchard_Standing">Orchard / Plantation Standing (Trees on Land)</option>
+    <option value="Caretaker">Caretaker / Watchman Arrangement</option>
+    <option value="As per agreement - verify">As per agreement - verify</option>
+    <option value="Immediate subject to documents">Immediate subject to documents</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="current_possession_status" id="current_possession_status_other"
+         style="display:none;" placeholder="Specify occupancy status" disabled>
+  <input type="hidden" name="current_possession_status" id="current_possession_status_hidden" value="">
+  <p class="hint-text">Indicates when the buyer can take physical possession</p>
+</div>
             </div>
 
           </div>
@@ -853,15 +1258,23 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <label class="radio-option"><input type="radio" name="price_negotiable" value="no" checked> Fixed Price</label>
                 </div>
               </div>
+             
+
               <div class="col-md-6 mt-3">
-                <label class="form-label">Transaction / Transfer Charges</label>
-                <select class="form-select form-control" name="additional_charges" id="additional_charges">
-                  <option value="none">No Additional Charges</option>
-                  <option value="stamp_extra">Stamp Duty &amp; Registration Extra</option>
-                  <option value="section63_fee">Section 63-A Permission Fee Extra (Non-Agriculturist)</option>
-                  <option value="all_inclusive">All Inclusive — Final Price</option>
-                </select>
-              </div>
+  <label class="form-label">Transaction / Transfer Charges</label>
+  <select class="form-select form-control" id="additional_charges_select"
+          onchange="handleOther(this,'additional_charges')">
+    <option value="none">No Additional Charges</option>
+    <option value="stamp_extra">Stamp Duty &amp; Registration Extra</option>
+    <option value="section63_fee">Section 63-A Permission Fee Extra (Non-Agriculturist)</option>
+    <option value="all_inclusive">All Inclusive — Final Price</option>
+    <option value="Not provided - confirm applicable charges">Not provided - confirm applicable charges</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="additional_charges" id="additional_charges_other"
+         style="display:none;" placeholder="Specify additional charges" disabled>
+  <input type="hidden" name="additional_charges" id="additional_charges_hidden" value="none">
+</div>
 
               <!-- BROKERAGE -->
               <div class="col-md-6 mt-3" id="brokerageSection">
@@ -883,10 +1296,376 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <span class="input-unit">₹</span>
                 </div>
               </div>
+
+
+
+              <div class="col-md-6 mt-3">
+  <label class="form-label">Booking Amount (INR)</label>
+  <div class="input-with-unit">
+    <input type="number" class="form-control" name="booking_amount" id="booking_amount" min="0"
+      placeholder="e.g., 100000">
+    <span class="input-unit">₹</span>
+  </div>
+  <p class="hint-text">Token / advance amount expected to block the deal</p>
+</div>
+
+<div class="col-md-6 mt-3">
+  <label class="form-label">Other Charges (if any)</label>
+  <input type="text" class="form-control" name="other_charges" id="other_charges"
+    placeholder="e.g., Legal fees, survey charges, mutation fees">
+</div>
+
+
+<div class="col-md-6 mt-3">
+  <label class="form-label">Crop Insurance / PMFBY Status</label>
+  <select class="form-select form-control" id="crop_insurance_status_select"
+          onchange="handleOther(this,'crop_insurance_status')">
+    <option value="">— Select —</option>
+    <option value="Enrolled">Enrolled (PMFBY / Other Scheme)</option>
+    <option value="Not_Enrolled">Not Enrolled</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="Not provided - verify">Not provided - verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="crop_insurance_status" id="crop_insurance_status_other"
+         style="display:none;" placeholder="Specify insurance status" disabled>
+  <input type="hidden" name="crop_insurance_status" id="crop_insurance_status_hidden" value="">
+</div>
+
+<div class="col-md-12 mt-3">
+  <label class="form-label">Price Includes / Excludes</label>
+  <textarea class="form-control" name="price_includes_excludes" id="price_includes_excludes" rows="2"
+    placeholder="e.g., Price includes land only. Stamp duty, registration, mutation charges extra. Brokerage separate."></textarea>
+</div>
+
+
             </div>
           </div>
         </div>
 
+
+        <!-- ═══════ NEW SECTION: WATER & IRRIGATION DETAILS ═══════ -->
+<div class="form-section">
+  <div class="section-header info-theme"><i class="fas fa-tint"></i> Water & Irrigation Details</div>
+  <div class="section-body">
+
+    <div class="sub-section-title">Primary Water Source</div>
+    <div class="row">
+
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Irrigation / Water Source <span class="required">*</span></label>
+  <select class="form-select form-control" id="irrigation_source_select" required
+          onchange="handleOther(this,'irrigation_source')">
+    <option value="">— Select —</option>
+    <option value="Canal_Irrigation">Canal / Dam Irrigation (Assured)</option>
+    <option value="Borewell">Borewell (On Plot)</option>
+    <option value="Open_Well">Open Well (On Plot)</option>
+    <option value="Drip_Installed">Drip Irrigation System Installed</option>
+    <option value="Rain_Fed">Rain-Fed Only (Seasonal)</option>
+    <option value="Lift_Irrigation">Lift Irrigation (Shared Canal)</option>
+    <option value="No_Water_Source">No Water Source</option>
+    <option value="Mixed">Mixed / Multiple Sources</option>
+    <option value="Borewell / source claimed - verify">Borewell / source claimed - verify</option>
+    <option value="Available nearby - verify">Available nearby - verify</option>
+    <option value="Not provided">Not provided</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="irrigation_source" id="irrigation_source_other"
+         style="display:none;" placeholder="Specify irrigation source" disabled>
+  <input type="hidden" name="irrigation_source" id="irrigation_source_hidden" value="">
+</div>
+
+      
+<div class="col-md-4 mt-2">
+  <label class="form-label">Irrigation Season Availability</label>
+  <select class="form-select form-control" id="irrigation_season_select"
+          onchange="handleOther(this,'irrigation_season')">
+    <option value="">— Select —</option>
+    <option value="Year_Round">Year-Round (All Seasons)</option>
+    <option value="Kharif_Only">Kharif Only (Monsoon)</option>
+    <option value="Rabi_Only">Rabi Only (Winter)</option>
+    <option value="Seasonal">Seasonal / Limited</option>
+    <option value="Not_Verified">Not Verified</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="irrigation_season" id="irrigation_season_other"
+         style="display:none;" placeholder="Specify season" disabled>
+  <input type="hidden" name="irrigation_season" id="irrigation_season_hidden" value="">
+</div>
+
+      <div class="col-md-4 mt-2">
+        <label class="form-label">Canal Water Rights / Share</label>
+        <input type="text" class="form-control" name="canal_water_rights" id="canal_water_rights"
+          placeholder="e.g., 2 shares in minor canal, rotation-based">
+      </div>
+    </div>
+
+    <div class="sub-section-title mt-3">Borewell / Well / Pond Details</div>
+    <div class="row">
+      <div class="col-md-3 mt-2">
+        <label class="form-label">Borewell Count</label>
+        <input type="number" class="form-control" name="borewell_count" id="borewell_count" min="0"
+          placeholder="e.g., 2">
+      </div>
+      <div class="col-md-3 mt-2">
+        <label class="form-label">Borewell Depth (ft)</label>
+        <input type="number" class="form-control" name="borewell_depth_ft" id="borewell_depth_ft" min="0"
+          placeholder="e.g., 250">
+      </div>
+      <div class="col-md-3 mt-2">
+        <label class="form-label">Open Well Count</label>
+        <input type="number" class="form-control" name="well_count" id="well_count" min="0"
+          placeholder="e.g., 1">
+      </div>
+      <div class="col-md-3 mt-2">
+        <label class="form-label">Farm Pond (Yes/No + Size)</label>
+        <input type="text" class="form-control" name="farm_pond" id="farm_pond"
+          placeholder="e.g., Yes, 30×40 ft">
+      </div>
+
+     <div class="col-md-4 mt-3">
+  <label class="form-label">Agricultural Pump Connection</label>
+  <select class="form-select form-control" id="agri_pump_connection_select"
+          onchange="handleOther(this,'agri_pump_connection')">
+    <option value="">— Select —</option>
+    <option value="Yes">Yes — Connected</option>
+    <option value="Applied">Applied — Pending</option>
+    <option value="No">No Connection</option>
+    <option value="Seller to provide and verify">Seller to provide and verify</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="agri_pump_connection" id="agri_pump_connection_other"
+         style="display:none;" placeholder="Specify pump connection" disabled>
+  <input type="hidden" name="agri_pump_connection" id="agri_pump_connection_hidden" value="">
+</div>
+
+
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Pump HP / Capacity</label>
+        <input type="number" class="form-control" name="pump_hp" id="pump_hp" min="0" step="any"
+          placeholder="e.g., 5 HP">
+      </div>
+
+     <div class="col-md-4 mt-3">
+  <label class="form-label">Electricity for Pump (Sanction Status)</label>
+  <select class="form-select form-control" id="pump_electricity_status_select"
+          onchange="handleOther(this,'pump_electricity_status')">
+    <option value="">— Select —</option>
+    <option value="Sanctioned">Sanctioned & Active</option>
+    <option value="Applied">Applied / Pending</option>
+    <option value="None">None</option>
+    <option value="Connection status to be confirmed">Connection status to be confirmed</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="pump_electricity_status" id="pump_electricity_status_other"
+         style="display:none;" placeholder="Specify electricity status" disabled>
+  <input type="hidden" name="pump_electricity_status" id="pump_electricity_status_hidden" value="">
+</div>
+
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Groundwater Depth / Water Table (ft)</label>
+        <input type="text" class="form-control" name="groundwater_depth" id="groundwater_depth"
+          placeholder="e.g., ~120 ft (monsoon), ~180 ft (summer)">
+      </div>
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Water Quality Notes</label>
+        <input type="text" class="form-control" name="water_quality_notes" id="water_quality_notes"
+          placeholder="e.g., Good, low salinity, suitable for irrigation">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════ NEW SECTION: TENANCY & OCCUPANCY DETAILS ═══════ -->
+<div class="form-section">
+  <div class="section-header"><i class="fas fa-people-arrows"></i> Tenancy & Occupancy Details</div>
+  <div class="section-body">
+
+    <div class="row">
+      <div class="col-md-6 mt-2">
+        <label class="form-label">Existing Occupant / Cultivator</label>
+        <input type="text" class="form-control" name="existing_occupant" id="existing_occupant"
+          placeholder="e.g., Self-cultivated / Name of tenant (if any)">
+      </div>
+
+    
+      <div class="col-md-6 mt-2">
+  <label class="form-label">Lease / Tenancy Status</label>
+  <select class="form-select form-control" id="lease_tenancy_status_select"
+          onchange="handleOther(this,'lease_tenancy_status')">
+    <option value="">— Select —</option>
+    <option value="Self_Cultivated">Self-Cultivated (Owner)</option>
+    <option value="Leased">Leased to Tenant</option>
+    <option value="Share_Crop">Share-cropping</option>
+    <option value="Caretaker">Caretaker / Watchman</option>
+    <option value="Fallow">Fallow / No Occupant</option>
+    <option value="Vacant / owner-occupied / leased — seller to confirm">Vacant / owner-occupied / leased — seller to confirm</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="lease_tenancy_status" id="lease_tenancy_status_other"
+         style="display:none;" placeholder="Specify tenancy status" disabled>
+  <input type="hidden" name="lease_tenancy_status" id="lease_tenancy_status_hidden" value="">
+</div>
+
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Tenant Rights / Eviction Status</label>
+        <input type="text" class="form-control" name="tenant_rights_status" id="tenant_rights_status"
+          placeholder="e.g., No formal tenancy; informal arrangement; eviction possible on notice">
+      </div>
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Annual Lease Income (₹) — if leased</label>
+        <div class="input-with-unit">
+          <input type="number" class="form-control" name="annual_lease_income" id="annual_lease_income" min="0"
+            placeholder="e.g., 50000">
+          <span class="input-unit">₹</span>
+        </div>
+      </div>
+
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Share-cropping Arrangement</label>
+        <input type="text" class="form-control" name="share_cropping_arrangement" id="share_cropping_arrangement"
+          placeholder="e.g., 50:50 crop share with tenant; or None">
+      </div>
+
+
+     <div class="col-md-6 mt-3">
+  <label class="form-label">Tenant / Sharecropper Declaration</label>
+  <select class="form-select form-control" id="tenant_declaration_select"
+          onchange="handleOther(this,'tenant_declaration')">
+    <option value="">— Select —</option>
+    <option value="Declared">Declared — Details Provided Above</option>
+    <option value="Not_Declared">Not Declared / None</option>
+    <option value="Disputed">Disputed / Under Claim</option>
+    <option value="Seller declaration; verify">Seller declaration; verify</option>
+    <option value="Not completed">Not completed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="tenant_declaration" id="tenant_declaration_other"
+         style="display:none;" placeholder="Specify declaration" disabled>
+  <input type="hidden" name="tenant_declaration" id="tenant_declaration_hidden" value="">
+</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ NEW SECTION: ENVIRONMENTAL & REGULATORY CHECKS ═══════ -->
+<div class="form-section">
+  <div class="section-header dark-theme"><i class="fas fa-leaf"></i> Environmental & Regulatory Checks</div>
+  <div class="section-body">
+
+    <div class="inline-status is-warning mb-3">
+      <i class="fas fa-triangle-exclamation"></i>
+      <span style="font-size:.8rem;">These checks are critical — restrictions here can block sale, development, or loan approval.</span>
+    </div>
+
+    <div class="row">
+      
+
+
+      <div class="col-md-4 mt-2">
+  <label class="form-label">Protected / Restricted Area Check</label>
+  <select class="form-select form-control" id="protected_area_check_select"
+          onchange="handleOther(this,'protected_area_check')">
+    <option value="">— Select —</option>
+    <option value="None">None — No Restrictions</option>
+    <option value="Yes">Yes — Partially / Fully Restricted</option>
+    <option value="Verify">Needs Verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="protected_area_check" id="protected_area_check_other"
+         style="display:none;" placeholder="Specify area status" disabled>
+  <input type="hidden" name="protected_area_check" id="protected_area_check_hidden" value="">
+</div>
+
+
+    
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Forest / Eco-sensitive Zone Check</label>
+  <select class="form-select form-control" id="forest_eco_check_select"
+          onchange="handleOther(this,'forest_eco_check')">
+    <option value="">— Select —</option>
+    <option value="None">None — Not in Forest / ESZ</option>
+    <option value="Yes">Yes — Inside ESZ / Forest Buffer</option>
+    <option value="Verify">Needs Verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="forest_eco_check" id="forest_eco_check_other"
+         style="display:none;" placeholder="Specify forest/eco status" disabled>
+  <input type="hidden" name="forest_eco_check" id="forest_eco_check_hidden" value="">
+</div>
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Watercourse / Flood Risk Check</label>
+  <select class="form-select form-control" id="flood_risk_check_select"
+          onchange="handleOther(this,'flood_risk_check')">
+    <option value="">— Select —</option>
+    <option value="None">None — No Watercourse / Flood Risk</option>
+    <option value="Low">Low — Occasional Waterlogging</option>
+    <option value="High">High — Near River / Flood-Prone</option>
+    <option value="Verify">Needs Verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="flood_risk_check" id="flood_risk_check_other"
+         style="display:none;" placeholder="Specify flood risk" disabled>
+  <input type="hidden" name="flood_risk_check" id="flood_risk_check_hidden" value="">
+</div>
+
+   
+<div class="col-md-4 mt-3">
+  <label class="form-label">CRZ / Coastal Regulation Check</label>
+  <select class="form-select form-control" id="crz_check_select"
+          onchange="handleOther(this,'crz_check')">
+    <option value="">— Select —</option>
+    <option value="Not_Applicable">Not Applicable (Inland)</option>
+    <option value="Yes">Yes — Within CRZ</option>
+    <option value="Verify">Needs Verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="crz_check" id="crz_check_other"
+         style="display:none;" placeholder="Specify CRZ status" disabled>
+  <input type="hidden" name="crz_check" id="crz_check_hidden" value="">
+</div>
+
+
+    <div class="col-md-4 mt-3">
+  <label class="form-label">Tribal / Gram Sabha Land Check</label>
+  <select class="form-select form-control" id="tribal_gram_sabha_check_select"
+          onchange="handleOther(this,'tribal_gram_sabha_check')">
+    <option value="">— Select —</option>
+    <option value="None">None — Not Tribal / Gram Sabha Land</option>
+    <option value="Yes">Yes — Tribal / Gram Sabha Land (Restricted)</option>
+    <option value="Verify">Needs Verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="tribal_gram_sabha_check" id="tribal_gram_sabha_check_other"
+         style="display:none;" placeholder="Specify tribal/gram sabha status" disabled>
+  <input type="hidden" name="tribal_gram_sabha_check" id="tribal_gram_sabha_check_hidden" value="">
+</div>
+
+
+    </div>
+
+  </div>
+</div>
         <!-- LEGAL -->
         <div class="form-section">
           <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title & Approval Details</div>
@@ -894,36 +1673,51 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
             <div class="sub-section-title">Ownership Details</div>
             <div class="row">
+              
               <div class="col-md-6 mt-2">
-                <label class="form-label">Ownership / Tenure Type</label>
-                <select class="form-select form-control" name="ownership_type" id="ownership_type">
-                  <option value="">— Select Ownership —</option>
-                  <option value="individual_shetkari">Individual / Shetkari (Agriculturist) Ownership</option>
-                  <option value="joint_family">Joint Family / Undivided Ownership</option>
-                  <option value="huf">HUF Property (Hindu Undivided Family)</option>
-                  <option value="trust_land">Trust / Sansthan Land</option>
-                  <option value="power_of_attorney">Power of Attorney (POA) Holder</option>
-                  <option value="inherited">Inherited Land (Legal Heir / Partition)</option>
-                </select>
-              </div>
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Primary Title / Ownership Document</label>
-                <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
-                  <option value="">— Select Document Type —</option>
-                  <option value="Registered Sale Deed">Registered Sale Deed</option>
-                  <option value="Registered Agreement to Sale">Registered Agreement to Sale (ATS)</option>
-                  <option value="Conveyance Deed">Conveyance Deed / Final Deed</option>
-                  <option value="Gift Deed">Gift Deed</option>
-                  <option value="Irrevocable Power of Attorney (POA)">Irrevocable Power of Attorney (POA)</option>
-                  <option value="Lease Deed">Lease Deed</option>
-                  <option value="Allotment Letter">Allotment Letter (Authority / Society)</option>
-                  <option value="Possession Letter">Possession Letter / Kabja Patra</option>
-                  <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
-                  <option value="Court Decree">Court Decree (Legal Settlement)</option>
-                  <option value="7/12 Extract">7/12 Extract (Agricultural)</option>
-                  <option value="Other">Other (Specify below)</option>
-                </select>
-              </div>
+  <label class="form-label">Ownership / Tenure Type</label>
+  <select class="form-select form-control" id="ownership_type_select"
+          onchange="handleOther(this,'ownership_type')">
+    <option value="">— Select Ownership —</option>
+    <option value="individual_shetkari">Individual / Shetkari (Agriculturist) Ownership</option>
+    <option value="joint_family">Joint Family / Undivided Ownership</option>
+    <option value="huf">HUF Property (Hindu Undivided Family)</option>
+    <option value="trust_land">Trust / Sansthan Land</option>
+    <option value="power_of_attorney">Power of Attorney (POA) Holder</option>
+    <option value="inherited">Inherited Land (Legal Heir / Partition)</option>
+    <option value="Individual owner">Individual owner</option>
+    <option value="Joint owners - verify">Joint owners - verify</option>
+    <option value="Owner representative - verify">Owner representative - verify</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="ownership_type" id="ownership_type_other"
+         style="display:none;" placeholder="Specify ownership type" disabled>
+  <input type="hidden" name="ownership_type" id="ownership_type_hidden" value="">
+</div>
+              
+
+<div class="col-md-6 mt-2">
+  <label class="form-label">Primary Title / Ownership Document</label>
+  <select class="form-select form-control" id="ownership_document_type_select"
+          onchange="handleOther(this,'ownership_document_type')">
+    <option value="">— Select Document Type —</option>
+    <option value="Registered Sale Deed">Registered Sale Deed</option>
+    <option value="Registered Agreement to Sale">Registered Agreement to Sale (ATS)</option>
+    <option value="Conveyance Deed">Conveyance Deed / Final Deed</option>
+    <option value="Gift Deed">Gift Deed</option>
+    <option value="Irrevocable Power of Attorney (POA)">Irrevocable Power of Attorney (POA)</option>
+    <option value="Lease Deed">Lease Deed</option>
+    <option value="Allotment Letter">Allotment Letter (Authority / Society)</option>
+    <option value="Possession Letter">Possession Letter / Kabja Patra</option>
+    <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
+    <option value="Court Decree">Court Decree (Legal Settlement)</option>
+    <option value="7/12 Extract">7/12 Extract (Agricultural)</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="ownership_document_type" id="ownership_document_type_other"
+         style="display:none;" placeholder="Specify document type" disabled>
+  <input type="hidden" name="ownership_document_type" id="ownership_document_type_hidden" value="">
+</div>
               <div class="col-md-6 mt-3" id="other_document_type_div" style="display:none;">
                 <label class="form-label">Specify Other Ownership Document Type</label>
                 <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document">
@@ -932,117 +1726,199 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
             <div class="sub-section-title mt-3">Approvals & Compliance</div>
             <div class="row">
-              <div class="col-md-4 mt-2">
-                <label class="form-label">RERA / Revenue Department Status</label>
-                <select class="form-select form-control" name="rera_status" id="rera_status">
-                  <option value="">— Select —</option>
-                  <option value="Not Applicable">RERA Not Applicable (Agricultural Land)</option>
-                  <option value="NA Converted_RERA_Exempt">NA Converted — RERA Exempt (Individual Plot)</option>
-                </select>
-                <p class="hint-text">Agricultural land is not covered under RERA; NA conversion required for non-agricultural development</p>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Title Clarity / Marketability</label>
-                <select class="form-select form-control" name="title_clearance" id="title_clearance">
-                  <option value="">— Select —</option>
-                  <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
-                  <option value="Under Verification">Title Under Verification / Search</option>
-                  <option value="Legal Dispute">Title in Legal Dispute</option>
-                  <option value="Encumbrance Exists">Encumbrance / Charge Exists</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Encumbrance / Charge Status</label>
-                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
-                  <option value="">— Select —</option>
-                  <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
-                  <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
-                  <option value="Under Litigation">Under Court Litigation</option>
-                  <option value="Government Acquisition Notice">Govt Acquisition / Section 4 Notice</option>
-                  <option value="Other Claim Exists">Other Claim / Charge Exists</option>
-                </select>
-              </div>
+
+            <div class="col-md-4 mt-2">
+  <label class="form-label">RERA / Revenue Department Status</label>
+  <select class="form-select form-control" id="rera_status_select"
+          onchange="handleOther(this,'rera_status')">
+    <option value="">— Select —</option>
+    <option value="Not Applicable">RERA Not Applicable (Agricultural Land)</option>
+    <option value="NA Converted_RERA_Exempt">NA Converted — RERA Exempt (Individual Plot)</option>
+    <option value="Check applicability; not supplied">Check applicability; not supplied</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="rera_status" id="rera_status_other"
+         style="display:none;" placeholder="Specify RERA status" disabled>
+  <input type="hidden" name="rera_status" id="rera_status_hidden" value="">
+</div>
+
+
+              
+             
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Title Clarity / Marketability</label>
+  <select class="form-select form-control" id="title_clearance_select"
+          onchange="handleOther(this,'title_clearance')">
+    <option value="">— Select —</option>
+    <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
+    <option value="Under Verification">Title Under Verification / Search</option>
+    <option value="Legal Dispute">Title in Legal Dispute</option>
+    <option value="Encumbrance Exists">Encumbrance / Charge Exists</option>
+    <option value="Not verified - check title chain and original documents">Not verified - check title chain</option>
+    <option value="Pending legal verification">Pending legal verification</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="title_clearance" id="title_clearance_other"
+         style="display:none;" placeholder="Specify title status" disabled>
+  <input type="hidden" name="title_clearance" id="title_clearance_hidden" value="">
+</div>
+             
+
+<div class="col-md-4 mt-2">
+  <label class="form-label">Encumbrance / Charge Status</label>
+  <select class="form-select form-control" id="property_encumbrance_status_select"
+          onchange="handleOther(this,'property_encumbrance_status')">
+    <option value="">— Select —</option>
+    <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
+    <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
+    <option value="Under Litigation">Under Court Litigation</option>
+    <option value="Government Acquisition Notice">Govt Acquisition / Section 4 Notice</option>
+    <option value="Other Claim Exists">Other Claim / Charge Exists</option>
+    <option value="Pending legal verification">Pending legal verification</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="Not checked — legal review required">Not checked — legal review required</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="property_encumbrance_status" id="property_encumbrance_status_other"
+         style="display:none;" placeholder="Specify encumbrance" disabled>
+  <input type="hidden" name="property_encumbrance_status" id="property_encumbrance_status_hidden" value="">
+</div>
 
               <!-- AGRICULTURAL-SPECIFIC LEGAL -->
+            <div class="col-md-4 mt-3">
+  <label class="form-label">7/12 Utara (Satbara) Available?</label>
+  <select class="form-select form-control" id="satbara_available_select"
+          onchange="handleOther(this,'satbara_available')">
+    <option value="Yes">Yes — Available</option>
+    <option value="No">No — Not Available</option>
+    <option value="Applied">Applied / In Process</option>
+    <option value="If applicable; verify">If applicable; verify</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="satbara_available" id="satbara_available_other"
+         style="display:none;" placeholder="Specify Satbara status" disabled>
+  <input type="hidden" name="satbara_available" id="satbara_available_hidden" value="">
+</div>
+
+
+             <div class="col-md-4 mt-3">
+  <label class="form-label">8A Khate Utara (Land Record) Available?</label>
+  <select class="form-select form-control" id="khate_utara_select"
+          onchange="handleOther(this,'khate_utara')">
+    <option value="Yes">Yes — Available</option>
+    <option value="No">No</option>
+    <option value="If applicable; verify">If applicable; verify</option>
+    <option value="Not verified">Not verified</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="khate_utara" id="khate_utara_other"
+         style="display:none;" placeholder="Specify 8A status" disabled>
+  <input type="hidden" name="khate_utara" id="khate_utara_hidden" value="">
+</div>
+
+
+           
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?</label>
+  <select class="form-select form-control" id="section63_clearance_select"
+          onchange="handleOther(this,'section63_clearance')">
+    <option value="Not_Applicable">Not Applicable (Agriculturist Buyer)</option>
+    <option value="Required">Required (Non-Agriculturist Buyer)</option>
+    <option value="Obtained">Obtained / Cleared</option>
+    <option value="Check applicability; not supplied">Check applicability; not supplied</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="section63_clearance" id="section63_clearance_other"
+         style="display:none;" placeholder="Specify Section 63 status" disabled>
+  <input type="hidden" name="section63_clearance" id="section63_clearance_hidden" value="">
+</div>
+
+
+
               <div class="col-md-4 mt-3">
-                <label class="form-label">7/12 Utara (Satbara) Available?</label>
-                <select class="form-select form-control" name="satbara_available" id="satbara_available">
-                  <option value="Yes">Yes — Available</option>
-                  <option value="No">No — Not Available</option>
-                  <option value="Applied">Applied / In Process</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">8A Khate Utara (Land Record) Available?</label>
-                <select class="form-select form-control" name="khate_utara" id="khate_utara">
-                  <option value="Yes">Yes — Available</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-3">
-                <label class="form-label">Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?</label>
-                <select class="form-select form-control" name="section63_clearance" id="section63_clearance">
-                  <option value="Not_Applicable">Not Applicable (Agriculturist Buyer)</option>
-                  <option value="Required">Required (Non-Agriculturist Buyer)</option>
-                  <option value="Obtained">Obtained / Cleared</option>
-                </select>
-                <p class="hint-text">Non-agriculturists need special permission to buy farm land in Maharashtra</p>
-              </div>
+  <label class="form-label">NA / Land-Use Order Number</label>
+  <input type="text" class="form-control" name="na_order_number" id="na_order_number"
+    placeholder="e.g., NA/Order/2023/456">
+  <p class="hint-text">Only if NA conversion is claimed — enter exact order reference</p>
+</div>
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">MahaRERA Number (if applicable)</label>
+  <input type="text" class="form-control" name="maharera_number" id="maharera_number"
+    placeholder="e.g., P50500012345">
+</div>
+
+
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Conversion Potential (NA-able)</label>
+  <select class="form-select form-control" id="conversion_potential_select"
+          onchange="handleOther(this,'conversion_potential')">
+    <option value="">— Select —</option>
+    <option value="Yes">Yes — NA Conversion Possible</option>
+    <option value="No">No — Not NA-able</option>
+    <option value="Verify">Needs Verification with Authority</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="conversion_potential" id="conversion_potential_other"
+         style="display:none;" placeholder="Specify conversion potential" disabled>
+  <input type="hidden" name="conversion_potential" id="conversion_potential_hidden" value="">
+</div>
+
+<div class="col-md-6 mt-3">
+  <label class="form-label">Permitted Use (as per records)</label>
+  <input type="text" class="form-control" name="permitted_use" id="permitted_use"
+    placeholder="e.g., Agriculture only; NA conversion required for construction">
+</div>
+
+
+
+<div class="col-md-6 mt-3">
+  <label class="form-label">Irrigation Cess / Land Revenue Dues (₹)</label>
+  <div class="input-with-unit">
+    <input type="number" class="form-control" name="irrigation_cess_dues" id="irrigation_cess_dues" min="0"
+      placeholder="e.g., 0">
+    <span class="input-unit">₹</span>
+  </div>
+</div>
+
+
+<div class="col-md-6 mt-3">
+  <label class="form-label">Agricultural Land Ceiling Declaration</label>
+  <select class="form-select form-control" id="agri_ceiling_declaration_select"
+          onchange="handleOther(this,'agri_ceiling_declaration')">
+    <option value="">— Select —</option>
+    <option value="Compliant">Compliant — Within Ceiling Limits</option>
+    <option value="Exempt">Exempt Category</option>
+    <option value="Not_Applicable">Not Applicable</option>
+    <option value="Not_Verified">Not Verified</option>
+    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="agri_ceiling_declaration" id="agri_ceiling_declaration_other"
+         style="display:none;" placeholder="Specify ceiling declaration" disabled>
+  <input type="hidden" name="agri_ceiling_declaration" id="agri_ceiling_declaration_hidden" value="">
+</div>
+
+<div class="col-md-12 mt-3">
+  <label class="form-label">Land Reforms / Tenancy Act Restrictions</label>
+  <input type="text" class="form-control" name="land_reforms_restrictions" id="land_reforms_restrictions"
+    placeholder="e.g., No restrictions; or specify if land is under tenancy / restricted sale">
+</div>
+
+<div class="col-md-12 mt-3">
+  <label class="form-label">Litigation Disclosure</label>
+  <textarea class="form-control" name="litigation_disclosure" id="litigation_disclosure" rows="2"
+    placeholder="e.g., No pending litigation. / Or describe any pending court cases, disputes, or claims on the property."></textarea>
+  <p class="hint-text">Seller declaration — buyer should independently verify via legal search</p>
+</div>
             </div>
 
-            <div class="sub-section-title mt-3">Tax & Loan Status</div>
-            <div class="row">
-              <div class="col-md-6 mt-2">
-                <label class="form-label">Land Revenue / Khajana Status</label>
-                <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
-                  <option value="">— Select —</option>
-                  <option value="Fully Paid">Land Revenue Fully Paid (Khajana Clear)</option>
-                  <option value="Partially Due">Partially Due</option>
-                  <option value="Pending">Pending — Revenue Arrears Exist</option>
-                  <option value="Not Applicable">Not Applicable</option>
-                </select>
-              </div>
-              <div id="tax_due_section" style="display:none;" class="col-md-12 mt-0">
-                <div class="row">
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Outstanding Tax Amount (₹)</label>
-                    <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 15000">
-                      <span class="input-unit">₹</span>
-                    </div>
-                  </div>
-                  <div class="col-md-6 mt-3" id="pending_since_div" style="display:none;">
-                    <label class="form-label">Tax Dues Pending Since</label>
-                    <input type="date" class="form-control" name="pending_since" id="pending_since">
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Existing Loan / Mortgage on Property</label>
-                <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
-                  <option value="">— Select Loan Status —</option>
-                  <option value="No Active Loan">No Active Loan (Loan-Free Property)</option>
-                  <option value="Loan Running">Loan Running (To be closed before sale)</option>
-                  <option value="Loan Closed">Loan Closed (NOC Available)</option>
-                  <option value="Loan Status Not Available">Not Disclosed</option>
-                </select>
-              </div>
-              <div id="loan_running_section" style="display:none;" class="col-md-12 mt-0">
-                <div class="row">
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label">Lender Bank / NBFC Name</label>
-                    <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
-                  </div>
-                  <div class="col-md-6 mt-3">
-                    <label class="form-label"> Existing Loan Outstanding Loan Amount (₹)</label>
-                    <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 1200000">
-                      <span class="input-unit">₹</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
 
             <div class="form-group mt-3">
               <label class="form-label">Revenue Authority / Talathi / Tehsil Office</label>
@@ -1064,7 +1940,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         <div class="form-header">
                 <div class="form-title">
                   
-         🌾 Agricultural Plot
+          Agricultural Plot
                 </div>
                
             </div>
@@ -1247,6 +2123,35 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
                 <label class="form-label">PIN Code</label>
                 <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 441501" maxlength="6">
               </div>
+
+
+
+              <div class="col-md-4 mt-3">
+  <label class="form-label">Distance to Mandi / Market (km)</label>
+  <input type="number" class="form-control" name="distance_to_mandi_km" id="distance_to_mandi_km" min="0" step="any"
+    placeholder="e.g., 8">
+</div>
+<div class="col-md-4 mt-3">
+  <label class="form-label">Distance to Village / Habitation (km)</label>
+  <input type="number" class="form-control" name="distance_to_village_km" id="distance_to_village_km" min="0" step="any"
+    placeholder="e.g., 3">
+</div>
+
+<div class="col-md-4 mt-3">
+  <label class="form-label">Road Frontage for Farm Machinery</label>
+  <select class="form-select form-control" id="farm_machinery_frontage_select"
+          onchange="handleOther(this,'farm_machinery_frontage')">
+    <option value="">— Select —</option>
+    <option value="Yes">Yes — Tractor / Machinery Accessible</option>
+    <option value="Partial">Partial — Small Machinery Only</option>
+    <option value="No">No — Not Accessible</option>
+    <option value="To be confirmed">To be confirmed</option>
+    <option value="__other__">Other (Specify below)</option>
+  </select>
+  <input type="text" class="form-control mt-2" name="farm_machinery_frontage" id="farm_machinery_frontage_other"
+         style="display:none;" placeholder="Specify machinery frontage" disabled>
+  <input type="hidden" name="farm_machinery_frontage" id="farm_machinery_frontage_hidden" value="">
+</div>
              
               <div class="col-md-6 mt-3">
                 <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
@@ -1475,14 +2380,74 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
             </div>
 
             <!-- Documents -->
-            <div class="row mt-4 pt-3" style="border-top: 1px solid #e9ecef;">
-              <div class="col-md-6">
-                <label class="form-label">Revenue Records (7/12 &amp; 8A)</label>
-                <input type="file" class="form-control" name="encumbrance_cert" id="encumbrance_cert" accept=".pdf,image/*">
-                <p class="hint-text">Upload Satbara (7/12) and Khate Utara (8A) — most important documents</p>
-              </div>
-            
-            </div>
+           <div class="row mt-4 pt-3" style="border-top: 1px solid #e9ecef;">
+
+  <!-- File upload (existing) -->
+  <div class="col-md-6">
+    <label class="form-label">Revenue Records (7/12 &amp; 8A)</label>
+    <input type="file" class="form-control" name="encumbrance_cert" id="encumbrance_cert" accept=".pdf,image/*">
+    <p class="hint-text">Upload Satbara (7/12) and Khate Utara (8A) — most important documents</p>
+  </div>
+
+  <!-- 🆕 Photos / Video Upload Status (read-only summary) -->
+  <div class="col-md-6">
+    <label class="form-label">
+      <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+      Upload Status <span style="font-weight:400;font-size:.75rem;color:var(--muted)">(auto)</span>
+    </label>
+    <div class="inline-status is-info" id="uploadStatusSummary" style="font-size:.82rem;">
+      <i class="fas fa-info-circle"></i>
+      <span>Photos: <strong id="statusPhotoCount">0</strong> · Video: <strong id="statusVideoState">Not uploaded</strong> · Documents: <strong id="statusDocCount">0</strong></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- 🆕 Documents Checklist (multi-checkbox) -->
+<div class="row mt-3">
+  <div class="col-md-12">
+    <div class="sub-section-title">Documents Checklist (tick all you can provide)</div>
+    <div class="selected-items-display" style="padding:16px;gap:10px;">
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="7/12 Extract" class="docs-checkbox">
+        7/12 Extract (Satbara)
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="8A Extract" class="docs-checkbox">
+        8A Khate Utara
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="Mutation Entries" class="docs-checkbox">
+        Mutation / Ferfar
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="Gram Panchayat Record" class="docs-checkbox">
+        Gram Panchayat Record
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="NA Order" class="docs-checkbox">
+        NA / Land-Use Order
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="Property Card" class="docs-checkbox">
+        Property Card
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.85rem;cursor:pointer;background:#fff;padding:6px 12px;border-radius:20px;border:2px solid #e9ecef;">
+        <input type="checkbox" name="docs_checklist[]" value="Survey Map" class="docs-checkbox">
+        Survey / Gat Map
+      </label>
+
+    </div>
+    <p class="hint-text mt-2">These checkboxes tell buyers/verifiers which documents are ready for review.</p>
+  </div>
+</div>
 
             <div class="sub-section-title mt-4">Farm Walkthrough Video</div>
             <div class="row mb-3">
@@ -1714,14 +2679,24 @@ function validateStep(step) {
   const required = stepEl.querySelectorAll('[required]');
   let missing = [];
   
+  
   required.forEach(f => {
-    f.style.borderColor = '';
-    if (!f.value.trim()) {
-      const lbl = f.closest('.col-md-4,.col-md-6,.col-md-12,.col-md-3,.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
-      missing.push(lbl || 'Required field');
-      f.style.borderColor = '#e74c3c';
+  f.style.borderColor = '';
+  // Skip disabled "Other" text input (user didn't pick "Other")
+  if (f.id && f.id.endsWith('_other') && f.disabled) return;
+  // Skip the mirroring hidden input
+  if (f.type === 'hidden' && f.id && f.id.endsWith('_hidden')) return;
+  if (!f.value.trim()) {
+    const lbl = f.closest('.col-md-4,.col-md-6,.col-md-12,.col-md-3,.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
+    missing.push(lbl || 'Required field');
+    f.style.borderColor = '#e74c3c';
+    // Highlight the select too if it's an "Other" text field
+    if (f.id && f.id.endsWith('_other')) {
+      var sel = document.getElementById(f.id.replace('_other','_select'));
+      if (sel) sel.style.borderColor = '#e74c3c';
     }
-  });
+  }
+});
 
   // Both amenities and facilities are now optional (validation block removed)
 
@@ -1742,15 +2717,26 @@ function validateStep(step) {
 /* ═══════════════════════════════════════════════════════════
    LIVE PREVIEW & AUTO-CALCULATE RATE
 ═══════════════════════════════════════════════════════════ */
+
 function updatePreview() {
-  const title  = document.getElementById('plot_title')?.value || '';
+  const title  = document.getElementById('property_title')?.value || '';
   const area   = document.getElementById('plot_area')?.value || '';
+
+
   // Fixed: Consistently use selling_price instead of the undefined 'price' variable
   const selling_price = document.getElementById('selling_price')?.value || '';
   const city   = document.getElementById('city')?.value || '';
     const loc    = document.getElementById('locality_area_final')?.value || '';
-  const catEl  = document.getElementById('property_type');
-  const catTxt = catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
+
+const catEl  = document.getElementById('property_type_select');
+
+let catTxt = '—';
+if (catEl?.value === '__other__') {
+  catTxt = document.getElementById('property_type_other')?.value || 'Other';
+} else if (catEl?.value) {
+  catTxt = catEl.options[catEl.selectedIndex].text.split('(')[0].trim();
+}
+
   const unit   = document.getElementById('agr_area_unit')?.value || 'acre';
 
   let autoTitle = '';
@@ -1775,10 +2761,33 @@ function updatePreview() {
     psf.value = Math.round(parseFloat(selling_price) / parseFloat(area));
   } else { psf.value = ''; }
 
-  const areaUnitEl = document.getElementById('area_unit');
+
+
+    const areaUnitEl = document.getElementById('area_unit');
   const ppsfUnitEl = document.getElementById('ppsf_unit');
   if (areaUnitEl) areaUnitEl.textContent = unit;
   if (ppsfUnitEl) ppsfUnitEl.textContent = `₹/${unit}`;
+
+  // ✅ AUTO-CALCULATE AREA IN SQFT & SQM
+  const areaNum = parseFloat(area);
+  const sqftDisplay = document.getElementById('plot_area_sqft_display');
+  const sqmDisplay  = document.getElementById('plot_area_sqm_display');
+  if (areaNum > 0) {
+    let acres = areaNum;
+    if (unit === 'hectare')      acres = areaNum * 2.47105;
+    else if (unit === 'guntha')  acres = areaNum / 40;
+    else if (unit === 'bigha')   acres = areaNum * 0.619;
+    else if (unit === 'sqft')    acres = areaNum / 43560;
+
+    const sqft = acres * 43560;
+    const sqm  = sqft * 0.092903;
+
+    if (sqftDisplay) sqftDisplay.value = sqft.toFixed(2);
+    if (sqmDisplay)  sqmDisplay.value  = sqm.toFixed(2);
+  } else {
+    if (sqftDisplay) sqftDisplay.value = '';
+    if (sqmDisplay)  sqmDisplay.value  = '';
+  }
 
   setCheck('cl-title',  !!title);
   setCheck('cl-area',   !!area);
@@ -1800,11 +2809,16 @@ function setCheck(id, done) {
 
 /* LIVE INPUT LISTENERS FIXED (Matched to correct HTML IDs) */
 
-['plot_title', 'plot_area', 'selling_price', 'city', 'listed_by_name'].forEach(id => {
+
+/* LIVE INPUT LISTENERS FIXED (Matched to correct HTML IDs) */
+
+['property_title', 'plot_area', 'selling_price', 'city', 'listed_by_name'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updatePreview);
 });
-document.getElementById('property_type')?.addEventListener('change', updatePreview);
+document.getElementById('property_type_select')?.addEventListener('change', updatePreview);
+
+
 /* ═══════════════════════════════════════════════════════════
    IMAGE UPLOAD
 ═══════════════════════════════════════════════════════════ */
@@ -2223,12 +3237,13 @@ document.addEventListener('change', function(e) {
 });
 
 /* LIVE INPUT LISTENERS */
-['plot_title','plot_area','plot_price','plot_city','plot_locality','listed_by_name'].forEach(id => {
+
+/* LIVE INPUT LISTENERS (secondary set — matches actual field IDs) */
+['property_title','plot_area','selling_price','city','listed_by_name'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updatePreview);
 });
-document.getElementById('plot_category')?.addEventListener('change', updatePreview);
-
+document.getElementById('property_type_select')?.addEventListener('change', updatePreview);
 /* ═══════════════════════════════════════════════════════════
    LISTED BY — Self / Other Toggle (role-based Brokerage label)
 ═══════════════════════════════════════════════════════════ */
@@ -2321,13 +3336,15 @@ function get_user_data() {
 }
 
 /* Mirror the Step 1 read-only fields into the Step 4 display */
+
+
+/* Mirror the Step 1 read-only fields into the Step 4 uploaded-by display */
 function syncUploadedByStep4() {
   const map = {
-    upby_id_display:      'listed_by_id',
-    upby_name_display:    'listed_by_name',
-    upby_email_display:   'listed_by_email',
-    upby_contact_display: 'listed_by_contact',
-    upby_role_display:    'listed_by_role'
+    uploaded_by_name:    'listed_by_name',
+    uploaded_by_email:   'listed_by_email',
+    uploaded_by_contact: 'listed_by_contact',
+    uploaded_by_role:    'listed_by_role'
   };
   Object.entries(map).forEach(([toId, fromId]) => {
     const from = document.getElementById(fromId);
@@ -2428,7 +3445,13 @@ function syncUploadedByStep4() {
   });
 
   // Init on load
-  Change_Fields();
+
+    // Init on load (after DOM is ready)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', Change_Fields);
+  } else {
+    Change_Fields();
+  }
 })();
 
 /* ═══════════════════════════════════════════════════════════
@@ -2750,5 +3773,56 @@ document.addEventListener('DOMContentLoaded', function () {
     if (localitySelect) localitySelect.addEventListener('change', syncLocalityFinal);
     if (manualInput) manualInput.addEventListener('input', syncLocalityFinal);
     if (plotForm) plotForm.addEventListener('submit', syncLocalityFinal);
+});
+
+
+
+
+/* ============================================================
+   "Other" option helper — same name attribute, no DB change
+   ============================================================ */
+function handleOther(selectEl, fieldName) {
+  var otherInput  = document.getElementById(fieldName + '_other');
+  var hiddenInput = document.getElementById(fieldName + '_hidden');
+  if (!otherInput || !hiddenInput) return;
+
+  if (selectEl.value === '__other__') {
+    otherInput.style.display = 'block';
+    otherInput.disabled = false;
+    otherInput.required = selectEl.required;
+    hiddenInput.value = '';
+    hiddenInput.disabled = true;
+    otherInput.focus();
+  } else {
+    otherInput.style.display = 'none';
+    otherInput.disabled = true;
+    otherInput.required = false;
+    hiddenInput.disabled = false;
+    hiddenInput.value = selectEl.value;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  [
+    'property_type','land_use','na_status','layout_approval_status',
+    'soil_type','land_slope','soil_erosion_status','current_crop_detail',
+    'orchard_type','plot_shape','contiguity','encroachment_status',
+    'plot_road_facing','road_width','legal_access_rtw','current_crop',
+    'agr_electricity','highway_distance','land_topography','govt_scheme',
+    'plot_fencing','current_possession_status','additional_charges',
+    'crop_insurance_status','irrigation_source','irrigation_season',
+    'agri_pump_connection','pump_electricity_status','lease_tenancy_status',
+    'tenant_declaration','protected_area_check','forest_eco_check',
+    'flood_risk_check','crz_check','tribal_gram_sabha_check',
+    'ownership_type','ownership_document_type','rera_status',
+    'title_clearance','property_encumbrance_status',
+    'satbara_available','khate_utara','section63_clearance',
+    'conversion_potential','agri_ceiling_declaration',
+    'farm_machinery_frontage',
+    'listing_verification_status','publication_status'
+  ].forEach(function (f) {
+    var sel = document.getElementById(f + '_select');
+    if (sel) handleOther(sel, f);
+  });
 });
 </script>

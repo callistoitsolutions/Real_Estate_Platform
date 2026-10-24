@@ -7,6 +7,7 @@ urlpatterns = [
 
       ##########urls for manage crime officer#####
      path('admin_page',views.admin_page,name="admin_page"),
+     path('badge_manager', views.badge_manager, name="badge_manager"),
      path('index3',views.index3,name="index3"),
      path('index2',views.index2,name="index2"),
 
