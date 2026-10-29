@@ -1,0 +1,698 @@
+
+{% load static %}<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Home Loan Assistance in India | EMI Calculator &amp; Eligibility | KANISHKAIMPERIA</title>
+<meta name="description" content="Get home loan assistance in India. Check eligibility, calculate EMI, compare bank offers and get help from application to disbursal with KANISHKAIMPERIA.">
+<meta name="keywords" content="home loan, home loan assistance, home loan EMI calculator, home loan eligibility, housing loan India, plot loan, home loan balance transfer">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="KANISHKAIMPERIA">
+<link rel="canonical" href="{{ canonical_url }}">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_IN">
+<meta property="og:site_name" content="KANISHKAIMPERIA">
+<meta property="og:title" content="Home Loan Assistance in India | KANISHKAIMPERIA">
+<meta property="og:description" content="Check eligibility, calculate EMI and get end-to-end home loan help from application to disbursal.">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:image" content="{{ og_image }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Home Loan Assistance in India | KANISHKAIMPERIA">
+<meta name="twitter:description" content="Check eligibility, calculate EMI and get end-to-end home loan help.">
+<meta name="twitter:image" content="{{ og_image }}">
+<meta name="theme-color" content="#0b1730">
+
+<link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">{{ schema_json|safe }}</script>
+
+<style>
+:root{
+  --navy:#0b1730; --navy-2:#13244a; --navy-3:#1b3163;
+  --gold:#c9a227; --gold-l:#f1d888; --gold-d:#8a6a15; --gold-bg:#fbf5e0;
+  --ink:#12202c; --body:#475467; --muted:#667085;
+  --line:rgba(11,23,48,.10); --bg:#f6f7f9; --wa:#15803d;
+  --serif:"Playfair Display",Georgia,serif; --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r-sm:10px; --r-md:14px; --r-lg:20px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;margin:0;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+h1,h2,h3,h4,p,ul,ol{margin:0;padding:0}
+ul,ol{list-style:none}
+button{font-family:inherit}
+.wrap{width:min(1200px,92%);margin-inline:auto}
+.skip-link{position:absolute;left:12px;top:-60px;z-index:20000;background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;font-weight:700}
+.skip-link:focus{top:12px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.section{padding:60px 0}
+.section.white{background:#fff}
+.sec-head{margin-bottom:28px}
+.sec-head.center{text-align:center}
+.sec-title{font-family:var(--serif);font-size:clamp(1.6rem,1.2rem + 1.6vw,2.2rem);line-height:1.2;font-weight:700;color:var(--navy)}
+.sec-sub{color:var(--body);margin-top:8px;max-width:62ch}
+.sec-head.center .sec-sub{margin-inline:auto}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:var(--r-sm);font-weight:800;font-size:.95rem;border:1.5px solid transparent;cursor:pointer;transition:filter .2s,background .2s;line-height:1;white-space:nowrap}
+.btn-gold{background:linear-gradient(135deg,#dcb73c,var(--gold));color:var(--navy)}
+.btn-gold:hover{filter:brightness(1.07);color:var(--navy)}
+.btn-line{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.btn-line:hover{background:rgba(255,255,255,.1);color:#fff}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy-2);color:#fff}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-wa:hover{filter:brightness(1.1);color:#fff}
+.btn-block{width:100%}
+
+/* Breadcrumb */
+.crumbs{background:#fff;border-bottom:1px solid var(--line);font-size:.85rem}
+.crumbs ol{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 0;color:var(--muted)}
+.crumbs li+li::before{content:"\203A";margin-right:6px;color:var(--muted)}
+.crumbs a{color:var(--navy);font-weight:600}
+.crumbs a:hover{color:var(--gold-d)}
+
+/* Hero */
+.hl-hero{background:linear-gradient(135deg,var(--navy),var(--navy-3));color:#fff;padding:48px 0 56px;position:relative;overflow:hidden}
+.hl-hero::after{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,.28),transparent 70%);pointer-events:none}
+.hl-hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;position:relative;z-index:1}
+.hl-kicker{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;letter-spacing:.12em;font-weight:800;text-transform:uppercase;color:var(--gold-l);background:rgba(255,255,255,.08);border:1px solid rgba(241,216,136,.3);padding:6px 12px;border-radius:999px}
+.hl-hero h1{font-family:var(--serif);font-size:clamp(1.9rem,1.2rem + 2.6vw,3rem);line-height:1.12;font-weight:700;margin:16px 0 14px}
+.hl-hero h1 span{color:var(--gold-l)}
+.hl-lead{color:rgba(255,255,255,.82);font-size:1.05rem;max-width:56ch}
+.hl-points{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px;margin:22px 0 26px}
+.hl-points li{display:flex;gap:9px;font-size:.92rem;font-weight:600;color:rgba(255,255,255,.92)}
+.hl-points i{color:var(--gold-l);margin-top:3px;flex-shrink:0}
+.hl-cta{display:flex;flex-wrap:wrap;gap:12px}
+.hl-note{font-size:.78rem;color:rgba(255,255,255,.6);margin-top:14px}
+
+/* Calculator card */
+.calc{background:#fff;color:var(--ink);border-radius:var(--r-lg);padding:24px;box-shadow:0 30px 60px -28px rgba(0,0,0,.6)}
+.calc h2{font-family:var(--serif);font-size:1.25rem;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.calc h2 i{color:var(--gold-d)}
+.fld{margin-bottom:16px}
+.fld-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.fld label{font-size:.82rem;font-weight:700;color:#303b4d}
+.fld-val{display:flex;align-items:center;gap:4px;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:2px 10px;font-weight:800;color:var(--navy);font-size:.92rem}
+.fld-val input{width:104px;border:0;background:transparent;text-align:right;font-weight:800;color:var(--navy);font-size:.92rem;font-family:var(--sans);outline:0}
+.fld-val input::-webkit-outer-spin-button,.fld-val input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.fld-val input[type=number]{-moz-appearance:textfield}
+.fld-val em{font-style:normal;color:var(--muted);font-size:.8rem;font-weight:700}
+.rng{width:100%;accent-color:var(--gold);height:6px}
+.res{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:var(--gold-bg);border:1px solid rgba(201,162,39,.35);border-radius:var(--r-md);padding:16px;margin:6px 0 16px}
+.donut{width:104px;height:104px;border-radius:50%;background:conic-gradient(var(--navy) 0 70%,var(--gold) 70% 100%);position:relative;flex-shrink:0}
+.donut::after{content:"";position:absolute;inset:18px;background:var(--gold-bg);border-radius:50%}
+.res-main small{display:block;font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-d)}
+.res-emi{font-family:var(--serif);font-size:1.9rem;font-weight:800;color:var(--navy);line-height:1.1}
+.res-emi span{font-size:.9rem;font-family:var(--sans);font-weight:600;color:var(--muted)}
+.res-rows{margin-top:8px;font-size:.84rem;color:var(--body);display:grid;gap:3px}
+.res-rows b{color:var(--navy)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+
+/* Cards */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-md);padding:22px;transition:border-color .2s,box-shadow .2s,transform .2s}
+.card:hover{border-color:var(--gold);box-shadow:0 14px 28px -18px rgba(11,23,48,.45);transform:translateY(-2px)}
+.ico{width:46px;height:46px;border-radius:12px;background:var(--gold-bg);color:var(--gold-d);display:grid;place-items:center;font-size:1.3rem;margin-bottom:12px}
+.card h3{font-size:1.02rem;font-weight:800;color:var(--navy);margin-bottom:6px}
+.card p{font-size:.9rem;color:var(--body)}
+.card .more{display:inline-flex;gap:5px;align-items:center;margin-top:12px;font-weight:800;font-size:.85rem;color:var(--navy);background:none;border:0;padding:0;cursor:pointer}
+.card .more:hover{color:var(--gold-d)}
+
+/* Eligibility */
+.elig{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
+.panel{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:26px}
+.panel.dark{background:linear-gradient(145deg,var(--navy),var(--navy-3));color:#fff;border:0;display:flex;flex-direction:column;justify-content:center}
+.panel h3{font-family:var(--serif);font-size:1.3rem;color:var(--navy);margin-bottom:14px}
+.panel.dark h3{color:#fff}
+.elig-out small{display:block;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--gold-l)}
+.elig-amt{font-family:var(--serif);font-size:clamp(2rem,1.4rem + 2vw,2.8rem);font-weight:800;color:#fff;line-height:1.1;margin:6px 0 10px}
+.elig-out p{color:rgba(255,255,255,.78);font-size:.9rem;margin-bottom:16px}
+.elig-out .tiny{font-size:.76rem;color:rgba(255,255,255,.55);margin:12px 0 0}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:s}
+.step{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-md);padding:22px;position:relative}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--navy);color:var(--gold-l);font-weight:800;margin-bottom:12px}
+.step h3{font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:4px}
+.step p{font-size:.88rem;color:var(--body)}
+
+/* Documents */
+.doc-col h3{font-size:1.02rem;font-weight:800;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.doc-col h3 i{color:var(--gold-d)}
+.doc-col li{display:flex;gap:9px;font-size:.9rem;color:var(--body);padding:6px 0;border-bottom:1px dashed var(--line)}
+.doc-col li:last-child{border-bottom:0}
+.doc-col li i{color:var(--gold-d);margin-top:3px;flex-shrink:0}
+
+/* Links / chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-weight:700;font-size:.88rem;color:var(--navy);transition:border-color .2s,background .2s}
+.chip:hover{border-color:var(--gold);background:var(--gold-bg)}
+
+/* FAQ */
+.faq{max-width:860px;margin-inline:auto}
+.faq details{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-md);margin-bottom:10px;padding:0 20px}
+.faq details[open]{border-color:var(--gold)}
+.faq summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:800;color:var(--navy);display:flex;justify-content:space-between;gap:14px;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--gold-d);flex-shrink:0}
+.faq details[open] summary::after{content:"\2212"}
+.faq details p{padding:0 0 18px;color:var(--body);font-size:.95rem}
+
+/* CTA band + disclaimer */
+.cta-banner{background:linear-gradient(135deg,var(--navy),var(--navy-3));color:#fff;border-radius:var(--r-lg);padding:34px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.cta-banner h2{font-family:var(--serif);font-size:clamp(1.3rem,1.1rem + 1vw,1.8rem);margin-bottom:6px}
+.cta-banner p{color:rgba(255,255,255,.78);max-width:56ch}
+.cta-actions{display:flex;gap:12px;flex-wrap:wrap}
+.disclaimer{font-size:.8rem;color:var(--muted);max-width:900px;margin:22px auto 0;text-align:center}
+
+/* Footer */
+footer{background:var(--navy);color:rgba(255,255,255,.7)}
+.footer-newsletter{border-bottom:1px solid rgba(255,255,255,.1)}
+.footer-newsletter-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:24px 0}
+.footer-newsletter-inner h3{font-family:var(--serif);color:#fff;font-size:1.15rem}
+.footer-newsletter-inner p{font-size:.9rem;color:rgba(255,255,255,.65)}
+.footer-social{display:flex;gap:8px}
+.footer-social a{width:42px;height:42px;background:rgba(255,255,255,.07);border:1px solid rgba(201,162,39,.35);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:var(--gold-l)}
+.footer-social a:hover{background:var(--gold);color:var(--navy)}
+.footer-inner{padding:44px 0 20px}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:30px;margin-bottom:30px}
+.fl-brand span{font-family:var(--serif);font-size:1.3rem;font-weight:800;color:#fff;display:block;margin-bottom:12px}
+.fl-desc{font-size:.85rem;line-height:1.7;margin-bottom:8px;color:rgba(255,255,255,.7)}
+.fl-desc i{color:var(--gold);margin-right:6px}
+.fl-desc a{color:rgba(255,255,255,.7)}
+.fl-desc a:hover{color:var(--gold-l)}
+.fl-title{font-size:.85rem;font-weight:800;color:var(--gold-l);margin-bottom:12px}
+.fl-link{display:block;font-size:.88rem;color:rgba(255,255,255,.8);padding:6px 0;font-weight:500}
+.fl-link:hover{color:var(--gold-l)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding:18px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.82rem;color:#fff;font-weight:600}
+
+@media(max-width:991px){
+  .hl-hero-grid,.elig{grid-template-columns:1fr}
+  .grid-4,.steps{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:640px){
+  .section{padding:44px 0}
+  .hl-hero{padding:32px 0 40px}
+  .hl-points{grid-template-columns:1fr}
+  .grid-4,.grid-3,.steps{grid-template-columns:1fr}
+  .res{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .calc,.panel{padding:18px}
+  .cta-banner{padding:24px}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr}.hl-cta .btn,.cta-actions .btn{width:100%}}
+</style>
+
+{% include 'home_page/head_assests.html' %}
+
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+{% include 'home_page/header.html' %}
+
+<nav class="crumbs" aria-label="Breadcrumb">
+  <div class="wrap">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><a href="{% url 'services' %}">Services</a></li>
+      <li aria-current="page">Home Loan Assistance</li>
+    </ol>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ============ HERO + EMI CALCULATOR ============ -->
+<section class="hl-hero" aria-labelledby="hlTitle">
+  <div class="wrap hl-hero-grid">
+    <div>
+      <span class="hl-kicker"><i class="bi bi-cash-coin"></i> Home Loan Assistance</span>
+      <h1 id="hlTitle">Home Loan Assistance in India, <span>from Application to Disbursal</span></h1>
+      <p class="hl-lead">Check your eligibility, calculate your EMI and compare offers from leading banks and housing finance companies. Our team supports you at every step.</p>
+      <ul class="hl-points">
+        <li><i class="bi bi-check-circle-fill"></i> Free eligibility and EMI check</li>
+        <li><i class="bi bi-check-circle-fill"></i> Options from multiple lenders</li>
+        <li><i class="bi bi-check-circle-fill"></i> Help with documents and sanction</li>
+        <li><i class="bi bi-check-circle-fill"></i> Flats, plots, construction and balance transfer</li>
+      </ul>
+      <div class="hl-cta">
+        
+        {% comment %} <button type="button" class="btn btn-gold" data-cta="hl_hero_callback" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Loan Assistance' })"><i class="bi bi-telephone"></i> Get Free Loan Advice</button> {% endcomment %}
+
+        <a href="tel:9175791501"><button type="button" class="btn btn-gold"><i class="bi bi-telephone"></i> Get Free Loan Advice</button></a>
+
+        <a class="btn btn-line" data-cta="hl_hero_whatsapp" target="_blank" rel="noopener" href="https://wa.me/919175791501?text=Hi%20KANISHKAIMPERIA%2C%20I%20need%20help%20with%20a%20home%20loan"><i class="bi bi-whatsapp"></i> WhatsApp Us</a>
+      </div>
+      <p class="hl-note">Interest rates and eligibility are set by lenders and may change. Figures here are indicative.</p>
+    </div>
+
+    <div class="calc" id="emi-calculator">
+      <h2><i class="bi bi-calculator"></i> Home Loan EMI Calculator</h2>
+
+      <div class="fld">
+        <div class="fld-top"><label for="emiAmt">Loan amount</label>
+          <div class="fld-val"><em>&#8377;</em><input type="number" id="emiAmt" min="100000" max="50000000" step="50000" value="5000000" inputmode="numeric"></div></div>
+        <input class="rng" type="range" id="emiAmtR" min="100000" max="50000000" step="50000" value="5000000" aria-label="Loan amount slider">
+      </div>
+      <div class="fld">
+        <div class="fld-top"><label for="emiRate">Interest rate (p.a.)</label>
+          <div class="fld-val"><input type="number" id="emiRate" min="5" max="18" step="0.05" value="8.5" inputmode="decimal"><em>%</em></div></div>
+        <input class="rng" type="range" id="emiRateR" min="5" max="18" step="0.05" value="8.5" aria-label="Interest rate slider">
+      </div>
+      <div class="fld">
+        <div class="fld-top"><label for="emiYrs">Tenure</label>
+          <div class="fld-val"><input type="number" id="emiYrs" min="1" max="30" step="1" value="20" inputmode="numeric"><em>yrs</em></div></div>
+        <input class="rng" type="range" id="emiYrsR" min="1" max="30" step="1" value="20" aria-label="Tenure slider">
+      </div>
+
+      <div class="res" aria-live="polite">
+        <div class="donut" id="emiDonut" role="img" aria-label="Principal versus interest split"></div>
+        <div class="res-main">
+          <small>Monthly EMI</small>
+          <div class="res-emi">&#8377;<span id="outEmi" style="font-size:inherit;font-family:inherit;font-weight:inherit;color:inherit">0</span></div>
+          <div class="res-rows">
+            <div><span class="dot" style="background:var(--navy)"></span>Principal <b id="outPrin">0</b></div>
+            <div><span class="dot" style="background:var(--gold)"></span>Total interest <b id="outInt">0</b></div>
+            <div>Total payable <b id="outTot">0</b></div>
+          </div>
+        </div>
+      </div>
+      
+      {% comment %} <button type="button" class="btn btn-navy btn-block" data-cta="hl_emi_cta" onclick="emiLead()"><i class="bi bi-send-check"></i> Get Offers for This Loan</button> {% endcomment %}
+
+      <a href="tel:9175791501"><button type="button" class="btn btn-navy btn-block"><i class="bi bi-send-check"></i> Get Offers for This Loan</button></a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY US ============ -->
+<section class="section" aria-labelledby="whyHeading">
+  <div class="wrap">
+    <div class="sec-head center">
+      <h2 class="sec-title" id="whyHeading">Why Take Your Home Loan Help with KANISHKAIMPERIA</h2>
+      <p class="sec-sub">Property and finance support in one place, so your purchase does not stall at the last step.</p>
+    </div>
+    <div class="grid-4">
+      <article class="card"><div class="ico"><i class="bi bi-bank2"></i></div><h3>Multiple lender options</h3><p>We help you look at offers from leading banks and housing finance companies instead of a single quote.</p></article>
+      <article class="card"><div class="ico"><i class="bi bi-speedometer2"></i></div><h3>Quick eligibility check</h3><p>Know a realistic loan amount before you shortlist properties, so you search within budget.</p></article>
+      <article class="card"><div class="ico"><i class="bi bi-file-earmark-check"></i></div><h3>Document support</h3><p>A clear checklist and guidance so your file is complete the first time.</p></article>
+      <article class="card"><div class="ico"><i class="bi bi-people"></i></div><h3>Dedicated advisor</h3><p>One point of contact who explains each step in simple language.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOAN TYPES ============ -->
+<section class="section white" aria-labelledby="typesHeading">
+  <div class="wrap">
+    <div class="sec-head center">
+      <h2 class="sec-title" id="typesHeading">Types of Home Loans We Can Help With</h2>
+      <p class="sec-sub">Pick the loan that matches your plan. Terms differ by lender and profile.</p>
+    </div>
+    <div class="grid-3">
+      <article class="card"><div class="ico"><i class="bi bi-building"></i></div><h3>Home Purchase Loan</h3><p>For buying a ready flat, house or under-construction property.</p>
+        {% comment %} <button type="button" class="more" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Purchase Loan' })">Enquire <i class="bi bi-arrow-right"></i></button> {% endcomment %}
+      </article>
+
+      <article class="card"><div class="ico"><i class="bi bi-bricks"></i></div><h3>Home Construction Loan</h3><p>Funds released in stages to build a house on land you already own.</p>
+        {% comment %} <button type="button" class="more" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Construction Loan' })">Enquire <i class="bi bi-arrow-right"></i></button> {% endcomment %}
+      </article>
+
+      <article class="card"><div class="ico"><i class="bi bi-map"></i></div><h3>Plot / Land Loan</h3><p>To buy a residential plot, with or without a plan to build later.</p>
+        {% comment %} <button type="button" class="more" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Plot / Land Loan' })">Enquire <i class="bi bi-arrow-right"></i></button> {% endcomment %}
+      </article>
+
+      <article class="card"><div class="ico"><i class="bi bi-arrow-left-right"></i></div><h3>Balance Transfer</h3><p>Move your existing loan to a lender with a lower rate or better terms.</p>
+        {% comment %} <button type="button" class="more" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Loan Balance Transfer' })">Enquire <i class="bi bi-arrow-right"></i></button> {% endcomment %}
+      </article>
+
+      <article class="card"><div class="ico"><i class="bi bi-plus-circle"></i></div><h3>Top-up Loan</h3><p>Extra funds on an existing home loan for renovation or other needs.</p>
+        {% comment %} <button type="button" class="more" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Loan Top-up' })">Enquire <i class="bi bi-arrow-right"></i></button> {% endcomment %}
+      </article>
+      <article class="card"><div class="ico"><i class="bi bi-house-gear"></i></div><h3>Renovation / Extension Loan</h3><p>To repair, upgrade or add a floor or room to your home.</p>
+        {% comment %} <button type="button" class="more" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Renovation Loan' })">Enquire <i class="bi bi-arrow-right"></i></button> {% endcomment %}
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ ELIGIBILITY ============ -->
+<section class="section" aria-labelledby="eligHeading" id="eligibility">
+  <div class="wrap">
+    <div class="sec-head center">
+      <h2 class="sec-title" id="eligHeading">Check Your Home Loan Eligibility</h2>
+      <p class="sec-sub">A quick estimate based on your income and existing EMIs. The lender gives the final figure.</p>
+    </div>
+    <div class="elig">
+      <div class="panel">
+        <h3>Your details</h3>
+        <div class="fld">
+          <div class="fld-top"><label for="elInc">Net monthly income</label>
+            <div class="fld-val"><em>&#8377;</em><input type="number" id="elInc" min="10000" max="5000000" step="5000" value="100000" inputmode="numeric"></div></div>
+          <input class="rng" type="range" id="elIncR" min="10000" max="1000000" step="5000" value="100000" aria-label="Monthly income slider">
+        </div>
+        <div class="fld">
+          <div class="fld-top"><label for="elEmi">Existing monthly EMIs</label>
+            <div class="fld-val"><em>&#8377;</em><input type="number" id="elEmi" min="0" max="1000000" step="1000" value="0" inputmode="numeric"></div></div>
+          <input class="rng" type="range" id="elEmiR" min="0" max="500000" step="1000" value="0" aria-label="Existing EMI slider">
+        </div>
+        <div class="fld">
+          <div class="fld-top"><label for="elRate">Interest rate (p.a.)</label>
+            <div class="fld-val"><input type="number" id="elRate" min="5" max="18" step="0.05" value="8.5" inputmode="decimal"><em>%</em></div></div>
+          <input class="rng" type="range" id="elRateR" min="5" max="18" step="0.05" value="8.5" aria-label="Interest rate slider">
+        </div>
+        <div class="fld" style="margin-bottom:0">
+          <div class="fld-top"><label for="elYrs">Tenure</label>
+            <div class="fld-val"><input type="number" id="elYrs" min="1" max="30" step="1" value="20" inputmode="numeric"><em>yrs</em></div></div>
+          <input class="rng" type="range" id="elYrsR" min="1" max="30" step="1" value="20" aria-label="Tenure slider">
+        </div>
+      </div>
+      <div class="panel dark">
+        <div class="elig-out" aria-live="polite">
+          <small>Estimated eligible loan</small>
+          <div class="elig-amt" id="elAmt">&#8377;0</div>
+          <p id="elText">Based on a monthly EMI capacity of &#8377;0.</p>
+          {% comment %} <button type="button" class="btn btn-gold" data-cta="hl_elig_cta" onclick="eligLead()"><i class="bi bi-headset"></i> Talk to a Loan Advisor</button> {% endcomment %}
+
+          <a href="tel:9175791501"><button type="button" class="btn btn-gold"><i class="bi bi-headset"></i> Talk to a Loan Advisor</button></a>
+
+
+          <p class="tiny">Estimate assumes total EMIs of up to 50% of net monthly income. Actual eligibility depends on credit score, age, employment, property and lender policy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section class="section white" aria-labelledby="stepsHeading">
+  <div class="wrap">
+    <div class="sec-head center">
+      <h2 class="sec-title" id="stepsHeading">How Home Loan Assistance Works</h2>
+      <p class="sec-sub">Four simple steps from first call to loan disbursal.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>Share your requirement</h3><p>Tell us the property, budget and your income details through the form or a call.</p></div>
+      <div class="step"><h3>Compare loan options</h3><p>We shortlist suitable lenders and explain rates, fees and tenure in plain terms.</p></div>
+      <div class="step"><h3>Apply and verify</h3><p>Submit documents with our guidance. The lender verifies your profile and the property.</p></div>
+      <div class="step"><h3>Sanction and disbursal</h3><p>Receive the sanction letter, complete formalities and get the loan disbursed.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOCUMENTS ============ -->
+<section class="section" aria-labelledby="docsHeading">
+  <div class="wrap">
+    <div class="sec-head center">
+      <h2 class="sec-title" id="docsHeading">Documents Required for a Home Loan</h2>
+      <p class="sec-sub">Keep these ready to speed up approval. Your lender may ask for more.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card doc-col">
+        <h3><i class="bi bi-person-badge"></i> All applicants</h3>
+        <ul>
+          <li><i class="bi bi-check2"></i> Identity proof (Aadhaar, passport or voter ID)</li>
+          <li><i class="bi bi-check2"></i> PAN card</li>
+          <li><i class="bi bi-check2"></i> Address proof</li>
+          <li><i class="bi bi-check2"></i> Passport size photographs</li>
+          <li><i class="bi bi-check2"></i> Last 6 months bank statements</li>
+        </ul>
+      </div>
+      <div class="card doc-col">
+        <h3><i class="bi bi-briefcase"></i> Salaried</h3>
+        <ul>
+          <li><i class="bi bi-check2"></i> Latest salary slips</li>
+          <li><i class="bi bi-check2"></i> Form 16 or ITR for recent years</li>
+          <li><i class="bi bi-check2"></i> Employment or appointment letter</li>
+          <li><i class="bi bi-check2"></i> Salary account statement</li>
+        </ul>
+      </div>
+      <div class="card doc-col">
+        <h3><i class="bi bi-shop"></i> Self-employed</h3>
+        <ul>
+          <li><i class="bi bi-check2"></i> ITR with computation for recent years</li>
+          <li><i class="bi bi-check2"></i> Profit and loss account and balance sheet</li>
+          <li><i class="bi bi-check2"></i> Business proof (GST, registration)</li>
+          <li><i class="bi bi-check2"></i> Business account statements</li>
+        </ul>
+      </div>
+    </div>
+    <p class="disclaimer" style="margin-top:20px">Property documents such as the sale agreement, title papers, approved plan and tax receipts are also required and are checked by the lender.</p>
+  </div>
+</section>
+
+<!-- ============ TAX + INTERNAL LINKS ============ -->
+<section class="section white" aria-labelledby="taxHeading">
+  <div class="wrap">
+    <div class="elig">
+      <div class="panel" style="background:var(--gold-bg);border-color:rgba(201,162,39,.35)">
+        <h2 class="sec-title" id="taxHeading" style="font-size:1.5rem;margin-bottom:10px">Tax Benefits on Home Loans</h2>
+        <p style="color:var(--body);margin-bottom:12px">Under the old tax regime, you may be able to claim:</p>
+        <ul class="doc-col" style="margin-bottom:12px">
+          <li><i class="bi bi-check2"></i> Principal repayment under Section 80C, within the overall limit</li>
+          <li><i class="bi bi-check2"></i> Interest on a self-occupied property under Section 24(b), within the limit</li>
+          <li><i class="bi bi-check2"></i> Additional deductions may apply in some cases</li>
+        </ul>
+        <p style="font-size:.82rem;color:var(--muted)">Tax rules change. Please confirm with a qualified tax advisor.</p>
+      </div>
+      <div class="panel">
+        <h2 class="sec-title" style="font-size:1.5rem;margin-bottom:10px">Found a Loan Amount? Now Find the Property</h2>
+        <p style="color:var(--body);margin-bottom:16px">Browse verified listings that fit your budget.</p>
+
+                <div class="chips">
+          <a class="chip" href="/flats-for-sale/"><i class="bi bi-building"></i> Flats for Sale</a>
+          <a class="chip" href="/plots-for-sale/"><i class="bi bi-map"></i> Plots &amp; Land</a>
+          <a class="chip" href="/commercial-property-for-sale/"><i class="bi bi-shop"></i> Commercial for Sale</a>
+          <a class="chip" href="/flats-for-rent/"><i class="bi bi-key"></i> Properties for Rent</a>
+          <a class="chip" href="{% url 'services' %}"><i class="bi bi-grid"></i> All Services</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section" aria-labelledby="faqHeading" id="faq">
+  <div class="wrap">
+    <div class="sec-head center">
+      <h2 class="sec-title" id="faqHeading">Home Loan FAQs</h2>
+      <p class="sec-sub">Answers to the questions buyers ask most.</p>
+    </div>
+    <div class="faq">
+      {% for f in faqs %}
+      <details>
+        <summary>{{ f.q }}</summary>
+        <p>{{ f.a }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta-banner">
+      <div>
+        <h2>Ready to Start Your Home Loan?</h2>
+        <p>Share your details once. Our advisor will call you back with suitable options.</p>
+      </div>
+      <div class="cta-actions">
+
+        {% comment %} <button type="button" class="btn btn-gold" data-cta="hl_footer_callback" onclick="openCallback({ intent: 'callback', type: 'Service enquiry', title: 'Home Loan Assistance' })"><i class="bi bi-telephone"></i> Request Callback</button> {% endcomment %}
+
+        <a href="tel:9175791501"><button type="button" class="btn btn-gold"><i class="bi bi-telephone"></i> Request Callback</button></a>
+
+        <a class="btn btn-wa" data-cta="hl_footer_whatsapp" target="_blank" rel="noopener" href="https://wa.me/919175791501?text=Hi%20KANISHKAIMPERIA%2C%20I%20need%20help%20with%20a%20home%20loan"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+      </div>
+    </div>
+    <p class="disclaimer">KANISHKAIMPERIA provides loan assistance and does not itself sanction loans. Interest rates, fees, eligibility and approval are determined by the lending institution and are subject to change. EMI and eligibility figures on this page are indicative only.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+
+<footer>
+  <div class="footer-newsletter">
+    <div class="wrap footer-newsletter-inner">
+      <div>
+        <h3>Follow Us</h3>
+        <p>Follow us for property updates.</p>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://wa.me/919175791501" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap footer-inner">
+    <div class="footer-grid">
+
+      <!-- Column 1: Brand -->
+      <div>
+        <div class="fl-brand"><span>KANISHKAIMPERIA</span></div>
+        <div class="fl-desc">A property platform connecting owners/landlords, tenants, buyers and agents across India</div>
+        <div class="fl-desc"><i class="bi bi-telephone"></i> <a href="tel:+919175791501">+91 9175791501</a></div>
+        <div class="fl-desc"><i class="bi bi-envelope"></i> <a href="mailto:kanishkaimperia@gmail.com">kanishkaimperia@gmail.com</a></div>
+        <a class="btn btn-gold" href="{% url 'Coming_Soon' %}" style="margin-top:12px;height:42px;font-size:.88rem;">
+          <i class="bi bi-plus-circle"></i> Post Property FREE
+        </a>
+      </div>
+
+      <!-- Column 2: For Tenants -->
+      <div>
+        <div class="fl-title">For Tenants</div>
+        <a href="/flats-for-rent/" class="fl-link">Flats for Rent</a>
+        <a href="/commercial-space-for-rent/" class="fl-link">Commercial for Rent</a>
+        <a href="/pg-coliving/" class="fl-link">PG / Co-living</a>
+        <a href="/listingpage/?type=rent" class="fl-link">All Rentals</a>
+      </div>
+
+      <!-- Column 3: For Buyers -->
+      <div>
+        <div class="fl-title">For Buyers</div>
+        <a href="/flats-for-sale/" class="fl-link">Flats for Sale</a>
+        <a href="/commercial-property-for-sale/" class="fl-link">Commercial for Sale</a>
+        <a href="/plots-for-sale/" class="fl-link">Plots &amp; Land</a>
+        <a href="/agricultural-plots-for-sale/" class="fl-link">Agricultural Land</a>
+        <a href="/industrial-plots-for-sale/" class="fl-link">Industrial Property</a>
+      </div>
+
+      <!-- Column 4: For Owners -->
+      <div>
+        <div class="fl-title">For Owners</div>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">Post Property FREE</a>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">List for Rent</a>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">List for Sale</a>
+        <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Support</a>
+      </div>
+
+      <!-- Column 5: Company & Help -->
+      <div>
+        <div class="fl-title">Company &amp; Help</div>
+        <a href="{% url 'blog' %}" class="fl-link">News / Guide</a>
+        <a href="{% url 'services' %}" class="fl-link">Services</a>
+        <a href="{% url 'about' %}" class="fl-link">About Us</a>
+        <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
+        <a href="#" class="fl-link">Privacy Policy</a>
+        <a href="#" class="fl-link">Terms &amp; Conditions</a>
+      </div>
+
+    </div>
+
+          <span>Privacy Policy · Terms · <a href="/sitemap.xml" class="footer-sitemap-link">Sitemap</a></span>
+
+    <div class="footer-bottom">
+      <span>© 2026 KANISHKAIMPERIA · Designed and Developed By Nedient Technology Private Limited</span>
+
+    </div>
+  </div>
+</footer>
+
+{% include 'home_page/_callback_modal.html' %}
+
+<script>
+(function(){
+  var inr = new Intl.NumberFormat('en-IN');
+  function fmt(n){ return '\u20B9' + inr.format(Math.round(n)); }
+  function short(n){
+    if (n >= 1e7) return '\u20B9' + (n/1e7).toFixed(2).replace(/\.?0+$/,'') + ' Cr';
+    if (n >= 1e5) return '\u20B9' + (n/1e5).toFixed(2).replace(/\.?0+$/,'') + ' L';
+    return fmt(n);
+  }
+  function $(id){ return document.getElementById(id); }
+  function num(id){ var v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+
+  /* keep number input and slider in sync */
+  function link(numId, rngId, onChange){
+    var n = $(numId), r = $(rngId);
+    r.addEventListener('input', function(){ n.value = r.value; onChange(); });
+    n.addEventListener('input', function(){ r.value = n.value; onChange(); });
+  }
+
+  function emi(P, annualRate, years){
+    var r = annualRate/12/100, n = years*12;
+    if (P <= 0 || n <= 0) return 0;
+    if (r === 0) return P/n;
+    var f = Math.pow(1+r, n);
+    return P*r*f/(f-1);
+  }
+
+  /* ---------- EMI calculator ---------- */
+  var lastEmi = { P:0, E:0 };
+  function calcEmi(){
+    var P = num('emiAmt'), rate = num('emiRate'), yrs = num('emiYrs');
+    var E = emi(P, rate, yrs), total = E*yrs*12, interest = Math.max(total-P, 0);
+    $('outEmi').textContent = inr.format(Math.round(E));
+    $('outPrin').textContent = fmt(P);
+    $('outInt').textContent = fmt(interest);
+    $('outTot').textContent = fmt(total);
+    var pct = total > 0 ? Math.round(P/total*100) : 100;
+    $('emiDonut').style.background = 'conic-gradient(#0b1730 0 ' + pct + '%, #c9a227 ' + pct + '% 100%)';
+    lastEmi = { P:P, E:E };
+  }
+  link('emiAmt','emiAmtR',calcEmi);
+  link('emiRate','emiRateR',calcEmi);
+  link('emiYrs','emiYrsR',calcEmi);
+
+  /* ---------- Eligibility ---------- */
+  var lastElig = { amt:0, cap:0 };
+  function calcElig(){
+    var inc = num('elInc'), ex = num('elEmi'), rate = num('elRate'), yrs = num('elYrs');
+    var cap = Math.max(inc*0.5 - ex, 0);
+    var r = rate/12/100, n = yrs*12, amt = 0;
+    if (cap > 0 && n > 0) {
+      amt = r === 0 ? cap*n : cap*(Math.pow(1+r,n)-1)/(r*Math.pow(1+r,n));
+    }
+    $('elAmt').textContent = short(amt);
+    $('elText').textContent = cap > 0
+      ? 'Based on a monthly EMI capacity of ' + fmt(cap) + ' over ' + yrs + ' years at ' + rate + '% p.a.'
+      : 'Your existing EMIs already use most of your income capacity. Talk to an advisor about options.';
+    lastElig = { amt:amt, cap:cap };
+  }
+  link('elInc','elIncR',calcElig);
+  link('elEmi','elEmiR',calcElig);
+  link('elRate','elRateR',calcElig);
+  link('elYrs','elYrsR',calcElig);
+
+  /* ---------- Lead buttons: reuse the site callback modal ---------- */
+  window.emiLead = function(){
+    openCallback({
+      intent: 'callback', type: 'Service enquiry', title: 'Home Loan Assistance',
+      price: 'Loan ' + short(lastEmi.P) + ' \u00B7 EMI ' + fmt(lastEmi.E) + '/mo'
+    });
+  };
+  window.eligLead = function(){
+    openCallback({
+      intent: 'callback', type: 'Service enquiry', title: 'Home Loan Assistance',
+      price: 'Eligibility approx ' + short(lastElig.amt)
+    });
+  };
+
+  calcEmi();
+  calcElig();
+})();
+</script>
+</body>
+</html>

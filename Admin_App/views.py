@@ -89,6 +89,9 @@ from openpyxl.comments import Comment
 
 
 from Main_App.registry import PROPERTY_REGISTRY
+from django.contrib.contenttypes.models import ContentType as _CT
+from Admin_App.badge_utils import BADGE_META, BADGE_CHOICES, all_property_models, live_q
+
 
 
 ########### Crime Officer Views#######
@@ -4299,8 +4302,6 @@ def Update_RM(request,id):
 ########## Views start for ajax for add/update rm functionality #################4
 
 
-
-
 @csrf_exempt
 def User_Ajax(request):
 
@@ -4316,6 +4317,7 @@ def User_Ajax(request):
     # --------------------------------------------------
     # GET SELECTED SERVICES SEPARATELY
     # --------------------------------------------------
+
     selected_services = request.POST.getlist('services[]')
 
     # These fields are not User_Details model fields
@@ -4325,6 +4327,7 @@ def User_Ajax(request):
     # --------------------------------------------------
     # HANDLE OPERATIONAL SCOPE
     # --------------------------------------------------
+
     user_operational_scope = data.get('user_operational_scope')
 
     if user_operational_scope == 'all':
@@ -4348,6 +4351,7 @@ def User_Ajax(request):
     # ==================================================
     # ADD NEW VENDOR
     # ==================================================
+
     if data.get('id') == "":
 
         # Remove ID before creating new record
@@ -4367,6 +4371,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # CHECK DUPLICATE PHONE
         # --------------------------------------------------
+
         if User_Details.objects.filter(
             user_phone=data.get('user_phone')
         ).exists():
@@ -4379,6 +4384,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # CHECK DUPLICATE EMAIL
         # --------------------------------------------------
+
         elif User_Details.objects.filter(
             user_email=data.get('user_email')
         ).exists():
@@ -4393,6 +4399,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # CREATE USER
             # --------------------------------------------------
+
             current_year = datetime.now().year
             year_suffix = str(current_year)[-2:]
 
@@ -4401,6 +4408,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # GENERATE USER ID
             # --------------------------------------------------
+            
             user_id = f"KI-{new_user.id}-{year_suffix}"
 
             new_user.user_id = user_id
@@ -4409,6 +4417,7 @@ def User_Ajax(request):
             # ==================================================
             # SAVE SELECTED SERVICES
             # ==================================================
+
             for service_id in selected_services:
 
                 service_obj = Service.objects.filter(
@@ -4434,6 +4443,7 @@ def User_Ajax(request):
             # --------------------------------------------------
             # SUCCESS RESPONSE
             # --------------------------------------------------
+            
             return JsonResponse({
                 "status": "1",
                 "msg": "User Details added successfully",
@@ -4443,6 +4453,7 @@ def User_Ajax(request):
     # ==================================================
     # UPDATE EXISTING VENDOR
     # ==================================================
+
     else:
 
         try:
@@ -4461,6 +4472,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # PROFILE IMAGE
         # --------------------------------------------------
+
         if request.FILES.get('user_profile'):
 
             data['user_profile'] = request.FILES.get(
@@ -4477,6 +4489,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # REMOVE NON-MODEL FIELDS
         # --------------------------------------------------
+
         data.pop(
             'services[]',
             None
@@ -4496,6 +4509,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # UPDATE USER DETAILS
         # --------------------------------------------------
+
         for key, value in data.items():
 
             setattr(
@@ -4511,11 +4525,13 @@ def User_Ajax(request):
         # ==================================================
 
         # Remove old service mappings
+
         Vendor_Service.objects.filter(
             vendor=rm
         ).delete()
 
         # Add currently selected services
+
         for service_id in selected_services:
 
             service_obj = Service.objects.filter(
@@ -4541,6 +4557,7 @@ def User_Ajax(request):
         # --------------------------------------------------
         # SUCCESS RESPONSE
         # --------------------------------------------------
+
         return JsonResponse({
             "status": "1",
             "msg": "User Details updated successfully",
@@ -4559,6 +4576,7 @@ def Users_Bulk_Delete(request):
         delete_type = data.get('delete_type')
         
         #  BUG FIX 1: This was incorrectly pulling 'delete_type' before
+
         role = data.get('role') 
         
         # Base query: Get all users of the selected role
@@ -4905,6 +4923,7 @@ def Landlord_Data(request):
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
     
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
+
 
 ############ Views end for upload landlord data functionality via excel #######
 
@@ -6724,7 +6743,7 @@ def Agency_Data(request):
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 
-############# Views end for upload agency data functionality via excel ##################
+############# Views end for upload agency data functionality via excel ########
 
 
 ######### Views start for download sample excel for agency/builder #################
@@ -7461,10 +7480,13 @@ def header_settings(request):
     if request.method == "POST":
         if request.FILES.get("logo"):
             settings.logo = request.FILES["logo"]
+        
+        if request.FILES.get("logo_favicon"):
+            settings.logo_favicon = request.FILES["logo_favicon"]
 
         settings.logo_alt = request.POST.get(
             "logo_alt",
-            "EstateFlow"
+            "Kanishka Imperia"
         )
         settings.logo_width = int(
             request.POST.get("logo_width", 180)
@@ -16271,31 +16293,31 @@ def pg_coliving_view(request, pk):
 
 ###################START VIEW SECTION RESALE PLOT Type LISTING Forms###########################
 
-def residential_plot_resale(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Resale_plot/residential_plot_resale.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
+# def residential_plot_resale(request):
+#     session_id = request.session.get('Admin_id')
+#     if session_id:
+#         admin_obj = Admin_Login.objects.get(id=session_id)
+#         ameneties_obj = Ameneties_Details.objects.all()
+#         facilities_obj = Facilities_Details.objects.all()
+#         user_obj = User_Details.objects.all()
+#         context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+#         return render(request,"admin_user/Resale_plot/residential_plot_resale.html",context)
+#     else:
+#         return render(request,'home_page/Adminlogin.html')
 
 
 
 
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        ameneties_obj = Ameneties_Details.objects.all()
-        facilities_obj = Facilities_Details.objects.all()
-        user_obj = User_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-        return render(request,"admin_user/Resale_plot/commercial_plot_resale.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
+#     session_id = request.session.get('Admin_id')
+#     if session_id:
+#         admin_obj = Admin_Login.objects.get(id=session_id)
+#         ameneties_obj = Ameneties_Details.objects.all()
+#         facilities_obj = Facilities_Details.objects.all()
+#         user_obj = User_Details.objects.all()
+#         context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+#         return render(request,"admin_user/Resale_plot/commercial_plot_resale.html",context)
+#     else:
+#         return render(request,'home_page/Adminlogin.html')
 
 
 def industrial_plot_resale(request):
@@ -17725,10 +17747,12 @@ def industrial_resale_add(request):
                 user_description=request.POST.get('user_description'),
 
                 # Step 3: File Document Streams
+                
                 compliance_docs=request.FILES.get('compliance_docs'),
                 social_video=request.FILES.get('social_video'),
 
                 # Step 4: Contact Information
+
                 city=request.POST.get('city'),
                 locality_area=request.POST.get('locality_area'),   # FIXED KEY
                 Property_address=request.POST.get('Property_address'), # FIXED KEY
@@ -17739,6 +17763,7 @@ def industrial_resale_add(request):
                 residency_status=request.POST.get('residency_status'),
 
                 # Audit Session Metadata Tracks
+
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
                 uploaded_by_contact=uploader_phone,
@@ -17770,7 +17795,9 @@ def industrial_resale_add(request):
     ameneties_obj = Ameneties_Details.objects.all()
     facilities_obj = Facilities_Details.objects.all()
 
-    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'admin_obj': Admin_Login.objects.filter(id=admin_id).first() if admin_id else None}
+    user_obj = User_Details.objects.all()
+
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'admin_obj': Admin_Login.objects.filter(id=admin_id).first() if admin_id else None,'user_obj':user_obj}
 
     return render(request, 'admin_user/Resale/industrial_resale.html', context)
 
@@ -18061,6 +18088,7 @@ def Resale_Industrial_Ajax(request):
                     data[field] = None
             else:
                 data[field] = None
+
         
         # ============================================================
         # 5. CONVERT BOOLEAN/CHOICE FIELDS
@@ -18077,25 +18105,40 @@ def Resale_Industrial_Ajax(request):
         
         data['listed_elsewhere'] = 'Yes' if data.get('listed_elsewhere') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
 
+        
+
+
         # Extract video option before saving property
         video_option = data.get('video_option')
 
         # ============================================================
         # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
         # ============================================================
-        # ============================================================
-        # 6. CLEANUP UNEXPECTED FORM METADATA / EXTRA KEYS
-        # ============================================================
+
         extra_keys_to_remove = [
             'csrfmiddlewaretoken', 'assigned_to_role',
-            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual'
+            'video_source', 'locality_manual', 'village_manual', 'locality_area_manual',
+            'price_per_sqft_builtup',
+            'price_per_sqft_builtup_display',
+            'price_per_sqft_land_display'
         ]
+
         for k in extra_keys_to_remove:
             data.pop(k, None)
 
         keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
         for k in keys_to_remove:
             data.pop(k, None)
+
+        # ============================================================
+        # FIX: FORCE "undefined" OR BLANK DATES TO Python None
+        # ============================================================
+        
+        date_fields_to_clean = ['dc_conversion_date']
+        for d_field in date_fields_to_clean:
+            val = data.get(d_field)
+            if not val or str(val).strip().lower() in ['', 'undefined', 'none', 'null']:
+                data[d_field] = None
         
         # ============================================================
         # 7. CREATE OR UPDATE PROPERTY FIRST
@@ -19846,12 +19889,9 @@ def Resale_Resident_Ajax(request):
             # ============================================================
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # ============================================================
-            # ============================================================
-            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
-            # ============================================================
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_building_name = (request.POST.get('building_name') or '').strip()
-            input_locality = (request.POST.get('locality') or request.POST.get('locality') or '').strip()
+            input_locality = (request.POST.get('locality') or '').strip() # Fixed duplicate getter
             input_pincode = (request.POST.get('pincode') or '').strip()
             input_state = (request.POST.get('state') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
@@ -19942,12 +19982,19 @@ def Resale_Resident_Ajax(request):
             data['nearby_facilities'] = ''
         
         # ============================================================
-        # 4. CONVERT NUMERIC FIELDS
+        # 4. CONVERT NUMERIC FIELDS (Added plot_area, construction_area, land_area)
         # ============================================================
+
+        # Remove UI display strings from data before model assignment
+        for ui_field in ['house_psf_plot_display', 'house_psf_const_display', 'farm_psf_builtup_display', 'farm_psf_land_display']:
+            data.pop(ui_field, None)
+
+            
         numeric_fields = [
             'super_builtup_area', 'builtup_area', 'carpet_area', 'plot_area', 
+            'construction_area', 'land_area',
             'total_floors', 'bathrooms', 'balconies', 
-            'covered_parking', 'selling_price', 'loan_amount', 
+            'selling_price', 'loan_amount', 
             'pending_tax_amount', 'manual_brokerage', 'price_per_sqft',
             'latitude', 'longitude'
         ]
@@ -19969,14 +20016,12 @@ def Resale_Resident_Ajax(request):
         data['any_legal_dispute'] = 'yes' if data.get('any_legal_dispute') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
         data['government_tax'] = 'yes' if data.get('government_tax') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
         data['price_negotiable'] = 'yes' if data.get('price_negotiable') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
-        data['open_parking'] = 'Yes' if data.get('open_parking') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
         data['listed_elsewhere'] = 'Yes' if data.get('listed_elsewhere') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
 
         # Extract video option before saving property
         video_option = data.get('video_option')
 
         # CLEANUP: Remove array/file keys from the 'data' dictionary 
-        # so they don't break the ORM unpack (**data) or setattr loop below
         keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
         for k in keys_to_remove:
             data.pop(k, None)
@@ -19987,7 +20032,6 @@ def Resale_Resident_Ajax(request):
         if is_update:
             try:
                 property_obj = ResaleResidentialProperty.objects.get(id=property_id)
-                # Dynamically set all processed fields to the existing object
                 for key, value in data.items():
                     setattr(property_obj, key, value)
                 property_obj.save()
@@ -20009,8 +20053,8 @@ def Resale_Resident_Ajax(request):
                 images_to_delete = ResalePropertyImage.objects.filter(id__in=deleted_image_ids, property=property_obj)
                 for img in images_to_delete:
                     if img.image:
-                        img.image.delete(save=False) # Delete physical file safely
-                    img.delete() # Delete DB record
+                        img.image.delete(save=False)
+                    img.delete()
                     
         # ============================================================
         # 7. HANDLE IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE)
@@ -20098,11 +20142,8 @@ def Resale_Resident_Ajax(request):
         
         property_video_link = data.get('property_video_link', '')
 
-        # ============================================================
-        # FIX: CORRECT VIDEO UPDATE LOGIC
-        # ============================================================
         if video_option == 'upload':
-            if uploaded_video:  # Only update if a NEW file was actually uploaded
+            if uploaded_video:
                 if uploaded_video.size > 20 * 1024 * 1024:
                     ResaleResidentialVideo.objects.update_or_create(
                         property=property_obj,
@@ -20141,7 +20182,7 @@ def Resale_Resident_Ajax(request):
         if hasattr(property_obj, 'generate_auto_descriptions'):
             property_obj.generate_auto_descriptions()
             
-        property_obj.save()  # Ensure Video & Floor Plan attachments get explicitly saved
+        property_obj.save()
         
         if hasattr(property_obj, 'generate_auto_faqs'):
             property_obj.generate_auto_faqs()
@@ -20635,12 +20676,13 @@ def resale_residential_view(request, pk):
 # SINGLE SOFT DELETE
 # ═════════════════════════════════════════════════════════════
 
-@require_POST
+@csrf_exempt
 def resale_residential_delete(request):
+
     # 1. Extract the ID from the AJAX POST payload
+    
     prop_id = request.POST.get('prop_id')
 
-    print("----------------------------",prop_id)
     
     if not prop_id:
         return JsonResponse({"status": "error", "message": "Property ID is missing."}, status=400)
@@ -24833,7 +24875,10 @@ def add_agricultural_property(request):
             'message': str(e)
         }, status=400)
 
-    context = {'admin_obj': admin if admin_id else user}
+    user_obj = User_Details.objects.all()
+
+    context = {'admin_obj': admin if admin_id else user,'user_obj':user_obj}
+
     return render(request, 'admin_user/Resale/agricultural_resale.html', context)
 
 
@@ -25085,6 +25130,7 @@ def Resale_Agricultural_Ajax(request):
         # ============================================================
         # 1. DETERMINE UPDATE OR CREATE VIA 'property_id'
         # ============================================================
+        
         property_id = data.get('property_id', '').strip()
         is_update = bool(property_id)
  
@@ -25111,6 +25157,7 @@ def Resale_Agricultural_Ajax(request):
             # ============================================================
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # ============================================================
+
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_village = (request.POST.get('village') or '').strip()
             input_district = (request.POST.get('district') or '').strip()
@@ -25186,6 +25233,7 @@ def Resale_Agricultural_Ajax(request):
         # ============================================================
         # 3. HANDLE AMENITIES & FACILITIES (JSON to String)
         # ============================================================
+
         amenities_str = data.get('amenities', '[]')
         facilities_str = data.get('nearby_facilities', '[]')
  
@@ -25207,6 +25255,7 @@ def Resale_Agricultural_Ajax(request):
         # instead it has price_per_acre, nos_borewells, property_age,
         # pending_tax_amount.
         # ============================================================
+
         numeric_fields = [
             'land_area', 'selling_price', 'price_per_acre',
             'manual_brokerage', 'loan_amount', 'pending_tax_amount',
@@ -25228,6 +25277,7 @@ def Resale_Agricultural_Ajax(request):
         # pending_tax_due (not government_tax), plus seven_twelve_available
         # and mutation_entry_updated which don't exist on the industrial form.
         # ============================================================
+
         data['property_loan'] = True if data.get('property_loan') in ['True', 'true', 'yes', 'Yes', '1', True, 'on'] else False
         data['existing_tenants'] = True if data.get('existing_tenants') in ['True', 'true', 'yes', 'Yes', '1', True, 'on'] else False
         data['agri_dispute'] = True if data.get('agri_dispute') in ['True', 'true', 'yes', 'Yes', '1', True, 'on'] else False
@@ -25266,6 +25316,16 @@ def Resale_Agricultural_Ajax(request):
             print(f"[Resale_Agricultural_Ajax] Dropping unexpected keys: {unexpected_keys}")
         data = {k: v for k, v in data.items() if k in valid_field_names}
 
+        # ============================================================
+        # FIX: FORCE "undefined" OR BLANK DATES TO Python None
+        # ============================================================
+        
+        date_fields_to_clean = ['na_order_date']
+        for d_field in date_fields_to_clean:
+            val = data.get(d_field)
+            if not val or str(val).strip().lower() in ['', 'undefined', 'none', 'null']:
+                data[d_field] = None
+
       
         # ============================================================
         # 7. CREATE OR UPDATE PROPERTY FIRST
@@ -25300,6 +25360,7 @@ def Resale_Agricultural_Ajax(request):
         # ============================================================
         # 8. HANDLE IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE - AGRICULTURAL)
         # ============================================================
+
         IMAGE_CATEGORY_FIELDS = {
             'land_overview':     'property_images_land_overview[]',
             'soil_quality':      'property_images_soil_quality[]',
@@ -27150,10 +27211,7 @@ def Resale_Residential_Plot_Ajax(request):
         property_id = data.get('property_id', '').strip()
         is_update = bool(property_id)
 
-        # Clean up pending_since date field to avoid validation errors if empty
-        pending_since_val = data.get('pending_since', '').strip()
-        if not pending_since_val or pending_since_val in ['""', '“”,', '“”', "''"]:
-            data['pending_since'] = None
+       
 
         is_dup_flag = False
         dup_group_id = None
@@ -27177,6 +27235,7 @@ def Resale_Residential_Plot_Ajax(request):
             # ============================================================
             # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
             # ============================================================
+            
             input_property_no = (request.POST.get('property_no') or '').strip()
             input_locality = (request.POST.get('locality') or '').strip()
             input_city = (request.POST.get('city') or '').strip()
@@ -27247,6 +27306,8 @@ def Resale_Residential_Plot_Ajax(request):
             data.pop("id", None)
             data.pop("property_id", None)
 
+        
+
         # ============================================================
         # 3. HANDLE AMENITIES & FACILITIES (JSON to String)
         # ============================================================
@@ -27275,7 +27336,8 @@ def Resale_Residential_Plot_Ajax(request):
             'plot_area', 'selling_price', 'plot_price_per_sqft',
             'manual_brokerage', 'plot_frontage', 'plot_depth',
             'outstanding_tax_amount', 'outstanding_loan_amount',
-            'latitude', 'longitude'
+            'latitude', 'longitude','plot_area_sqm', 'plot_area_acres',
+            'booking_amount', 'landlord_owner_fixed_amount'
         ]
 
         for field in numeric_fields:
@@ -27308,6 +27370,16 @@ def Resale_Residential_Plot_Ajax(request):
         keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
         for k in keys_to_remove:
             data.pop(k, None)
+
+        # ============================================================
+        # FIX: FORCE "undefined" OR BLANK DATES TO Python None
+        # ============================================================
+                
+        date_fields_to_clean = ['layout_sanction_date','pending_since']
+        for d_field in date_fields_to_clean:
+            val = data.get(d_field)
+            if not val or str(val).strip().lower() in ['', 'undefined', 'none', 'null']:
+                data[d_field] = None
 
         # ============================================================
         # 7. CREATE OR UPDATE PROPERTY FIRST
@@ -28610,10 +28682,14 @@ def residential_plot_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
+        
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
+        
         user_obj = User_Details.objects.all()
+
         context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+
         return render(request,"admin_user/Resale_plot/residential_plot_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')

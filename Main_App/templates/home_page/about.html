@@ -1,443 +1,702 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="en">
-{% load static %}
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>About - TheProperty Bootstrap Template</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Favicons -->
-  <link href="{% static "assets/img/favicon.png" %}" rel="icon">
-  <link href="{% static "assets/img/apple-touch-icon.png" %}" rel="apple-touch-icon">
+<title>{{ seo.meta_title|default:"About Us | KANISHKAIMPERIA" }}</title>
+<meta name="description" content="{{ seo.meta_description|default:'About KANISHKAIMPERIA — a property platform for landlords, tenants, buyers and agents in India.' }}">
+<meta name="keywords" content="{{ seo.secondary_keywords|default:'about kanishkaimperia, property platform india, buy rent sell property india' }}">
+<meta name="robots" content="{% if seo.noindex %}noindex, nofollow{% else %}index, follow{% endif %}, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="KANISHKAIMPERIA">
+<meta name="language" content="en-IN">
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link rel="canonical" href="{{ seo.canonical_url|default:'https://www.kanishkaimperia.com/about/' }}">
 
-  <!-- Vendor CSS Files -->
-  <link href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/bootstrap-icons/bootstrap-icons.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/aos/aos.css" %}" rel="stylesheet"> 
-  <link href="{% static "assets/vendor/glightbox/css/glightbox.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/swiper/swiper-bundle.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/drift-zoom/drift-basic.css" %}" rel="stylesheet">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_IN">
+<meta property="og:site_name" content="KANISHKAIMPERIA">
+<meta property="og:title" content="{{ seo.meta_title|default:'About Us | KANISHKAIMPERIA' }}">
+<meta property="og:description" content="{{ seo.meta_description|default:'About KANISHKAIMPERIA — a property platform in India.' }}">
+<meta property="og:url" content="{{ seo.canonical_url|default:'https://www.kanishkaimperia.com/about/' }}">
+{% if about.main_image %}
+<meta property="og:image" content="https://www.kanishkaimperia.com{{ about.main_image.url }}">
+{% else %}
+<meta property="og:image" content="https://www.kanishkaimperia.com/static/images/kanishka-imperia-logo.png">
+{% endif %}
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KANISHKAIMPERIA — About Us">
 
-  <!-- Main CSS File -->
-  <link href="{% static "assets/css/main.css" %}" rel="stylesheet">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo.meta_title|default:'About Us | KANISHKAIMPERIA' }}">
+<meta name="twitter:description" content="{{ seo.meta_description|default:'About KANISHKAIMPERIA — a property platform in India.' }}">
+{% if about.main_image %}
+<meta name="twitter:image" content="https://www.kanishkaimperia.com{{ about.main_image.url }}">
+{% endif %}
 
-  <!-- =======================================================
-  * Template Name: TheProperty
-  * Template URL: https://bootstrapmade.com/theproperty-bootstrap-real-estate-template/
-  * Updated: Aug 05 2025 with Bootstrap v5.3.7
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+<meta name="theme-color" content="#0b1730">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://code.jquery.com">
+
+<link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+<link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+{% if seo.schema_json %}
+<script type="application/ld+json">{{ seo.schema_json|safe }}</script>
+{% else %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.kanishkaimperia.com/#organization",
+      "name": "KANISHKAIMPERIA",
+      "url": "https://www.kanishkaimperia.com/",
+      "logo": "https://www.kanishkaimperia.com/static/images/kanishka-imperia-logo.png",
+      "telephone": "+91-9175791501",
+      "email": "kanishkaimperia@gmail.com",
+      "address": {"@type": "PostalAddress", "addressCountry": "IN"},
+      "areaServed": {"@type": "Country", "name": "India"}
+    },
+    {
+      "@type": "AboutPage",
+      "name": "About KANISHKAIMPERIA",
+      "url": "https://www.kanishkaimperia.com/about/",
+      "description": "{{ about.description|striptags|truncatewords:30|escapejs }}",
+      "isPartOf": {"@id": "https://www.kanishkaimperia.com/#organization"}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.kanishkaimperia.com/"},
+        {"@type": "ListItem", "position": 2, "name": "About Us", "item": "https://www.kanishkaimperia.com/about/"}
+      ]
+    }{% if timeline_items %},
+    {
+      "@type": "ItemList",
+      "name": "Our Journey So Far",
+      "itemListElement": [
+        {% for item in timeline_items %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "name": "{{ item.title|escapejs }} ({{ item.year }})",
+          "description": "{{ item.description|striptags|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }{% endif %}
+  ]
+}
+</script>
+{% endif %}
+
+<style>
+/* =========================================================
+   DESIGN TOKENS
+========================================================= */
+:root{
+  --navy:#0b1730; --navy-2:#13244a; --navy-3:#1b3163;
+  --gold:#c9a227; --gold-l:#f1d888; --gold-d:#8a6a15; --gold-bg:#fbf5e0;
+  --ink:#12202c; --body:#475467; --muted:#667085;
+  --line:rgba(11,23,48,.10); --line-soft:rgba(11,23,48,.06);
+  --bg:#f6f7f9; --white:#fff; --soft:#f5f7fa; --wa:#15803d;
+  --serif:"Playfair Display",Georgia,serif; --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r-sm:10px; --r-md:14px; --r-lg:20px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;overflow-x:hidden;margin:0}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+h1,h2,h3,h4,h5,p,ul,ol{margin:0;padding:0}
+ul,ol{list-style:none}
+button{font-family:inherit}
+.wrap{width:min(1200px,92%);margin-inline:auto}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.section{padding:64px 0}
+.section.tight{padding:28px 0}
+.section.soft{background:var(--soft);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.sec-head.center{justify-content:center;text-align:center}
+.eyebrow{font-size:.72rem;font-weight:800;color:var(--gold-d);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:8px}
+.sec-title{font-family:var(--serif);font-size:clamp(1.6rem,1.2rem + 1.6vw,2.2rem);line-height:1.2;font-weight:700;color:var(--navy);letter-spacing:-.2px}
+.sec-sub{font-size:1rem;color:var(--body);margin-top:6px;max-width:70ch;line-height:1.65}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:var(--r-sm);font-weight:800;font-size:.95rem;border:1.5px solid transparent;cursor:pointer;transition:filter .2s,background .2s,border-color .2s;line-height:1;white-space:nowrap}
+.btn-gold{background:linear-gradient(135deg,#dcb73c,var(--gold));color:var(--navy)}
+.btn-gold:hover{filter:brightness(1.06);color:var(--navy)}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-wa:hover{filter:brightness(1.1);color:#fff}
+.btn-line{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.btn-line:hover{background:rgba(255,255,255,.1);color:#fff}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy-2);color:#fff}
+.btn-outline{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.btn-outline:hover{border-color:var(--gold);background:var(--gold-bg);color:var(--navy)}
+
+/* BREADCRUMB */
+.crumbs{padding:12px 0 0}
+.crumbs ol{display:flex;flex-wrap:wrap;gap:8px;font-size:.84rem;color:var(--muted)}
+.crumbs li+li::before{content:"›";margin-right:8px;color:#b4bcc8}
+.crumbs a:hover{color:var(--gold-d)}
+.crumbs li[aria-current]{color:var(--navy);font-weight:600}
+
+/* =========================================================
+   HERO
+========================================================= */
+.about-hero{position:relative;z-index:2;color:#fff;padding:60px 0 50px;
+  background:linear-gradient(to right,rgba(11,23,48,.95) 0%,rgba(11,23,48,.75) 55%,rgba(11,23,48,.55) 100%),
+             var(--hero-img,url('{% static "kanishka-imperia-luxury-hero.jpg" %}')) center/cover no-repeat}
+.hdr-over .about-hero{padding-top:130px}
+.about-hero-inner{max-width:820px}
+.about-kicker{font-size:.72rem;letter-spacing:.18em;font-weight:800;color:var(--gold-l);margin-bottom:12px;text-transform:uppercase}
+.about-title{font-family:var(--serif);font-size:clamp(1.9rem,1rem + 3vw,3rem);line-height:1.15;font-weight:700}
+.about-title span{display:block;margin-top:10px;font-family:var(--sans);font-weight:500;font-size:clamp(.98rem,.85rem + .5vw,1.2rem);line-height:1.55;color:var(--gold-l)}
+.about-hero-desc{margin-top:18px;font-size:1.02rem;line-height:1.7;color:rgba(255,255,255,.9);max-width:66ch}
+.about-hero-note{margin-top:18px;font-size:.85rem;color:rgba(255,255,255,.7);max-width:60ch;line-height:1.6}
+.about-hero-points{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:22px;font-size:.92rem;font-weight:600;color:rgba(255,255,255,.9)}
+.about-hero-points i{color:var(--gold-l);margin-right:6px}
+.about-hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.about-hero-actions .btn{height:52px}
+
+/* =========================================================
+   QUICK CHIP NAV
+========================================================= */
+.about-chips{background:#fff;border-bottom:1px solid var(--line-soft);position:sticky;top:72px;z-index:40}
+.about-chips-inner{display:flex;gap:8px;overflow-x:auto;padding:14px 0;scrollbar-width:none}
+.about-chips-inner::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);font-weight:700;font-size:.9rem;color:var(--navy);background:#fff;transition:border-color .2s,background .2s}
+.chip:hover{border-color:var(--gold);background:var(--gold-bg);color:var(--navy)}
+.chip i{color:var(--gold-d)}
+
+/* =========================================================
+   CARD GRID (like demo's .cardx)
+========================================================= */
+.grid{display:grid;gap:16px}
+.grid.g2{grid-template-columns:repeat(2,1fr)}
+.grid.g3{grid-template-columns:repeat(3,1fr)}
+.grid.g4{grid-template-columns:repeat(4,1fr)}
+.cardx{border:1px solid var(--line);border-radius:var(--r-md);padding:22px;background:#fff;height:100%;box-shadow:0 5px 18px rgba(16,32,64,.03);transition:border-color .2s,box-shadow .2s,transform .2s}
+.cardx:hover{border-color:rgba(201,162,39,.55);box-shadow:0 16px 34px -12px rgba(11,23,48,.18);transform:translateY(-3px)}
+.cardx i.ci{font-size:1.6rem;color:var(--gold-d);display:block;margin-bottom:10px}
+.cardx h3{font-size:1.02rem;font-weight:800;color:var(--navy);margin:0 0 6px;font-family:var(--sans)}
+.cardx p{font-size:.88rem;color:var(--body);line-height:1.6;margin:0}
+.cardx .cardx-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:.85rem;font-weight:800;color:var(--gold-d)}
+.cardx .cardx-link:hover{color:var(--navy)}
+
+/* =========================================================
+   NOTE BOX
+========================================================= */
+.note{background:#fff8e8;border-left:4px solid var(--gold);padding:16px 18px;border-radius:var(--r-sm);font-size:.92rem;color:#5b4a22;line-height:1.65;margin-top:20px}
+.note b{color:#4a3b1a}
+
+/* =========================================================
+   STEP LIST (numbered, like demo)
+========================================================= */
+.steps{margin-top:20px}
+.step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--line-soft)}
+.step:last-child{border-bottom:0}
+.step .num{flex-shrink:0;min-width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;font-family:var(--serif)}
+.step h4{font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 4px;font-family:var(--sans)}
+.step p{font-size:.9rem;color:var(--body);margin:0;line-height:1.6}
+
+/* =========================================================
+   SERVICES SECTION (special)
+========================================================= */
+.services-section{background:linear-gradient(120deg,var(--navy),var(--navy-3));color:#fff;border-radius:var(--r-lg);padding:44px 40px;border:1px solid rgba(201,162,39,.35);position:relative;overflow:hidden}
+.services-section::after{content:"";position:absolute;bottom:-80px;right:-80px;width:240px;height:240px;background:radial-gradient(circle,rgba(201,162,39,.22) 0%,transparent 70%);border-radius:50%;pointer-events:none}
+.services-section .eyebrow{color:var(--gold-l)}
+.services-section .sec-title{color:#fff}
+.services-section .sec-sub{color:rgba(255,255,255,.82)}
+.services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:28px;position:relative;z-index:2}
+.svc-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-md);padding:22px;color:#fff;transition:background .2s,border-color .2s,transform .2s;display:flex;flex-direction:column}
+.svc-card:hover{background:rgba(255,255,255,.12);border-color:rgba(201,162,39,.55);transform:translateY(-3px);color:#fff}
+.svc-card i.ci{font-size:1.6rem;color:var(--gold-l);display:block;margin-bottom:10px}
+.svc-card h3{font-size:1rem;font-weight:800;margin:0 0 6px;color:#fff;font-family:var(--sans)}
+.svc-card p{font-size:.85rem;color:rgba(255,255,255,.78);line-height:1.6;margin:0}
+.services-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px;position:relative;z-index:2}
+
+/* =========================================================
+   HELP CTA
+========================================================= */
+.help-cta{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;padding:40px;border-radius:var(--r-lg);color:#fff;background:linear-gradient(120deg,var(--navy-2),var(--navy-3));border:1px solid rgba(201,162,39,.35)}
+.help-cta h2{font-family:var(--serif);font-size:clamp(1.3rem,1.05rem + 1vw,1.8rem);line-height:1.25;max-width:26ch;color:#fff}
+.help-cta p{margin-top:8px;color:rgba(255,255,255,.82);max-width:52ch;font-size:.95rem}
+.help-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* =========================================================
+   FOOTER (same as index.html)
+
+
+========================================================= */
+footer{background:var(--navy);color:rgba(255,255,255,.7);border-top:none}
+.footer-newsletter{border-bottom:1px solid rgba(255,255,255,.1)}
+
+.footer-newsletter-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:24px 20px}
+
+.footer-inner{max-width:1200px;margin:0 auto;padding:44px 20px 20px}
+
+.footer-newsletter-inner h3{font-family:var(--serif);color:#fff;font-size:1.15rem;margin:0}
+.footer-newsletter-inner p{font-size:.9rem;color:rgba(255,255,255,.65);margin:0}
+.footer-social{display:flex;gap:8px}
+.footer-social a{width:42px;height:42px;background:rgba(255,255,255,.07);border:1px solid rgba(201,162,39,.35);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:var(--gold-l);font-size:1rem;text-decoration:none;transition:background .2s,color .2s}
+.footer-social a:hover{background:var(--gold);color:var(--navy)}
+
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:30px;margin-bottom:30px}
+.fl-brand{margin-bottom:14px}
+.fl-brand span{font-family:var(--serif);font-size:1.3rem;font-weight:800;color:#fff;display:block;margin-bottom:12px}
+.fl-desc{font-size:.92rem;line-height:1.7;margin-bottom:8px;color:rgba(255,255,255,.7)}
+.fl-desc i{color:var(--gold);margin-right:6px}
+.fl-desc a{color:rgba(255,255,255,.7)}
+.fl-desc a:hover{color:var(--gold-l)}
+.fl-title{font-size:.95rem;font-weight:800;color:var(--gold-l);margin-bottom:12px}
+.fl-link{display:block;font-size:.93rem;color:rgba(255,255,255,.8);padding:6px 0;font-weight:500;text-decoration:none}
+.fl-link:hover{color:var(--gold-l)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding:18px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.85rem;color:#fff;font-weight:600}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media(max-width:1100px){
+  .grid.g4{grid-template-columns:repeat(2,1fr)}
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:900px){
+  .grid.g3{grid-template-columns:repeat(2,1fr)}
+  .about-chips{top:70px}
+}
+@media(max-width:768px){
+  .section{padding:44px 0}
+  .grid.g2,.grid.g3,.grid.g4{grid-template-columns:repeat(2,1fr);gap:12px}
+  .cardx{padding:16px}
+  .services-section{padding:28px 20px}
+  .services-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .services-actions .btn{flex:1 1 100%}
+  .help-cta{padding:28px 22px}
+  .help-actions{width:100%}
+  .help-actions .btn{flex:1 1 100%}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .grid.g2,.grid.g3,.grid.g4{grid-template-columns:1fr}
+  .services-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .step .num{min-width:32px;height:32px;font-size:.85rem}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none !important;animation:none !important}
+}
+</style>
+
+{% include 'home_page/head_assests.html' %}
+
 </head>
+<body>
 
-<body class="about-page">
+{% include 'home_page/header.html' %}
 
-  <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+<script>
+(function(){
+  var h = document.querySelector('.premium-header');
+  if (h && h.classList.contains('header-transparent')) document.documentElement.classList.add('hdr-over');
+})();
+</script>
 
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.webp" alt=""> -->
-        <h1 class="sitename">TheProperty</h1>
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="about-hero">
+  <div class="wrap">
+    <div class="about-hero-inner">
+      <p class="about-kicker">{{ about.intro_badge|default:"ABOUT KANISHKAIMPERIA" }}</p>
+      <h1 class="about-title">
+        {{ about.title|default:"Property Search & Listing, Made Simple." }}
+        <span>{{ about.extra_description|default:"Buy, rent, sell and post property from locations across India."|truncatewords:24 }}</span>
+      </h1>
+      {% if about.description %}
+      <p class="about-hero-desc">{{ about.description|striptags|truncatewords:40 }}</p>
+      {% else %}
+      <p class="about-hero-desc">KANISHKAIMPERIA is a property platform where users can browse listings and owners can submit property details for residential, commercial, land and other property types.</p>
+      {% endif %}
+      <p class="about-hero-note">Property information and availability may vary by listing and location.</p>
+      <div class="about-hero-points">
+        <span><i class="bi bi-house-door"></i>Buy, rent, sell</span>
+        <span><i class="bi bi-person-lines-fill"></i>Post property</span>
+        <span><i class="bi bi-geo-alt"></i>Browse by city and locality</span>
+      </div>
+      <div class="about-hero-actions">
+        <a class="btn btn-gold" href="/listingpage/?type=all"><i class="bi bi-search"></i> Search Properties</a>
+        <a class="btn btn-line" href="{% url 'Coming_Soon' %}"><i class="bi bi-plus-circle"></i> Post Your Property</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BREADCRUMB ============ -->
+<nav aria-label="Breadcrumb" class="crumbs">
+  <div class="wrap">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li aria-current="page">About Us</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- ============ QUICK CHIP NAV ============ -->
+<nav class="about-chips" aria-label="About sections">
+  <div class="wrap about-chips-inner">
+    <a class="chip" href="#seekers"><i class="bi bi-house-door"></i>For Seekers</a>
+    <a class="chip" href="#owners"><i class="bi bi-key"></i>For Owners</a>
+    <a class="chip" href="#post"><i class="bi bi-plus-circle"></i>Post Property</a>
+    <a class="chip" href="#approach"><i class="bi bi-signpost-2"></i>How We Work</a>
+    <a class="chip" href="#services"><i class="bi bi-grid"></i>Services</a>
+    <a class="chip" href="#info"><i class="bi bi-info-circle"></i>Info</a>
+  </div>
+</nav>
+
+<!-- ============ 1. FOR PROPERTY SEEKERS ============ -->
+<section class="section white" id="seekers">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">For Property Seekers</p>
+        <h2 class="sec-title">Find Property Across Locations</h2>
+        <p class="sec-sub">Search by city, locality, property type, budget and other preferences. Results depend on listings available on KANISHKAIMPERIA.</p>
+      </div>
+      <a href="/listingpage/?type=all" class="btn btn-outline"><i class="bi bi-search"></i> Browse Listings</a>
+    </div>
+
+    <div class="grid g4">
+     
+      
+            <a href="/flats-for-sale/" class="cardx">
+        <i class="bi bi-house ci"></i>
+        <h3>Buy / Resale</h3>
+        <p>Flats, houses, villas, plots and other sale listings.</p>
+        <span class="cardx-link">Browse <i class="bi bi-arrow-right"></i></span>
+      </a>
+      <a href="/flats-for-rent/" class="cardx">
+        <i class="bi bi-key ci"></i>
+        <h3>Rent & Lease</h3>
+        <p>Residential, commercial and other rental listings.</p>
+        <span class="cardx-link">Browse <i class="bi bi-arrow-right"></i></span>
+      </a>
+      <a href="/commercial-property-for-sale/" class="cardx">
+        <i class="bi bi-building ci"></i>
+        <h3>Commercial</h3>
+        <p>Offices, shops, spaces and commercial listings.</p>
+        <span class="cardx-link">Browse <i class="bi bi-arrow-right"></i></span>
+      </a>
+      <a href="/plots-for-sale/" class="cardx">
+        <i class="bi bi-tree ci"></i>
+        <h3>Land & Plots</h3>
+        <p>Residential, agricultural and other land listings.</p>
+        <span class="cardx-link">Browse <i class="bi bi-arrow-right"></i></span>
       </a>
 
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="about.html" class="active">About</a></li>
-          <li><a href="properties.html">Properties</a></li>
-          <li><a href="services.html">Services</a></li>
-          <li><a href="agents.html">Agents</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>More Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="property-details.html">Property Details</a></li>
-              <li><a href="service-details.html">Service Details</a></li>
-              <li><a href="agent-profile.html">Agent Profile</a></li>
-              <li><a href="blog-details.html">Blog Details</a></li>
-              <li><a href="terms.html">Terms</a></li>
-              <li><a href="privacy.html">Privacy</a></li>
-              <li><a href="404.html">404</a></li>
-            </ul>
-          </li>
-
-          <li class="dropdown"><a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="#">Dropdown 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                <ul>
-                  <li><a href="#">Deep Dropdown 1</a></li>
-                  <li><a href="#">Deep Dropdown 2</a></li>
-                  <li><a href="#">Deep Dropdown 3</a></li>
-                  <li><a href="#">Deep Dropdown 4</a></li>
-                  <li><a href="#">Deep Dropdown 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Dropdown 2</a></li>
-              <li><a href="#">Dropdown 3</a></li>
-              <li><a href="#">Dropdown 4</a></li>
-            </ul>
-          </li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-
-      <a class="btn-getstarted" href="properties.html">Get Started</a>
 
     </div>
-  </header>
+  </div>
+</section>
 
-  <main class="main">
+<!-- ============ 2. FOR OWNERS & LANDLORDS ============ -->
+<section class="section soft" id="owners">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">For Owners & Landlords</p>
+        <h2 class="sec-title">Have a Property to Sell or Rent?</h2>
+        <p class="sec-sub">Property owners from locations where KANISHKAIMPERIA operates can submit property details online. Provide accurate information, photos and contact details to create a listing request.</p>
+      </div>
+    </div>
 
-    <!-- Page Title -->
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">About</h1>
-              <p class="mb-0">
-                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
-                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
-                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
-                ipsum dolorem.
-              </p>
-            </div>
-          </div>
+    <div class="note"><b>Please note:</b> Listing availability, verification, enquiry volume, service charges and transaction terms can vary by property, location and applicable agreement.</div>
+
+    <div style="margin-top:24px">
+      <a class="btn btn-navy" href="{% url 'Coming_Soon' %}"><i class="bi bi-plus-circle"></i> Post Your Property</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. POST PROPERTY ============ -->
+<section class="section white" id="post">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Post Property</p>
+        <h2 class="sec-title">List Your Property on KANISHKAIMPERIA</h2>
+        <p class="sec-sub">Owners and landlords can submit residential, commercial, plot, land and other eligible property details. The form guides you through the information needed for a useful listing.</p>
+      </div>
+    </div>
+
+    <div class="grid g4">
+      <div class="cardx"><i class="bi bi-geo-alt ci"></i><h3>Choose Location</h3><p>City, locality, landmark and property address details.</p></div>
+      <div class="cardx"><i class="bi bi-card-text ci"></i><h3>Add Details</h3><p>Type, size, rooms, pricing, amenities and availability.</p></div>
+      <div class="cardx"><i class="bi bi-images ci"></i><h3>Add Photos</h3><p>Upload clear property photographs and relevant documents where applicable.</p></div>
+      <div class="cardx"><i class="bi bi-check2-square ci"></i><h3>Review & Submit</h3><p>Review entered information before submitting the property.</p></div>
+    </div>
+
+    <div style="margin-top:24px">
+      <a class="btn btn-gold" href="{% url 'Coming_Soon' %}"><i class="bi bi-plus-circle"></i> Start Property Listing</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. HOW WE WORK ============ -->
+<section class="section soft" id="approach">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">How We Work</p>
+        <h2 class="sec-title">A Platform Built Around Choice</h2>
+        <p class="sec-sub">KANISHKAIMPERIA brings property discovery, listing and related services into one platform. Users can review available information and decide which next step suits their requirement.</p>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h4>Search</h4>
+          <p>Explore properties by location, category and requirement.</p>
         </div>
       </div>
-      <nav class="breadcrumbs">
-        <div class="container">
-          <ol>
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li class="current">About</li>
-          </ol>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h4>Compare</h4>
+          <p>Review price, size, features, photos and other available details.</p>
         </div>
-      </nav>
-    </div><!-- End Page Title -->
-
-    <!-- About Section -->
-    <section id="about" class="about section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-       <div class="row align-items-center mb-5">
-  <div class="col-lg-7">
-    <div class="intro-content" data-aos="fade-right" data-aos-delay="200">
-      
-      <div class="section-badge">
-        <i class="bi bi-house-heart"></i>
-        <span>{{ about.intro_badge }}</span>
       </div>
-
-      <h2>{{ about.title }}</h2>
-
-      <p class="lead-text">{{ about.description }}</p>
-      <p>{{ about.extra_description }}</p>
-
-      <div class="founder-highlight" data-aos="fade-up" data-aos-delay="300">
-        <div class="founder-image">
-          {% if about.founder_image %}
-            <img src="{{ about.founder_image.url }}" alt="Founder" class="img-fluid">
-          {% endif %}
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h4>Enquire</h4>
+          <p>Request more information, a callback or a visit where available.</p>
         </div>
-        <div class="founder-info">
-          <blockquote>"{{ about.founder_quote }}"</blockquote>
-          <div class="founder-details">
-            <h5>{{ about.founder_name }}</h5>
-            <span>{{ about.founder_role }}</span>
-          </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <h4>Proceed</h4>
+          <p>Take the next step based on your requirement and agreed terms.</p>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-  <div class="col-lg-5">
-    <div class="visual-section" data-aos="fade-left" data-aos-delay="250">
-      <div class="main-image">
-        {% if about.main_image %}
-          <img src="{{ about.main_image.url }}" alt="Luxury Development" class="img-fluid">
-        {% endif %}
-        <div class="experience-badge">
-          <div class="badge-number">{{ about.years_of_excellence }}+</div>
-          <div class="badge-text">Years of Excellence</div>
-        </div>
+<!-- ============ 5. SERVICES (with link to services page) ============ -->
+<section class="section white" id="services">
+  <div class="wrap">
+    <div class="services-section">
+      <p class="eyebrow">Property Services</p>
+      <h2 class="sec-title">Need Help Beyond Property Search?</h2>
+      <p class="sec-sub">Explore available services such as home loans, legal/document assistance, interiors, movers and maintenance. Service availability and charges may vary.</p>
+
+      <div class="services-grid">
+        <a href="{% url 'services' %}" class="svc-card">
+          <i class="bi bi-bank ci"></i>
+          <h3>Home Loan</h3>
+          <p>Explore loan assistance and eligibility guidance.</p>
+        </a>
+        <a href="{% url 'services' %}" class="svc-card">
+          <i class="bi bi-file-earmark-check ci"></i>
+          <h3>Legal & Documents</h3>
+          <p>Explore document-related assistance options.</p>
+        </a>
+        <a href="{% url 'services' %}" class="svc-card">
+          <i class="bi bi-truck ci"></i>
+          <h3>Movers & Packers</h3>
+          <p>Explore moving and relocation services.</p>
+        </a>
+        <a href="{% url 'services' %}" class="svc-card">
+          <i class="bi bi-tools ci"></i>
+          <h3>Maintenance</h3>
+          <p>Explore property repair and maintenance options.</p>
+        </a>
       </div>
-      <div class="overlay-image">
-        {% if about.overlay_image %}
-          <img src="{{ about.overlay_image.url }}" alt="Interior Design" class="img-fluid">
-        {% endif %}
+
+      <div class="services-actions">
+        <a class="btn btn-gold" href="{% url 'services' %}"><i class="bi bi-grid"></i> View All Services</a>
+        <a class="btn btn-line" href="{% url 'Contact_Us' %}"><i class="bi bi-telephone"></i> Contact Us</a>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="achievements-grid" data-aos="fade-up" data-aos-delay="350">
-
-
-   <div class="row text-center">
-            {% for achievement in achievements %}
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="achievement-item" data-aos="zoom-in">
-                    <div class="achievement-icon">
-                        <i class="{{ achievement.icon_class }}"></i>
-                    </div>
-                    <div class="achievement-number">
-                        <span data-purecounter-start="0" data-purecounter-end="{{ achievement.number }}" data-purecounter-duration="2" class="purecounter"></span>{{ achievement.suffix }}
-                    </div>
-                    <div class="achievement-label">{{ achievement.label }}</div>
-                  
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <script>
-        function editItem(id, icon_class, number, suffix, label, order) {
-            document.getElementById("pk").value = id;
-            document.getElementById("icon_class").value = icon_class;
-            document.getElementById("number").value = number;
-            document.getElementById("suffix").value = suffix;
-            document.getElementById("label").value = label;
-            document.getElementById("order").value = order;
-        }
-    </script>
-
-
-    
-
-<div class="timeline-section" data-aos="fade-up" data-aos-delay="400">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="section-header text-center mb-5">
-                    <h3>Our Journey of Excellence</h3>
-                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam.</p>
-                </div>
-
-                <div class="timeline">
-                    {% for item in timeline_items %}
-                    <div class="timeline-item" data-aos="fade-right">
-                        <div class="timeline-year">{{ item.year }}</div>
-                        <div class="timeline-content">
-                            <h4>{{ item.title }}</h4>
-                            <p>{{ item.description }}</p>
-                            <a href="#" onclick="editItem('{{ item.id }}','{{ item.year }}','{{ item.title }}','{{ item.description }}','{{ item.order }}')">Edit</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function editItem(id, year, title, description, order) {
-            document.getElementById("pk").value = id;
-            document.getElementById("year").value = year;
-            document.getElementById("title").value = title;
-            document.getElementById("description").value = description;
-            document.getElementById("order").value = order;
-        }
-    </script>
-
-
-        <div class="team-preview" data-aos="fade-up" data-aos-delay="450">
-          <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-              <h3>Meet Our Expert Team</h3>
-              <p class="team-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua quis nostrud exercitation.</p>
-
-              <div class="team-grid">
-                <div class="row justify-content-center">
-                  <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-member" data-aos="flip-up" data-aos-delay="500">
-                      <div class="member-image">
-                        <img src="{% static "assets/img/real-estate/agent-5.webp" %}" alt="Team Member" class="img-fluid">
-                      </div>
-                      <div class="member-info">
-                        <h5>Sarah Martinez</h5>
-                        <span>Senior Property Advisor</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="team-member" data-aos="flip-up" data-aos-delay="550">
-                      <div class="member-image">
-                        <img src="{% static "assets/img/real-estate/agent-2.webp" %}" alt="Team Member" class="img-fluid">
-                      </div>
-                      <div class="member-info">
-                        <h5>David Chen</h5>
-                        <span>Investment Specialist</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <a href="team.html" class="view-team-btn">View Full Team</a>
-            </div>
-          </div>
-        </div><!-- End Team Preview -->
-
+<!-- ============ 6. KNOWLEDGE & GUIDES ============ -->
+<section class="section soft">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Smart Property Content</p>
+        <h2 class="sec-title">Useful Information for Buyers, Tenants & Owners</h2>
+        <p class="sec-sub">Property decisions involve location, budget, documents, visits and transaction terms. KANISHKAIMPERIA can publish practical guides and property information to help users understand these steps.</p>
       </div>
+      <a href="{% url 'blog' %}" class="btn btn-outline"><i class="bi bi-journal-text"></i> Explore Guides</a>
+    </div>
 
-    </section><!-- /About Section -->
+    <div class="grid g3">
+      <div class="cardx"><i class="bi bi-house-door ci"></i><h3>Buying Guide</h3><p>Steps, documents and things to review before buying a property.</p></div>
+      <div class="cardx"><i class="bi bi-key ci"></i><h3>Renting Guide</h3><p>Rental agreements, deposits, notice periods and tenant information.</p></div>
+      <div class="cardx"><i class="bi bi-journal-text ci"></i><h3>Property Documents</h3><p>Common documents involved in property transactions in India.</p></div>
+    </div>
+  </div>
+</section>
 
-  </main>
-
-  <footer id="footer" class="footer position-relative">
-
-    <div class="container">
-      <div class="row gy-5">
-
-        <div class="col-lg-4">
-          <div class="footer-content">
-            <a href="index.html" class="logo d-flex align-items-center mb-4">
-              <span class="sitename">TheProperty</span>
-            </a>
-            <p class="mb-4">Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec velit neque auctor sit amet aliquam vel ullamcorper sit amet ligula.</p>
-
-            <div class="newsletter-form">
-              <h5>Stay Updated</h5>
-              <form action="forms/newsletter.php" method="post" class="php-email-form">
-                <div class="input-group">
-                  <input type="email" name="email" class="form-control" placeholder="Enter your email" required="">
-                  <button type="submit" class="btn-subscribe">
-                    <i class="bi bi-send"></i>
-                  </button>
-                </div>
-                <div class="loading">Loading</div>
-                <div class="error-message"></div>
-                <div class="sent-message">Thank you for subscribing!</div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-6">
-          <div class="footer-links">
-            <h4>Company</h4>
-            <ul>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> About</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Careers</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Press</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Blog</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Contact</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-6">
-          <div class="footer-links">
-            <h4>Solutions</h4>
-            <ul>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Digital Strategy</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Cloud Computing</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Data Analytics</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> AI Solutions</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Cybersecurity</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-4">
-          <div class="footer-contact">
-            <h4>Get in Touch</h4>
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-geo-alt"></i>
-              </div>
-              <div class="contact-info">
-                <p>2847 Maple Avenue<br>Los Angeles, CA 90210<br>United States</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-telephone"></i>
-              </div>
-              <div class="contact-info">
-                <p>+1 (555) 987-6543</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-envelope"></i>
-              </div>
-              <div class="contact-info">
-                <p>contact@example.com</p>
-              </div>
-            </div>
-
-            <div class="social-links">
-              <a href="#"><i class="bi bi-facebook"></i></a>
-              <a href="#"><i class="bi bi-twitter-x"></i></a>
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-              <a href="#"><i class="bi bi-youtube"></i></a>
-              <a href="#"><i class="bi bi-github"></i></a>
-            </div>
-          </div>
-        </div>
-
+<!-- ============ 7. IMPORTANT INFORMATION ============ -->
+<section class="section white" id="info">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Important Information</p>
+        <h2 class="sec-title">Property Information Can Change</h2>
+        <p class="sec-sub">Prices, availability, property status, services, fees, timelines and other details may change. Users should review the current listing information and applicable terms before proceeding.</p>
       </div>
     </div>
+
+    <div class="note"><b>Reminder:</b> KANISHKAIMPERIA is a property platform. Property details, service terms and applicable charges are provided by owners, agents and service providers. Users are encouraged to review all information before making a decision.</div>
+  </div>
+</section>
+
+<!-- ============ 8. HELP CTA ============ -->
+<section class="section tight">
+  <div class="wrap">
+    <div class="help-cta">
+      <div>
+        <h2>Have questions about a property or a service?</h2>
+        <p>Reach out to the KANISHKAIMPERIA team for assistance with listings, enquiries or related services.</p>
+      </div>
+      <div class="help-actions">
+        <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/919175791501?text=Hi%20KANISHKAIMPERIA"><i class="bi bi-whatsapp"></i> WhatsApp Us</a>
+        <a class="btn btn-line" href="tel:+919175791501"><i class="bi bi-telephone"></i> Call +91 9175791501</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER (same as index.html) ============ -->
+
+
+<!-- ============ FOOTER (Standard — matches index.html) ============ -->
+<footer>
+  <div class="footer-newsletter">
+    <div class="wrap footer-newsletter-inner">
+      <div>
+        <h3>Follow Us</h3>
+        <p>Follow us for property updates.</p>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://wa.me/919175791501" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap footer-inner">
+    <div class="footer-grid">
+
+      <!-- Column 1: Brand -->
+      <div>
+        <div class="fl-brand"><span>KANISHKAIMPERIA</span></div>
+        <div class="fl-desc">A property platform connecting owners/landlords, tenants, buyers and agents across India</div>
+        <div class="fl-desc"><i class="bi bi-telephone"></i> <a href="tel:+919175791501">+91 9175791501</a></div>
+        <div class="fl-desc"><i class="bi bi-envelope"></i> <a href="mailto:kanishkaimperia@gmail.com">kanishkaimperia@gmail.com</a></div>
+        <a class="btn btn-gold" href="{% url 'Coming_Soon' %}" style="margin-top:12px;height:42px;font-size:.88rem;">
+          <i class="bi bi-plus-circle"></i> Post Property FREE
+        </a>
+      </div>
+
+      <!-- Column 2: For Tenants -->
+      <div>
+        <div class="fl-title">For Tenants</div>
+        <a href="/flats-for-rent/" class="fl-link">Flats for Rent</a>
+        <a href="/commercial-space-for-rent/" class="fl-link">Commercial for Rent</a>
+        <a href="/pg-coliving/" class="fl-link">PG / Co-living</a>
+        <a href="/listingpage/?type=rent" class="fl-link">All Rentals</a>
+      </div>
+
+      <!-- Column 3: For Buyers -->
+      <div>
+        <div class="fl-title">For Buyers</div>
+        <a href="/flats-for-sale/" class="fl-link">Flats for Sale</a>
+        <a href="/commercial-property-for-sale/" class="fl-link">Commercial for Sale</a>
+        <a href="/plots-for-sale/" class="fl-link">Plots &amp; Land</a>
+        <a href="/agricultural-plots-for-sale/" class="fl-link">Agricultural Land</a>
+        <a href="/industrial-plots-for-sale/" class="fl-link">Industrial Property</a>
+      </div>
+
+      <!-- Column 4: For Owners -->
+      <div>
+        <div class="fl-title">For Owners</div>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">Post Property FREE</a>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">List for Rent</a>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">List for Sale</a>
+        <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Support</a>
+      </div>
+
+      <!-- Column 5: Company & Help -->
+      <div>
+        <div class="fl-title">Company &amp; Help</div>
+        <a href="{% url 'blog' %}" class="fl-link">News / Guide</a>
+        <a href="{% url 'services' %}" class="fl-link">Services</a>
+        <a href="{% url 'about' %}" class="fl-link">About Us</a>
+        <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
+        <a href="#" class="fl-link">Privacy Policy</a>
+        <a href="#" class="fl-link">Terms &amp; Conditions</a>
+      </div>
+
+    </div>
+
+          <span>Privacy Policy · Terms · <a href="/sitemap.xml" class="footer-sitemap-link">Sitemap</a></span>
 
     <div class="footer-bottom">
-      <div class="container">
-        <div class="row align-items-center">
-          <div class="col-lg-6">
-            <div class="copyright">
-              <p>© <span>Copyright</span> <strong class="px-1 sitename">MyWebsite</strong> <span>All Rights Reserved</span></p>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="footer-bottom-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Cookie Policy</a>
-            </div>
-            <div class="credits">
-              <!-- All the links in the footer should remain intact. -->
-              <!-- You can delete the links only if you've purchased the pro version. -->
-              <!-- Licensing information: https://bootstrapmade.com/license/ -->
-              <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-            </div>
-          </div>
-        </div>
-      </div>
+      <span>© 2026 KANISHKAIMPERIA · Designed and Developed By Nedient Technology Private Limited</span>
+
     </div>
-
-  </footer>
-
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src="{% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-  <script src="{% static "assets/vendor/php-email-form/validate.js" %}"></script>
-  <script src="{% static "assets/vendor/aos/aos.js" %}"></script>
-  <script src="{% static "assets/vendor/purecounter/purecounter_vanilla.js" %}"></script>
-  <script src="{% static "assets/vendor/glightbox/js/glightbox.min.js" %}"></script>
-  <script src="{% static "assets/vendor/swiper/swiper-bundle.min.js" %}"></script>
-  <script src="{% static "assets/vendor/drift-zoom/Drift.min.js" %}"></script>
-
-  <!-- Main JS File -->
-  <script src="{% static "assets/js/main.js" %}"></script>
+  </div>
+</footer>
+<script>
+(function(){
+  var chips = document.querySelectorAll('.about-chips .chip');
+  if (!chips.length || !('IntersectionObserver' in window)) return;
+  var sections = [];
+  chips.forEach(function(c){
+    var id = (c.getAttribute('href') || '').replace('#','');
+    var el = id ? document.getElementById(id) : null;
+    if (el) sections.push({ el: el, chip: c });
+  });
+  if (!sections.length) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) {
+        chips.forEach(function(c){ c.style.background = ''; c.style.borderColor = ''; });
+        var match = sections.find(function(s){ return s.el === entry.target; });
+        if (match) { match.chip.style.background = 'var(--gold-bg)'; match.chip.style.borderColor = 'var(--gold)'; }
+      }
+    });
+  }, { rootMargin: '-120px 0px -60% 0px' });
+  sections.forEach(function(s){ io.observe(s.el); });
+})();
+</script>
 
 </body>
-
 </html>

@@ -7,371 +7,1714 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <style>
-  :root {
-    --primary: #56ab2f;
-    --primary-dark: #3e8e41;
-    --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --success-grad: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    --info-grad: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --dark-grad: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    --success: #10b981;
-    --muted: #64748b;
-    --border: #e2e8f0;
-    --bg-light: #f8f9fa;
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --topbar-height: 70px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
+
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+        padding: 20px 0;
+        transition: all 0.3s ease;
+        z-index: 999;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+    .sidebar-brand {
+        padding: 20px 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-brand-icon {
+        width: 45px;
+        height: 45px;
+        background: var(--primary-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .sidebar-brand-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed .sidebar-brand-text {
+        display: none;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 30px 0 0 0;
+    }
+
+    .menu-section-title {
+        padding: 15px 25px 10px;
+        color: #7f8c8d;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed .menu-section-title {
+        opacity: 0;
+        height: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .menu-item {
+        position: relative;
+    }
+
+    .menu-link {
+        display: flex;
+        align-items: center;
+        padding: 15px 25px;
+        color: #bdc3c7;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        gap: 15px;
+        cursor: pointer;
+    }
+
+    .menu-link:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .menu-link.active {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .menu-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: white;
+    }
+
+    /* Validation Error Styles */
+    .input-error {
+        border-color: #e74c3c !important;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
+    }
+
+    .radio-error-group {
+        border: 1px solid #e74c3c !important;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
+    }
+
+    .menu-icon {
+        width: 24px;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    .menu-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed .menu-text {
+        display: none;
+    }
+
+    .menu-badge {
+        margin-left: auto;
+        background: #e74c3c;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .sidebar.collapsed .menu-badge {
+        display: none;
+    }
+
+    .dropdown-icon {
+        margin-left: auto;
+        transition: transform 0.3s ease;
+        font-size: 0.8rem;
+    }
+
+    .sidebar.collapsed .dropdown-icon {
+        display: none;
+    }
+
+    .menu-link.dropdown-open .dropdown-icon {
+        transform: rotate(180deg);
+    }
+
+    .submenu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .submenu.active {
+        max-height: 1000px;
+    }
+
+    .submenu-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 25px 12px 65px;
+        color: #95a5a6;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .submenu-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .submenu-link.active {
+        color: #667eea;
+    }
+
+    /* Nested Submenu */
+    .submenu .menu-item {
+        position: relative;
+    }
+
+    .submenu .submenu {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .submenu .submenu-link {
+        padding-left: 85px;
+    }
+
+    /* Top Bar */
+    .topbar {
+        position: fixed;
+        left: var(--sidebar-width);
+        top: 0;
+        right: 0;
+        height: var(--topbar-height);
+        background: white;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        transition: all 0.3s ease;
+        z-index: 997;
+    }
+
+    .sidebar.collapsed~.main-wrapper .topbar {
+        left: var(--sidebar-collapsed-width);
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .toggle-sidebar {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: #f8f9fa;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+    }
+
+    .toggle-sidebar:hover {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .topbar-search {
+        position: relative;
+        width: 300px;
+    }
+
+    .topbar-search input {
+        width: 100%;
+        padding: 10px 40px 10px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .topbar-search input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .topbar-search i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+    }
+
+    .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .topbar-icon {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .topbar-icon:hover {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .user-profile:hover {
+        background: #f8f9fa;
+    }
+
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Main Content */
+    .main-wrapper {
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width);
+        margin-top: var(--topbar-height);
+        padding: 30px;
+        min-height: calc(100vh - var(--topbar-height));
+        transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed~.main-wrapper .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+    }
+
+    /* Page Wrapper with Grid for Preview */
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        max-width: 1600px;
+        margin: 0 auto;
+        align-items: start;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: var(--primary-gradient);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        grid-column: 1 / -1;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .btn-back {
+        background: white;
+        color: #2c3e50;
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-back:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+    }
+
+    /* STEPPER STYLES */
+    .stepper-container {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        position: relative;
+    }
+
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #adb5bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border: 3px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-circle.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: #667eea;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .step-circle.done {
+        background: var(--success-gradient);
+        color: white;
+        border-color: #11998e;
+    }
+
+    .step-label {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #adb5bd;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .step-label.active {
+        color: #667eea;
+    }
+
+    .step-label.done {
+        color: #11998e;
+    }
+
+    .step-line {
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        right: -50%;
+        height: 3px;
+        background: #e9ecef;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .step-item:last-child .step-line {
+        display: none;
+    }
+
+    .step-line.done {
+        background: var(--success-gradient);
+    }
+
+    /* Form Container */
+    .form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-title i {
+        width: 45px;
+        height: 45px;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Step Content */
+    .step-content {
+        display: none;
+    }
+
+    .step-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 12px 12px 0 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-body {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 0 0 12px 12px;
+        border: 2px solid #e9ecef;
+        border-top: none;
+    }
+
+    /* Form Controls */
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .form-label .required {
+        color: #e74c3c;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    select.form-control {
+        appearance: none;
+        background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center;
+        background-size: 16px;
+        background-color: white;
+        padding-right: 2rem;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Step Navigation Buttons */
+    .step-nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        gap: 15px;
+    }
+
+    .btn-step {
+        padding: 12px 35px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-prev {
+        background: #f8f9fa;
+        color: #2d3748;
+        border: 2px solid #e9ecef;
+    }
+
+    .btn-prev:hover {
+        background: #e9ecef;
+    }
+
+    .btn-next {
+        background-color:#57C785!important;
+        color: 1111   white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-next:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Form Footer */
+    .form-footer {
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #f0f0f0;
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+    }
+
+    .btn-submit {
+        color: white;
+        padding: 12px 35px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        font-size: 1rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* PREVIEW SIDEBAR */
+    .preview-sidebar {
+        position: sticky;
+        top: calc(var(--topbar-height) + 20px);
+        height: max-content;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        z-index: 10;
+    }
+
+    .preview-card {
+        background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+        border-radius: 16px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .preview-header {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .preview-mock {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .preview-image {
+        height: 140px;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        position: relative;
+    }
+
+    .preview-badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 6px;
+    }
+
+    .preview-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0f172a;
+    }
+
+    .preview-price {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 900;
+        padding: 5px 12px;
+        border-radius: 8px;
+    }
+
+    .preview-body {
+        padding: 15px;
+    }
+
+    .preview-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .preview-location {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-bottom: 10px;
+    }
+
+    .preview-specs {
+        display: flex;
+        gap: 12px;
+        font-size: 0.75rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .checklist-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .checklist-title {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        color: #718096;
+    }
+
+    .checklist-item i {
+        font-size: 0.8rem;
+        width: 18px;
+    }
+
+    .checklist-item.done {
+        color: #11998e;
+    }
+
+    .checklist-item.done i {
+        color: #11998e;
+    }
+
+    /* Search Select Dropdown */
+    .form-group,
+    .col-md-12,
+    .section-body,
+    .step-content,
+    .row,
+    .modal-body {
+        overflow: visible !important;
+    }
+
+    .search-select {
+        position: relative;
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+    .search-select-control {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+        min-height: 48px;
+    }
+
+    .search-select-control:hover,
+    .search-select-control:focus {
+        border-color: #667eea;
+        outline: none;
+    }
+
+    .search-select.open .search-select-control {
+        border-color: #667eea;
+    }
+
+    .search-select-value {
+        color: #1e293b;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-height: 1.2em;
+        display: inline-block;
+    }
+
+    .search-select-value.ss-placeholder {
+        color: #94a3b8;
+    }
+
+    .search-select-arrow {
+        color: #64748b;
+        transition: transform 0.2s ease;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+        margin-left: 8px;
+    }
+
+    .search-select.open .search-select-arrow {
+        transform: rotate(180deg);
+    }
+
+    .search-select-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ced4da;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    .search-select.open .search-select-panel {
+        display: block;
+    }
+
+    .search-select-input {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid #e9ecef;
+        padding: 12px 15px;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .search-select-options {
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .search-select-group-label {
+        padding: 8px 15px 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: #f8f9fa;
+    }
+
+    .search-select-option {
+        padding: 10px 16px;
+        cursor: pointer;
+        color: #2d3748;
+        font-size: 0.9rem;
+    }
+
+    .search-select-option:hover,
+    .search-select-option.highlighted {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .search-select-no-results {
+        padding: 16px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .search-select.validation-error .search-select-control {
+        border-color: #e74c3c !important;
+        background: #fff5f5 !important;
+    }
+
+    /* Categorized Image Styling */
+  /* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
+
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 6 Free", "Font Awesome 5 Free"; font-weight: 900; background: #38ef7d; border-color: #38ef7d; color: #fff; }
+
+.img-cat-tab:nth-child(1)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #eef2ff;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .min-ok { font-size: 0.85rem; color: #10b981; font-weight: 600; }
+
+    @media (max-width: 1200px) {
+        .page-wrapper {
+            grid-template-columns: 1fr;
+        }
+        .preview-sidebar {
+            display: none;
+        }
+    }
+
+    /* Custom Form Section Cards */
+    .form-section {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .form-section .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section .section-body {
+        padding: 20px;
+    }
+
+    /* Custom Image/Video Dropzone Area */
+    .image-upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .image-upload-area:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+
+    .upload-icon {
+        margin-bottom: 8px;
+    }
+
+    .upload-text {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+
+    .upload-subtext {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    /* Custom Reset Button Style */
+    .btn-reset {
+        background: #ffffff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+.btn-reset:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+
+/* =====================================================================
+   UI REFRESH — modern look, interactive floating labels, mobile-first
+   (visual only — no ids / names / behaviour changed)
+   ===================================================================== */
+:root {
+    --ui-primary: #667eea;
+    --ui-primary-dark: #4f46e5;
+    --ui-border: #dfe4ee;
+    --ui-text: #1e293b;
+    --ui-muted: #94a3b8;
+    --ui-danger: #e74c3c;
+    --ui-radius: 12px;
+}
+
+/* ---------- Cards & sections ---------- */
+.form-container { padding: 32px; }
+.form-container .form-section {
+    border: 1px solid #e6eaf3;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(30, 41, 59, 0.05);
+    transition: box-shadow .25s ease;
+}
+.form-container .form-section:hover { box-shadow: 0 10px 28px rgba(102, 126, 234, 0.12); }
+.form-container .form-section .section-header {
+    padding: 14px 22px;
+    font-size: 1rem;
+    letter-spacing: .2px;
+}
+.form-container .form-section .section-header > i:first-child,
+.form-container .form-section .section-header > span > i:first-child {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    font-size: .9rem;
+}
+.form-container .form-section .section-body {
+    background: #fff;
+    padding: 14px 22px 20px;
+    border: none;
+}
+.form-container .row { --bs-gutter-x: 1.1rem; }
+.form-container .col-md-3,
+.form-container .col-md-4,
+.form-container .col-md-6,
+.form-container .col-md-12 { margin-bottom: 4px; }
+.form-container .mt-2 { margin-top: 1rem !important; }
+
+/* ---------- Inputs ---------- */
+.form-container .form-control,
+.form-container .form-select {
+    min-height: 52px;
+    border: 1.5px solid var(--ui-border);
+    border-radius: var(--ui-radius);
+    padding: 14px 16px;
+    font-size: .95rem;
+    color: var(--ui-text);
+    background-color: #fff;
+    box-shadow: none;
+    transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.form-container .form-control:hover:not(:focus):not([readonly]),
+.form-container .form-select:hover:not(:focus) { border-color: #b8c2f5; }
+.form-container .form-control:focus,
+.form-container .form-select:focus {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, .14);
+}
+.form-container .form-control[readonly] { cursor: not-allowed; }
+.form-container select.form-control,
+.form-container .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 42px;
+    cursor: pointer;
+}
+.form-container textarea.form-control { min-height: 110px; padding-top: 16px; }
+
+/* ---------- Interactive floating labels ---------- */
+.form-container .fl { position: relative; }
+.form-container .fl > .form-label {
+    position: absolute;
+    left: 12px; top: 15px;
+    z-index: 3;
+    display: block;
+    max-width: calc(100% - 52px);
+    margin: 0 !important;
+    padding: 0 6px;
+    font-size: .93rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ui-muted);
+    background: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transition: top .18s ease, font-size .18s ease, color .18s ease, font-weight .18s ease, background .18s ease;
+}
+.form-container .fl > .form-label i { margin-right: 5px; font-size: .85em; opacity: .8; }
+
+/* floated state: focused, has value, or select (always shows a value) */
+.form-container .fl:focus-within > .form-label,
+.form-container .fl:has(> input:not(:placeholder-shown)) > .form-label,
+.form-container .fl:has(> textarea:not(:placeholder-shown)) > .form-label,
+.form-container .fl:has(> input[type="date"]) > .form-label,
+.form-container .fl:has(> select) > .form-label {
+    top: -9px;
+    font-size: .74rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #fff;
+}
+.form-container .fl:focus-within > .form-label { color: var(--ui-primary-dark); }
+.form-container .fl:has(> .input-error) > .form-label,
+.form-container .fl:has(> .is-invalid) > .form-label { color: var(--ui-danger); }
+
+/* placeholder only appears once the field is focused (label does the talking) */
+.form-container .fl > .form-control::placeholder { color: transparent; transition: color .2s ease; }
+.form-container .fl > .form-control:focus::placeholder { color: #c5cddb; }
+
+/* ---------- Pill radios (Yes / No etc.) ---------- */
+.form-container .form-group:not(.fl) > .form-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+.form-container .radio-group,
+.form-container .listed-by-radio-group { display: flex; flex-wrap: wrap; gap: 10px !important; }
+.form-container .radio-option,
+.form-container .listed-by-radio-group > label {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    margin: 0;
+    padding: 10px 20px;
+    border: 1.5px solid var(--ui-border);
+    border-radius: var(--ui-radius);
+    background: #fff;
+    color: #475569;
+    font-weight: 500;
+    font-size: .93rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all .2s ease;
+}
+.form-container .radio-option:hover,
+.form-container .listed-by-radio-group > label:hover { border-color: #a5b4fc; background: #f8f9ff; }
+.form-container .radio-option:has(input:checked),
+.form-container .listed-by-radio-group > label:has(input:checked) {
+    border-color: var(--ui-primary);
+    background: #eef2ff;
+    color: var(--ui-primary-dark);
+    font-weight: 600;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, .12);
+}
+.form-container .radio-option input,
+.form-container .listed-by-radio-group input { accent-color: var(--ui-primary); width: 18px; height: 18px; margin: 0; }
+
+/* ---------- Searchable select (Listed for other user) ---------- */
+.form-container .search-select-control {
+    min-height: 52px;
+    border: 1.5px solid var(--ui-border);
+    border-radius: var(--ui-radius);
+}
+.form-container .search-select-panel { max-width: 100%; }
+
+/* ---------- Buttons ---------- */
+.form-container .btn-step,
+.form-container .btn-submit { min-height: 48px; justify-content: center; }
+.form-container .btn-submit { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---------- Tablet & mobile ---------- */
+@media (max-width: 991px) {
+    .main-content { margin-left: 0 !important; padding: 14px; }
+    .page-wrapper { gap: 16px; }
+    .page-header { padding: 22px 20px; margin-bottom: 16px; border-radius: 16px; }
+    .page-title { font-size: 1.35rem; }
+    .page-subtitle { font-size: .85rem; }
+    .stepper-container { padding: 18px 12px; margin-bottom: 16px; border-radius: 16px; }
+    .form-container { padding: 16px; border-radius: 16px; }
+    .form-header { margin-bottom: 18px; padding-bottom: 14px; }
+    .form-title { font-size: 1.1rem; }
+    .form-title i { width: 38px; height: 38px; }
+}
+
+@media (max-width: 767px) {
+    .page-header-content { flex-direction: column; align-items: flex-start; }
+    .btn-back { width: 100%; justify-content: center; }
+
+    /* compact stepper */
+    .step-circle { width: 36px; height: 36px; font-size: .9rem; border-width: 2px; }
+    .step-line { top: 18px; height: 2px; }
+    .step-label { font-size: .64rem; line-height: 1.25; margin-top: 6px; padding: 0 2px; }
+
+    .form-container .form-section { border-radius: 14px; margin-bottom: 18px; }
+    .form-container .form-section .section-header { padding: 12px 16px; font-size: .95rem; }
+    .form-container .form-section .section-body { padding: 12px 14px 14px; }
+    .form-container .row { --bs-gutter-x: 0; }
+
+    /* 16px stops iOS from zooming on focus */
+    .form-container .form-control,
+    .form-container .form-select,
+    .form-container .search-select-input { font-size: 16px; }
+    .form-container .fl > .form-label { font-size: 15px; }
+
+    .form-container .radio-group,
+    .form-container .listed-by-radio-group { gap: 8px !important; }
+    .form-container .radio-option,
+    .form-container .listed-by-radio-group > label { flex: 1 1 calc(50% - 8px); justify-content: center; padding: 10px 12px; }
+
+    /* sticky nav bar so Next / Previous are always reachable */
+    .form-container .step-nav {
+        position: sticky; bottom: 0; z-index: 20;
+        margin: 18px -16px -16px; padding: 12px 16px;
+        background: rgba(255, 255, 255, .96);
+        backdrop-filter: blur(6px);
+        border-top: 1px solid #eef0f6;
+        border-radius: 0 0 16px 16px;
+    }
+    .form-container .step-nav > div:empty { display: none; }
+    .form-container .step-nav .btn-step { flex: 1; padding: 12px 14px; font-size: .92rem; }
+
+    .form-container .form-footer { flex-direction: column-reverse; gap: 10px; }
+    .form-container .form-footer .btn-step,
+    .form-container .form-footer .btn-submit { width: 100%; justify-content: center; }
+
+    /* image upload area */
+    .img-upload-guide { padding: 12px; }
+    .img-cat-tabs { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .img-cat-upload-area { padding: 24px 12px; }
+    .img-cat-preview { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .img-total-summary { padding: 12px 14px; }
+}
+
+@media (max-width: 400px) {
+    .step-label { font-size: .58rem; }
+    .form-container .radio-option,
+    .form-container .listed-by-radio-group > label { flex: 1 1 100%; }
+}
+
+/* ---------- v2: measurement labels fully visible + livelier placeholders ---------- */
+.form-container { container-type: inline-size; container-name: formbox; }
+
+/* resting label: more room for text (selects keep space for the chevron) */
+.form-container .fl > .form-label { font-size: .88rem; max-width: calc(100% - 26px); }
+.form-container .fl:has(> select) > .form-label { max-width: calc(100% - 26px); }
+.form-container .fl:has(> select:not(:focus)) > .form-label,
+.form-container .fl:focus-within > .form-label,
+.form-container .fl:has(> input:not(:placeholder-shown)) > .form-label,
+.form-container .fl:has(> textarea:not(:placeholder-shown)) > .form-label { font-size: .74rem; }
+
+/* when the form card is narrow, go 2 columns instead of squeezing 3-4 */
+@container formbox (max-width: 700px) {
+    .form-container .row > .col-md-3,
+    .form-container .row > .col-md-4 { flex: 0 0 auto; width: 50%; }
+}
+@container formbox (max-width: 480px) {
+    .form-container .row > .col-md-3,
+    .form-container .row > .col-md-4,
+    .form-container .row > .col-md-6 { width: 100%; }
+}
+
+/* placeholder fades + slides in once the label has floated up */
+.form-container .fl > .form-control::placeholder {
+    color: transparent;
+    opacity: 1;
+    transition: color .25s ease .05s;
+}
+.form-container .fl > .form-control:focus::placeholder { color: #a3aec2; }
+
+/* little life on the field itself */
+.form-container .fl:focus-within { transform: translateY(-1px); transition: transform .2s ease; }
+.form-container .fl > .form-control:focus,
+.form-container .fl > .form-select:focus { background-color: #fbfcff; }
+
+/* ---------- v3: consistent vertical rhythm so floating labels never collide ---------- */
+.form-container .row { --bs-gutter-y: 1.15rem; }
+.form-container .mt-2 { margin-top: 1.15rem !important; }
+.form-container .row > [class*="col-"].mt-2 { margin-top: 1.15rem !important; }
+
+/* ---------- v4: stop Bootstrap's negative row margin from collapsing the gap between stacked rows ---------- */
+.form-container .row { margin-top: 0 !important; }
+
+/* ================= AMENITIES MODAL ================= */
+.am-modal .modal-content { border: none; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 60px rgba(30,41,59,.3); }
+.am-header { background: var(--primary-gradient); color: #fff; border: none; padding: 18px 24px; }
+.am-header-left { display: flex; align-items: center; gap: 14px; }
+.am-header-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.am-header .modal-title { font-weight: 700; font-size: 1.15rem; }
+.am-subtitle { opacity: .85; font-size: .78rem; }
+.am-toolbar { display: flex; gap: 12px; align-items: center; padding: 14px 24px; background: #f8f9ff; border-bottom: 1px solid #eef0f6; }
+.am-search { position: relative; flex: 1; }
+.am-search i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: .85rem; }
+.am-search input { width: 100%; border: 1.5px solid #dfe4ee; border-radius: 12px; padding: 11px 14px 11px 38px; font-size: .92rem; background: #fff; transition: all .2s; }
+.am-search input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,.14); }
+.am-link-btn { border: none; background: none; color: #4f46e5; font-weight: 600; font-size: .85rem; cursor: pointer; white-space: nowrap; padding: 8px 10px; border-radius: 8px; }
+.am-link-btn:hover { background: #eef2ff; }
+.am-body { padding: 20px 24px; background: #fff; }
+.am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.am-card { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0; cursor: pointer; user-select: none; border: 1.5px solid #e6eaf3; border-radius: 14px; background: #fff; transition: all .2s ease; }
+.am-card input { position: absolute; opacity: 0; pointer-events: none; }
+.am-card:hover { border-color: #a5b4fc; background: #f8f9ff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102,126,234,.12); }
+.am-icon { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.am-name { flex: 1; font-size: .88rem; font-weight: 600; color: #334155; line-height: 1.25; }
+.am-tick { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: .6rem; color: transparent; transition: all .2s; }
+.am-card:has(input:checked) { border-color: #667eea; background: #eef2ff; box-shadow: 0 0 0 3px rgba(102,126,234,.12); }
+.am-card:has(input:checked) .am-icon { background: var(--primary-gradient); color: #fff; }
+.am-card:has(input:checked) .am-name { color: #3730a3; }
+.am-card:has(input:checked) .am-tick { background: #667eea; border-color: #667eea; color: #fff; }
+.am-empty { text-align: center; padding: 50px 0; color: #94a3b8; }
+.am-empty i { font-size: 2rem; margin-bottom: 8px; }
+.am-footer { background: #f8f9fa; border-top: 1px solid #eef0f6; padding: 14px 24px; }
+.am-btn { border: none; border-radius: 12px; padding: 11px 24px; font-weight: 600; font-size: .92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .2s; }
+.am-btn-ghost { background: #fff; color: #475569; border: 1.5px solid #dfe4ee; }
+.am-btn-ghost:hover { background: #fef2f2; color: #e74c3c; border-color: #fecaca; }
+.am-btn-apply { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(102,126,234,.3); }
+.am-btn-apply:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(102,126,234,.4); }
+.selected-items-display { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px; background: #f8f9ff; border: 1.5px dashed #c7d2fe; border-radius: 14px; min-height: 56px; align-items: center; justify-content: center; }
+.selected-items-display:has(.item-tag) { justify-content: flex-start; }
+.item-tag { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #3730a3; border: 1.5px solid #c7d2fe; border-radius: 30px; padding: 6px 8px 6px 12px; font-size: .82rem; font-weight: 600; box-shadow: 0 2px 6px rgba(102,126,234,.08); }
+.item-tag > i { color: #667eea; }
+.item-tag .remove-btn { cursor: pointer; color: #94a3b8; display: inline-flex; transition: color .2s; }
+.item-tag .remove-btn:hover { color: #e74c3c; }
+
+/* Fix: page-level ".modal-body{overflow:visible!important}" broke modal scrolling */
+.am-modal .modal-content { max-height: calc(100vh - 2rem); display: flex; flex-direction: column; }
+.am-modal .modal-body.am-body { overflow-y: auto !important; overflow-x: hidden !important; flex: 1 1 auto; min-height: 0; max-height: calc(100vh - 290px); }
+.am-modal .am-header, .am-modal .am-toolbar, .am-modal .am-footer { flex-shrink: 0; }
+.am-modal .am-body::-webkit-scrollbar { width: 8px; }
+.am-modal .am-body::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+@media (max-width: 575px) {
+    .am-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .am-card { padding: 10px; gap: 8px; }
+    .am-icon { width: 32px; height: 32px; }
+    .am-name { font-size: .8rem; }
+    .am-toolbar, .am-body, .am-footer { padding-left: 14px; padding-right: 14px; }
+}
+
+
+/* ================= COMMERCIAL-ONLY STYLES (kept from the original commercial form) ================= */
+.header-actions { display: flex; align-items: center; gap: 16px; }
+.admin-user-badge { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px); padding: 6px 14px 6px 8px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.25); color: white; }
+.admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: #1e293b; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.82rem; }
+.admin-info { display: flex; flex-direction: column; line-height: 1.2; }
+.admin-email { font-size: 0.85rem; font-weight: 600; color: #fff; }
+.admin-role { font-size: 0.7rem; opacity: 0.85; text-transform: capitalize; }
+.form-section.facility-theme .section-header { background: var(--info-gradient); }
+.required, .required-star { color: #e74c3c; font-size: 1rem; line-height: 1; }
+.video-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.video-option-card { position: relative; border: 2px solid #e2e8f0; border-radius: 14px; padding: 24px 16px; text-align: center; cursor: pointer; background: #fff; transition: all 0.3s; }
+.video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
+.video-option-card.active { border-color: #667eea; background: #f0f4ff; box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15); }
+.video-option-card input[type="radio"] { position: absolute; opacity: 0; }
+.vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
+.video-option-card.active .vo-icon { color: #667eea; }
+.vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.vo-desc { font-size: 0.8rem; color: #64748b; }
+.vo-check { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0; }
+.video-option-card.active .vo-check { opacity: 1; }
+.img-total-summary .min-warning { font-size: 0.85rem; color: #e67e22; font-weight: 600; }
+.form-container .video-option-card { min-height: 0; }
+.form-container .video-options-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
+
+/* =====================================================================
+   INDUSTRIAL-FORM ADAPTERS (so industrial markup picks up commercial look)
+   ===================================================================== */
+:root { --primary:#667eea; --primary-dark:#5a67d8; --success:#10b981; --muted:#64748b; --border:#e2e8f0; --bg-light:#f8f9fa; --text-dark:#2d3748; }
+
+/* one consistent header colour, like commercial (Nearby Facilities keeps the info gradient) */
+.form-container .form-section .section-header.info-theme,
+.form-container .form-section .section-header.dark-theme { background: var(--primary-gradient); }
+
+/* commercial green action buttons */
+.btn-submit { background-color:#57C785 !important; display:inline-flex; align-items:center; gap:8px; }
+
+/* upload area helper text */
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color:#4a5568; }
+
+/* ---------- Items modal (Amenities / Facilities) -> commercial 'am-' look ---------- */
+#itemsModal .modal-dialog { max-width: 800px; }
+#itemsModal .modal-content { border:none; border-radius:20px; overflow:hidden; box-shadow:0 25px 60px rgba(30,41,59,.3); max-height:calc(100vh - 2rem); display:flex; flex-direction:column; }
+#itemsModal .modal-body.am-body { overflow-y:auto !important; overflow-x:hidden !important; flex:1 1 auto; min-height:0; max-height:calc(100vh - 290px); padding:20px 24px; background:#fff; }
+#itemsModal .am-header .btn-close { filter: brightness(0) invert(1); opacity:.85; }
+#itemsModal .modal-grid-options { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; max-height:none; overflow:visible; padding:0; }
+#itemsModal .modal-option-card { position:relative; display:flex; align-items:center; gap:12px; padding:12px 14px; margin:0; cursor:pointer; user-select:none; border:1.5px solid #e6eaf3; border-radius:14px; background:#fff; transition:all .2s ease; }
+#itemsModal .modal-option-card:hover { border-color:#a5b4fc; background:#f8f9ff; transform:translateY(-2px); box-shadow:0 6px 16px rgba(102,126,234,.12); }
+#itemsModal .modal-option-card i { order:1; width:38px; height:38px; flex-shrink:0; border-radius:10px; background:#f1f5f9; color:#64748b; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all .2s; }
+#itemsModal .modal-option-card label { order:2; flex:1; font-size:.88rem; font-weight:600; color:#334155; line-height:1.25; white-space:normal; overflow:visible; cursor:pointer; }
+#itemsModal .modal-option-card input[type="checkbox"] { order:3; width:20px; height:20px; accent-color:#667eea; flex-shrink:0; margin:0; }
+#itemsModal .modal-option-card.checked { border-color:#667eea; background:#eef2ff; box-shadow:0 0 0 3px rgba(102,126,234,.12); transform:none; }
+#itemsModal .modal-option-card.checked i { background:var(--primary-gradient); color:#fff; }
+#itemsModal .modal-option-card.checked label { color:#3730a3; }
+.am-toolbar .am-search input.modal-search-input { padding:11px 14px 11px 38px; border:1.5px solid #dfe4ee; border-radius:12px; font-size:.92rem; }
+.am-count-pill { font-size:.82rem; font-weight:600; color:#64748b; white-space:nowrap; }
+#itemsModal .modal-footer.am-footer { justify-content:space-between; }
+@media (max-width:575px) {
+  #itemsModal .modal-grid-options { grid-template-columns:1fr 1fr; gap:10px; }
+  #itemsModal .modal-option-card { padding:10px; gap:8px; }
+  #itemsModal .modal-option-card i { width:32px; height:32px; }
+  #itemsModal .modal-option-card label { font-size:.8rem; }
+}
+
+
+/* =====================================================================
+   RESIDENTIAL PLOT ADDITIONS — classes this form uses that the industrial
+   stylesheet does not define, drawn in the same indigo theme.
+   ===================================================================== */
+:root {
+    --primary-grad: var(--primary-gradient);
+    --success-grad: var(--success-gradient);
+    --info-grad: var(--info-gradient);
+    --dark-grad: var(--dark-gradient);
     --text-dark: #2d3748;
-    --sidebar-width: 280px;
-    --topbar-height: 70px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 20px;
-    --shadow-card: 0 4px 24px rgba(0, 0, 0, .07);
-  }
+}
 
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f0f4e8 0%, #c8d5b9 100%);
-    min-height: 100vh;
-  }
+.hint-text { font-size: .76rem; color: var(--muted); font-weight: 400; margin-top: 6px; padding-left: 4px; line-height: 1.4; }
 
-  .main-content {
-    margin-left: var(--sidebar-width);
-    margin-top: var(--topbar-height);
-    padding: 28px;
-  }
+/* number + unit (₹, sq.ft, ft) */
+.form-container .input-with-unit { position: relative; }
+.form-container .input-with-unit .form-control { padding-right: 78px; }
+.input-unit {
+    position: absolute; top: 1.5px; right: 1.5px; bottom: 1.5px;
+    display: flex; align-items: center; padding: 0 14px;
+    background: #f1f5f9; border-left: 1.5px solid var(--ui-border);
+    border-radius: 0 10px 10px 0;
+    font-size: .8rem; font-weight: 700; color: #64748b; white-space: nowrap;
+    pointer-events: none;
+}
 
-  .page-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    grid-template-rows: auto auto 1fr;
-    gap: 22px;
-    align-items: start;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
+.form-container .form-control[readonly] { background-color: #f1f5f9; color: #475569; font-weight: 600; }
 
-  /* PAGE HEADER */
-  .page-header {
-    grid-column: 1/-1;
-    background: var(--primary-grad);
-    border-radius: var(--radius-xl);
-    padding: 28px 35px;
-    color: #fff;
-    box-shadow: 0 8px 32px rgba(86, 171, 47, .35);
-    position: relative;
-    overflow: hidden;
-  }
+/* sub headings inside a section */
+.sub-section-title {
+    font-size: .9rem; font-weight: 700; color: var(--ui-primary-dark);
+    margin: 18px 0 10px; padding: 2px 0 2px 10px;
+    border-left: 4px solid var(--ui-primary);
+}
+.sub-section-title:empty { border: none; border-top: 1.5px solid #eef0f6; margin: 14px 0 0; padding: 0; height: 0; }
 
-  .page-header::after {
-    content: '';
-    position: absolute;
-    right: -40px;
-    top: -40px;
-    width: 200px;
-    height: 200px;
-    background: rgba(255, 255, 255, .08);
-    border-radius: 50%;
-  }
+.form-container .form-section .section-header.info-theme { background: var(--info-gradient); }
 
-  .page-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; }
-  .page-subtitle { font-size: .95rem; opacity: .85; margin: 0; }
-
-  /* STEPPER */
-  .stepper-container {
-    grid-column: 1/-1;
-    background: #fff;
-    border-radius: var(--radius-xl);
-    padding: 22px 30px;
-    box-shadow: var(--shadow-card);
-  }
-
-  .stepper { display: flex; align-items: center; overflow-x: auto; }
-  .step-item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .step-circle {
-    width: 46px; height: 46px; min-width: 46px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .9rem; font-weight: 700; border: 3px solid var(--border);
-    background: #fff; color: var(--muted); transition: all .3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-  }
-  .step-circle.active {
-    background: var(--primary-grad); color: #fff; border-color: transparent;
-    transform: scale(1.1); box-shadow: 0 4px 16px rgba(86, 171, 47, .45);
-  }
-  .step-circle.done { background: var(--success-grad); color: #fff; border-color: transparent; }
-  .step-label { font-size: .82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .3s; }
-  .step-label.active { color: #56ab2f; }
-  .step-label.done { color: var(--success); }
-  .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background .4s; }
-  .step-line.done { background: var(--success-grad); }
-
-  .form-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;
-  }
-  .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
-  .form-title i {
-    width: 45px; height: 45px; background: var(--primary-grad); color: white;
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  }
-
-  .btn-back {
-    background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px;
-    border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
-    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
-  }
-  .btn-back:hover { background: var(--dark-grad); color: white; transform: translateY(-2px); }
-
-  /* FORM + SIDEBAR */
-  .form-container {
-    grid-column: 1/2; grid-row: 3; background: #fff; border-radius: var(--radius-xl);
-    padding: 32px; box-shadow: var(--shadow-card); min-width: 0;
-  }
-  .preview-sidebar {
-    grid-column: 2/3; grid-row: 3; display: flex; flex-direction: column; gap: 18px;
-    position: sticky; top: calc(var(--topbar-height) + 20px); align-self: start;
-  }
-
-  .step-content { display: none; }
-  .step-content.active { display: block; animation: fadeInUp .35s ease; }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-  .form-section {
-    margin-bottom: 26px; border-radius: var(--radius-md); overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
-  }
-  .section-header {
-    background: var(--primary-grad); color: #fff; padding: 13px 20px;
-    font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: 10px;
-  }
-  .section-header.info-theme { background: var(--info-grad); }
-  .section-header.dark-theme { background: var(--dark-grad); }
-  .section-body {
-    background: var(--bg-light); padding: 22px 24px; border: 2px solid #e9ecef;
-    border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md);
-  }
-
-  .form-label {
-    font-weight: 600; color: var(--text-dark); margin-bottom: 7px;
-    font-size: .88rem; display: flex; align-items: center; gap: 5px;
-  }
-  .required { color: #e74c3c; font-size: 1rem; }
-  .hint-text { font-size: .76rem; color: var(--muted); font-weight: 400; margin-top: 4px; }
-
-  .form-control, .form-select {
-    border: 2px solid #e9ecef; border-radius: var(--radius-md); padding: 10px 14px;
-    font-size: .92rem; width: 100%; transition: border-color .25s, box-shadow .25s;
-    background-color: #fff; color: var(--text-dark); font-family: inherit;
-  }
-  .form-control:focus, .form-select:focus {
-    border-color: #56ab2f; box-shadow: 0 0 0 3px rgba(86, 171, 47, .15); outline: none;
-  }
-  .form-control[readonly] { background: #edf2f7; border-color: #cbd5e0; color: #4a5568; font-weight: 600; cursor: not-allowed; }
-
-  /* Red border validation style */
-  .validation-error {
+/* validation (this form's JS adds .validation-error) */
+.form-container .validation-error,
+.search-select-control.validation-error {
     border-color: #e74c3c !important;
     background-color: #fff5f5 !important;
-    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
-  }
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, .15) !important;
+}
+.form-container .fl:has(> .validation-error) > .form-label,
+.form-container .fl:has(> .input-with-unit > .validation-error) > .form-label { color: var(--ui-danger); }
 
-  select.form-control, .form-select {
-    appearance: none; -webkit-appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px;
-  }
-  textarea.form-control { min-height: 100px; resize: vertical; line-height: 1.6; }
+/* floating labels also work on number+unit fields */
+.form-container .fl:has(> .input-with-unit input:not(:placeholder-shown)) > .form-label {
+    top: -9px; font-size: .74rem; font-weight: 600; color: #64748b; background: #fff;
+}
+.form-container .fl > .input-with-unit .form-control::placeholder { color: transparent; transition: color .2s ease; }
+.form-container .fl > .input-with-unit .form-control:focus::placeholder { color: #c5cddb; }
 
-  .input-with-unit { position: relative; }
-  .input-unit {
-    position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center;
-    padding: 0 14px; background: #e9ecef; border: 2px solid #e9ecef; border-left: none;
-    border-radius: 0 var(--radius-md) var(--radius-md) 0; font-size: .82rem; font-weight: 700; color: var(--muted); white-space: nowrap;
-  }
-  .input-with-unit .form-control { border-radius: var(--radius-md) 0 0 var(--radius-md); padding-right: 10px; }
+/* the "Other — specify" text box under a dropdown has no label of its own, so keep its placeholder visible */
+.form-container .fl > select ~ input.form-control::placeholder { color: var(--ui-muted); }
 
-  .radio-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-  .radio-option {
-    display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; background: #fff;
-    border: 2px solid #e9ecef; border-radius: var(--radius-md); cursor: pointer; font-weight: 600;
-    font-size: .85rem; color: var(--text-dark); transition: all .2s;
-  }
-  .radio-option:hover { border-color: #56ab2f; background: #f4fdf0; }
-  .radio-option input { accent-color: #56ab2f; width: 16px; height: 16px; }
-
-  .sub-section-title {
-    font-size: .8rem; font-weight: 700; color: #56ab2f; text-transform: uppercase;
-    letter-spacing: .05em; margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #e9ecef;
-  }
-
-  .step-nav {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 26px; gap: 12px; padding-top: 20px; border-top: 2px solid #f0f0f0;
-  }
-  .btn-step {
-    padding: 12px 28px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;
-    font-size: .92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all .3s; border: none;
-  }
-  .btn-next, .btn-submit { background: var(--primary-grad); color: #fff; box-shadow: 0 4px 14px rgba(86, 171, 47, .35); }
-  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(86, 171, 47, .5); }
-  .btn-prev { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border) !important; }
-  .btn-prev:hover { background: #e9ecef; }
-
-  /* CATEGORIZED IMAGES SYSTEM */
-  .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-  .img-cat-tab {
-    border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px;
-    font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer;
-    display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap;
-  }
-  .img-cat-tab.active { background: var(--primary-grad); border-color: transparent; color: #fff; }
-  .img-cat-panel { display: none; }
-  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
-  .img-cat-upload-area {
-    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px;
-    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
-  }
-  .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
-  .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; cursor: grab; }
-  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; }
-  .img-cat-preview-item .remove-image {
-    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
-    background: #e74c3c; color: #fff; border: none; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;
-  }
-  .img-total-summary {
-    display: flex; justify-content: space-between; align-items: center;
-    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;
-  }
-
-  /* MODERN VIDEO OPTION CARDS */
-  .video-options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .video-option-card {
-    position: relative; border: 2px solid #e2e8f0; border-radius: 14px; padding: 24px 16px;
-    text-align: center; cursor: pointer; background: #fff; transition: all 0.3s;
-  }
-  .video-option-card:hover { border-color: #cbd5e1; background: #f8fafc; transform: translateY(-3px); }
-  .video-option-card.active { border-color: #56ab2f; background: #f4fdf0; box-shadow: 0 8px 16px rgba(86, 171, 47, 0.15); }
-  .video-option-card input[type="radio"] { position: absolute; opacity: 0; }
-  .vo-icon { font-size: 2.2rem; color: #94a3b8; margin-bottom: 14px; }
-  .video-option-card.active .vo-icon { color: #56ab2f; }
-  .vo-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-  .vo-desc { font-size: 0.8rem; color: #64748b; }
-  .vo-check {
-    position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
-    background: #56ab2f; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; opacity: 0;
-  }
-  .video-option-card.active .vo-check { opacity: 1; }
-
-  /* SELECTED ITEMS */
-  .selected-items-display {
-    padding: 12px; background: #f8f9fa; border: 2px dashed #dee2e6;
-    border-radius: 10px; min-height: 52px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-  }
-  .item-tag {
-    background: #fff; border: 1px solid #dee2e6; border-radius: 20px;
-    padding: 4px 14px; font-size: .82rem; display: inline-flex; align-items: center; gap: 5px; font-weight: 600;
-  }
-  .item-tag .remove-btn { cursor: pointer; color: #dc3545; margin-left: 4px; font-size: .75rem; }
-
-  /* MODAL STYLING IMPROVEMENTS */
-  .modal-content { border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 25px 60px rgba(0,0,0,0.2); }
-  .modal-header { background: var(--primary-grad); color: #fff; border: none; padding: 20px 24px; }
-  .modal-title { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-  .btn-close { filter: invert(1); opacity: 0.8; }
-  .modal-body { padding: 24px; background: #f8fafc; }
-  .modal-footer { background: #fff; padding: 16px 24px; border-top: 1px solid var(--border); }
-
-  .modal-search-box { position: relative; margin-bottom: 20px; }
-  .modal-search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-  .modal-search-input {
-    width: 100%; padding: 12px 16px 12px 45px; border: 2px solid #e2e8f0;
-    border-radius: 12px; font-size: 0.92rem; background: #fff; transition: all 0.2s;
-  }
-  .modal-search-input:focus { border-color: #56ab2f; box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.15); outline: none; }
-
-  .modal-grid-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 380px; overflow-y: auto; padding: 4px; }
-  .modal-option-card {
-    background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px;
-    display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s ease; user-select: none;
-  }
-  .modal-option-card:hover { border-color: #56ab2f; background: #f4fdf0; transform: translateY(-1px); }
-  .modal-option-card.checked { border-color: #56ab2f; background: #eefbee; box-shadow: 0 4px 12px rgba(86, 171, 47, 0.12); }
-  .modal-option-card input[type="checkbox"] { accent-color: #56ab2f; width: 18px; height: 18px; cursor: pointer; display: inline-block !important; flex-shrink: 0; }
-  .modal-option-card i { font-size: 1.1rem; color: #56ab2f; width: 24px; text-align: center; }
-  .modal-option-card label { font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer; margin: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  /* SEARCHABLE DROPDOWN */
-  .search-select { position: relative; width: 100%; font-size: .95rem; }
-  .search-select-control {
-    border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; background: #fff;
-    display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: border-color .3s; min-height: 48px;
-  }
-  .search-select.open .search-select-control { border-color: #56ab2f; }
-  .search-select-value { color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 1.2em; display: inline-block; }
-  .search-select-value.ss-placeholder { color: #94a3b8; }
-  .search-select-arrow { color: #64748b; transition: transform .2s; font-size: .8rem; flex-shrink: 0; margin-left: 8px; }
-  .search-select.open .search-select-arrow { transform: rotate(180deg); }
-  .search-select-panel {
-    display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff;
-    border: 1px solid #ced4da; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .15); z-index: 9999; overflow: hidden;
-  }
-  .search-select.open .search-select-panel { display: block; }
-  .search-select-input { width: 100%; border: none; border-bottom: 2px solid #e9ecef; padding: 12px 15px; font-size: .9rem; outline: none; }
-  .search-select-input:focus { border-bottom-color: #56ab2f; }
-  .search-select-options { max-height: 260px; overflow-y: auto; }
-  .search-select-group-label { padding: 8px 15px 4px; font-size: .72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; background: #f8f9fa; }
-  .search-select-option { padding: 10px 16px; cursor: pointer; color: #2d3748; font-size: .9rem; }
-  .search-select-option:hover, .search-select-option.highlighted { background: #f4fdf0; color: #3e8e41; }
-  .search-select-option.selected { background: #56ab2f; color: #fff; }
-  .search-select-no-results { padding: 14px 16px; color: #94a3b8; font-size: .88rem; text-align: center; }
-
-  /* PREVIEW CARD */
-  .preview-card {
-    background: linear-gradient(135deg, #1a2e1a, #2d4a2d); border-radius: var(--radius-lg); padding: 18px; color: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .2);
-  }
-  .preview-mock { background: #fff; border-radius: var(--radius-md); overflow: hidden; margin-top: 14px; }
-  .preview-image {
-    height: 130px; background: linear-gradient(135deg, #d4edda, #a8e063);
-    display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative;
-  }
-  .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; }
-  .preview-badge { font-size: .62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255, 255, 255, .95); color: #0f172a; }
-  .preview-price {
-    position: absolute; bottom: 9px; left: 9px; background: rgba(15, 23, 42, .88); color: #fff;
-    font-size: .88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px;
-  }
-  .preview-body { background: #fff; padding: 14px; color: #0f172a; }
-  .preview-title { font-size: .88rem; font-weight: 800; margin-bottom: 5px; line-height: 1.4; }
-  .preview-location { font-size: .75rem; color: var(--muted); margin-bottom: 8px; }
-  .preview-specs { display: flex; gap: 12px; font-size: .75rem; color: #475569; font-weight: 600; flex-wrap: wrap; }
-
-  /* CHECKLIST CARD */
-  .checklist-card {
-    background: #fff; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
-  }
-  .checklist-title { font-size: .88rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
-  .checklist-item {
-    display: flex; align-items: center; gap: 9px; padding: 7px 0; font-size: .82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; transition: color .3s;
-  }
-  .checklist-item:last-child { border-bottom: none; }
-  .checklist-item i { font-size: .75rem; width: 14px; flex-shrink: 0; color: #cbd5e0; transition: color .3s; }
-  .checklist-item.done { color: var(--success); }
-  .checklist-item.done i { color: var(--success); }
-
-  .inline-status { padding: 12px 16px; border-radius: 10px; font-size: .85rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-  .is-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-  .is-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-  .is-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-
-  .form-group, .col-md-12, .section-body, .step-content, .row { overflow: visible !important; }
-
-  @media(max-width:1200px) {
-    .page-wrapper { grid-template-columns: 1fr; }
-    .preview-sidebar { display: none; }
-    .form-container { grid-column: 1/-1; }
-  }
-  @media(max-width:992px) { .main-content { margin-left: 0; } }
+/* keep the team-member dropdown from being clipped */
+.form-group, .col-md-12, .section-body, .step-content, .row { overflow: visible !important; }
 </style>
 
 <div class="main-content">
@@ -379,13 +1722,22 @@
 
     <!-- PAGE HEADER -->
     <div class="page-header">
-      <h1 class="page-title"><i class="fas fa-home" style="margin-right:12px;opacity:.9"></i>Sell Your Residential Plot</h1>
-      <p class="page-subtitle">List your plot for villa or house construction and connect with genuine buyers</p>
+      <div class="page-header-content">
+        <div>
+          <h1 class="page-title">Sell Your Residential Plot</h1>
+          <p class="page-subtitle">List your plot for villa or house construction in 4 easy steps and connect with genuine buyers.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-back" type="button" onclick="history.back();">
+            <i class="fas fa-arrow-left"></i> Back to List
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- STEPPER -->
+    <!-- ROW 2: STEPPER -->
     <div class="stepper-container">
-      <div class="stepper">
+      <div class="stepper" id="stepper">
         <div class="step-item">
           <div class="step-circle active" id="sc1">1</div>
           <div class="step-label active" id="sl1">Plot Details</div>
@@ -408,38 +1760,37 @@
       </div>
     </div>
 
-    <!-- FORM CONTAINER -->
+    <!-- ROW 3 COL 1: FORM -->
     <div class="form-container">
+      <div class="form-header">
+        <div class="form-title">
+          <i class="fas fa-home"></i> Sell Your Residential Plot
+        </div>
+      </div>
+
       <form action="{% url 'plot_sale_add' %}" method="POST" enctype="multipart/form-data" id="plotForm">
         {% csrf_token %}
         {% comment %} <input type="hidden" name="plot_type_main" value="residential"> {% endcomment %}
 
-    
+        <div class="step-content active" id="step1">
 
-<div class="step-content active" id="step1">
-
-  <div class="form-header">
-    <div class="form-title">🏡 Residential Plot</div>
-    <button class="btn-back" type="button" onclick="history.back();">
-      <i class="fas fa-arrow-left"></i> Back to List
-    </button>
-  </div>
 
   <!-- LISTED BY -->
   <div class="form-section">
+
     <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
     <div class="section-body">
       <div class="form-group">
         <label class="form-label"><i class="fas fa-user"></i> Listed By <span class="required">*</span></label>
-        <div style="display:flex;gap:24px;margin-bottom:14px;margin-top:8px;">
-          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.9rem;">
+        <div class="listed-by-radio-group">
+          <label>
             <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked
-              onchange="Change_Fields()" style="accent-color:#56ab2f;width:16px;height:16px;">
+              onchange="Change_Fields()">
             Listed by Self
           </label>
-          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:600;font-size:.9rem;">
+          <label>
             <input type="radio" name="listed_by_type" id="listedByOther" value="other"
-              onchange="Change_Fields()" style="accent-color:#56ab2f;width:16px;height:16px;">
+              onchange="Change_Fields()">
             Listed for Other User
           </label>
         </div>
@@ -523,9 +1874,9 @@
     <div class="section-header"><i class="fas fa-map"></i> Basic Residential Plot Information</div>
     <div class="section-body">
       <div class="mb-3">
-        <label class="form-label">Property Title</label>
+        <label class="form-label" style="color:#4facfe;"><i class="fas fa-wand-magic-sparkles"></i> Property Title</label>
         <input type="text" class="form-control" id="property_title" name="property_title" readonly
-          placeholder="Auto-generated by system">
+          placeholder="Property Title auto-generated by system" style="background-color:#e9ecef; font-weight:600; color:#495057;">
       </div>
       <div class="row">
         
@@ -557,6 +1908,7 @@
   <label class="form-label">Plot Area (sq.m) (Auto)</label>
   <input type="number" class="form-control" id="plot_area_sqm" name="plot_area_sqm" readonly style="background:#f8f9fa;">
 </div>
+
 <div class="col-md-4 mt-3">
   <label class="form-label">Plot Area (acres) (Auto)</label>
   <input type="number" class="form-control" id="plot_area_acres" name="plot_area_acres" readonly style="background:#f8f9fa;">
@@ -596,7 +1948,7 @@
       <div class="row">
       
 
-        <div class="col-md-4 mt-2">
+<div class="col-md-4 mt-2">
   <label class="form-label">Residential Zone / Land Use <span class="required">*</span></label>
   <select class="form-select form-control" id="land_use_select" required
           onchange="handleOther(this,'land_use')">
@@ -656,7 +2008,7 @@
 </div>
 
 
-     <div class="col-md-4 mt-2">
+<div class="col-md-4 mt-2">
   <label class="form-label">Layout Approval Status</label>
   <select class="form-select form-control" id="layout_approval_status_select"
           onchange="handleOther(this,'layout_approval_status')">
@@ -765,7 +2117,7 @@
       <div class="sub-section-title mt-3">Road &amp; Access</div>
       <div class="row">
       
-        <div class="col-md-4 mt-2">
+<div class="col-md-4 mt-2">
   <label class="form-label">Road Connectivity <span class="required">*</span></label>
   <select class="form-select form-control" id="road_connectivity_select" required
           onchange="handleOther(this,'road_connectivity')">
@@ -936,12 +2288,6 @@
         <!-- ════ STEP 2 — PRICING & LEGAL ════ -->
         <div class="step-content" id="step2">
 
-          <div class="form-header">
-            <div class="form-title">Residential Plot</div>
-            <button class="btn-back" type="button" onclick="history.back();">
-              <i class="fas fa-arrow-left"></i> Back to List
-            </button>
-          </div>
 
           <!-- PRICING -->
           <div class="form-section">
@@ -1010,6 +2356,7 @@
                     <option value="Fixed Amount">Fixed Amount</option>
                     <option value="Negotiable">Negotiable</option>
                   </select>
+                  <p class="hint-text" id="brokerageAutoHint">Auto-selected from the selling price: 2% below ₹1 Cr, 1% from ₹1 Cr. You can change it.</p>
                 </div>
                 <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:none;">
                   <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
@@ -1018,13 +2365,45 @@
                     <span class="input-unit">₹</span>
                   </div>
                 </div>
+
+
+                <!-- 🆕 LANDLORD / OWNER SERVICE FEE -->
+<div class="col-md-6 mt-3" id="landlordFeeSection">
+  <label class="form-label">
+    Landlord / Owner Service Fee
+    <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Optional)</span>
+  </label>
+  <select class="form-select form-control" name="landlord_owner_fee"
+          id="landlordOwnerFee" onchange="toggleLandlordFixedAmount()">
+    <option value="">Select Fee Structure</option>
+    <option value="0.5% of Sale Value">0.5% of Sale Value</option>
+    <option value="1% of Sale Value">1% of Sale Value</option>
+    <option value="1.5% of Sale Value">1.5% of Sale Value</option>
+    <option value="2% of Sale Value">2% of Sale Value</option>
+    <option value="2.5% of Sale Value">2.5% of Sale Value</option>
+    <option value="3% of Sale Value">3% of Sale Value</option>
+    <option value="Fixed Amount">Fixed Amount</option>
+    <option value="No Fee">No Fee / Direct Deal</option>
+  </select>
+</div>
+
+<!-- Fixed Amount Input (hidden by default) -->
+
+<div class="col-md-6 mt-3" id="landlordFixedAmountSection" style="display: none;">
+  <label class="form-label">Enter Fixed Owner Fee Amount (₹)</label>
+  <div class="input-with-unit">
+    <input type="number" class="form-control" name="landlord_owner_fixed_amount"
+           id="landlordOwnerFixedAmount" placeholder="e.g., 50000">
+    <span class="input-unit">₹</span>
+  </div>
+</div>
               </div>
             </div>
           </div>
 
           <!-- LEGAL -->
        <div class="form-section">
-  <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &amp; Approval Details</div>
+        <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &amp; Approval Details</div>
   <div class="section-body">
 
     <div class="sub-section-title">Ownership Details</div>
@@ -1113,42 +2492,42 @@
 
 
    
-   <div class="col-md-4 mt-2">
-  <label class="form-label">Encumbrance / Charge Status</label>
-  <select class="form-select form-control" id="property_encumbrance_status_select"
-          onchange="handleOther(this,'property_encumbrance_status')">
-    <option value="">— Select —</option>
-    <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
-    <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
-    <option value="Under Litigation">Under Court Litigation</option>
-    <option value="Government Acquisition Notice">Govt Acquisition / Section 4 Notice</option>
-    <option value="Other Claim Exists">Other Claim / Charge Exists</option>
-    <option value="Pending legal verification">Pending legal verification</option>
-    <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
-    <option value="__other__">Other (Specify below)</option>
-  </select>
-  <input type="text" class="form-control mt-2" name="property_encumbrance_status" id="property_encumbrance_status_other"
-         style="display:none;" placeholder="Specify encumbrance status" disabled>
-  <input type="hidden" name="property_encumbrance_status" id="property_encumbrance_status_hidden" value="">
-</div>
+    <div class="col-md-4 mt-2">
+      <label class="form-label">Encumbrance / Charge Status</label>
+      <select class="form-select form-control" id="property_encumbrance_status_select"
+              onchange="handleOther(this,'property_encumbrance_status')">
+        <option value="">— Select —</option>
+        <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
+        <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
+        <option value="Under Litigation">Under Court Litigation</option>
+        <option value="Government Acquisition Notice">Govt Acquisition / Section 4 Notice</option>
+        <option value="Other Claim Exists">Other Claim / Charge Exists</option>
+        <option value="Pending legal verification">Pending legal verification</option>
+        <option value="Not verified - check latest revenue record">Not verified - check latest revenue record</option>
+        <option value="__other__">Other (Specify below)</option>
+      </select>
+      <input type="text" class="form-control mt-2" name="property_encumbrance_status" id="property_encumbrance_status_other"
+            style="display:none;" placeholder="Specify encumbrance status" disabled>
+      <input type="hidden" name="property_encumbrance_status" id="property_encumbrance_status_hidden" value="">
+    </div>
 
       <!-- NEW FIELDS (Correctly aligned) -->
    
-      <div class="col-md-4 mt-3">
-  <label class="form-label">8A Extract Status</label>
-  <select class="form-select form-control" id="extract_8a_status_select"
-          onchange="handleOther(this,'extract_8a_status')">
-    <option value="">— Select —</option>
-    <option value="Verified">Verified</option>
-    <option value="To Verify">To Verify</option>
-    <option value="Not verified">Not verified</option>
-    <option value="Not Applicable">Not Applicable</option>
-    <option value="__other__">Other (Specify below)</option>
-  </select>
-  <input type="text" class="form-control mt-2" name="extract_8a_status" id="extract_8a_status_other"
-         style="display:none;" placeholder="Specify 8A extract status" disabled>
-  <input type="hidden" name="extract_8a_status" id="extract_8a_status_hidden" value="">
-</div>
+    <div class="col-md-4 mt-3">
+      <label class="form-label">8A Extract Status</label>
+      <select class="form-select form-control" id="extract_8a_status_select"
+              onchange="handleOther(this,'extract_8a_status')">
+        <option value="">— Select —</option>
+        <option value="Verified">Verified</option>
+        <option value="To Verify">To Verify</option>
+        <option value="Not verified">Not verified</option>
+        <option value="Not Applicable">Not Applicable</option>
+        <option value="__other__">Other (Specify below)</option>
+      </select>
+      <input type="text" class="form-control mt-2" name="extract_8a_status" id="extract_8a_status_other"
+            style="display:none;" placeholder="Specify 8A extract status" disabled>
+      <input type="hidden" name="extract_8a_status" id="extract_8a_status_hidden" value="">
+    </div>
       
 
 <div class="col-md-4 mt-3">
@@ -1249,6 +2628,7 @@
       <label class="form-label">Sanctioning / Approving Authority</label>
       <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2" placeholder="e.g., Nagpur Municipal Corporation (NMC), MHADA, NIT Nagpur, CIDCO, Gram Panchayat, Town Planning Authority"></textarea>
     </div>
+
   </div>
 </div>
 
@@ -1261,23 +2641,16 @@
         <!-- ════ STEP 3 — AMENITIES & LOCATION ════ -->
         <div class="step-content" id="step3">
 
-          <div class="form-header">
-            <div class="form-title">Residential Plot</div>
-            <button class="btn-back" type="button" onclick="history.back();">
-              <i class="fas fa-arrow-left"></i> Back to List
-            </button>
-          </div>
 
           <!-- AMENITIES -->
           <div class="form-section">
             <div class="section-header"><i class="fas fa-star"></i> Plot &amp; Layout Amenities</div>
             <div class="section-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-label mb-0">Available Amenities</label>
+                <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Available Amenities</label>
                 <span class="badge bg-primary px-3 py-2" id="amenitiesCount" style="font-size:.82rem;">0 selected</span>
               </div>
-              <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')"
-                style="border-radius:10px;font-weight:700;padding:11px;background:var(--primary-grad);border:none;">
+              <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
                 <i class="fas fa-plus-circle me-2"></i> Select Amenities &nbsp;<span class="badge bg-light text-dark" id="amenitiesBadge">0</span>
               </button>
               <div id="amenitiesDisplay" class="selected-items-display">
@@ -1296,11 +2669,10 @@
             <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities &amp; Landmarks</div>
             <div class="section-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-label mb-0">Nearby Facilities</label>
+                <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby Facilities</label>
                 <span class="badge bg-info text-dark px-3 py-2" id="facilitiesCount" style="font-size:.82rem;">0 selected</span>
               </div>
-              <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')"
-                style="border-radius:10px;font-weight:700;padding:11px;">
+              <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
                 <i class="fas fa-plus-circle me-2"></i> Select Nearby Facilities &nbsp;<span class="badge bg-light text-dark" id="facilitiesBadge">0</span>
               </button>
               <div id="facilitiesDisplay" class="selected-items-display">
@@ -1334,52 +2706,53 @@
 
 
 
-  <div class="col-md-4 mt-2">
-    <label class="form-label">PIN Code <span class="required">*</span></label>
-    <input type="text" class="form-control" name="pincode" id="pincode"
-           placeholder="e.g., 440015" maxlength="6" inputmode="numeric" required>
-    <p class="hint-text">Enter pincode first. City, state and localities load automatically.</p>
-  </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">PIN Code <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="pincode" id="pincode"
+                        placeholder="e.g., 440015" maxlength="6" inputmode="numeric" required>
+                  <p class="hint-text">Enter pincode first. City, state and localities load automatically.</p>
+                </div>
 
 
 
 
-  <div class="col-md-4 mt-2">
-    <label class="form-label">City / District <span class="required">*</span></label>
-    <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required>
-  </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">City / District <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Nagpur" required>
+                </div>
 
 
-    <div class="col-md-12 mt-3">
-    <label class="form-label">Locality / Neighbourhood <span class="required">*</span></label>
-    <select class="form-select form-control" id="locality_area" required>
-      <option value="">-- Enter pincode first --</option>
-    </select>
-    <input type="text" class="form-control mt-2" id="locality_area_manual"
-           placeholder="Type your locality / area name" style="display:none;">
-    <!-- id is now "locality", so the rest of your JS finds it -->
-    <input type="hidden" name="locality" id="locality">
-    <p class="hint-text">Primary location filter used by buyers</p>
-  </div>
+              <div class="col-md-12 mt-3">
+                <label class="form-label">Locality / Neighbourhood <span class="required">*</span></label>
+                <select class="form-select form-control" id="locality_area" required>
+                  <option value="">-- Enter pincode first --</option>
+                </select>
+                <input type="text" class="form-control mt-2" id="locality_area_manual"
+                      placeholder="Type your locality / area name" style="display:none;">
+                <!-- id is now "locality", so the rest of your JS finds it -->
+                <input type="hidden" name="locality" id="locality">
+                <p class="hint-text">Primary location filter used by buyers</p>
+              </div>
 
 
 
-  <div class="col-md-6 mt-3">
-  <label class="form-label">Taluka / Tehsil <span class="required">*</span></label>
-  <input type="text" class="form-control" name="taluka" id="taluka" placeholder="e.g., Nagpur Urban, Hingna" required>
-  <p class="hint-text">Required for legal/revenue verification</p>
-</div>
-<div class="col-md-6 mt-3">
-  <label class="form-label">Mouza / Village Name</label>
-  <input type="text" class="form-control" name="mouza" id="mouza" placeholder="e.g., Besa, Hingna">
-  <p class="hint-text">Exact village name as per 7/12 extract</p>
-</div>
+        <div class="col-md-6 mt-3">
+          <label class="form-label">Taluka / Tehsil <span class="required">*</span></label>
+          <input type="text" class="form-control" name="taluka" id="taluka" placeholder="e.g., Nagpur Urban, Hingna" required>
+          <p class="hint-text">Required for legal/revenue verification</p>
+        </div>
 
-  <div class="col-md-12 mt-3">
-    <label class="form-label">Nearby Landmark / Reference Point</label>
-    <input type="text" class="form-control" name="property_landmark" id="property_landmark"
-           placeholder="e.g., Near Hingna T-Point, Opp. NIT Gate">
-  </div>
+          <div class="col-md-6 mt-3">
+            <label class="form-label">Mouza / Village Name</label>
+            <input type="text" class="form-control" name="mouza" id="mouza" placeholder="e.g., Besa, Hingna">
+            <p class="hint-text">Exact village name as per 7/12 extract</p>
+          </div>
+
+            <div class="col-md-12 mt-3">
+              <label class="form-label">Nearby Landmark / Reference Point</label>
+              <input type="text" class="form-control" name="property_landmark" id="property_landmark"
+                    placeholder="e.g., Near Hingna T-Point, Opp. NIT Gate">
+            </div>
 
 
 
@@ -1424,57 +2797,32 @@
                     <option value="Puducherry">Puducherry</option>
                   </select>
                 </div>
-
-
-
-               
-
-               
                 
-
-
-               
-
                 <div class="col-md-12 mt-3">
                   <label class="form-label">Full Address <span class="required">*</span></label>
                   <textarea class="form-control" name="address" id="address" rows="3" required placeholder="e.g., Plot No. 42, Layout No. 5, Manish Nagar, Wardha Road, Nagpur – 440015"></textarea>
                 </div>
+
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
                   <input type="url" class="form-control" name="google_maps_link" id="google_maps_link" placeholder="https://maps.google.com/?q=…">
                 </div>
+
                 <div class="col-md-3 mt-3">
                   <label class="form-label">Latitude</label>
                   <input type="text" class="form-control" name="latitude" id="latitude" placeholder="e.g., 21.1458">
                 </div>
+
                 <div class="col-md-3 mt-3">
                   <label class="form-label">Longitude</label>
                   <input type="text" class="form-control" name="longitude" id="longitude" placeholder="e.g., 79.0882">
                 </div>
+
               </div>
             </div>
           </div>
 
 
-                  <!-- ════ STEP 3 — AMENITIES & LOCATION ════ -->
-        <div class="step-content" id="step3">
-
-          <div class="form-header">
-            <div class="form-title">Residential Plot</div>
-            <button class="btn-back" type="button" onclick="history.back();">
-              <i class="fas fa-arrow-left"></i> Back to List
-            </button>
-          </div>
-
-      
-          
-        
-
-        
-
-         
-
-        </div><!-- /step3 -->
           <div class="step-nav">
             <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
             <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
@@ -1488,20 +2836,40 @@
         <!-- ════ STEP 4 — PHOTOS & PUBLISH ════ -->
         <div class="step-content" id="step4">
 
-          <div class="form-header">
-            <div class="form-title">Residential Plot</div>
-            <button class="btn-back" type="button" onclick="history.back();">
-              <i class="fas fa-arrow-left"></i> Back to List
-            </button>
-          </div>
 
           <!-- CATEGORIZED IMAGES -->
+
           <div class="form-section">
             <div class="section-header"><i class="fas fa-images"></i> Categorized Photos &amp; Media</div>
             <div class="section-body">
+              <div class="img-upload-guide">
+                <div class="guide-step">
+                  <div class="guide-step-num">1</div>
+                  <div class="guide-step-text">
+                    <strong>Pick a category</strong>
+                    Tap a tile below (Front View, Road Facing, etc.)
+                  </div>
+                </div>
+                <i class="fas fa-arrow-right guide-arrow"></i>
+                <div class="guide-step">
+                  <div class="guide-step-num">2</div>
+                  <div class="guide-step-text">
+                    <strong>Upload matching photos</strong>
+                    Click or drag images into that category only
+                  </div>
+                </div>
+                <i class="fas fa-arrow-right guide-arrow"></i>
+                <div class="guide-step">
+                  <div class="guide-step-num">3</div>
+                  <div class="guide-step-text">
+                    <strong>Set your cover photo</strong>
+                    Drag to reorder — the 1st photo of the first filled category is the cover
+                  </div>
+                </div>
+              </div>
               <div class="img-total-summary">
-                <div class="total-count" style="font-weight:600;">Total Uploaded: <span id="imgTotalCount">0</span> / 25</div>
-                <div id="imgMinNotice" style="color:#b45309;font-weight:600;font-size:0.85rem;"><i class="fas fa-exclamation-circle"></i> Add at least 3 images across any categories to publish</div>
+                <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span> / 25</div>
+                <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images across any categories to publish</div>
               </div>
 
               <!-- Categorization Tabs -->
@@ -1521,8 +2889,8 @@
                 <div class="img-cat-panel active" data-cat-panel="front_view">
                   <input type="file" class="img-cat-input" id="imgInput-front_view" name="property_images_front_view[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="front_view">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Front View Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Front View Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-front_view"></div>
                 </div>
@@ -1530,8 +2898,8 @@
                 <div class="img-cat-panel" data-cat-panel="full_plot">
                   <input type="file" class="img-cat-input" id="imgInput-full_plot" name="property_images_full_plot[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="full_plot">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Full Plot View Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Full Plot View Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-full_plot"></div>
                 </div>
@@ -1539,8 +2907,8 @@
                 <div class="img-cat-panel" data-cat-panel="road_facing">
                   <input type="file" class="img-cat-input" id="imgInput-road_facing" name="property_images_road_facing[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="road_facing">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Road Facing Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Road Facing Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-road_facing"></div>
                 </div>
@@ -1548,8 +2916,8 @@
                 <div class="img-cat-panel" data-cat-panel="entrance_access">
                   <input type="file" class="img-cat-input" id="imgInput-entrance_access" name="property_images_entrance_access[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="entrance_access">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Entrance / Access Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Entrance / Access Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-entrance_access"></div>
                 </div>
@@ -1557,8 +2925,8 @@
                 <div class="img-cat-panel" data-cat-panel="boundary">
                   <input type="file" class="img-cat-input" id="imgInput-boundary" name="property_images_boundary[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="boundary">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Boundary Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Boundary Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-boundary"></div>
                 </div>
@@ -1566,8 +2934,8 @@
                 <div class="img-cat-panel" data-cat-panel="layout_plan">
                   <input type="file" class="img-cat-input" id="imgInput-layout_plan" name="property_images_layout_plan[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="layout_plan">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Layout Plan Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Layout Plan Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-layout_plan"></div>
                 </div>
@@ -1575,8 +2943,8 @@
                 <div class="img-cat-panel" data-cat-panel="surroundings">
                   <input type="file" class="img-cat-input" id="imgInput-surroundings" name="property_images_surroundings[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="surroundings">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Surroundings Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Surroundings Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-surroundings"></div>
                 </div>
@@ -1584,8 +2952,8 @@
                 <div class="img-cat-panel" data-cat-panel="amenities_infra">
                   <input type="file" class="img-cat-input" id="imgInput-amenities_infra" name="property_images_amenities_infra[]" accept="image/*" multiple style="display:none;">
                   <div class="img-cat-upload-area" data-cat="amenities_infra">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-2x" style="color:#56ab2f;"></i></div>
-                    <div class="upload-text" style="font-weight:600;margin-top:6px;">Click or Drag Amenities/Infra Photos Here</div>
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Amenities/Infra Photos Here</div>
                   </div>
                   <div class="img-cat-preview" id="imgPreview-amenities_infra"></div>
                 </div>
@@ -1640,10 +3008,11 @@
               <input type="hidden" name="video_source" id="video_source" value="upload">
 
               <!-- Direct Video Upload -->
+
               <div id="videoUploadWrapper">
                 <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
                 <div class="image-upload-area" id="videoUploadArea" style="background: #fff; border-color: #cbd5e1; padding:25px;">
-                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#56ab2f;"></i></div>
+                  <div class="upload-icon"><i class="fas fa-file-video" style="font-size:2.5rem;color:#667eea;"></i></div>
                   <div class="upload-text">Click to Select Property Video</div>
                   <div class="upload-subtext">Supported formats: MP4, MOV, AVI (Max 60 sec, 20MB)</div>
                 </div>
@@ -1651,9 +3020,10 @@
               </div>
 
               <!-- Auto Slideshow Preview -->
+               
               <div id="videoAutoWrapper" style="display:none;">
-                <div class="alert alert-info" style="background:#f4fdf0; border-left:4px solid #56ab2f; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
-                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#56ab2f;"></i> AI Slideshow Generator</div>
+                <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:16px 20px; margin-bottom: 15px;">
+                  <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fas fa-magic me-2" style="color:#667eea;"></i> AI Slideshow Generator</div>
                   <div style="font-size: 0.85rem; color: #4b5563;">We will automatically generate a smooth, professional walkthrough video using the images you've uploaded above (minimum 3 required).</div>
                 </div>
                 <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
@@ -1666,6 +3036,7 @@
               </div>
 
               <!-- RM Assisted / Link -->
+
               <div id="videoRMWrapper" style="display:none;">
                 <div class="alert alert-info" style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin-bottom:15px;">
                   <div style="font-weight: 700; color: #374151; margin-bottom: 4px;"><i class="fab fa-youtube me-2" style="color:#ef4444;"></i> Public URL / RM Assist</div>
@@ -1679,7 +3050,7 @@
                     <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="e.g. https://www.youtube.com/watch?v=..." style="border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0;">
                   </div>
                 </div>
-                <button type="button" class="btn btn-outline-secondary btn-sm mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
+                <button type="button" class="btn-reset mt-3" id="previewRMLinkBtn"><i class="fas fa-play-circle me-1 text-primary"></i> Test Video Link</button>
                 
                 <div id="rmVideoFrame" style="display:none; margin-top:20px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                   <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
@@ -1688,6 +3059,7 @@
 
             </div>
           </div>
+
 
           <!-- LISTED ELSEWHERE -->
           <div class="form-section">
@@ -1741,9 +3113,9 @@
             </div>
           </div>
 
-          <div class="step-nav">
+          <div class="form-footer">
             <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-submit" id="submitBtn" onclick="Submit_Residential_Plot(this)"><i class="fas fa-save"></i> Submit Property</button>
+            <button type="button" class="btn-submit" id="submitBtn" onclick="Submit_Residential_Plot(this)"><i class="fas fa-check-circle"></i> Submit Property</button>
           </div>
 
         </div>
@@ -1751,30 +3123,27 @@
       </form>
     </div><!-- /form-container -->
 
-    <!-- PREVIEW SIDEBAR -->
+    <!-- ROW 3 COL 2: PREVIEW SIDEBAR -->
     <div class="preview-sidebar">
       <div class="preview-card">
-        <div style="font-size:.82rem;font-weight:600;opacity:.8;margin-bottom:4px;display:flex;align-items:center;gap:7px;">
-          <i class="fas fa-eye"></i> Live Preview
-        </div>
+        <div class="preview-header"><i class="fas fa-eye"></i> Live Preview — Portal Card</div>
         <div class="preview-mock">
-          <div class="preview-image">🏡
+          <div class="preview-image">
+            🏡
             <div class="preview-badges">
               <span class="preview-badge">FOR SALE</span>
-              <span class="preview-badge" style="background:#56ab2f;color:white;">RESIDENTIAL</span>
+              <span class="preview-badge" style="background:#667eea; color:white;">RESIDENTIAL</span>
             </div>
             <div class="preview-price" id="p_price">₹ 0</div>
           </div>
-          <div class="preview-body">
-            <div class="preview-title" id="p_title">Your Plot Headline</div>
-            <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#56ab2f"></i> <span id="p_loc">City, Locality</span></div>
-            <div class="preview-specs">
-              <span id="p_area">0 sq.ft</span>
-              <span id="p_cat">—</span>
-            </div>
+          <div class="preview-body" style="padding:14px; color:#0f172a;">
+            <div class="preview-title" id="p_title" style="font-size:0.88rem; font-weight:800; color:#0f172a; margin-bottom:5px;">Your Plot Headline</div>
+            <div class="preview-location" style="font-size:0.75rem; color:var(--muted); margin-bottom:10px;"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> <span id="p_loc">City, Locality</span></div>
+            <div class="preview-specs" style="display:flex; gap:14px; font-size:0.75rem; color:#475569; font-weight:600;"><span id="p_area">0 sq.ft</span><span id="p_cat">—</span></div>
           </div>
         </div>
       </div>
+
       <div class="checklist-card">
         <div class="checklist-title">📋 Listing Checklist</div>
         <div class="checklist-item" id="cl-listedby"><i class="fas fa-circle"></i> Listed by filled</div>
@@ -1785,33 +3154,44 @@
         <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> City &amp; locality filled</div>
         <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> At least 3 photos uploaded</div>
       </div>
-    </div>
+    </div><!-- /preview-sidebar -->
 
-  </div><!-- /page-wrapper -->
-</div><!-- /main-content -->
-
+  </div>
+  <!-- /page-wrapper -->
+</div>
+<!-- /main-content -->
 
 <!-- Common Modal -->
 <div class="modal fade" id="itemsModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable am-modal">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fas fa-list-check"></i> <span id="modalTitle">Select Items</span></h5>
+      <div class="modal-header am-header">
+        <div class="am-header-left">
+          <div class="am-header-icon"><i class="fas fa-star"></i></div>
+          <div>
+            <h5 class="modal-title mb-0"><span id="modalTitle">Select Items</span></h5>
+            <small class="am-subtitle">Tap to select. You can pick as many as you like.</small>
+          </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <div class="modal-search-box">
+
+      <div class="am-toolbar">
+        <div class="am-search">
           <i class="fas fa-search"></i>
-          <input type="text" class="modal-search-input" id="modalSearch" placeholder="Search items by name...">
+          <input type="text" class="modal-search-input" id="modalSearch" placeholder="Search...">
         </div>
+      </div>
+
+      <div class="modal-body am-body">
         <div id="modalItemsList" class="modal-grid-options"></div>
       </div>
-      <div class="modal-footer justify-content-between">
-        <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-600" onclick="clearAll()"><i class="fas fa-trash-alt me-1"></i> Clear All</button>
-        <div class="d-flex align-items-center gap-3">
-          <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;"><span id="modalSelectedCount">0</span> selected</span>
-          <button type="button" class="btn btn-primary px-4 rounded-pill fw-600" style="background: var(--primary-grad); border:none;" data-bs-dismiss="modal">Apply Selections</button>
-        </div>
+
+      <div class="modal-footer am-footer">
+        <button type="button" class="am-btn am-btn-ghost" onclick="clearAll()"><i class="fas fa-eraser"></i> Clear All</button>
+        <button type="button" class="am-btn am-btn-apply btn-primary" data-bs-dismiss="modal">
+          <i class="fas fa-check"></i> Apply (<span id="modalSelectedCount">0</span>)
+        </button>
       </div>
     </div>
   </div>
@@ -2022,7 +3402,7 @@
 
     switch (normalizedRole) {
       case 'admin':
-        labelText = "EstateFlow Service Fee";
+        labelText = "KanishkaImperia Service Fee";
         break;
       case 'relationship manager':
         labelText = "Buyer Service Fee";
@@ -2445,6 +3825,7 @@
   }
 
   /* Skip the mirroring hidden input — it's never user-facing */
+
   if (field.type === 'hidden' && field.id && field.id.endsWith('_hidden')) {
     return;
   }
@@ -2481,7 +3862,7 @@
       Swal.fire({
         icon: 'warning', title: 'Required Fields Missing',
         html: `<p>Please fill the following fields:</p><ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f => `<li>${f}</li>`).join('')}</ul>`,
-        confirmButtonColor: '#56ab2f'
+        confirmButtonColor: '#667eea'
       });
       return false;
     }
@@ -2538,16 +3919,20 @@
     if (pArea) pArea.textContent = area ? Number(area).toLocaleString('en-IN') + ' sq.ft' : '0 sq.ft';
 
     var ptSelect = document.getElementById('property_type_select');
-if (ptSelect && pCat) {
-  var ptText = (ptSelect.value === '__other__')
-    ? (document.getElementById('property_type_other')?.value || 'Other')
-    : (ptSelect.options[ptSelect.selectedIndex]?.text.split('(')[0].trim() || '—');
-  pCat.textContent = ptText;
+
+  if (ptSelect && pCat) {
+    var ptText = (ptSelect.value === '__other__')
+      ? (document.getElementById('property_type_other')?.value || 'Other')
+      : (ptSelect.options[ptSelect.selectedIndex]?.text.split('(')[0].trim() || '—');
+    pCat.textContent = ptText;
 }
 
 
     if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ 0';
     if (pLoc) pLoc.textContent = [city, loc].filter(Boolean).join(', ') || 'City, Locality';
+
+    // Auto-select brokerage from the selling price (1 Crore threshold)
+    autoSelectBrokerage(price);
 
     // Corrected Price Per Sq.ft Calculation
     const psf = document.getElementById('plot_price_per_sqft');
@@ -2570,6 +3955,7 @@ if (ptSelect && pCat) {
 
 
     // 👇 ADD THIS NEW CODE HERE 👇
+
     var areaSqFtVal = parseFloat(document.getElementById('plot_area').value) || 0;
     if (areaSqFtVal > 0) {
         document.getElementById('plot_area_sqm').value = (areaSqFtVal * 0.092903).toFixed(2);
@@ -2626,7 +4012,7 @@ if (ptSelect && pCat) {
               var isCover = (cat === coverCat && idx === 0);
               div.innerHTML =
                   '<img src="' + e.target.result + '">' +
-                  '<span style="position:absolute;top:6px;left:6px;background:rgba(86,171,47,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Image ' + (idx + 1) + '</span>' +
+                  '<span style="position:absolute;top:6px;left:6px;background:rgba(102,126,234,.95);color:white;font-size:0.7rem;font-weight:bold;padding:2px 6px;border-radius:6px;z-index:5;">Image ' + (idx + 1) + '</span>' +
                   (isCover ? '<span style="position:absolute;bottom:6px;left:6px;background:#f59e0b;color:white;font-size:0.6rem;font-weight:bold;padding:2px 6px;border-radius:4px;z-index:5;"><i class="fas fa-star"></i> Cover</span>' : '') +
                   '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)"><i class="fas fa-times"></i></button>';
 
@@ -2727,6 +4113,19 @@ if (ptSelect && pCat) {
         document.getElementById('manualBrokerageSection').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
       });
     }
+
+    // Brokerage / owner fee: stop auto-selecting once the user picks a value themselves.
+    // Choosing the blank "Select" option hands control back to the automatic rule.
+    ['brokeragePercentage', 'landlordOwnerFee'].forEach(function (id) {
+
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('change', function () {
+        if (this.value === '') { delete this.dataset.manualOverride; }
+        else { this.dataset.manualOverride = 'true'; }
+      });
+      
+    });
 
     document.querySelectorAll('input, select, textarea').forEach(el => {
       el.addEventListener('input', updatePreview);
@@ -2844,6 +4243,7 @@ if (ptSelect && pCat) {
   });
 
   function renderVideoPreview() {
+    
       var linkInput = document.getElementById('property_video_link');
       var frame = document.getElementById('rmVideoFrame');
       if (!linkInput || !frame) return;
@@ -2864,13 +4264,14 @@ if (ptSelect && pCat) {
   }
 
   // ── RESIDENTIAL PLOT FORM SUBMISSION VIA SWAL WITH PERCENTAGE PROGRESS ──
+
   function Submit_Residential_Plot(_this) {
     Swal.fire({
         title: 'Confirm Submission',
         text: 'Are you sure you want to submit this residential plot property?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#56ab2f',
+        confirmButtonColor: '#667eea',
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'Yes, Submit!'
     }).then((result) => {
@@ -2903,10 +4304,10 @@ if (ptSelect && pCat) {
     progressContainer.innerHTML = `
         <div style="padding: 10px 0;">
             <div style="margin-bottom: 12px;">
-                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #56ab2f;">0%</span>
+                <span id="swalProgressText" style="font-size: 28px; font-weight: 700; color: #667eea;">0%</span>
             </div>
             <div style="width: 100%; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #56ab2f 0%, #a8e063 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+                <div id="swalProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
             </div>
             <div style="margin-top: 14px; color: #64748b; font-size: 13px; font-weight: 500;">
                 <i class="fas fa-spinner fa-spin me-1"></i> 
@@ -2930,9 +4331,12 @@ if (ptSelect && pCat) {
     var fd = new FormData(formEl);
 
    /* ---- Fields that are plain inputs (unchanged) ---- */
+
 fd.append('property_title', $('#property_title').val());
 fd.append('property_no', $('#property_no').val());
 fd.append('plot_area', $('#plot_area').val());
+fd.append('property_type', $('#property_type').val());
+
 fd.append('gated_community', $('#gated_community').val());
 fd.append('layout_name', $('#layout_name').val());
 fd.append('plot_frontage', $('#plot_frontage').val());
@@ -2940,6 +4344,7 @@ fd.append('plot_depth', $('#plot_depth').val());
 fd.append('road_width', $('#road_width').val());
 
 /* ---- "Other-pattern" fields: read from _other (if active) else _hidden ---- */
+
 var otherFields = [
   'property_type','land_use','na_status','layout_approval_status',
   'residential_zone_type','plot_shape','road_connectivity','corner_plot',
@@ -2962,17 +4367,25 @@ otherFields.forEach(function (f) {
 });
 
 /* ---- Pricing / brokerage (unchanged) ---- */
+
 fd.append('selling_price', $('#selling_price').val());
 fd.append('plot_price_per_sqft', $('#plot_price_per_sqft').val());
 fd.append('price_negotiable', $('input[name="price_negotiable"]:checked').val() || 'no');
 fd.append('brokerage_percentage', $('#brokeragePercentage').val());
 fd.append('manual_brokerage', $('[name="manual_brokerage"]').val());
 
+//  Landlord / Owner Service Fee
+
+fd.append('landlord_owner_fee', $('#landlordOwnerFee').val() || '');
+fd.append('landlord_owner_fixed_amount', $('#landlordOwnerFixedAmount').val() || '');
+
 /* ---- Ownership document (uses existing other_document_type — leave as-is) ---- */
+
 fd.append('ownership_document_type', $('#ownership_document_type').val());
 fd.append('other_document_type', $('#other_document_type').val());
 
 /* ---- Other tax / loan (unchanged) ---- */
+
 fd.append('property_tax_status', $('#property_tax_status').val());
 fd.append('outstanding_tax_amount', $('#outstanding_tax_amount').val());
 fd.append('pending_since', $('#pending_since').val());
@@ -2994,6 +4407,7 @@ fd.append('latitude', $('#latitude').val() || '');
 fd.append('longitude', $('#longitude').val() || '');
 
 /* ---- Extra fields (unchanged) ---- */
+
 fd.append('plot_unit_number', $('#plot_unit_number').val());
 fd.append('plot_area_sqm', $('#plot_area_sqm').val());
 fd.append('plot_area_acres', $('#plot_area_acres').val());
@@ -3003,7 +4417,6 @@ fd.append('town_planning_permission', $('#town_planning_permission').val());
 fd.append('permitted_fsi', $('#permitted_fsi').val());
 fd.append('booking_amount', $('#booking_amount').val());
 fd.append('price_includes_excludes', $('#price_includes_excludes').val());
-fd.append('nearby_facilities_details', $('#nearby_facilities_details').val());
 
 
     // --- END NEW FIELDS ---
@@ -3120,7 +4533,7 @@ fd.append('nearby_facilities_details', $('#nearby_facilities_details').val());
                         icon: 'success',
                         title: 'Listing Active!',
                         text: (response.msg || response.message || 'Residential plot published successfully.') + propertyIdText,
-                        confirmButtonColor: '#56ab2f'
+                        confirmButtonColor: '#667eea'
                     }).then(() => {
                         window.location.href = "{% url 'residential_plot_resale_list' %}";
                     });
@@ -3229,7 +4642,7 @@ function lookupPincode() {
         lastLookedUpPincode = '';
         fillLocalities([]);
         Swal.fire({ icon: 'warning', title: 'Pincode not found',
-                    text: data.error || 'Please enter your locality manually.', confirmButtonColor: '#56ab2f' });
+                    text: data.error || 'Please enter your locality manually.', confirmButtonColor: '#667eea' });
         return;
       }
       if (cleanText(data.city)) document.getElementById('city').value = data.city;
@@ -3247,7 +4660,7 @@ function lookupPincode() {
       lastLookedUpPincode = '';
       fillLocalities([]);
       Swal.fire({ icon: 'error', title: 'Lookup failed',
-                  text: 'Could not verify pincode. Please enter your locality manually.', confirmButtonColor: '#56ab2f' });
+                  text: 'Could not verify pincode. Please enter your locality manually.', confirmButtonColor: '#667eea' });
     });
 }
 
@@ -3303,4 +4716,74 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+/* ---- Auto brokerage from selling price (same rule as the industrial form) ----
+   below ₹1 Cr  -> 2% of sale value
+   ₹1 Cr & above -> 1% of sale value
+   Only applies until the user changes the dropdown themselves. */
+
+var BROKERAGE_THRESHOLD = 10000000; // ₹1 Crore
+
+function autoSelectBrokerage(priceVal) {
+  var price = parseFloat(priceVal) || 0;
+  var below = price < BROKERAGE_THRESHOLD;
+  var brokerageSel = document.getElementById('brokeragePercentage');
+  var ownerFeeSel  = document.getElementById('landlordOwnerFee');
+  var hint         = document.getElementById('brokerageAutoHint');
+
+  if (brokerageSel && !brokerageSel.dataset.manualOverride) {
+    brokerageSel.value = price > 0 ? (below ? '2% of amount' : '1% of amount') : '';
+  }
+  if (ownerFeeSel && !ownerFeeSel.dataset.manualOverride) {
+    ownerFeeSel.value = price > 0 ? (below ? '2% of Sale Value' : '1% of Sale Value') : '';
+  }
+
+  if (hint) {
+    if (brokerageSel && brokerageSel.dataset.manualOverride) {
+      hint.textContent = 'Changed manually. Choose “Select” to switch back to automatic.';
+    } else if (price > 0) {
+      hint.textContent = below
+        ? 'Auto-selected 2% because the selling price is below ₹1 Cr. You can change it.'
+        : 'Auto-selected 1% because the selling price is ₹1 Cr or more. You can change it.';
+    } else {
+      hint.textContent = 'Auto-selected from the selling price: 2% below ₹1 Cr, 1% from ₹1 Cr. You can change it.';
+    }
+  }
+}
+
+function toggleLandlordFixedAmount() {
+  const feeType = document.getElementById('landlordOwnerFee').value;
+  const fixedSection = document.getElementById('landlordFixedAmountSection');
+
+  if (feeType === 'Fixed Amount') {
+    fixedSection.style.display = 'block';
+  } else {
+    fixedSection.style.display = 'none';
+    document.getElementById('landlordOwnerFixedAmount').value = '';
+  }
+}
+
+</script>
+
+<script>
+
+/* UI helper: interactive floating labels + clear red error state on edit (visual only — no existing logic touched) */
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.form-container label.form-label').forEach(function (lbl) {
+        var ctl = lbl.nextElementSibling;
+        var parent = lbl.parentElement;
+        if (!ctl || !parent) return;
+        var tag = ctl.tagName;
+        var ok = tag === 'SELECT' || tag === 'TEXTAREA' ||
+                 (tag === 'INPUT' && !/^(radio|checkbox|hidden|file)$/i.test(ctl.type)) ||
+                 (tag === 'DIV' && ctl.classList.contains('input-with-unit') && !!ctl.querySelector('input'));
+        if (ok) parent.classList.add('fl');
+    });
+
+    document.querySelectorAll('.form-container input, .form-container select, .form-container textarea').forEach(function (el) {
+        var clear = function () { this.classList.remove('validation-error'); };
+        el.addEventListener('input', clear);
+        el.addEventListener('change', clear);
+    });
+});
 </script>

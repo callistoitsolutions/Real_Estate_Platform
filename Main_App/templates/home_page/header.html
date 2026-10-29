@@ -1,15 +1,25 @@
 {% load static %}
-
 <head>
-    <!-- Google Tag Manager -->
-  
 
+
+
+    <!-- Favicons -->
+<link rel="icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}?v=11">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/favicon.ico' %}?v=11">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/favicon.ico' %}?v=11">
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/favicon.ico' %}?v=11">
+    <meta name="theme-color" content="#16233a">
+
+    <!-- Google Tag Manager -->
+    <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-KXBSXTN4');</script>
-    <!-- End Google Tag Manager -->
+
+<!-- End Google Tag Manager -->
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -20,21 +30,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <style>
 /* ============================================
    ISOLATED HEADER CSS (NO CONFLICTS)
-   Self-contained navy / gold palette so this
-   partial looks right on every page it's
-   included on, independent of the host page's
-   own :root variables.
 ============================================ */
-
-
-
-
-
-
-
-
-
-
 .premium-header {
     --ph-navy: #16233a;
     --ph-navy-2: #1f2f47;
@@ -59,7 +55,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: background .25s ease, box-shadow .25s ease, height .25s ease;
 }
 
-/* Transparent mode at the top of the page */
 .premium-header.header-transparent {
     background: transparent !important;
     box-shadow: none !important;
@@ -71,7 +66,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     width: 100%;
 }
 
-/* Scrolled state: turns solid white with dark text and visible buttons */
 .premium-header.ph-scrolled,
 .premium-header.header-transparent.ph-scrolled {
     background: #ffffff !important;
@@ -87,7 +81,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     color: #16233a !important;
 }
 
-/* Post Property button color fix when scrolled onto white background */
 .premium-header.ph-scrolled .btn-nav-outline,
 .premium-header.header-transparent.ph-scrolled .btn-nav-outline {
     border-color: #16233a !important;
@@ -101,9 +94,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     color: #ffffff !important;
 }
 
-
-
-
 .premium-header.header-transparent.ph-scrolled .desktop-menu a:hover {
     color: var(--menu-hover, #d4af37) !important;
 }
@@ -111,8 +101,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .premium-header * {
     box-sizing: border-box;
 }
-
-
 
 .premium-header .logo {
     font-family: "Playfair Display", serif;
@@ -145,22 +133,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .ef-breadcrumb-inner .ef-bc-sep { font-size:.65rem; color:#b7bcc4; }
 .ef-breadcrumb-inner .ef-bc-current { color:#0b1730; font-weight:700; }
 
-
-
-
-
 .premium-header .logo span { color: var(--ph-gold-light); }
-.premium-header .logo-badge {
-    background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
-    color: var(--ph-navy);
-    font-size: 0.55rem;
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    font-family: "Poppins", sans-serif;
-}
-
 .premium-header .desktop-menu {
     display: flex;
     align-items: center;
@@ -177,9 +150,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: background .3s ease, color .3s ease, box-shadow .3s ease;
 }
 
-/* ==========================================
-   DYNAMIC HEADER
-========================================== */
 .premium-header.header-transparent {
     background: transparent !important;
     box-shadow: none !important;
@@ -203,7 +173,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 .premium-header.header-sticky { position: sticky; top: 0; }
 .premium-header.header-transparent.header-sticky { position: fixed; top: 0; left: 0; right: 0; width: 100%; }
-
 
 .dynamic-header-logo { display: block; max-width: 100%; height: auto; object-fit: contain; transition: width .25s ease; }
 
@@ -235,7 +204,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     border-bottom-color: var(--menu-hover, var(--ph-gold));
 }
 
-/* MAIN NAVIGATION DROPDOWN (Luxury App Style) */
 .nav-dropdown {
     position: relative;
     display: inline-block;
@@ -300,20 +268,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transform: scale(1.1);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* =========================================================
+   STRICTLY UNIFORM HEADER BUTTON SIZING & ALIGNMENT
+========================================================= */
 .premium-header .nav-right {
     display: flex;
     gap: 10px;
@@ -323,24 +280,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 .premium-header .btn-nav-outline,
 .premium-header .btn-nav-pr {
-    height: 42px;
-    padding: 0 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.82rem;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    padding: 0 16px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    line-height: 1;
+    line-height: normal !important;
     transition: .2s;
     white-space: nowrap;
     font-family: "DM Sans", sans-serif;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    vertical-align: middle;
 }
-
 
 .premium-header .btn-nav-outline {
     border: 1.5px solid rgba(255, 255, 255, 0.4);
@@ -351,6 +311,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background: rgba(255, 255, 255, 0.12);
     color: #ffffff;
 }
+
 .premium-header .btn-nav-pr {
     background: linear-gradient(135deg, var(--ph-gold), var(--ph-pr2));
     color: var(--ph-navy);
@@ -371,37 +332,71 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 }
 .premium-header .mobile-menu-btn i { font-size: 1.8rem; color: var(--ph-gold-light); }
 
-/* Compact "Post Property FREE" pill — phones only. Mirrors the
-   mobile-app-style badge from the mobile demo so listing owners
-   always see a one-tap CTA next to the hamburger, even though the
-   full outline button is hidden below 900px. */
 .mob-post-pill { display:none; }
 @media(max-width:900px) {
+    .mob-post-pill,
+    .premium-header .nav-right .btn-nav-pr {
+        height: 38px !important;
+        min-height: 38px !important;
+        max-height: 38px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        vertical-align: middle !important;
+        font-family: "DM Sans", sans-serif !important;
+    }
     .mob-post-pill {
-        display:flex;
+        display:flex !important;
         flex-direction:column;
         align-items:center;
         justify-content:center;
         border:1px solid var(--ph-gold);
         background:#fffaf0;
         color:#16233a;
-        border-radius:10px;
-        padding:5px 8px 4px;
+        border-radius:8px !important;
+        padding:0 10px !important;
         min-width:78px;
-        line-height:1.05;
+        line-height:1 !important;
         text-decoration:none;
         flex-shrink:0;
     }
-    .mob-post-pill .mp-main { font-size:11px; font-weight:900; white-space:nowrap; display:flex; align-items:center; gap:3px; }
-    .mob-post-pill .mp-main i { color:var(--ph-pr2); }
-    .mob-post-pill .mp-free { display:inline-block; margin-top:3px; background:#22c55e; color:#fff; border-radius:8px; padding:2px 7px; font-size:8.5px; font-weight:900; letter-spacing:.3px; }
+    .mob-post-pill .mp-main { font-size:11px !important; font-weight:900 !important; white-space:nowrap; display:flex; align-items:center; gap:3px; }
+    .mob-post-pill .mp-main i { color:var(--ph-pr2); font-size: 11px; }
+    .mob-post-pill .mp-free { display:inline-block; margin-top:2px; background:#22c55e; color:#fff; border-radius:4px; padding:1px 5px; font-size:8px; font-weight:900; letter-spacing:.3px; }
+
+    .premium-header .nav-right .btn-nav-pr {
+        background: linear-gradient(135deg, var(--ph-gold, #c9a227), var(--ph-pr2, #a5811c)) !important;
+        color: var(--ph-navy, #16233a) !important;
+        border-radius: 8px !important;
+        padding: 0 14px !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        border: none !important;
+    }
+
+    .premium-header .nav-right #loginDropdown.btn-nav-pr {
+        width: 38px !important;
+        max-width: 38px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+    }
+    .premium-header .nav-right #loginDropdown.btn-nav-pr span,
+    .premium-header .nav-right #loginDropdown.btn-nav-pr .bi-chevron-down {
+        display: none !important;
+    }
+    .premium-header .nav-right #loginDropdown.btn-nav-pr i.bi-person {
+        font-size: 1.1rem;
+        margin: 0;
+    }
 }
 @media(max-width:500px) {
-    .mob-post-pill { min-width:66px; padding:4px 6px; }
-    .mob-post-pill .mp-main { font-size:9.5px; }
+    .mob-post-pill { min-width:66px; padding:0 6px !important; }
+    .mob-post-pill .mp-main { font-size:9.5px !important; }
+    .premium-header .btn-nav-pr { max-width: 150px; padding: 0 10px !important; font-size: 0.72rem; }
 }
 
-/* Mobile Dropdown scoped class */
 .hdr-mobile-overlay {
     display: none;
     position: fixed; inset: 0;
@@ -429,19 +424,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: transform .3s ease;
 }
 
-.premium-header .desktop-menu .ph-menu-badge,
-.hdr-mobile-menu .ph-menu-badge {
-    display: inline-block;
-    font-size: 0.55rem;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    padding: 2px 7px;
-    border-radius: 6px;
-    color: #16233a;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-
 .hdr-mobile-menu.show { transform: translateX(0); }
 .hdr-mobile-head {
     background: linear-gradient(135deg, var(--ph-navy,#0b1730), var(--ph-navy-2,#101f3d));
@@ -458,7 +440,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 }
 .hdr-mobile-close:hover { background: rgba(255,255,255,.25); }
 
-/* Mobile Navigation Categories */
 .mob-nav-category {
     padding: 18px 20px 8px;
     font-size: 0.75rem;
@@ -485,7 +466,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .hdr-mobile-menu a:last-child { border-bottom: none; }
 .hdr-mobile-menu a:hover { color: #a5811c; background: #fbf4de; }
 
-/* PROFILE DROPDOWN */
 .custom-dropdown-overlay {
     display: none;
     position: fixed; inset: 0;
@@ -551,13 +531,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .custom-dropdown-menu a i,
 .custom-dropdown-menu button i { margin-right: 14px; color: #a5811c; font-size: 1.15rem; width: 20px; }
 
-
 #phHeaderSpacer { width: 100%; }
 
-
-
 @media(max-width:900px) {
-
     .premium-header { padding: 0 15px; height: 70px; justify-content: flex-start; }
     .premium-header .nav-right { margin-left: auto; }
     .premium-header .mobile-menu-btn { margin-left: 10px; }
@@ -568,53 +544,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         max-width: 130px !important;
         max-height: 42px !important;
     }
-    
-   
-
 
     .premium-header .logo { margin: 0 !important; order: 0 !important; }
     .premium-header .desktop-menu { display: none; }
     .premium-header .mobile-menu-btn { display: block; }
     .premium-header .nav-right .btn-nav-outline { display: none; }
 
-    /* Logged-in state: collapse the "Hello Name" pill to just an avatar icon
-       so it never fights the hamburger for space. Full name/role/logout
-       still live in the mobile slide-out menu's Account section. */
-    .premium-header .nav-right #loginDropdown.btn-nav-pr {
-        max-width: 40px;
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        border-radius: 50%;
-        justify-content: center;
-        overflow: hidden;
-    }
-    .premium-header .nav-right #loginDropdown.btn-nav-pr span,
-    .premium-header .nav-right #loginDropdown.btn-nav-pr .bi-chevron-down {
-        display: none;
-    }
-    .premium-header .nav-right #loginDropdown.btn-nav-pr i.bi-person {
-        font-size: 1.1rem;
-        margin: 0;
-    }
-
-    /* Logged-out Login button keeps its label but stays compact */
     .premium-header .btn-nav-pr:not(#loginDropdown) { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
 @media(max-width: 500px) {
     .premium-header { padding: 0 10px; }
     .premium-header .logo img { height: 34px !important; max-width: 100px !important; max-height: 34px !important; }
     .premium-header .logo { font-size: 1.15rem; gap: 4px; }
     .premium-header .logo-badge { display: none; }
-    .premium-header .btn-nav-pr { max-width: 150px; padding: 7px 10px; font-size: 0.72rem; }
     .premium-header .mobile-menu-btn i { font-size: 1.6rem; }
     .premium-header .nav-right { gap: 5px; }
 }
 
-/* =========================================================
-   MOBILE "LIST YOUR PROPERTY" STRIP — a slim always-visible
-   banner right under the header, matching the mobile app demo.
-========================================================= */
 .ef-mobile-post-strip { display:none; }
 @media(max-width:768px) {
     .ef-mobile-post-strip {
@@ -643,10 +590,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     .ef-mobile-post-strip strong { background:#22c55e; color:#fff; border-radius:8px; padding:3px 8px; font-size:9px; }
 }
 
-/* =========================================================
-   MOBILE BOTTOM APP NAV — fixed 5-tab bar (Home / Search /
-   Post Property / Saved / Menu), site-wide, phones only.
-========================================================= */
+
+.premium-header .desktop-menu .nav-dropdown > a.nav-services-hl{
+    background:linear-gradient(135deg,#dcb73c,#c9a227);
+    color:#16233a !important;font-weight:800;border-radius:999px;
+    padding:7px 16px;gap:6px;
+    box-shadow:0 6px 16px -6px rgba(201,162,39,.75);
+}
+.premium-header .desktop-menu .nav-dropdown > a.nav-services-hl:hover{
+    color:#16233a !important;filter:brightness(1.06);
+}
+
+/* Wider dropdown so long labels don't wrap */
+.nav-dropdown-menu{ min-width: 260px; }
+
+
 .ef-bottom-nav { display:none; }
 @media(max-width:768px) {
     .ef-bottom-nav {
@@ -684,103 +642,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         font-size:6px; font-weight:900;
     }
     body { padding-bottom: 66px; }
-    .ef-wa-fab { bottom: 158px !important; }
-    .ef-chat-fab { bottom: 88px !important; }
-    .ef-chat-panel { bottom: 154px !important; }
 }
 @media(max-width:500px) {
     .ef-bottom-nav a, .ef-bottom-nav button { font-size:9px; }
     .ef-bottom-nav i { font-size:21px; }
 }
 
-
-/* Admin Logo Control */
-
-
-
 /* ============================================
-   AI CHATBOT LAUNCHER + PANEL (Leading Platform Theme)
+   AI CHAT WINDOW
+   (the round chat + WhatsApp buttons were replaced by the
+    "Need help?" popup in floating_help.html, included at the end of this file)
 ============================================ */
-
-
-/* ============================================
-   MATCHING FLOATING ACTION BUTTONS (FAB)
-============================================ */
-.ef-wa-fab {
-    position: fixed;
-    right: 22px;
-    bottom: 96px;
-    z-index: 10050;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #22c55e;
-    color: #fff;
-    border: none;
-    box-shadow: 0 10px 24px rgba(34, 197, 94, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.45rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: .2s;
-}
-.ef-wa-fab:hover {
-    background: #16a34a;
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(34, 197, 94, 0.5);
-}
-
-.ef-chat-fab {
-    position: fixed;
-    right: 22px;
-    bottom: 22px;
-    z-index: 10050;
-    width: 56px; /* Matched to WhatsApp FAB size */
-    height: 56px; /* Matched to WhatsApp FAB size */
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.45rem; /* Matched font scale */
-    cursor: pointer;
-    transition: .2s;
-}
-.ef-chat-fab:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.5);
-}
-
-.ef-chat-fab .ef-chat-dot {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #22c55e;
-    border: 2px solid #fff;
-}
-
-@media(max-width: 500px) {
-    .ef-wa-fab { right: 16px; width: 50px; height: 50px; font-size: 1.3rem; }
-    .ef-chat-fab { right: 16px; width: 50px; height: 50px; font-size: 1.3rem; }
-}
-
-
-
 .ef-chat-panel {
     position: fixed;
-    right: 22px;
+    right: 24px;
     bottom: 96px;
-    z-index: 10050;
-    width: 380px;
+    z-index: 10060;
+    width: 390px;
     max-width: 92vw;
     height: 540px;
     max-height: 78vh;
@@ -886,7 +764,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     gap: 5px;
 }
 
-
 .ef-chat-opts button {
     border: 1px solid #bfdbfe;
     background: #eff6ff;
@@ -927,7 +804,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: border-color 0.2s;
 }
 
-
 .ef-chat-foot input:focus {
     border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
@@ -949,18 +825,218 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .ef-chat-foot button:hover {
     background: #1d4ed8;
 }
-@media(max-width: 500px) {
-    .ef-chat-panel { right: 10px; left: 10px; width: auto; }
+
+/* ===== MODERN MENU BUTTON ===== */
+.premium-header .mobile-menu-btn{
+    width:42px;height:42px;border-radius:12px;padding:0;
+    background:rgba(255,255,255,.08);
+    border:1.5px solid rgba(241,216,136,.55);
+    transition:background .2s,border-color .2s,transform .15s;
+}
+.premium-header .mobile-menu-btn:active{transform:scale(.94)}
+.ph-burger{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.ph-burger span{display:block;height:2.5px;border-radius:2px;background:#f1d888;transition:width .2s,background .2s}
+.ph-burger span:nth-child(1){width:20px}
+.ph-burger span:nth-child(2){width:13px}
+.ph-burger span:nth-child(3){width:17px}
+.premium-header .mobile-menu-btn:hover .ph-burger span{width:20px}
+.premium-header.ph-scrolled .mobile-menu-btn{background:#f6f7f9;border-color:rgba(22,35,58,.3)}
+.premium-header.ph-scrolled .ph-burger span{background:#16233a}
+@media(max-width:900px){
+    .premium-header .mobile-menu-btn{display:flex !important;align-items:center;justify-content:center}
+}
+
+/* ===== LOGGED-IN AVATAR (mobile) ===== */
+.ph-avatar{display:none}
+@media(max-width:900px){
+    .premium-header .nav-right #loginDropdown.btn-nav-pr .ph-avatar{
+        display:inline-flex !important;align-items:center;justify-content:center;
+        font-weight:800;font-size:1rem;color:#16233a;line-height:1;
+    }
+    .premium-header .nav-right #loginDropdown.btn-nav-pr i.bi-person{display:none !important}
+}
+
+/* ===== HIGHLIGHTED SERVICES BUTTON ===== */
+.premium-header .desktop-menu > a.nav-services-hl{
+    background:linear-gradient(135deg,#dcb73c,#c9a227);
+    color:#16233a !important;font-weight:800;border-radius:999px;
+    padding:7px 16px;gap:6px;
+    box-shadow:0 6px 16px -6px rgba(201,162,39,.75);
+}
+.premium-header .desktop-menu > a.nav-services-hl:hover{
+    background:linear-gradient(135deg,#dcb73c,#c9a227);
+    color:#16233a !important;filter:brightness(1.06);
+}
+.ph-new-tag{background:#16233a;color:#f1d888;font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:999px;letter-spacing:.4px;line-height:1.4}
+.hdr-mobile-menu a.mob-services-hl{
+    background:linear-gradient(135deg,#fbf0c4,#f1d888);
+    color:#16233a;font-weight:800;
+}
+.hdr-mobile-menu a.mob-services-hl:hover{background:linear-gradient(135deg,#f6e7a8,#e9cb6a);color:#16233a}
+.hdr-mobile-menu a.mob-services-hl .ph-new-tag{margin-left:auto}
+
+/* Lighter weight placeholder style */
+.custom-search-input::-webkit-input-placeholder { color: rgba(255, 255, 255, 0.45) !important; font-weight: 300 !important; }
+.custom-search-input::-moz-placeholder { color: rgba(255, 255, 255, 0.45) !important; font-weight: 300 !important; }
+.custom-search-input:-ms-input-placeholder { color: rgba(255, 255, 255, 0.45) !important; font-weight: 300 !important; }
+.custom-search-input::placeholder { color: rgba(255, 255, 255, 0.45) !important; font-weight: 300 !important; }
+
+/* =========================================================
+   NEW DESIGN — MOBILE DRAWER (matches site theme)
+========================================================= */
+.hdr-mobile-menu { background: #f6f7f9 !important; }
+
+.hdr-mobile-head {
+    background: linear-gradient(135deg, #0b1730, #1b3163) !important;
+    padding: 20px !important;
+    border-bottom: 1px solid rgba(201,162,39,.25) !important;
+    align-items: center !important;
+}
+.hdr-drawer-brand { display: flex; align-items: center; gap: 10px; }
+.hdr-drawer-mark {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 1.5px solid #f1d888;
+    display: grid; place-items: center;
+    color: #f1d888; font: bold 16px Georgia, serif;
+    flex-shrink: 0;
+}
+.hdr-drawer-brand b {
+    font: 15px "Playfair Display", serif;
+    color: #fff; line-height: 1; letter-spacing: .3px;
+    display: block;
+}
+.hdr-drawer-brand small {
+    display: block; color: #f1d888;
+    font: 800 8px Arial, sans-serif;
+    letter-spacing: 2px; margin-top: 4px;
+}
+.hdr-mobile-close {
+    background: rgba(255,255,255,.08) !important;
+    border: 1px solid rgba(241,216,136,.35) !important;
+    width: 34px !important; height: 34px !important;
+    min-width: 34px !important; max-width: 34px !important;
+    border-radius: 10px !important;
+    color: #f1d888 !important;
+}
+.hdr-mobile-close:hover {
+    background: rgba(241,216,136,.18) !important;
+    color: #fff !important;
+}
+
+/* CTA row */
+.hdr-drawer-cta {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; padding: 14px 16px;
+    background: #fff;
+    border-bottom: 1px solid rgba(11,23,48,.06);
+}
+.hdr-drawer-cta-btn {
+    height: 42px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 7px; font-weight: 800; font-size: .82rem;
+    text-decoration: none; font-family: "DM Sans", sans-serif;
+    border: 1.5px solid transparent;
+    transition: .2s;
+}
+.hdr-drawer-cta-btn.outline {
+    background: #fff; color: #16233a;
+    border-color: rgba(22,35,58,.15);
+}
+.hdr-drawer-cta-btn.outline:hover {
+    border-color: #c9a227; background: #fbf5e0;
+}
+.hdr-drawer-cta-btn.primary {
+    background: linear-gradient(135deg, #dcb73c, #c9a227);
+    color: #0b1730; border: none;
+}
+.hdr-drawer-cta-btn.primary:hover { filter: brightness(1.06); }
+.hdr-drawer-cta-btn i { font-size: 1rem; }
+
+/* Section labels */
+.hdr-drawer-label {
+    padding: 14px 18px 8px;
+    font-size: .68rem; font-weight: 900;
+    color: #8a6a15;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    background: transparent;
+}
+
+/* Section container */
+.hdr-drawer-section {
+    background: #fff;
+    margin: 0 12px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(11,23,48,.06);
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(11,23,48,.03);
+}
+.hdr-drawer-section a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 13px 16px !important;
+    border-bottom: 1px solid rgba(11,23,48,.05) !important;
+    font-size: .9rem !important;
+    font-weight: 600 !important;
+    color: #12202c !important;
+    text-decoration: none !important;
+    transition: background .18s, color .18s !important;
+}
+.hdr-drawer-section a:last-child { border-bottom: none !important; }
+.hdr-drawer-section a i {
+    color: #a5811c !important;
+    font-size: 1.1rem !important;
+    width: 22px !important;
+    text-align: center !important;
+    transition: transform .18s !important;
+}
+.hdr-drawer-section a:hover {
+    background: #fbf5e0 !important;
+    color: #0b1730 !important;
+}
+.hdr-drawer-section a:hover i {
+    color: #8a6a15 !important;
+    transform: scale(1.1) !important;
+}
+
+/* Highlighted (Services / About Us) */
+.hdr-drawer-section a.hdr-drawer-hl {
+    background: linear-gradient(135deg, #fbf0c4, #f1d888) !important;
+    color: #0b1730 !important;
+    font-weight: 800 !important;
+}
+.hdr-drawer-section a.hdr-drawer-hl:hover {
+    background: linear-gradient(135deg, #f6e7a8, #e9cb6a) !important;
+}
+.hdr-drawer-section a.hdr-drawer-hl .ph-new-tag {
+    margin-left: auto !important;
 }
 
 
+/* ===== MOBILE HEADER FIX ===== */
+.premium-header .mobile-menu-btn{flex-shrink:0;background:#f6f7f9;border:1.5px solid rgba(22,35,58,.35)}
+.premium-header .ph-burger span{background:#16233a}
 
+/* only when the header is transparent (over the hero) and not scrolled: light icon */
+.premium-header.header-transparent:not(.ph-scrolled) .mobile-menu-btn{background:rgba(255,255,255,.12);border-color:rgba(241,216,136,.7)}
+.premium-header.header-transparent:not(.ph-scrolled) .ph-burger span{background:#f1d888}
 
+@media(max-width:900px){
+  .premium-header{gap:8px}
+  .premium-header .logo{min-width:0;flex-shrink:1}
+  .premium-header .nav-right{flex-shrink:0;min-width:0}
+}
+@media(max-width:500px){
+  .premium-header{padding:0 10px}
+  .premium-header .logo img{height:46px !important;max-width:104px !important;max-height:46px !important}
+  .premium-header .logo-badge{display:none}
+  .premium-header .nav-right{gap:6px}
+  .premium-header .mobile-menu-btn{width:40px;height:40px;margin-left:6px}
+}
 
 </style>
 
 </head>
-
 
 <header
     class="
@@ -980,7 +1056,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KXBSXTN4"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-    <!-- End Google Tag Manager (noscript) -->
 
     <a href="{% url 'index' %}" class="logo brand-logo text-decoration-none"
    style="
@@ -995,8 +1070,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             style="width: auto; height: auto; max-width: {{ header_settings.logo_width|default:180 }}px; max-height: {{ header_settings.logo_height|default:80 }}px; object-fit: contain; -webkit-font-smoothing: antialiased; image-rendering: -webkit-optimize-contrast;"
         >
         {% else %}
-
-
             <img
                 src="{% static 'assets/img/kanishka_imperia_logo_original_size.png' %}"
                 alt="KANISHKAIMPERIA"
@@ -1005,46 +1078,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         {% endif %}
     </a>
 
-    <nav class="desktop-menu">
-        <a href="{% url 'index' %}" hidden class="{% if request.path == '/' %}active{% endif %}">Home</a>
 
-        <!-- LUXURY RENTALS DROPDOWN -->
-        <div class="nav-dropdown">
-            <a href="#">Rent & Lease <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
-            <div class="nav-dropdown-menu">
-                <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Rental Residences</a>
-                <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial Spaces</a>
-                <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> Co-Living / PG</a>
-            </div>
+
+  <nav class="desktop-menu">
+    <a href="{% url 'index' %}" hidden class="{% if request.path == '/' %}active{% endif %}">Home</a>
+
+    <!-- RENT & LEASE DROPDOWN -->
+
+    <div class="nav-dropdown">
+        <a href="#">Buy / Resale <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
+        <div class="nav-dropdown-menu">
+            <a href="/listingpage/?type=sale&category=residential"><i class="bi bi-house-door"></i> Residential</a>
+            <a href="/listingpage/?type=sale&category=commercial"><i class="bi bi-briefcase"></i> Commercial</a>
+            <a href="/listingpage/?type=sale&category=plot"><i class="bi bi-map"></i> Plot / Land</a>
+            <a href="/listingpage/?type=sale&category=industrial"><i class="bi bi-buildings"></i> Industrial</a>
+            <a href="/listingpage/?type=sale&category=agricultural"><i class="bi bi-tree"></i> Agricultural</a>
         </div>
-
-        <!-- LUXURY SALES DROPDOWN -->
-        <div class="nav-dropdown">
-            <a href="#">Buy & Invest <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
-            <div class="nav-dropdown-menu">
-                <a href="/listingpage/?type=sale&category=residential"><i class="bi bi-house-door"></i> Luxury Residences</a>
-                <a href="/listingpage/?type=sale&category=commercial"><i class="bi bi-briefcase"></i> Commercial Investments</a>
-                <a href="/listingpage/?type=sale&category=plot"><i class="bi bi-map"></i> Land & Plots</a>
-                <a href="/listingpage/?type=sale&category=agricultural"><i class="bi bi-tree"></i> Agricultural Estates</a>
-                <a href="/listingpage/?type=sale&category=industrial"><i class="bi bi-factory"></i> Industrial Assets</a>
-            </div>
+    </div>
+    <div class="nav-dropdown">
+        <a href="#">Rent / Lease <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
+        <div class="nav-dropdown-menu">
+            <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Residential</a>
+            <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial</a>
+            <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> PG / Co-Living</a>
         </div>
+    </div>
 
-                <a href="{% url 'services' %}">
-            Services
-            {% if header_settings.show_badge and header_settings.badge_menu_label == "Services" %}
-                <span class="ph-menu-badge" style="background:{{ header_settings.badge_color }};">{{ header_settings.badge_text }}</span>
-            {% endif %}
+    <!-- BUY & SALE DROPDOWN -->
+    
+
+    <!-- SERVICES DROPDOWN -->
+    <div class="nav-dropdown">
+        <a href="{% url 'services' %}" class="nav-services-hl">
+            <i class="bi bi-stars"></i> Services <span class="ph-new-tag">NEW</span>
+            <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i>
         </a>
-        <a href="{% url 'blog' %}">News/Guide</a>
+        <div class="nav-dropdown-menu">
+            <a href="{% url 'services' %}"><i class="bi bi-grid"></i> All Services</a>
+            <a href="{% url 'home_loan' %}"><i class="bi bi-bank"></i> Home Loan</a>
+            <a href="{% url 'services' %}#movers"><i class="bi bi-truck"></i> Packers &amp; Movers</a>
+            <a href="{% url 'services' %}#cleaning"><i class="bi bi-brush"></i> Cleaning Service</a>
+            <a href="{% url 'services' %}#doc-verify"><i class="bi bi-shield-check"></i> Document Verification</a>
+        </div>
+    </div>
 
-        <a href="{% url 'Contact_Us' %}">Contact Us</a>
-    </nav>
+    <!-- NEWS & GUIDE DROPDOWN -->
+    <div class="nav-dropdown">
+        <a href="{% url 'blog' %}">News &amp; Guide <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i></a>
+        <div class="nav-dropdown-menu">
+            <a href="{% url 'blog' %}"><i class="bi bi-journal-text"></i> All Articles</a>
+            <a href="{% url 'blog' %}?category=news"><i class="bi bi-newspaper"></i> News</a>
+            <a href="{% url 'blog' %}?category=guide"><i class="bi bi-book"></i> Guides</a>
+        </div>
+    </div>
 
-       <div class="nav-right">
+    <a href="{% url 'about' %}">About Us</a>
+    <a href="{% url 'Contact_Us' %}">Contact Us</a>
+</nav>
 
-    {% if header_settings.show_primary_btn|default_if_none:True %}
-        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'post_property' %}{% endif %}"
+    <div class="nav-right">
+        {% if header_settings.show_primary_btn|default_if_none:True %}
+        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'Coming_Soon' %}{% endif %}"
            id="navPostPropBtn"
            class="btn-nav-outline"
            style="{% if header_settings.primary_btn_bg and header_settings.primary_btn_bg != 'transparent' %}background:{{ header_settings.primary_btn_bg }};{% endif %}{% if header_settings.primary_btn_text_color %}color:{{ header_settings.primary_btn_text_color }};{% endif %}">
@@ -1052,20 +1146,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </a>
         {% endif %}
 
-        <!-- Compact mobile "Post Property FREE" pill — shown only on phones,
-             next to the hamburger, so the CTA is never hidden away. -->
-        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'post_property' %}{% endif %}" class="mob-post-pill">
+        <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'Coming_Soon' %}{% endif %}" class="mob-post-pill">
             <span class="mp-main"><i class="bi bi-plus-circle-fill"></i> Post Property</span>
             <span class="mp-free">FREE</span>
         </a>
 
         {% if user_obj %}
         <div class="dropdown d-inline-block" style="position: relative;">
-
-         <a href="#" class="btn-nav-pr text-decoration-none" id="loginDropdown" onclick="toggleProfileMenu(event)">
-    <i class="bi bi-person"></i> <span>Hello {{user_obj.user_name}}-{{user_obj.user_role}}</span>
-    <i class="bi bi-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
-</a>
+            <a href="#" class="btn-nav-pr text-decoration-none" id="loginDropdown" onclick="toggleProfileMenu(event)">
+                                <span class="ph-avatar">{{ user_obj.user_name|slice:":1"|upper }}</span>
+                <i class="bi bi-person"></i> <span>Hello {{user_obj.user_name}}-{{user_obj.user_role}}</span>
+                <i class="bi bi-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
+            </a>
             <div class="custom-dropdown-overlay" id="profileOverlay" onclick="toggleProfileMenu(event)"></div>
             <div class="custom-dropdown-menu" id="profileMenu">
                 <div class="custom-dropdown-head">
@@ -1111,8 +1203,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </nav>
             </div>
         </div>
-
-              {% else %}
+        {% else %}
             {% if header_settings.show_secondary_btn|default_if_none:True %}
             <a href="{% if header_settings.secondary_btn_url %}{{ header_settings.secondary_btn_url }}{% else %}{% url 'login' %}{% endif %}"
                class="btn-nav-pr">
@@ -1122,82 +1213,109 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         {% endif %}
     </div>
 
-    
-    <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)">
-        <i class="bi bi-list"></i>
+       <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)" aria-label="Open menu">
+        <span class="ph-burger"><span></span><span></span><span></span></span>
     </button>
 
-    <!-- UPDATED MOBILE MENU -->
     <div class="hdr-mobile-overlay" id="hdrMobileOverlay" onclick="toggleHdrMenu(event)"></div>
-    <div id="hdrMobileMenu" class="hdr-mobile-menu">
+   
+        <div id="hdrMobileMenu" class="hdr-mobile-menu">
+
+        <!-- Drawer head with brand + close -->
         <div class="hdr-mobile-head">
-            <span>Menu</span>
+            <div class="hdr-drawer-brand">
+                <div class="hdr-drawer-mark">KI</div>
+                <div>
+                    <b>KANISHKA<br>IMPERIA</b>
+                    <small>REAL ESTATE</small>
+                </div>
+            </div>
             <button class="hdr-mobile-close" onclick="toggleHdrMenu(event)" aria-label="Close"><i class="bi bi-x-lg"></i></button>
         </div>
-        
-        <a href="{% url 'index' %}"><i class="bi bi-house"></i> Home</a>
-        
-        <!-- Luxury Mobile Nav Categories -->
-        <div class="mob-nav-category">Rent & Lease</div>
-        <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Rental Residences</a>
-        <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial Spaces</a>
-        <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> Co-Living / PG</a>
-        
-        <div class="mob-nav-category">Buy & Invest</div>
-        <a href="/listingpage/?type=sale&category=residential"><i class="bi bi-house-door"></i> Luxury Residences</a>
-        <a href="/listingpage/?type=sale&category=commercial"><i class="bi bi-briefcase"></i> Commercial Investments</a>
-        <a href="/listingpage/?type=sale&category=plot"><i class="bi bi-map"></i> Land & Plots</a>
-        <a href="/listingpage/?type=sale&category=agricultural"><i class="bi bi-tree"></i> Agricultural Estates</a>
-        <a href="/listingpage/?type=sale&category=industrial"><i class="bi bi-factory"></i> Industrial Assets</a>
 
-        <div class="mob-nav-category">More Links</div>
-        <a href="{% url 'services' %}"><i class="bi bi-star"></i> Services</a>
-        <a href="{% url 'blog' %}"><i class="bi bi-journal-text"></i> News/Guide</a>
-        <a href="{% url 'Contact_Us' %}"><i class="bi bi-envelope"></i> Contact Us</a>
-        <a href="{% url 'post_property' %}"><i class="bi bi-plus-circle"></i> Post Property FREE</a>
-        
-        
-        <div class="mob-nav-category">Account</div>
-{% if user_obj %}
-    {% if user_obj.user_role == "Landlord" %}
-        <a href="{% url 'landlord_dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% elif user_obj.user_role == "Tenant" %}
-        <a href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% elif user_obj.user_role == "Buyer" %}
-        <a href="{% url 'Buyer_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% elif user_obj.user_role == "Agent" %}
-        <a href="{% url 'agent_dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% elif user_obj.user_role == "Agency/Builder" %}
-        <a href="{% url 'Agency_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% elif user_obj.user_role == "Vendor" %}
-        <a href="{% url 'Vendors:vendors_Dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% elif user_obj.user_role == "Relationship Manager" %}
-        <a href="{% url 'rm_dashboard' %}" target="_blank"><i class="bi bi-speedometer2"></i> Access Dashboard</a>
-    {% endif %}
-    <a href="{% url 'Wishlist_Property' %}"><i class="bi bi-heart"></i> Wishlist Properties</a>
-    <a href="#" onclick="User_Logout(); return false;"><i class="bi bi-door-closed"></i> Logout ({{ user_obj.user_name }})</a>
-{% else %}
-    <a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> User Login</a>
-{% endif %}
-<a href="{% url 'Adminlogin' %}" hidden><i class="bi bi-shield-lock"></i> Admin Login</a>
-        
+        <!-- Quick CTA row -->
+        <div class="hdr-drawer-cta">
+            {% if user_obj %}
+                <a href="{% if user_obj.user_role == 'Landlord' %}{% url 'landlord_dashboard' %}{% elif user_obj.user_role == 'Tenant' %}{% url 'Tenant_App:tenant_Dashboard' %}{% elif user_obj.user_role == 'Buyer' %}{% url 'Buyer_Dashboard' %}{% elif user_obj.user_role == 'Agent' %}{% url 'agent_dashboard' %}{% elif user_obj.user_role == 'Agency/Builder' %}{% url 'Agency_Dashboard' %}{% elif user_obj.user_role == 'Vendor' %}{% url 'Vendors:vendors_Dashboard' %}{% else %}{% url 'rm_dashboard' %}{% endif %}" class="hdr-drawer-cta-btn outline">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="hdr-drawer-cta-btn outline">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            {% endif %}
+            <a href="{% url 'Coming_Soon' %}" class="hdr-drawer-cta-btn primary">
+                <i class="bi bi-plus-circle-fill"></i> Post FREE
+            </a>
+        </div>
 
+        <!-- Home -->
+        <div class="hdr-drawer-section">
+            <a href="{% url 'index' %}"><i class="bi bi-house"></i> Home</a>
+        </div>
 
+        <!-- Rent & Lease -->
+
+        <div class="hdr-drawer-label">Buy / Resale</div>
+<div class="hdr-drawer-section">
+    <a href="/listingpage/?type=sale&category=residential"><i class="bi bi-house-door"></i> Residential</a>
+    <a href="/listingpage/?type=sale&category=commercial"><i class="bi bi-briefcase"></i> Commercial</a>
+    <a href="/listingpage/?type=sale&category=plot"><i class="bi bi-map"></i> Plot / Land</a>
+ <a href="/listingpage/?type=sale&category=industrial"><i class="bi bi-buildings"></i> Industrial</a>
+    <a href="/listingpage/?type=sale&category=agricultural"><i class="bi bi-tree"></i> Agricultural</a>
+</div>
+
+     <!-- Rent & Lease -->
+<div class="hdr-drawer-label">Rent / Lease</div>
+<div class="hdr-drawer-section">
+    <a href="/listingpage/?type=rent&category=residential"><i class="bi bi-building"></i> Residential</a>
+    <a href="/listingpage/?type=rent&category=commercial"><i class="bi bi-shop-window"></i> Commercial</a>
+    <a href="/listingpage/?type=rent&category=pg"><i class="bi bi-people"></i> PG / Co-Living</a>
+</div>
+
+<!-- Buy & Sale -->
+
+<!-- Services -->
+<div class="hdr-drawer-label">Services</div>
+<div class="hdr-drawer-section">
+    <a href="{% url 'services' %}" class="hdr-drawer-hl"><i class="bi bi-stars"></i> All Services <span class="ph-new-tag">NEW</span></a>
+    <a href="{% url 'home_loan' %}"><i class="bi bi-bank"></i> Home Loan</a>
+    <a href="{% url 'services' %}#movers"><i class="bi bi-truck"></i> Packers &amp; Movers</a>
+    <a href="{% url 'services' %}#cleaning"><i class="bi bi-brush"></i> Cleaning Service</a>
+    <a href="{% url 'services' %}#doc-verify"><i class="bi bi-shield-check"></i> Document Verification</a>
+</div>
+
+<!-- News & Guide -->
+<div class="hdr-drawer-label">News &amp; Guide</div>
+<div class="hdr-drawer-section">
+    <a href="{% url 'blog' %}"><i class="bi bi-journal-text"></i> All Articles</a>
+    <a href="{% url 'blog' %}?category=news"><i class="bi bi-newspaper"></i> News</a>
+    <a href="{% url 'blog' %}?category=guide"><i class="bi bi-book"></i> Guides</a>
+</div>
+
+<!-- More Links -->
+<div class="hdr-drawer-label">More Links</div>
+<div class="hdr-drawer-section">
+    <a href="{% url 'about' %}" class="hdr-drawer-hl"><i class="bi bi-info-circle"></i> About Us</a>
+    <a href="{% url 'Contact_Us' %}"><i class="bi bi-envelope"></i> Contact Us</a>
+</div>
+
+        <!-- Account -->
+        {% if user_obj %}
+        <div class="hdr-drawer-label">Account</div>
+        <div class="hdr-drawer-section">
+            <a href="{% url 'Wishlist_Property' %}"><i class="bi bi-heart"></i> Wishlist</a>
+            <a href="#" onclick="User_Logout(); return false;"><i class="bi bi-door-closed"></i> Logout ({{ user_obj.user_name }})</a>
+        </div>
+        {% endif %}
 
     </div>
 
-    </header>
+
+</header>
 <div id="phHeaderSpacer"></div>
 
-<!-- Mobile-only "List Your Property FREE" strip, sits right under the
-     header on every page, matching the app-style mobile demo. -->
-<div class="ef-mobile-post-strip">
-    <a href="{% url 'post_property' %}"><span><i class="bi bi-house-add-fill"></i> List Your Property</span><strong>FREE</strong></a>
-</div>
-
 {% if breadcrumbs %}
-
-
 <div class="ef-breadcrumb-bar">
     <div class="ef-breadcrumb-inner">
         <a href="{% url 'index' %}"><i class="bi bi-house-door-fill"></i> Home</a>
@@ -1213,21 +1331,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 {% endif %}
 
-
-<a class="ef-wa-fab" href="https://wa.me/9175791501?text={{ 'Hi Kanishka Imperia, I would like to know more about your properties.'|urlencode }}" target="_blank" rel="noopener" aria-label="Chat with Kanishka Imperia on WhatsApp">
-    <i class="bi bi-whatsapp"></i>
-</a>
-
-<!-- =========================================================
-     AI CHATBOT LAUNCHER BUTTON + PANEL
-     Sits outside <header> so it stays fixed to the viewport
-     on every page that includes this partial.
-========================================================= -->
-<button class="ef-chat-fab" id="efChatFab" onclick="toggleEfChat()" aria-label="Open KANISHKAIMPERIA AI Assistant">
-    <i class="bi bi-chat-dots-fill"></i>
-    <span class="ef-chat-dot"></span>
-</button>
-
+<!-- AI CHAT WINDOW (opened from the "Need help?" popup below) -->
 <div class="ef-chat-panel" id="efChatPanel">
     <div class="ef-chat-head">
         <div>
@@ -1243,28 +1347,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
-<!-- =========================================================
-     MOBILE BOTTOM APP NAV — Home / Search / Post Property FREE /
-     Saved / Menu. Fixed, site-wide, phones only.
-========================================================= -->
+<!-- MOBILE BOTTOM APP NAV -->
 <nav class="ef-bottom-nav">
     <a href="{% url 'index' %}" class="{% if request.path == '/' %}active{% endif %}"><i class="bi bi-house-door-fill"></i>Home</a>
     <a href="/listingpage/"><i class="bi bi-search"></i>Search</a>
-    <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'post_property' %}{% endif %}" class="ef-bn-sell"><i class="bi bi-plus-circle-fill"></i>Post Property</a>
+    <a href="{% if header_settings.primary_btn_url %}{{ header_settings.primary_btn_url }}{% else %}{% url 'Coming_Soon' %}{% endif %}" class="ef-bn-sell"><i class="bi bi-plus-circle-fill"></i>Post Property</a>
     <a href="{% if user_obj %}{% url 'Wishlist_Property' %}{% else %}{% url 'login' %}{% endif %}"><i class="bi bi-heart"></i>Saved</a>
     <button onclick="toggleHdrMenu(event)"><i class="bi bi-list"></i>Menu</button>
 </nav>
 
 <script>
-// Mobile Menu Script
-
 function toggleHdrMenu(e) {
     e.preventDefault();
     e.stopPropagation();
     document.getElementById("hdrMobileMenu").classList.toggle("show");
     document.getElementById("hdrMobileOverlay").classList.toggle("show");
 
-    // Close profile menu if it is currently open
     const profileMenu = document.getElementById("profileMenu");
     if(profileMenu) {
         profileMenu.classList.remove("show");
@@ -1272,25 +1370,22 @@ function toggleHdrMenu(e) {
         if (profileOverlay) profileOverlay.classList.remove("show");
     }
 }
-//  Profile Dropdown Script
+
 function toggleProfileMenu(e) {
     e.preventDefault();
     e.stopPropagation();
     document.getElementById("profileMenu").classList.toggle("show");
     document.getElementById("profileOverlay").classList.toggle("show");
 
-    // Close mobile menu if it is currently open
     const mobileMenu = document.getElementById("hdrMobileMenu");
     if(mobileMenu) mobileMenu.classList.remove("show");
 }
-//  Close menus when clicking outside
+
 document.addEventListener('click', function(e) {
     const mobileMenu = document.getElementById('hdrMobileMenu');
     const profileMenu = document.getElementById('profileMenu');
-    const profileBtn = document.getElementById('loginDropdown');
     const mobileBtn = document.querySelector('.mobile-menu-btn');
 
-    // Handle mobile menu close
     if (mobileMenu && mobileMenu.classList.contains('show')) {
         if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
             mobileMenu.classList.remove('show');
@@ -1300,10 +1395,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-
-// Header background change on scroll (like housing.com)
-
-// Header background change on scroll (like housing.com)
 (function() {
     const headerEl = document.querySelector('.premium-header');
     if (!headerEl) return;
@@ -1326,17 +1417,17 @@ document.addEventListener('click', function(e) {
     applyScrollState();
 })();
 
-// Reserve space below the fixed header so page content and the breadcrumb
-// bar are never hidden behind it. Skipped automatically on pages where the
-// hero section sits directly under the header, since it's meant to overlay it.
 (function() {
     const headerEl = document.querySelector('.premium-header');
     const spacer = document.getElementById('phHeaderSpacer');
     if (!headerEl || !spacer) return;
 
+    /* skip fixed-position and hidden siblings (floating buttons, bottom nav on desktop, scripts) */
     function getNextFlowSibling(el) {
         let sib = el.nextElementSibling;
-        while (sib && getComputedStyle(sib).position === 'fixed') {
+        while (sib) {
+            const cs = getComputedStyle(sib);
+            if (cs.position !== 'fixed' && cs.display !== 'none') break;
             sib = sib.nextElementSibling;
         }
         return sib;
@@ -1359,7 +1450,6 @@ document.addEventListener('click', function(e) {
     updateSpacer();
 })();
 
-// User Logout Script using SweetAlert2
 function User_Logout() {
     Swal.fire({
         title: "LOGOUT",
@@ -1413,231 +1503,9 @@ function User_Logout() {
 </script>
 
 <script>
-
-// STEP 1: CHECK EMAIL
-function checkEmailExists(_this) {
-    let email = $('#flow_email').val().trim();
-    if (!email) {
-        Swal.fire("Wait", "Please enter a valid email address.", "info");
-        return;
-    }
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
-
-    $.ajax({
-        type: "POST",
-        url: "{% url 'Check_Email_Api' %}",
-        data: { 'email': email },
-        success: function(response) {
-            $(_this).prop("disabled", false).html(btnText);
-
-            if(response.exists) {
-                // Email exists -> Go to Login
-                goToStep('step-2-login');
-            } else {
-                // Email is new -> Send OTP
-                sendOTP(email);
-            }
-        },
-        error: function() {
-            $(_this).prop("disabled", false).html(btnText);
-            Swal.fire("Error", "Server error. Try again.", "error");
-        }
-    });
-}
-
-// STEP 2A: LOGIN
-function processProgLogin(_this) {
-    let email = $('#flow_email').val();
-    let password = $('#flow_password').val();
-
-    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
-
-    $.ajax({
-        type: "POST",
-        url: "{% url 'Prop_Login_Api' %}",
-        data: {
-            'email': email,
-            'password': password,
-        },
-        success: function(response) {
-            if(response.status == '1') {
-                $('#authModal').modal('hide');
-                Swal.fire("Success", "Logged in successfully!", "success").then(() => {
-                    location.reload();
-                });
-            } else {
-                $(_this).prop("disabled", false).html(btnText);
-                Swal.fire("Error", response.msg || "Incorrect password", "error");
-            }
-        },
-        error: function() {
-            $(_this).prop("disabled", false).html(btnText);
-            Swal.fire("Error", "Login request failed.", "error");
-        }
-    });
-}
-
-// STEP 2B: SEND & VERIFY OTP
-function sendOTP(email) {
-    $('#display_otp_email').text(email);
-    goToStep('step-2-otp');
-
-    $.ajax({
-        type: "POST",
-        url: "{% url 'Send_Otp_Api' %}",
-        data: { 'email': email}
-    });
-}
-
-function verifyOTP(_this) {
-    let otp = "";
-    $('.otp-input').each(function() { otp += $(this).val(); });
-
-    if(otp.length < 4) return Swal.fire("Wait", "Please enter the full 4-digit OTP.", "info");
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
-
-    $.ajax({
-        type: "POST",
-        url: "{% url 'Verify_Otp_Api' %}",
-        data: {
-            'email': $('#flow_email').val(),
-            'otp': otp,
-        },
-        success: function(response) {
-            $(_this).prop("disabled", false).html(btnText);
-            if(response.valid) {
-                goToStep('step-3-details');
-            } else {
-                Swal.fire("Error", "Invalid OTP. Try again.", "error");
-            }
-        },
-        error: function() {
-            $(_this).prop("disabled", false).html(btnText);
-            Swal.fire("Error", "Verification failed.", "error");
-        }
-    });
-}
-
-// STEP 3: FINAL REGISTRATION
-function processProgRegistration(_this) {
-    let email = $('#flow_email').val();
-    let name = $('#flow_reg_name').val();
-    let mobile = $('#flow_reg_mobile').val();
-    let role = $('#flow_reg_role').val();
-
-    if(!name || !mobile || role === "SelectRole") {
-        return Swal.fire("Wait", "Please fill in all details.", "info");
-    }
-
-    let btnText = _this.innerHTML;
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
-
-    $.ajax({
-        type: "POST",
-        url: "{% url 'Prop_Register_Api' %}",
-        data: {
-            'email': email,
-            'name': name,
-            'mobile': mobile,
-            'role': role,
-        },
-        success: function(response) {
-            if(response.status == '1') {
-                $('#authModal').modal('hide');
-                Swal.fire("Success", "Account created and logged in!", "success").then(() => {
-                    location.reload();
-                });
-            } else {
-                $(_this).prop("disabled", false).html(btnText);
-                Swal.fire("Error", response.msg || "Registration failed.", "error");
-            }
-        },
-        error: function() {
-            $(_this).prop("disabled", false).html(btnText);
-            Swal.fire("Error", "Registration request failed.", "error");
-        }
-    });
-}
-
-
-// Ajax and Jquery function for wislist properties
-
-function Add_Wishlist(propertyId, category,listingtype,user, btnElement) {
-    // 1. Check if the heart icon is already filled
-    let icon = btnElement.querySelector('i');
-    let isAlreadySaved = icon.classList.contains('bi-heart-fill');
-
-    console.log("------------------",category)
-    console.log("------------------",listingtype)
-
-    // 2. Setup the dynamic alert text
-    let alertTitle = isAlreadySaved ? 'Remove from Wishlist?' : 'Wishlist this Property?';
-    let alertText = isAlreadySaved
-        ? "Do you want to remove this property from your saved list?"
-        : "Do you want to save this property to view it later?";
-    let confirmBtnText = isAlreadySaved ? 'Yes, remove it' : 'Yes, save it!';
-
-    // 3. Trigger the SweetAlert Modal
-    Swal.fire({
-        title: alertTitle,
-        text: alertText,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#c9a227',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: confirmBtnText,
-        cancelButtonText: 'Cancel',
-        background: '#fff',
-        color: '#0b1730',
-        borderRadius: '16px'
-    }).then((result) => {
-
-        // 4. If the user clicks "Yes"
-        if (result.isConfirmed) {
-
-            // --- PUT YOUR AJAX CALL HERE ---
-
-            $.ajax({
-                type: "POST",
-                url: "{% url 'Wishlist_Ajax' %}",
-                data: { 'property_id': propertyId, 'category': category,'listing_type':listingtype,'user_id':user },
-                success: function(response) {
-
-
-                    // Toggle the visual heart icon immediately
-                    if (isAlreadySaved) {
-                        icon.classList.remove('bi-heart-fill');
-                        icon.classList.add('bi-heart');
-                        Swal.fire({icon: 'info', title: 'Removed', text: 'Property removed from wishlist.', timer: 1500, showConfirmButton: false});
-                    } else {
-                        icon.classList.remove('bi-heart');
-                        icon.classList.add('bi-heart-fill');
-                        Swal.fire({icon: 'success', title: 'Saved!', text: 'Property added to your wishlist.', timer: 1500, showConfirmButton: false});
-                    }
-
-            } // End of AJAX success
-            });
-        }
-    });
-}
-
-</script>
-
-
-
-<script>
-const EF_BACKEND_READY = true;                                   // <-- now real
+const EF_BACKEND_READY = true;
 const EF_CHAT_ENDPOINT = "{% url 'chatbot_query_api' %}";
 
-// Persistent per-browser session id so the lead/requirement accumulates
-// across page loads instead of resetting every time the widget opens.
 function efGetSessionId(){
     let sid = localStorage.getItem('ef_chat_session_id');
     if(!sid){
@@ -1737,8 +1605,6 @@ function efSendToBackend(message){
         },
         success: function(response){
             efHideTyping();
-            // response shape from chatbot_views.chatbot_query_api:
-            // { reply, options, intent, lead_id, lead_score, lead_classification, risk, next_best_action, results? }
             efBotSay(response.reply, response.options || []);
         },
         error: function(){
@@ -1748,7 +1614,6 @@ function efSendToBackend(message){
         }
     });
 }
-
 
 document.addEventListener("DOMContentLoaded", function() {
     const rawText = "{{ header_settings.primary_btn_text|default:'Post Property FREE' }}";
@@ -1763,3 +1628,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 </script>
+
+{# "Need help?" popup (AI chat / WhatsApp / Call / Site visit / RM callback) - shown on EVERY page that includes this header #}
+{% include 'home_page/floating_help.html' %}

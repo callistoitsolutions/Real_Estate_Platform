@@ -14,6 +14,79 @@
         margin-right: 4px;
         vertical-align: middle;
     }
+
+    /* ===== Alerts strip ===== */
+    .section-head { display:flex; align-items:center; justify-content:space-between; margin: 6px 0 14px; }
+    .section-head h3 { font-size:1.05rem; font-weight:700; color:#1e293b; margin:0; display:flex; align-items:center; gap:8px; }
+    .section-head h3 i { color:#667eea; }
+    .section-head .hint { font-size:.78rem; color:#64748b; }
+
+    .attention-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-bottom:26px; }
+    .attn-card {
+        display:flex; align-items:center; gap:14px; padding:16px 18px; background:#fff; border-radius:16px;
+        text-decoration:none; color:inherit; border:1px solid #eef2f7; position:relative; overflow:hidden;
+        box-shadow:0 4px 14px rgba(30,41,59,.06); transition:transform .2s, box-shadow .2s; cursor:pointer; text-align:left; font-family:inherit;
+    }
+    .attn-card:hover { transform:translateY(-3px); box-shadow:0 10px 26px rgba(30,41,59,.12); color:inherit; }
+    .attn-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent,#94a3b8); }
+    .attn-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#fff; background:var(--accent,#94a3b8); flex-shrink:0; }
+    .attn-body { flex:1; min-width:0; }
+    .attn-count { font-size:1.6rem; font-weight:700; line-height:1.1; color:#1e293b; }
+    .attn-label { font-size:.78rem; color:#64748b; margin-top:2px; }
+    .attn-cta { font-size:.75rem; font-weight:600; color:var(--accent,#64748b); white-space:nowrap; }
+    .attn-card.is-active .attn-icon { animation:attnPulse 1.8s infinite; }
+    @keyframes attnPulse { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.45);} 70%{box-shadow:0 0 0 12px rgba(239,68,68,0);} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0);} }
+    .attn-card.a-danger { --accent:#ef4444; } .attn-card.a-warn { --accent:#f59e0b; }
+    .attn-card.a-info { --accent:#3b82f6; }   .attn-card.a-ok { --accent:#10b981; }
+    .attn-card.a-clear .attn-icon { animation:none; }
+
+    /* ===== Quick actions ===== */
+    .qa-panel { background:#fff; border-radius:20px; padding:22px; margin-bottom:26px; box-shadow:0 4px 18px rgba(30,41,59,.06); border:1px solid #eef2f7; }
+    .qa-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+    .qa-search { position:relative; flex:0 1 280px; min-width:200px; }
+    .qa-search i { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.85rem; }
+    .qa-search input { width:100%; border:1px solid #e2e8f0; border-radius:12px; padding:9px 12px 9px 36px; font:400 .85rem 'Poppins',sans-serif; outline:none; background:#f8fafc; }
+    .qa-search input:focus { border-color:#667eea; background:#fff; box-shadow:0 0 0 3px rgba(102,126,234,.15); }
+    .qa-chips { display:flex; gap:8px; overflow-x:auto; flex:1; padding-bottom:2px; scrollbar-width:none; }
+    .qa-chips::-webkit-scrollbar { display:none; }
+    .qa-chip { border:1px solid #e2e8f0; background:#fff; color:#475569; border-radius:999px; padding:7px 16px; font:500 .78rem 'Poppins',sans-serif; white-space:nowrap; cursor:pointer; transition:all .2s; }
+    .qa-chip:hover { border-color:#667eea; color:#667eea; }
+    .qa-chip.active { background:var(--primary-gradient); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(102,126,234,.35); }
+
+    .qa-group { margin-bottom:18px; }
+    .qa-group:last-of-type { margin-bottom:0; }
+    .qa-group-title { font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#94a3b8; margin:0 0 10px; display:flex; align-items:center; gap:8px; }
+    .qa-group-title::after { content:''; flex:1; height:1px; background:#f1f5f9; }
+    .qa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+    .qa-tile {
+        display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; text-decoration:none;
+        background:#f8fafc; border:1px solid #eef2f7; color:#1e293b; font-size:.8rem; font-weight:500;
+        transition:all .18s; position:relative; line-height:1.25;
+    }
+    .qa-tile:hover { background:#fff; border-color:#c7d2fe; transform:translateY(-2px); box-shadow:0 6px 16px rgba(102,126,234,.15); color:#4f46e5; }
+    .qa-tile i.qa-ico { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.85rem; color:#fff; flex-shrink:0; background:var(--c,#667eea); }
+    .qa-tile .qa-badge { margin-left:auto; background:#ef4444; color:#fff; border-radius:9px; font-size:.65rem; font-weight:700; padding:2px 7px; }
+    .qa-tile.hidden-extra { display:none; }
+    .qa-tile.is-hidden, .qa-group.is-hidden { display:none !important; }
+    .qa-more { border:0; background:none; color:#667eea; font:600 .78rem 'Poppins',sans-serif; margin-top:8px; cursor:pointer; padding:4px 0; }
+    .qa-empty { display:none; text-align:center; color:#94a3b8; padding:24px 0; font-size:.88rem; }
+    .c-indigo{--c:#667eea}.c-green{--c:#10b981}.c-amber{--c:#f59e0b}.c-blue{--c:#3b82f6}.c-rose{--c:#f43f5e}.c-violet{--c:#8b5cf6}.c-teal{--c:#14b8a6}.c-slate{--c:#475569}
+
+    @media (max-width:768px) {
+        .attention-strip { display:flex; overflow-x:auto; gap:12px; margin:0 -12px 22px; padding:4px 12px 8px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+        .attention-strip::-webkit-scrollbar { display:none; }
+        .attn-card { flex:0 0 78%; scroll-snap-align:start; }
+        .qa-panel { padding:16px 14px; border-radius:18px; }
+        .qa-search { flex:1 1 100%; }
+        .qa-grid { grid-template-columns:repeat(4,1fr); gap:6px 4px; }
+        .qa-tile { flex-direction:column; text-align:center; gap:6px; padding:10px 2px; background:none; border:0; font-size:.66rem; font-weight:500; }
+        .qa-tile:hover { transform:none; box-shadow:none; background:none; }
+        .qa-tile:active { background:#f1f5f9; }
+        .qa-tile i.qa-ico { width:46px; height:46px; border-radius:15px; font-size:1.05rem; box-shadow:0 4px 10px rgba(0,0,0,.12); }
+        .qa-tile .qa-badge { position:absolute; top:4px; right:calc(50% - 30px); margin:0; border:2px solid #fff; }
+        .page-header .page-actions { display:none; }
+    }
+    @media (max-width:360px) { .qa-grid { grid-template-columns:repeat(3,1fr); } }
 </style>
 
         <div class="main-content">
@@ -32,9 +105,155 @@
                 </div>
             </div>
 
+
+            <!-- ===== Needs attention (alerts) ===== -->
+            <div class="section-head">
+                <h3><i class="fas fa-bell"></i> Needs Your Attention</h3>
+                <span class="hint">Tap a card to jump straight in</span>
+            </div>
+            <div class="attention-strip">
+                <a href="{% url 'Listing_Approval_Admin' %}" class="attn-card a-danger {% if total_count %}is-active{% else %}a-clear{% endif %}">
+                    <div class="attn-icon"><i class="fas fa-archive"></i></div>
+                    <div class="attn-body"><div class="attn-count">{{ total_count|default:0 }}</div><div class="attn-label">Listings awaiting approval</div></div>
+                    <span class="attn-cta">Review <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{% url 'Payment_Approval_Admin' %}" class="attn-card a-warn {% if total_pending_count %}is-active{% else %}a-clear{% endif %}">
+                    <div class="attn-icon"><i class="fas fa-money-bill"></i></div>
+                    <div class="attn-body"><div class="attn-count">{{ total_pending_count|default:0 }}</div><div class="attn-label">Payments pending approval</div></div>
+                    <span class="attn-cta">Review <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <button type="button" class="attn-card a-info" onclick="toggleNotification(event)">
+                    <div class="attn-icon"><i class="fas fa-bell"></i></div>
+                    <div class="attn-body"><div class="attn-count" id="attnNotifCount">0</div><div class="attn-label">New notifications today</div></div>
+                    <span class="attn-cta">Open <i class="fas fa-arrow-right"></i></span>
+                </button>
+                <a href="{% url 'Contact_Enquiries_List' %}" class="attn-card a-ok">
+                    <div class="attn-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="attn-body"><div class="attn-count"><i class="fas fa-inbox" style="font-size:1.25rem;"></i></div><div class="attn-label">Contact page enquiries</div></div>
+                    <span class="attn-cta">View <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+
+            <!-- ===== Quick actions ===== -->
+            <div class="section-head">
+                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <span class="hint d-none d-md-inline">Every menu item, one click away</span>
+            </div>
+            <div class="qa-panel">
+                <div class="qa-toolbar">
+                    <div class="qa-search"><i class="fas fa-search"></i><input type="search" id="qaSearch" placeholder="Find an action..." autocomplete="off"></div>
+                    <div class="qa-chips" id="qaChips"><button class="qa-chip active" data-filter="all">All</button><button class="qa-chip" data-filter="approvals">Approvals</button><button class="qa-chip" data-filter="subscriptions">Subscriptions</button><button class="qa-chip" data-filter="rentals">Rentals</button><button class="qa-chip" data-filter="resale">Resale</button><button class="qa-chip" data-filter="people">People</button><button class="qa-chip" data-filter="setup">Setup</button><button class="qa-chip" data-filter="website">Website</button><button class="qa-chip" data-filter="system">System</button></div>
+                </div>
+            <div class="qa-group" data-group="approvals">
+                <div class="qa-group-title">Approvals &amp; Payments</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'Listing_Approval_Admin' %}" ><i class="fas fa-archive qa-ico c-rose"></i><span>Listing Approval</span>{% if total_count %}<span class="qa-badge">{{ total_count }}</span>{% endif %}</a>
+                    <a class="qa-tile" href="{% url 'Payment_Approval_Admin' %}" ><i class="fas fa-money-bill qa-ico c-amber"></i><span>Payment Approval</span>{% if total_pending_count %}<span class="qa-badge">{{ total_pending_count }}</span>{% endif %}</a>
+                    <a class="qa-tile" href="{% url 'Payments_List_Admin' %}" ><i class="fas fa-coins qa-ico c-green"></i><span>Payments List</span></a>
+                    <a class="qa-tile" href="{% url 'Contact_Enquiries_List' %}" ><i class="fas fa-envelope qa-ico c-blue"></i><span>Contact Enquiries</span></a>
+                </div>
+            </div>
+            
+            <div class="qa-group" data-group="subscriptions">
+                <div class="qa-group-title">Subscriptions</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'Subscriptions_Packages_List' %}" ><i class="fas fa-box-open qa-ico c-violet"></i><span>Packages</span></a>
+                    <a class="qa-tile" href="{% url 'Subscriptions_Plans_List' %}" ><i class="fas fa-layer-group qa-ico c-indigo"></i><span>Plan Type</span></a>
+                    <a class="qa-tile" href="{% url 'Subscriptions_List' %}" ><i class="fas fa-money-bill-wave qa-ico c-green"></i><span>Subscriptions</span></a>
+                </div>
+            </div>
+
+            <div class="qa-group" data-group="rentals">
+                <div class="qa-group-title">Listed Rental Properties</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'residential_list' %}" ><i class="fas fa-house-user qa-ico c-indigo"></i><span>Residential</span></a>
+                    <a class="qa-tile" href="{% url 'rental_reports' %}" ><i class="fas fa-file-lines qa-ico c-slate"></i><span>Residential Reports</span></a>
+                    <a class="qa-tile" href="{% url 'commercial_list' %}" ><i class="fas fa-shop qa-ico c-amber"></i><span>Commercial</span></a>
+                    <a class="qa-tile" href="{% url 'commercial_reports' %}" ><i class="fas fa-file-invoice qa-ico c-slate"></i><span>Commercial Reports</span></a>
+                    <a class="qa-tile" href="{% url 'pg_list' %}" ><i class="fas fa-bed qa-ico c-blue"></i><span>PG / Co-living</span></a>
+                </div>
+            </div>
+
+            <div class="qa-group" data-group="resale">
+                <div class="qa-group-title">Listed Resale Properties</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'residential_resale_list' %}" ><i class="fas fa-house qa-ico c-indigo"></i><span>Residential Resale</span></a>
+                    <a class="qa-tile" href="{% url 'commercial_resale_list' %}" ><i class="fas fa-building qa-ico c-amber"></i><span>Commercial Resale</span></a>
+                    <a class="qa-tile" href="{% url 'industrial_resale_list' %}" ><i class="fas fa-industry qa-ico c-slate"></i><span>Industrial Resale</span></a>
+                    <a class="qa-tile" href="{% url 'agricultural_resale_list' %}" ><i class="fas fa-seedling qa-ico c-green"></i><span>Agricultural Resale</span></a>
+                    <a class="qa-tile" href="{% url 'residential_plot_resale_list' %}" ><i class="fas fa-map-location-dot qa-ico c-indigo"></i><span>Residential Plot</span></a>
+                    <a class="qa-tile" href="{% url 'commercial_plot_resale_list' %}" ><i class="fas fa-map-location-dot qa-ico c-amber"></i><span>Commercial Plot</span></a>
+                    <a class="qa-tile" href="{% url 'industrial_plot_resale_list' %}" ><i class="fas fa-map-location-dot qa-ico c-slate"></i><span>Industrial Plot</span></a>
+                    <a class="qa-tile" href="{% url 'agricultural_plot_resale_list' %}" ><i class="fas fa-map-location-dot qa-ico c-green"></i><span>Agricultural Plot</span></a>
+                </div>
+            </div>
+
+            <div class="qa-group" data-group="people">
+                <div class="qa-group-title">Teams &amp; People</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'rm_list' %}" ><i class="fas fa-user-tie qa-ico c-indigo"></i><span>Relationship Managers</span></a>
+                    <a class="qa-tile" href="{% url 'Landlord_List' %}" ><i class="fas fa-key qa-ico c-amber"></i><span>Landlords</span></a>
+                    <a class="qa-tile" href="{% url 'Tenant_List' %}" ><i class="fas fa-user-check qa-ico c-green"></i><span>Tenants</span></a>
+                    <a class="qa-tile" href="{% url 'Buyer_List' %}" ><i class="fas fa-cart-shopping qa-ico c-rose"></i><span>Buyers</span></a>
+                    <a class="qa-tile" href="{% url 'Agent_List' %}" ><i class="fas fa-handshake qa-ico c-blue"></i><span>Agents</span></a>
+                    <a class="qa-tile" href="{% url 'Agency_List' %}" ><i class="fas fa-city qa-ico c-violet"></i><span>Agencies / Builders</span></a>
+                    <a class="qa-tile" href="{% url 'Vendor_List' %}" ><i class="fas fa-truck-fast qa-ico c-teal"></i><span>Vendors</span></a>
+                </div>
+            </div>
+
+            <div class="qa-group" data-group="setup">
+                <div class="qa-group-title">Listing Setup</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'Ameneties_List' %}" ><i class="fas fa-drafting-compass qa-ico c-indigo"></i><span>Amenities</span></a>
+                    <a class="qa-tile" href="{% url 'Facilities_List' %}" ><i class="fas fa-location-dot qa-ico c-rose"></i><span>Nearby Facilities</span></a>
+                    <a class="qa-tile" href="{% url 'Services_List' %}" ><i class="fas fa-gear qa-ico c-slate"></i><span>Services (Vendors)</span></a>
+                    <a class="qa-tile" href="{% url 'Faqs_List' %}" ><i class="fas fa-circle-question qa-ico c-blue"></i><span>FAQ</span></a>
+                </div>
+            </div>
+
+            <div class="qa-group" data-group="website">
+                <div class="qa-group-title">Website &amp; SEO</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'seo_list' %}" ><i class="fas fa-magnifying-glass-chart qa-ico c-green"></i><span>SEO Landing Pages</span></a>
+                    <a class="qa-tile" href="{% url 'blog_list' %}" ><i class="fas fa-blog qa-ico c-indigo"></i><span>Blog Reports</span></a>
+                    <a class="qa-tile" href="{% url 'services_list' %}" ><i class="fas fa-screwdriver-wrench qa-ico c-slate"></i><span>Services Reports</span></a>
+                    <a class="qa-tile" href="{% url 'hero_section_list' %}" ><i class="fas fa-image qa-ico c-violet"></i><span>Hero Section</span></a>
+                    <a class="qa-tile" href="{% url 'header_settings' %}" ><i class="fas fa-window-maximize qa-ico c-blue"></i><span>Header Section</span></a>
+                    <a class="qa-tile" href="{% url 'add_property_category' %}" ><i class="fas fa-tags qa-ico c-amber"></i><span>Add Property Category</span></a>
+                    <a class="qa-tile" href="{% url 'add_trust_highlight' %}" ><i class="fas fa-shield-halved qa-ico c-green"></i><span>Add Trust Highlight</span></a>
+                    <a class="qa-tile" href="{% url 'update_why_section' %}" ><i class="fas fa-lightbulb qa-ico c-amber"></i><span>Update Why Section</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_stat_highlight' %}" ><i class="fas fa-chart-simple qa-ico c-blue"></i><span>Add Stat Highlight</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_value_proposition' %}" ><i class="fas fa-gem qa-ico c-violet"></i><span>Add Value Proposition</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_how_it_works' %}" ><i class="fas fa-list-ol qa-ico c-indigo"></i><span>Add How It Works</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_info_banner' %}" ><i class="fas fa-bullhorn qa-ico c-rose"></i><span>Add Info Banner</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_service_highlight' %}" ><i class="fas fa-star qa-ico c-amber"></i><span>Add Service Highlight</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_services_banner_card' %}" ><i class="fas fa-rectangle-list qa-ico c-blue"></i><span>Add Banner Card</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_services_banner_bullet' %}" ><i class="fas fa-list qa-ico c-slate"></i><span>Add Banner Bullet</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_service_detail_faq' %}" ><i class="fas fa-comments qa-ico c-teal"></i><span>Add Service FAQ</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_service_sidebar_quicklink' %}" ><i class="fas fa-link qa-ico c-indigo"></i><span>Add Quick Link</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_service_benefit' %}" ><i class="fas fa-thumbs-up qa-ico c-green"></i><span>Add Service Benefit</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_service_process_step' %}" ><i class="fas fa-shoe-prints qa-ico c-violet"></i><span>Add Process Step</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_category_pill' %}" ><i class="fas fa-pills qa-ico c-rose"></i><span>Add Category Pill</span></a>
+                    <a class="qa-tile hidden-extra" href="{% url 'add_guide_card' %}" ><i class="fas fa-book-open qa-ico c-blue"></i><span>Add Guide Card</span></a>
+                </div>
+                <button type="button" class="qa-more" onclick="toggleQaMore(this)">Show all 21 <i class="fas fa-chevron-down"></i></button>
+            </div>
+            <div class="qa-group" data-group="system">
+                <div class="qa-group-title">Analytics &amp; System</div>
+                <div class="qa-grid">
+                    <a class="qa-tile" href="{% url 'property_analytics' %}" ><i class="fas fa-chart-line qa-ico c-indigo"></i><span>Property Analytics</span></a>
+                    <a class="qa-tile" href="{% url 'global_recycle_bin' %}" ><i class="fas fa-trash-restore qa-ico c-rose"></i><span>Deleted Properties</span></a>
+                    <a class="qa-tile" href="{% url 'system_audit_logs' %}" ><i class="fas fa-clipboard-list qa-ico c-slate"></i><span>Audit Logs</span></a>
+                    <a class="qa-tile" href="{% url 'Update_Profile_Admin' %}" ><i class="fas fa-user-gear qa-ico c-blue"></i><span>My Profile</span></a>
+                    <a class="qa-tile" href="{% url 'crm_dashboard' %}" target="_blank" rel="noopener"><i class="fas fa-paper-plane qa-ico c-teal"></i><span>CRM Dashboard</span></a>
+                </div>
+            </div>
+                <div class="qa-empty" id="qaEmpty"><i class="fas fa-magnifying-glass"></i> No matching actions</div>
+            </div>
+
             <div class="row">
 
-                        <div class="col-4">
+                        {% comment %} <div class="col-4">
 
                             <div class="stat-card info">
                                 <div class="stat-icon info">
@@ -46,10 +265,10 @@
                                     <i class="fas fa-circle live-dot"></i> Active Now
                                 </span>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
 
 
-                        <div class="col-4">
+                        {% comment %} <div class="col-4">
 
                             <div class="stat-card warning">
                                 <div class="stat-icon warning">
@@ -61,9 +280,9 @@
                                     <i class="fas fa-circle live-dot"></i> Active Now
                                 </span>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
 
-                        <div class="col-4">
+                        {% comment %} <div class="col-4">
 
                             <div class="stat-card primary">
                                 <div class="stat-icon primary">
@@ -75,7 +294,7 @@
                                     <i class="fas fa-circle live-dot"></i> Active Now
                                 </span>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
 
                     
 
@@ -111,7 +330,7 @@
 
             <br>
 
-            <div class="stats-grid">
+            {% comment %} <div class="stats-grid">
 
 
                 <div class="stat-card primary">
@@ -493,7 +712,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> {% endcomment %}
 
         </div>
     </div>
@@ -505,15 +724,14 @@
         $("#Admin_Dashboard").addClass("active");
 
         // Sidebar Toggle for Desktop and Mobile
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const windowWidth = window.innerWidth;
 
             if (windowWidth <= 768) {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+                openMobileMenu();
             } else {
                 sidebar.classList.toggle('collapsed');
             }
@@ -826,6 +1044,66 @@
                 document.body.style.overflow = 'hidden';
             }
         });
+
+
+        // ===== Quick actions: filter chips + search + show more =====
+        (function () {
+            const groups = document.querySelectorAll('.qa-group');
+            const search = document.getElementById('qaSearch');
+            const empty  = document.getElementById('qaEmpty');
+            let activeFilter = 'all';
+
+            function apply() {
+                const q = (search.value || '').trim().toLowerCase();
+                const expandAll = q.length > 0 || activeFilter !== 'all';
+                let shown = 0;
+                groups.forEach(g => {
+                    const inFilter = activeFilter === 'all' || g.dataset.group === activeFilter;
+                    let vis = 0;
+                    g.querySelectorAll('.qa-tile').forEach(t => {
+                        const match = !q || t.textContent.toLowerCase().includes(q);
+                        t.classList.toggle('is-hidden', !match);
+                        if (match) vis++;
+                        if (expandAll) t.classList.remove('hidden-extra');
+                        else if (t.dataset.extra === '1' && !g.classList.contains('expanded')) t.classList.add('hidden-extra');
+                    });
+                    const more = g.querySelector('.qa-more');
+                    if (more) more.style.display = expandAll ? 'none' : '';
+                    const show = inFilter && vis > 0;
+                    g.classList.toggle('is-hidden', !show);
+                    if (show) shown += vis;
+                });
+                empty.style.display = shown ? 'none' : 'block';
+            }
+
+            document.querySelectorAll('.qa-tile.hidden-extra').forEach(t => t.dataset.extra = '1');
+
+            document.getElementById('qaChips').addEventListener('click', e => {
+                const chip = e.target.closest('.qa-chip'); if (!chip) return;
+                document.querySelectorAll('.qa-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                activeFilter = chip.dataset.filter;
+                apply();
+            });
+            search.addEventListener('input', apply);
+
+            window.toggleQaMore = function (btn) {
+                const g = btn.closest('.qa-group');
+                const open = g.classList.toggle('expanded');
+                g.querySelectorAll('.qa-tile[data-extra="1"]').forEach(t => t.classList.toggle('hidden-extra', !open));
+                btn.innerHTML = open ? 'Show less <i class="fas fa-chevron-up"></i>'
+                                     : 'Show all ' + g.querySelectorAll('.qa-tile').length + ' <i class="fas fa-chevron-down"></i>';
+            };
+
+            // Mirror the topbar notification count into the alert card
+            const src = document.getElementById('notificationCount');
+            const card = document.getElementById('attnNotifCount');
+            if (src && card) {
+                const sync = () => { card.textContent = src.style.display === 'none' ? '0' : (src.textContent || '0'); };
+                sync();
+                new MutationObserver(sync).observe(src, { childList: true, characterData: true, subtree: true, attributes: true });
+            }
+        })();
 
         // ==========================================
         // 🟢 REAL LIVE TRAFFIC FETCH (AJAX)

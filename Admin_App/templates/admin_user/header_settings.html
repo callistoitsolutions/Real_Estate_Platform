@@ -256,6 +256,23 @@
                         </div>
                     </div>
 
+                    <div class="col-md-6" style="margin-top:5px;">
+                        <label class="admin-form-label">Favicon Logo</label>
+                        <input type="file" name="logo_favicon" class="admin-form-control" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                        <small class="text-muted">Recommended: PNG/WebP with transparent background.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="admin-form-label">Current Favicon Preview</label>
+                        <div class="logo-preview" id="faviconPreviewBox">
+                            {% if settings.logo_favicon %}
+                                <img src="{{ settings.logo_favicon.url }}" alt="{{ settings.logo_alt }}" id="faviconPreview">
+                            {% else %}
+                                <span class="text-muted">No custom Favicon uploaded</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <label class="admin-form-label">Logo Alt Text</label>
                         <input type="text" name="logo_alt" class="admin-form-control" value="{{ settings.logo_alt }}" placeholder="Kanishka Imperia Logo">
@@ -523,6 +540,27 @@ if (logoInput) {
             if (!preview) {
                 preview = document.createElement("img");
                 preview.id = "logoPreview";
+                previewBox.innerHTML = "";
+                previewBox.appendChild(preview);
+            }
+            preview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+const faviconInput = document.querySelector('input[name="logo_favicon"]');
+if (faviconInput) {
+    faviconInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            let preview = document.getElementById("faviconPreview");
+            const previewBox = document.getElementById("faviconPreviewBox");
+            if (!preview) {
+                preview = document.createElement("img");
+                preview.id = "faviconPreview";
                 previewBox.innerHTML = "";
                 previewBox.appendChild(preview);
             }

@@ -2,19 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
 <title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }} | KANISHKAIMPERIA{% endif %}</title>
 <meta name="description" content="{% if seo %}{{ seo.meta_description }}{% else %}{{ p.property_summary|default:p.title|striptags|truncatewords:30 }}{% endif %}">
+
+{# ==================== ROBOTS ==================== #}
 {% if seo.noindex %}
 <meta name="robots" content="noindex,nofollow">
 {% else %}
-<meta name="robots" content="index,follow">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 {% endif %}
-<link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+{# ==================== CANONICAL (self-referencing, no query params) ==================== #}
+{% if seo.canonical_url %}
+<link rel="canonical" href="{{ seo.canonical_url }}">
+{% else %}
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+{% endif %}
+
+{# ==================== OPEN GRAPH / TWITTER ==================== #}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KANISHKAIMPERIA">
+<meta property="og:title" content="{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }}{% endif %}">
+<meta property="og:description" content="{% if seo %}{{ seo.meta_description }}{% else %}{{ p.property_summary|default:p.title|striptags|truncatewords:30 }}{% endif %}">
+<meta property="og:url" content="{% if seo.canonical_url %}{{ seo.canonical_url }}{% else %}{{ request.build_absolute_uri }}{% endif %}">
+{% if property_images %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ property_images.0.image.url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }}{% endif %}">
+<meta name="twitter:description" content="{% if seo %}{{ seo.meta_description }}{% else %}{{ p.property_summary|default:p.title|striptags|truncatewords:30 }}{% endif %}">
+<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ property_images.0.image.url }}">
+{% endif %}
 
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -45,7 +70,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-tml{max-width:100%;}
+html{max-width:100%;}
 body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; background: var(--bg-page); color: var(--text-main); line-height: 1.5;max-width:100%;overflow-x:hidden; }
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; }
@@ -93,6 +118,7 @@ button { font-family: inherit; }
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   width: 260px;
+  max-width: calc(100vw - 32px);
   padding: 16px;
 }
 .share-popover.open { display: block; }
@@ -123,22 +149,43 @@ button { font-family: inherit; }
   justify-content: center;
 }
 
-/* ── MODERN GALLERY GRID ── */
+/* ── MODERN GALLERY GRID (Fully Responsive) ── */
 .gallery-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  grid-template-rows: 215px 215px;
+  grid-template-rows: 1fr 1fr;
   gap: 12px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  aspect-ratio: 16 / 8.2;
+  max-height: 520px;
+  width: 100%;
 }
-.gallery-item { position: relative; overflow: hidden; background: #e2e8f0; cursor: pointer; }
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  background: #e2e8f0;
+  cursor: pointer;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
 .gallery-item img, .gallery-item video {
-  width: 100%; height: 100%; object-fit: cover; display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  aspect-ratio: 16 / 9;
   transition: transform .5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .gallery-item:hover img, .gallery-item:hover video { transform: scale(1.035); }
+.gallery-item > div {
+  width: 100%;
+  height: 100%;
+}
 .gallery-item-main { grid-row: 1 / 3; }
 .more-badge {
   position: absolute;
@@ -166,10 +213,12 @@ button { font-family: inherit; }
   border-radius: 30px;
   font-size: 12px;
   font-weight: 700;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   z-index: 5;
+  transform: translateZ(0);
+  will-change: transform;
 }
 .video-overlay-play {
   position: absolute;
@@ -203,6 +252,8 @@ button { font-family: inherit; }
   gap: 24px;
   flex-wrap: wrap;
 }
+
+
 .badge-verified-glow {
   background: var(--emerald-bg);
   border: 1px solid #bbf7d0;
@@ -216,6 +267,35 @@ button { font-family: inherit; }
   gap: 6px;
   margin-bottom: 8px;
 }
+
+
+
+/* ── Property badge pills (same design as homepage / listing cards) ── */
+.fp-badges { line-height: 1; }
+.fp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(9,26,54,.10);
+}
+.fp-badge i { font-size: 12px; }
+
+/* Match the exact "Featured" pill in your screenshot: solid orange, white text, star */
+.fp-badge.featured   { background:#f59e0b; color:#fff; }
+.fp-badge.verified   { background:#10b981; color:#fff; }
+.fp-badge.exclusive  { background:#7c3aed; color:#fff; }
+.fp-badge.popular    { background:#ef4444; color:#fff; }
+.fp-badge.sponsored  { background:#cba243; color:#0b1730; }
+.fp-badge.premium    { background:#091a36; color:#f1d888; }
+.fp-badge.new        { background:#0ea5e9; color:#fff; }
+.fp-badge.listed     { background:#0d6efd; color:#fff; }
+.fp-badge.just_added { background:#14b8a6; color:#fff; }
 .prop-headline {
   font-size: 32px;
   color: var(--navy);
@@ -238,7 +318,18 @@ button { font-family: inherit; }
   font-weight: 800;
   letter-spacing: -0.5px;
 }
+
 .pricing-val small { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.pricing-val .per-month-suffix {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.3px;
+  margin-left: 2px;
+}
+@media (max-width: 768px) {
+  .pricing-val .per-month-suffix { font-size: 18px; }
+}
 .pricing-sub-meta { display: flex; gap: 10px; justify-content: flex-end; font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
 
 /* ── COMPACT QUICK FACTS STRIP ── */
@@ -611,15 +702,102 @@ button { font-family: inherit; }
   .mobile-bar button, .mobile-bar a { flex: 1; padding: 12px 6px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
 }
 
+/* ── MOBILE GALLERY LAYOUT (≤ 768px) ── */
 @media (max-width: 768px) {
-  .gallery-grid { grid-template-columns: 1fr; grid-template-rows: 240px 120px; }
-  .gallery-item-main { grid-row: 1; }
+  .gallery-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 220px 130px;
+    aspect-ratio: auto;
+    max-height: none;
+  }
+  .gallery-item-main {
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+  .gallery-item:not(.gallery-item-main) {
+    grid-row: 2;
+  }
+
+  .gallery-tag-pill {
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
   .prop-headline { font-size: 24px; }
   .pricing-val { font-size: 28px; }
   .dense-specs-grid { grid-template-columns: 1fr 1fr; }
 }
+
+@media (max-width: 480px) {
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 200px 110px 110px;
+  }
+  .gallery-item-main { grid-column: 1; grid-row: 1; }
+  .gallery-item:nth-of-type(2) { grid-row: 2; }
+  .gallery-item:nth-of-type(3) { grid-row: 3; }
+
+  .gallery-tag-pill {
+    bottom: 8px;
+    left: 8px;
+    font-size: 10px;
+    padding: 3px 9px;
+  }
+}
+
+/* ── MOBILE: compact floating "Schedule Visit" pill (sits above header bottom nav) ── */
+@media (max-width: 1024px) {
+  .mobile-bar {
+    display: block !important;
+    position: fixed !important;
+    left: 14px !important; right: auto !important;
+    bottom: calc(var(--ef-nav-h, 0px) + 14px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    z-index: 10030 !important;            /* just under header nav (10040) */
+  }
+  .mobile-bar .cta-btn {
+    width: auto !important;
+    flex: none !important;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: .2px;
+    border-radius: 999px !important;
+    gap: 8px !important;
+    background: linear-gradient(135deg, #d6b13a, #b8921f) !important;
+    color: #0b1730 !important;
+    box-shadow: 0 6px 18px rgba(11,23,48,.28), 0 0 0 1px rgba(255,255,255,.35) inset;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .mobile-bar .cta-btn:active { transform: scale(.96); box-shadow: 0 3px 10px rgba(11,23,48,.3); }
+  .mobile-bar .cta-btn i { font-size: 13px; }
+  .sidebar-wrapper { z-index: 10120 !important; }   /* form sheet above header menus */
+  .sheet-backdrop  { z-index: 10110 !important; }
+  body { padding-bottom: calc(var(--ef-nav-h, 0px) + 64px + env(safe-area-inset-bottom, 0px)) !important; }
+}
+
+/* ── LOCKED PHOTOS (guests see first 3 only) ── */
+.viewer-slide-locked { background: radial-gradient(circle at 50% 35%, #16233a 0%, #0b1730 70%); }
+.photo-lock-card { text-align: center; color: #fff; max-width: 360px; padding: 28px 24px; }
+.photo-lock-icon { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; color: #0b1730; background: linear-gradient(135deg, #d6b13a, #b8921f); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.photo-lock-card h4 { font-size: 18px; font-weight: 700; margin: 0 0 8px; color: #fff; }
+.photo-lock-card p { font-size: 13px; line-height: 1.5; color: #cbd5e0; margin: 0 0 18px; }
+.photo-lock-btn { border: 0; cursor: pointer; padding: 11px 26px; border-radius: 999px; font-size: 14px; font-weight: 700; color: #0b1730; background: linear-gradient(135deg, #d6b13a, #b8921f); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.photo-lock-btn:hover { filter: brightness(1.06); }
 </style>
 </head>
+
+{% include 'home_page/head_assests.html' %}
+
+
 <body>
 
 {% include 'home_page/header.html' %}
@@ -660,11 +838,85 @@ button { font-family: inherit; }
     </div>
   </div>
 
+    <!-- ═══ HEADER BAR & PRICING ═══ -->
+  <div class="property-header-card">
+    <div>
+     
+
+ <nav aria-label="Breadcrumb" style="font-size:13px;color:#666;margin-bottom:10px;">
+  <a href="/" style="color:#666;text-decoration:none;">Home</a>
+  <span> › </span>
+  <a href="/listingpage/?type={% if property_group == 'rental' %}rent{% else %}sale{% endif %}" style="color:#666;text-decoration:none;">{% if property_group == 'rental' %}Rent{% else %}Buy / Resale{% endif %}</a>
+  <span> › </span>
+
+  {# ── SOURCE SECTION ── #}
+  {% if source_section %}
+  <a href="/listingpage/?badge={{ request.GET.from }}" style="color:#c9a227;font-weight:700;text-decoration:none;">{{ source_section }}</a>
+  <span> › </span>
+  {% endif %}
+
+  <a href="/listingpage/?type={% if property_group == 'rental' %}rent{% else %}sale{% endif %}&category={{ category }}" style="color:#666;text-decoration:none;">{{ category|title }}</a>
+  {% if p.locality or p.village %}
+  <span> › </span>
+  <span style="color:#333;">{{ p.locality|default:p.village|title }}</span>
+  {% endif %}
+</nav>
+
+
+{# ══════════ BADGES (same partial as listing/index) ══════════ #}
+<div class="property-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+  {% include 'home_page/_badges.html' with items=badges %}
+</div>
+
+
+<h1 class="prop-headline">
+
+
+  {{ p.bhk|default:p.bhk_type|default:"" }}{% if p.bhk or p.bhk_type %} {% endif %}{{ p.property_type|default:"Property" }} for {% if property_group == 'rental' %}Rent{% else %}Sale{% endif %} 
+  in {{ p.locality|default:p.village|title }}{% if p.city %}, {{ p.city|title }}{% endif %}
+</h1>
+      <div class="prop-subloc">
+        <i class="fas fa-location-dot"></i>
+        <span>{% if p.building_name %}<span style="color:black;font-weight:bold;font-size:15px;">{{ p.building_name }}</span>, {% endif %}{{ p.locality|default:p.village|default:'' }}{% if p.city %}, {{ p.city }}{% endif %}{% if p.state %}, {{ p.state }}{% endif %}</span>
+      </div>
+    </div>
+
+    <div class="pricing-hero-wrap">
+
+   <div class="pricing-val">
+  {% if p.monthly_rent %}
+    ₹<span class="price-format">{{ p.monthly_rent }}</span>
+    <span class="per-month-suffix">/ Month</span>
+  {% elif p.selling_price %}
+    ₹<span class="price-format">{{ p.selling_price }}</span>
+  {% elif p.expected_price %}
+    ₹<span class="price-format">{{ p.expected_price }}</span>
+  {% else %}
+    <span style="font-size:19px;color:var(--text-muted);">Price on Request</span>
+  {% endif %}
+</div>
+      <div class="pricing-sub-meta">
+        {% if property_group == 'rental' and p.deposit_display %}
+          <span>Deposit: ₹<span class="price-format">{{ p.deposit_display }}</span></span>
+        {% endif %}
+        {% if p.total_move_in_cost %}
+          <span style="color:var(--emerald);">Move-in: ₹<span class="price-format">{{ p.total_move_in_cost }}</span></span>
+        {% endif %}
+      
+     <!----   {% if p.price_per_sqft or p.plot_price_per_sqft or p.price_per_acre or p.price_per_sqm or p.price_per_unit %}
+          <span>₹<span class="price-format">{{ p.price_per_sqft|default:p.plot_price_per_sqft|default:p.price_per_acre|default:p.price_per_sqm|default:p.price_per_unit }}</span>/per sq.ft</span>
+        {% endif %} ------>
+       
+      </div>
+    </div>
+  </div>
+  <br>
   <!-- ═══ GALLERY ═══ -->
   <div class="gallery-grid">
     <div class="gallery-item gallery-item-main" onclick="openMediaViewer(0)">
       {% if property_images %}
-        <img src="{{ property_images.0.image.url }}" alt="Property Main Image">
+       
+      <img src="{{ property_images.0.image.url }}" alt="{{ p.bhk|default:p.bhk_type|default:'' }} {{ p.property_type|default:'Property' }} for {% if listing_type == 'rent' %}Rent{% else %}Sale{% endif %} in {{ p.locality|default:p.village|title }} {{ p.city|title }} - Main View">
       {% else %}
         <div style="background:#091a36;color:rgba(255,255,255,0.2);display:grid;place-items:center;height:100%;font-size:32px;font-weight:800;letter-spacing:4px;">KANISHKAIMPERIA</div>
       {% endif %}
@@ -677,61 +929,57 @@ button { font-family: inherit; }
         {% if selected_video.source == 'rm_assisted' and selected_video.youtube_thumbnail %}
           <img src="{{ selected_video.youtube_thumbnail }}" alt="Video thumbnail">
         {% elif selected_video.video %}
-          <video muted loop playsinline style="pointer-events:none;"><source src="{{ selected_video.video.url }}" type="video/mp4"></video>
+          <video muted loop playsinline preload="metadata" style="pointer-events:none; width:100%; height:100%; object-fit:cover; aspect-ratio:16 / 9;"><source src="{{ selected_video.video.url }}" type="video/mp4"></video>
         {% else %}<div style="background:#1e293b;width:100%;height:100%;"></div>{% endif %}
         <div class="video-overlay-play"><div><i class="fas fa-play"></i></div></div>
       {% elif property_images|length > 1 %}
-        <img src="{{ property_images.1.image.url }}" alt="Property View 2">
+
+      <img src="{{ property_images.1.image.url }}" alt="{{ p.bhk|default:p.bhk_type|default:'' }} {{ p.property_type|default:'Property' }} in {{ p.locality|default:p.village|title }} {{ p.city|title }} - View 2">
+
       {% else %}
         <div style="background:#f1f5f9;height:100%;"></div>
       {% endif %}
+
+      
     </div>
 
     <div class="gallery-item" onclick="openMediaViewer(2)">
       {% if property_images|length > 2 %}
-        <img src="{{ property_images.2.image.url }}" alt="Property View 3">
-        {% if property_images|length > 3 %}
-          <div class="more-badge">
-            +{{ property_images|length|add:"-3" }}
-            <span>View All</span>
-          </div>
-        {% endif %}
+     
+<img src="{{ property_images.2.image.url }}" alt="{{ p.bhk|default:p.bhk_type|default:'' }} {{ p.property_type|default:'Property' }} in {{ p.locality|default:p.village|title }} {{ p.city|title }} - View 3">
+
+      {% if property_images|length > 3 %}
+  <div class="more-badge">
+    +{{ property_images|length|add:"-3" }}
+    <span>View All</span>
+  </div>
+{% endif %}
+
       {% else %}
         <div style="background:#f1f5f9;height:100%;"></div>
       {% endif %}
-    </div>
+   
+          </div>
   </div>
 
-  <!-- ═══ HEADER BAR & PRICING ═══ -->
-  <div class="property-header-card">
-    <div>
-      <h1 class="prop-headline">{{ p.title }}</h1>
-      <div class="prop-subloc">
-        <i class="fas fa-location-dot"></i>
-        <span>{% if p.building_name %}{{ p.building_name }}, {% endif %}{{ p.locality|default:p.village|default:'' }}{% if p.city %}, {{ p.city }}{% endif %}{% if p.state %}, {{ p.state }}{% endif %}</span>
-      </div>
-    </div>
-
-    <div class="pricing-hero-wrap">
-      <div class="pricing-val">
-        {% if p.monthly_rent %}₹<span class="price-format">{{ p.monthly_rent }}</span><small>/ month</small>
-        {% elif p.selling_price %}₹<span class="price-format">{{ p.selling_price }}</span>
-        {% elif p.expected_price %}₹<span class="price-format">{{ p.expected_price }}</span>
-        {% else %}<span style="font-size:19px;color:var(--text-muted);">Price on Request</span>{% endif %}
-      </div>
-      <div class="pricing-sub-meta">
-        {% if property_group == 'rental' and p.deposit_display %}
-          <span>Deposit: ₹<span class="price-format">{{ p.deposit_display }}</span></span>
-        {% endif %}
-        {% if p.total_move_in_cost %}
-          <span style="color:var(--emerald);">Move-in: ₹<span class="price-format">{{ p.total_move_in_cost }}</span></span>
-        {% endif %}
-        {% if p.price_per_sqft or p.plot_price_per_sqft or p.price_per_acre or p.price_per_sqm or p.price_per_unit %}
-          <span>₹<span class="price-format">{{ p.price_per_sqft|default:p.plot_price_per_sqft|default:p.price_per_acre|default:p.price_per_sqm|default:p.price_per_unit }}</span>/unit</span>
-        {% endif %}
-      </div>
-    </div>
-  </div>
+  <!-- ═══ ASK FOR MORE PHOTOS ═══ -->
+  {% comment %} <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+    <button type="button"
+      onclick="openCallback({
+        id: '{{ original.id|default:p.id }}',
+        type: '{{ p.property_type|default:category|escapejs }}',
+        listingType: '{{ listing_type|escapejs }}',
+        category: '{{ category|escapejs }}',
+        title: '{{ p.title|escapejs }}',
+        building: '{{ p.building_name|escapejs }}',
+        price: '{% if p.monthly_rent %}₹{{ p.monthly_rent }}/mo{% elif p.selling_price %}₹{{ p.selling_price }}{% else %}Price on Request{% endif %}',
+        location: '{% if p.building_name %}{{ p.building_name|escapejs }}, {% endif %}{{ p.locality|default:p.village|escapejs }}{% if p.city %}, {{ p.city|escapejs }}{% endif %}',
+        intent: 'images'
+      })"
+      style="background:#fff;border:1.5px solid var(--gold);color:var(--navy);padding:9px 18px;font-weight:700;font-size:13px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 2px 10px rgba(9,26,54,.06);transition:.2s;">
+      <i class="fas fa-images"></i> Ask for More Photos
+    </button>
+  </div> {% endcomment %}
 
   <!-- ═══ COMPACT QUICK FACTS STRIP ═══ -->
   <div class="compact-facts-grid">
@@ -1019,24 +1267,29 @@ button { font-family: inherit; }
           {% endif %}
         </div>
 
-        {% if price_trend %}
-        <div style="margin-top: 18px;">
-          <div style="font-size:11px; text-transform: uppercase; font-weight:700; color:var(--text-muted); margin-bottom:8px;">Locality Rate Trends — {{ p.locality }}</div>
-          <canvas id="priceTrendChart" height="90"></canvas>
-        </div>
-        {% endif %}
+    
       </section>
 
-      <!-- VERIFICATION -->
-      <section class="bento-card" id="sec-verify">
-<h2 class="bento-card-title"><i class="fas fa-circle-check"></i> Trust &amp; Quality Standards</h2>
-      
-<div class="trust-grid">
-  <div class="trust-chip"><i class="fas fa-shield-check"></i><div><strong>Quality Checked</strong><span>Document reviewed</span></div></div>
-  <div class="trust-chip"><i class="fas fa-house-circle-check"></i><div><strong>Physical Inspection</strong><span>Property visited</span></div></div>
-  <div class="trust-chip"><i class="fas fa-location-dot"></i><div><strong>Geo Confirmed</strong><span>Coordinates mapped</span></div></div>
-  <div class="trust-chip"><i class="fas fa-user-check"></i><div><strong>Direct Ownership</strong><span>Identity screened</span></div></div>
-</div>
+      <!-- FAQS -->
+          <!-- ═══ SEO INTERNAL LINKS ═══ -->
+      <section class="bento-card">
+        <h2 class="bento-card-title"><i class="fas fa-link"></i> Explore More in {{ p.locality|default:p.village|title }}, {{ p.city|title }}</h2>
+        <ul style="list-style:none;padding:0;margin:0;font-size:14px;line-height:2;">
+          {% if p.bhk and listing_type == 'sale' and category == 'residential' %}
+          <li>→ <a href="/flats-for-sale/{{ p.city|slugify }}/" style="color:var(--gold-hover);font-weight:600;">More {{ p.bhk }} Flats for Sale in {{ p.city|title }}</a></li>
+          {% endif %}
+          {% if listing_type == 'sale' and category == 'residential' %}
+          <li>→ <a href="/flats-for-sale/{{ p.city|slugify }}/" style="color:var(--gold-hover);font-weight:600;">All Flats for Sale in {{ p.city|title }}</a></li>
+          {% endif %}
+          {% if listing_type == 'rent' and category == 'residential' %}
+          <li>→ <a href="/flats-for-rent/{{ p.city|slugify }}/" style="color:var(--gold-hover);font-weight:600;">Flats for Rent in {{ p.city|title }}</a></li>
+          {% endif %}
+          {% if listing_type == 'sale' and category == 'plot' %}
+          <li>→ <a href="/plots-for-sale/{{ p.city|slugify }}/" style="color:var(--gold-hover);font-weight:600;">Plots for Sale in {{ p.city|title }}</a></li>
+          {% endif %}
+          <li>→ <a href="/listingpage/?type={{ listing_type }}&category={{ category }}" style="color:var(--gold-hover);font-weight:600;">All {{ category|title }} Properties</a></li>
+          <li>→ <a href="/list-property/{{ p.city|slugify }}/" style="color:var(--gold-hover);font-weight:600;">List Your Property in {{ p.city|title }}</a></li>
+        </ul>
       </section>
 
       <!-- FAQS -->
@@ -1066,10 +1319,16 @@ button { font-family: inherit; }
         <h2 class="bento-card-title"><i class="fas fa-layer-group"></i> Similar Properties Nearby</h2>
         <div class="sim-grid-refined">
           {% for sp in similar %}
-          <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower }}/{{ sp.id }}/" class="sim-card-refined">
-            <div class="sim-thumb">
-              {% if sp.image_url %}<img src="{{ sp.image_url }}" alt="{{ sp.title }}">{% else %}<div style="height:100%;display:grid;place-items:center;background:#e2e8f0;color:#94a3b8;"><i class="fas fa-house"></i></div>{% endif %}
-            </div>
+          
+         <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower }}/{{ sp.id }}/" class="sim-card-refined">
+  <div class="sim-thumb">
+    {% if sp.image_url %}
+      <img src="{{ sp.image_url }}" alt="{{ sp.title }} in {{ sp.location }} - Similar Property">
+    {% else %}
+      <div style="height:100%;display:grid;place-items:center;background:#e2e8f0;color:#94a3b8;"><i class="fas fa-house"></i></div>
+    {% endif %}
+  </div>
+
             <div class="sim-content">
               <div class="sim-price-txt">{{ sp.price_display }}</div>
               <div class="sim-title-txt">{{ sp.title|truncatechars:34 }}</div>
@@ -1089,121 +1348,153 @@ button { font-family: inherit; }
         <span>Enquire Now</span><i class="fas fa-times"></i>
       </button>
 
-      <div class="enquiry-card-lux">
-        <div class="enquiry-card-header">
-          <h3>Connect with Property Team</h3>
-          <p>Schedule a visit or get instant contact details</p>
-        </div>
+    <div class="enquiry-card-lux">
+  <div class="enquiry-card-header">
+    <h3>Connect with Property Team</h3>
+    <p>Schedule a visit or get instant contact details</p>
+  </div>
 
-        {% if can_view_contact %}
-          <a href="https://wa.me/919175791501?text=Hi%2C+I+am+interested+in+{{ p.title|default:p.property_title|urlencode }}" target="_blank" class="cta-btn cta-whatsapp">
-            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
-          </a>
-        {% else %}
-          <div class="masked-phone-banner">
-            <div class="num">{{ masked_phone }}</div>
-            <div class="hint">Verified Number · Complete enquiry to view</div>
-          </div>
-        {% endif %}
+  <!-- ═══ NEW: Request Callback + Ask for Photos ═══ -->
+  {% comment %} <button type="button" class="cta-btn cta-gold" style="margin-bottom:8px;"
+    onclick="openCallback({
+      id: '{{ original.id|default:p.id }}',
+      type: '{{ p.property_type|default:category|escapejs }}',
+      listingType: '{{ listing_type|escapejs }}',
+      category: '{{ category|escapejs }}',
+      title: '{{ p.title|escapejs }}',
+      building: '{{ p.building_name|escapejs }}',
+      price: '{% if p.monthly_rent %}₹{{ p.monthly_rent }}/mo{% elif p.selling_price %}₹{{ p.selling_price }}{% else %}Price on Request{% endif %}',
+      location: '{% if p.building_name %}{{ p.building_name|escapejs }}, {% endif %}{{ p.locality|default:p.village|escapejs }}{% if p.city %}, {{ p.city|escapejs }}{% endif %}',
+      intent: 'callback'
+    })">
+    <i class="fas fa-phone"></i> Request Callback
+  </button> {% endcomment %}
 
-        <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
-          {% csrf_token %}
-          <input type="hidden" name="property_id" value="{{ original.id|default:p.id }}">
-          <input type="hidden" name="property_title" value="{{ p.title|default:p.property_title }}">
-          <input type="hidden" name="property_type" value="{{ listing_type }}">
-          <input type="hidden" name="property_group" value="{{ property_group }}">
-          <input type="hidden" name="category" value="{{ category }}">
-          <input type="hidden" name="lead_source" value="property_detail_page">
-          <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
-          <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
-          <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
-          <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
-          <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
-          <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
-          <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
-          <input type="hidden" name="page_url" id="enquiry_page_url" value="">
 
-          <div class="form-field-group">
-            <label for="enquiry_name">Your Name <span style="color:red;">*</span></label>
-            <input type="text" name="enquiry_name" id="enquiry_name" class="input-lux" placeholder="Your Name" required>
-          </div>
 
-          <div class="form-field-group">
-            <label for="enquiry_phone">Phone Number <span style="color:red;">*</span></label>
-            <div style="display:flex;gap:6px;">
-              <select name="country_code" id="country_code" class="input-lux" style="width:75px;padding:8px 4px;">
-                <option value="+91" selected>+91</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-                <option value="+971">+971</option>
-                <option value="+65">+65</option>
-                <option value="+61">+61</option>
-              </select>
-              <input type="tel" name="enquiry_phone" id="enquiry_phone" class="input-lux" style="flex:1;" placeholder="Phone Number" required>
-            </div>
-          </div>
+  <!-- ═══ Existing WhatsApp / Masked phone ═══ -->
+  {% if can_view_contact %}
+    <a href="https://wa.me/919175791501?text=Hi%2C+I+am+interested+in+{{ p.title|default:p.property_title|urlencode }}" target="_blank" class="cta-btn cta-whatsapp">
+      <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+    </a>
+  {% else %}
+   
+  {% endif %}
 
-          <div class="row g-2 mb-2">
-            <div class="col-6">
-              <label class="form-label text-muted mb-1" style="font-size: 11px; font-weight: 700;">Preferred Visit Date</label>
-              <input type="date" name="enquiry_visit_date" id="enquiry_visit_date" class="input-lux">
-            </div>
-            <div class="col-6">
-              <label class="form-label text-muted mb-1" style="font-size: 11px; font-weight: 700;">Visit Time</label>
-              <input type="text" name="enquiry_visit_time" id="enquiry_visit_time" class="input-lux" placeholder="Select Time" readonly>
-            </div>
-          </div>
+  <!-- ═══ Existing form — unchanged ═══ -->
+  <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
+    {% csrf_token %}
+    <input type="hidden" name="property_id" value="{{ original.id|default:p.id }}">
+    <input type="hidden" name="property_title" value="{{ p.title|default:p.property_title }}">
+    <input type="hidden" name="property_type" value="{{ listing_type }}">
+    <input type="hidden" name="property_group" value="{{ property_group }}">
+    <input type="hidden" name="category" value="{{ category }}">
+    <input type="hidden" name="lead_source" value="property_detail_page">
+    <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
+    <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
+    <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
+    <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
+    <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
+    <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
+    <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
+    <input type="hidden" name="page_url" id="enquiry_page_url" value="">
 
-          <div class="form-check mb-1" style="text-align: left;">
-            <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked>
-            <label class="form-check-label text-muted" for="whatsappConsent" style="font-size:11px;">Receive details on WhatsApp/SMS</label>
-          </div>
+    <div class="form-field-group">
+      <label for="enquiry_name">Your Name <span style="color:red;">*</span></label>
+      <input type="text" name="enquiry_name" id="enquiry_name" class="input-lux" placeholder="Nice to meet you" required>
+    </div>
 
-          <div class="form-check mb-3" style="text-align: left;">
-            <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
-            <label class="form-check-label text-muted" for="agreeTerms" style="font-size:11px;">
-              {% if property_group == "rental" %}Interested in vendor services{% else %}Interested in home loan services{% endif %}
-            </label>
-          </div>
-
-          <button type="button" class="cta-btn cta-gold" onclick="Send_Enquiry(this)">Schedule Visit</button>
-        </form>
-
-        <div class="agent-profile-strip">
-          <div class="agent-initial-circle">{{ p.owner_name|default:p.listed_by_name|slice:":1"|upper|default:"K" }}</div>
-          <div>
-            <strong>{{ p.owner_name|default:p.listed_by_name|default:"KANISHKAIMPERIA Team" }}</strong>
-            <span>Verified Advisor</span>
-          </div>
-        </div>
+    <div class="form-field-group">
+      <label for="enquiry_phone">Phone Number <span style="color:red;">*</span></label>
+      <div style="display:flex;gap:6px;">
+        <select name="country_code" id="country_code" class="input-lux" style="width:75px;padding:8px 4px;">
+          <option value="+91" selected>+91</option>
+          <option value="+1">+1</option>
+          <option value="+44">+44</option>
+          <option value="+971">+971</option>
+          <option value="+65">+65</option>
+          <option value="+61">+61</option>
+        </select>
+        <input type="tel" name="enquiry_phone" id="enquiry_phone" class="input-lux" style="flex:1;" placeholder="Where can we reach you?" required>
       </div>
+    </div>
 
-      <!-- EMI CALCULATOR (RESALE ONLY) -->
-      {% if property_group != 'rental' and base_emi > 0 %}
-      <div class="emi-widget-lux">
-        <div style="font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">Estimated Monthly EMI (80% Loan)</div>
-        <div class="emi-result-headline">₹<span id="emiResult">{{ base_emi }}</span></div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Based on 80% loan · 8.5% interest · 20-year tenure</div>
-        <button type="button" class="btn-toggle-read" style="width:100%;justify-content:center;" onclick="document.getElementById('emiCtrl').style.display='block';this.style.display='none'">
-          <i class="fas fa-sliders"></i> Adjust Loan Terms
-        </button>
-
-        <div id="emiCtrl" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light);">
-          <div class="mb-2">
-            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Property Value (₹)</div>
-            <input type="number" id="emiPrincipal" class="input-lux" value="{{ raw_price|default:p.selling_price|default:'0' }}" oninput="calcEMI()">
-          </div>
-          <div class="mb-2">
-            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Interest Rate (%)</div>
-            <input type="number" id="emiRate" class="input-lux" value="8.5" step="0.1" oninput="calcEMI()">
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Tenure (Years)</div>
-            <input type="number" id="emiYears" class="input-lux" value="20" min="1" max="30" oninput="calcEMI()">
-          </div>
-        </div>
+    <div class="row g-2 mb-2">
+      <div class="col-6">
+        <label class="form-label text-muted mb-1" style="font-size: 11px; font-weight: 700;">Preferred Visit Date</label>
+        <input type="date" name="enquiry_visit_date" id="enquiry_visit_date" class="input-lux" placeholder="Your preferred visit date">
       </div>
-      {% endif %}
+      <div class="col-6">
+        <label class="form-label text-muted mb-1" style="font-size: 11px; font-weight: 700;">Visit Time</label>
+        <input type="text" name="enquiry_visit_time" id="enquiry_visit_time" class="input-lux" placeholder="Select Time" readonly>
+      </div>
+    </div>
+
+    <div class="form-check mb-1" style="text-align: left;">
+      <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked>
+      <label class="form-check-label text-muted" for="whatsappConsent" style="font-size:11px;">Receive details on WhatsApp/SMS</label>
+    </div>
+
+    <div class="form-check mb-3" style="text-align: left;">
+      <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+      <label class="form-check-label text-muted" for="agreeTerms" style="font-size:11px;">
+        {% if property_group == "rental" %}Interested in vendor services{% else %}Interested in home loan services{% endif %}
+      </label>
+    </div>
+
+    <button type="button" class="cta-btn cta-gold" onclick="Send_Enquiry(this)">Schedule Visit</button>
+  </form>
+
+  
+</div>
+
+    <!-- LOAN ELIGIBILITY (RESALE ONLY) -->
+{% if property_group != 'rental' %}
+<div class="emi-widget-lux">
+  <div style="font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:700;">
+    <i class="fas fa-hand-holding-dollar" style="color:var(--gold);"></i> Loan Eligibility Check
+  </div>
+  <div style="font-size:13px;color:var(--text-main);margin-top:6px;line-height:1.5;">
+    Loan approval, interest rate and tenure are decided by your bank based on your income and CIBIL score.
+  </div>
+
+  <div class="emi-result-headline" id="emiResultBox" style="display:none;">
+    ₹<span id="emiResult">0</span>
+    <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-top:2px;text-transform:none;letter-spacing:0;">
+      Indicative EMI only
+    </div>
+  </div>
+
+  <div id="emiResultEmpty" style="font-size:11px;color:var(--text-muted);margin:10px 0 8px;font-style:italic;">
+    Enter details below to see an indicative EMI.
+  </div>
+
+  <button type="button" class="btn-toggle-read" style="width:100%;justify-content:center;" onclick="document.getElementById('emiCtrl').style.display='block';this.style.display='none'">
+    <i class="fas fa-sliders"></i> Check Eligibility
+  </button>
+
+  <div id="emiCtrl" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light);">
+    <div class="mb-2">
+      <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Loan Amount</div>
+      <input type="number" id="emiPrincipal" class="input-lux" placeholder="Enter loan Amount" oninput="calcEMI()">
+    </div>
+    <div class="mb-2">
+      <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Interest Rate (%) <span style="color:#98a2b3;font-weight:500;">— ask your bank</span></div>
+      <input type="number" id="emiRate" class="input-lux" value="" placeholder="e.g. 8.5" step="0.1" oninput="calcEMI()">
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--text-muted);font-weight:700;">Tenure (Years)</div>
+      <input type="number" id="emiYears" class="input-lux" value="" placeholder="e.g. 20" min="1" max="30" oninput="calcEMI()">
+    </div>
+
+    <div style="margin-top:12px;padding:10px 12px;background:#fbf5e0;border:1px dashed rgba(201,162,39,.55);border-radius:8px;font-size:11px;color:#8a6a15;line-height:1.5;">
+      <i class="fas fa-circle-info"></i>
+      <b>Hint:</b> Final eligibility, rate and tenure are decided by your bank. KANISHKAIMPERIA only helps you connect with lending partners.
+    </div>
+  </div>
+</div>
+{% endif %}
+
     </aside>
   </div>
 </div>
@@ -1249,12 +1540,16 @@ button { font-family: inherit; }
             <div class="slide-caption-tag"><i class="fas fa-video me-1"></i> Video Walkthrough</div>
           </div>
           {% endif %}
+
+         
           {% for img in property_images %}
-          <div class="viewer-slide" data-type="image" data-cat="{{ img.category|default:'all' }}">
-            <img src="{{ img.image.url }}" alt="Property Media {{ forloop.counter }}">
-            <div class="slide-caption-tag"><i class="fas fa-camera me-1"></i> {{ img.category|title|default:"Photo View" }}</div>
-          </div>
-          {% endfor %}
+<div class="viewer-slide" data-type="image" data-cat="{{ img.category|default:'all' }}">
+  <img src="{{ img.image.url }}" alt="{{ p.title }} - {{ img.category|title|default:'Photo' }}">
+  <div class="slide-caption-tag"><i class="fas fa-camera me-1"></i> {{ img.category|title|default:"Photo View" }}</div>
+</div>
+{% endfor %}
+
+
         </div>
       </div>
     </div>
@@ -1324,8 +1619,44 @@ button { font-family: inherit; }
   </div>
 </div>
 
+
+
 <!-- ═══ SCHEMA DATA ═══ -->
-{% if seo.schema_json %}<script type="application/ld+json">{{ seo.schema_json|safe }}</script>{% endif %}
+{% if seo.schema_json %}
+<script type="application/ld+json">{{ seo.schema_json|safe }}</script>
+{% else %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateListing",
+  "name": "{{ p.title|escapejs }}",
+  "description": "{{ p.property_summary|default:p.desc|striptags|truncatechars:300|escapejs }}",
+  "url": "{% if seo.canonical_url %}{{ seo.canonical_url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ request.path }}{% endif %}",
+  {% if p.selling_price or p.monthly_rent or p.expected_price %}"offers": {
+    "@type": "Offer",
+    "price": "{{ p.selling_price|default:p.monthly_rent|default:p.expected_price }}",
+    "priceCurrency": "INR",
+    "availability": "https://schema.org/InStock"
+  },{% endif %}
+  {% if property_images %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ property_images.0.image.url }}",{% endif %}
+  {% if p.bhk or p.bhk_type %}"numberOfRooms": "{{ p.bhk|default:p.bhk_type }}",{% endif %}
+  {% if p.baths or p.bathrooms %}"numberOfBathroomsTotal": "{{ p.baths|default:p.bathrooms }}",{% endif %}
+  {% if p.area or p.built_up_area or p.builtup_area %}"floorSize": {
+    "@type": "QuantitativeValue",
+    "value": "{{ p.area|default:p.built_up_area|default:p.builtup_area }}",
+    "unitCode": "FTK"
+  },{% endif %}
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ p.address|default:p.locality|default:p.village|escapejs }}",
+    "addressLocality": "{{ p.locality|default:p.village|escapejs }}",
+    "addressRegion": "{{ p.city|escapejs }}",
+    "addressCountry": "IN"
+  }
+}
+</script>
+{% endif %}
+
 {% if p.latitude and p.longitude %}
 <script type="application/ld+json">
 {
@@ -1336,18 +1667,24 @@ button { font-family: inherit; }
 }
 </script>
 {% endif %}
+
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org", "@type": "BreadcrumbList",
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "{{ listing_type|title }}", "item": "{{ request.scheme }}://{{ request.get_host }}/listingpage/?type={{ listing_type }}" },
-    { "@type": "ListItem", "position": 2, "name": "{{ p.city|default:'' }}", "item": "{{ request.scheme }}://{{ request.get_host }}/listingpage/?type={{ listing_type }}&city={{ p.city|urlencode }}" },
-    { "@type": "ListItem", "position": 3, "name": {{ p.title|default:""|escapejs|safe }} }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ request.scheme }}://{{ request.get_host }}/" },
+    { "@type": "ListItem", "position": 2, "name": "{% if listing_type == 'rent' %}Rent{% else %}Buy{% endif %}", "item": "{{ request.scheme }}://{{ request.get_host }}/listingpage/?type={{ listing_type }}" },
+    { "@type": "ListItem", "position": 3, "name": "{{ p.locality|default:p.village|title }}", "item": "{% if seo.canonical_url %}{{ seo.canonical_url }}{% else %}{{ request.build_absolute_uri }}{% endif %}" }
   ]
 }
 </script>
 
 <div class="sheet-backdrop" id="sheetBackdrop" onclick="closeContactSheet()"></div>
+
+
+
+
 
 <!-- ═══ MOBILE BOTTOM ACTIONS ═══ -->
 <div class="mobile-bar">
@@ -1356,7 +1693,26 @@ button { font-family: inherit; }
   </button>
 </div>
 
+<!-- ADDED: Request Callback floating pill (mobile only) -->
+
+
+
+<script>
+/* measure the header's bottom nav so the Schedule Visit bar sits exactly above it */
+(function(){
+  function setNavH(){
+    var nav=document.querySelector('.ef-bottom-nav');
+    var h=(nav && getComputedStyle(nav).display!=='none') ? nav.offsetHeight : 0;
+    document.documentElement.style.setProperty('--ef-nav-h', h+'px');
+  }
+  window.addEventListener('load',setNavH);
+  window.addEventListener('resize',setNavH);
+  setNavH();
+})();
+</script>
 <!-- ═══ SCRIPTS ═══ -->
+
+{% include 'home_page/_callback_modal.html' %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -1416,19 +1772,29 @@ document.addEventListener('DOMContentLoaded', function () {
   updateActiveNav();
 });
 
-/* ── EMI CALCULATOR ── */
 function calcEMI() {
   const principalEl = document.getElementById('emiPrincipal');
   const rateEl = document.getElementById('emiRate');
   const yearsEl = document.getElementById('emiYears');
+  const resultBox = document.getElementById('emiResultBox');
+  const emptyMsg = document.getElementById('emiResultEmpty');
   if (!principalEl || !rateEl || !yearsEl) return;
+
   const principal = parseFloat(principalEl.value) * 0.80;
   const r = parseFloat(rateEl.value) / 12 / 100;
   const n = parseFloat(yearsEl.value) * 12;
-  if (principal > 0 && r > 0 && n > 0) {
-    const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    document.getElementById('emiResult').innerText = Math.round(emi).toLocaleString('en-IN');
+
+  // If user has not typed rate or tenure, keep result hidden
+  if (!rateEl.value || !yearsEl.value || !(principal > 0 && r > 0 && n > 0)) {
+    if (resultBox) resultBox.style.display = 'none';
+    if (emptyMsg) emptyMsg.style.display = 'block';
+    return;
   }
+
+  const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  document.getElementById('emiResult').innerText = Math.round(emi).toLocaleString('en-IN');
+  if (resultBox) resultBox.style.display = 'block';
+  if (emptyMsg) emptyMsg.style.display = 'none';
 }
 
 /* ── PROGRESSIVE AUTH AJAX ── */
@@ -1540,6 +1906,8 @@ function Send_Enquiry(_this) {
     success: function (response) {
       $(_this).prop("disabled", false).html(`Schedule Visit`);
       if (response.status == '1') { 
+        closeContactSheet();
+
         Swal.fire({
           title: 'Success!',
           text: response.msg,
@@ -1618,6 +1986,21 @@ function copyPropertyLink(btn) {
     document.getElementById('sharePopover').classList.remove('open');
   });
 }
+function kiLoginAlert() {
+  var go = function () { window.location.href = "{% url 'login' %}"; };
+  if (!window.Swal) { if (confirm('Please log in to save properties to your wishlist.')) go(); return; }
+  Swal.fire({
+    icon: 'info',
+    iconColor: '#dc2626',
+    title: 'Login to save this property',
+    text: 'Create a free account or log in to add properties to your wishlist and view them anytime.',
+    showCancelButton: true, confirmButtonText: 'Login Now', cancelButtonText: 'Maybe Later',
+    reverseButtons: true, confirmButtonColor: '#0b1730', cancelButtonColor: '#98a2b3',
+    customClass: { popup: 'rounded-2xl', title: 'text-xl font-extrabold' }
+  }).then(function (r) { if (r.isConfirmed) go(); });
+}
+function kiAuthMsg(m) { return /authenticat|log in|login|session/i.test(m || ''); }
+
 function toggleWishlist(btn) {
   $.ajax({
     type: "POST",
@@ -1635,7 +2018,8 @@ function toggleWishlist(btn) {
         icon.classList.toggle('far', response.action !== 'added');
         icon.classList.toggle('fas', response.action === 'added');
       } else {
-        Swal.fire({ icon: 'error', title: 'Error', text: response.msg });
+        if (kiAuthMsg(response.msg)) { kiLoginAlert(); }
+        else { Swal.fire({ icon: 'error', title: 'Error', text: response.msg }); }
       }
     }
   });
@@ -1675,6 +2059,20 @@ function filterViewerMedia(cat, pillBtn) {
   if (pillBtn) pillBtn.classList.add('active');
   initViewerSlides(cat); updateViewerSlide(0);
 }
+/* Locked photos -> close viewer, then open the existing login/register modal */
+function openLoginForPhotos() {
+  const viewer = document.getElementById('housingMediaModal');
+  const auth = document.getElementById('authEnModal');
+  if (!auth) { window.location.href = "{% url 'login' %}"; return; }
+  const showAuth = () => {
+    if (typeof goToStepAuth === 'function') goToStepAuth('step-1-email');
+    bootstrap.Modal.getOrCreateInstance(auth).show();
+  };
+  if (viewer && viewer.classList.contains('show')) {
+    viewer.addEventListener('hidden.bs.modal', showAuth, { once: true });
+    bootstrap.Modal.getOrCreateInstance(viewer).hide();
+  } else { showAuth(); }
+}
 function openMediaViewer(target) {
   initViewerSlides('all');
   document.querySelectorAll('#viewerPills .viewer-pill').forEach((btn, i) => btn.classList.toggle('active', i === 0));
@@ -1702,15 +2100,22 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-/* ── PRICE FORMAT ── */
+
+/* ── PRICE FORMAT (always show 2 decimals: ₹5.00 Cr) ── */
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll('.price-format').forEach(el => {
     let val = el.innerText.replace(/,/g, '').trim();
     let num = parseFloat(val);
     if (!isNaN(num) && num > 0) {
-      if (num >= 10000000) { let cr = (num / 10000000).toFixed(2); if (cr.endsWith('.00')) cr = cr.slice(0, -2); el.innerText = cr + " Cr"; }
-      else if (num >= 100000) { let lac = (num / 100000).toFixed(2); if (lac.endsWith('.00')) lac = lac.slice(0, -2); el.innerText = lac + " Lac"; }
-      else { el.innerText = new Intl.NumberFormat('en-IN').format(num); }
+      if (num >= 10000000) {
+        el.innerText = (num / 10000000).toFixed(2) + " Cr";
+      }
+      else if (num >= 100000) {
+        el.innerText = (num / 100000).toFixed(2) + " Lac";
+      }
+      else {
+        el.innerText = new Intl.NumberFormat('en-IN').format(num);
+      }
     }
   });
 });

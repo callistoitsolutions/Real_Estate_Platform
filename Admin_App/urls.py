@@ -6,6 +6,7 @@ urlpatterns = [
       
 
       ##########urls for manage crime officer#####
+      
      path('admin_page',views.admin_page,name="admin_page"),
      path('badge_manager', views.badge_manager, name="badge_manager"),
      path('index3',views.index3,name="index3"),
@@ -1107,6 +1108,8 @@ urlpatterns = [
     path("admin/value/add/", views.add_value_proposition, name="add_value_proposition"),
     path("admin/step/add/", views.add_how_it_works, name="add_how_it_works"),
     path("admin/banner/add/", views.add_info_banner, name="add_info_banner"),
+
+    path('badge_manager', views.badge_manager, name="badge_manager"),
 
     
 ]

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coming Soon — KANISHKAIMPERIA | Nagpur</title>
+
+<meta name="description" content="Something exciting is on the way. KANISHKAIMPERIA is upgrading your property search experience in Nagpur.">
+<meta name="theme-color" content="#0b1730">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --black: #ffffff;
+    --black2: #f7f8f9;
+    --black3: #f0f2f4;
+    --panel: #ffffff;
+
+    --navy: #0b1730;
+    --navy-2: #101f3d;
+
+    --gold: #c9a227;
+    --gold2: #a5811c;
+    --pr2: #8a6a15;
+
+    --white: #12202c;
+    --muted: #64748b;
+    --text-body: #556070;
+
+    --border: rgba(11,23,48,.10);
+    --border-soft: rgba(11,23,48,.06);
+
+    --radius: 10px;
+    --serif: "Playfair Display", serif;
+    --sans: "DM Sans", sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+    font-family: var(--sans);
+    background: #f5f6f8;
+    color: #1a2531;
+    font-size: 15px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+
+.container-main { width: min(1000px, 92%); margin: 0 auto; }
+
+.coming-soon-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background-image: linear-gradient(135deg, rgba(11, 23, 48, 0.95) 0%, rgba(16, 31, 61, 0.90) 100%),
+                      url('{% static "kanishka-imperia-luxury-hero.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+    color: #fff;
+    cursor: pointer;
+}
+
+.coming-soon-card {
+    background: rgba(11, 23, 48, 0.82);
+    border: 1px solid rgba(199, 154, 85, 0.45);
+    border-radius: 16px;
+    padding: clamp(30px, 5vw, 56px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    max-width: 680px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.section-label {
+    color: var(--gold2) !important;
+    font-size: 13px !important;
+    letter-spacing: 2.5px !important;
+    font-weight: 800 !important;
+    margin-bottom: 12px !important;
+    text-transform: uppercase;
+}
+
+.section-title {
+    font-family: var(--serif);
+    font-size: clamp(28px, 3.8vw, 42px);
+    line-height: 1.2;
+    color: #ffffff;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+.section-title span { color: var(--gold2); display: block; }
+
+.section-subtitle {
+    font-size: 0.98rem;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.7;
+    margin-bottom: 30px;
+    font-weight: 400;
+}
+
+/* HIGH-IMPACT EYE-CATCHING BLINKING & GLOW BUTTON STYLING */
+@keyframes highImpactGlow {
+    0% { 
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(201, 162, 39, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2); 
+    }
+    50% { 
+        transform: scale(1.04);
+        box-shadow: 0 0 35px rgba(201, 162, 39, 0.95), 0 0 50px rgba(241, 216, 136, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.4); 
+    }
+    100% { 
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(201, 162, 39, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2); 
+    }
+}
+
+.btn-blinking-register {
+    background: linear-gradient(135deg, #f1d888, var(--gold), var(--pr2));
+    border: 2px solid #ffffff;
+    height: 56px;
+    padding: 0 36px;
+    border-radius: 30px;
+    color: var(--navy);
+    font-weight: 900;
+    font-size: 1.05rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    animation: highImpactGlow 1.5s infinite ease-in-out;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    transition: transform 0.2s;
+}
+.btn-blinking-register:hover {
+    transform: scale(1.06);
+    color: var(--navy);
+}
+
+.back-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gold2);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 2px;
+    transition: color 0.2s;
+}
+.back-home-link:hover { color: #fff; border-bottom-color: #fff; }
+
+/* Footer */
+footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid rgba(255,255,255,.08); text-align: center; padding: 20px; font-size: 0.78rem; }
+</style>
+
+{% include 'home_page/head_assests.html' %}
+
+</head>
+<body onclick="redirectToSignup(event)">
+
+<!-- Header Include -->
+{% include 'home_page/header.html' %}
+
+<!-- Coming Soon Main Content -->
+<div class="coming-soon-wrapper">
+    <div class="container-main">
+        <div class="coming-soon-card">
+            <div class="section-label">EXCITING THINGS AHEAD</div>
+            <h1 class="section-title">We Are Crafting<span>Something Extraordinary</span></h1>
+            <p class="section-subtitle">Our team is putting the finishing touches on an upgraded property discovery experience for Nagpur. Until now, you can post property from your dashboards.</p>
+            
+            <!-- High-Impact Blinking Register CTA Button -->
+            <div>
+                <a href="{% url 'signup' %}" class="btn-blinking-register">
+                    <i class="bi bi-building-add" style="font-size: 1.2rem;"></i> For listing click here
+                </a>
+            </div>
+
+            <div>
+                <a href="/" class="back-home-link"><i class="bi bi-arrow-left"></i> Back to Homepage</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <span>&copy; {% now "Y" %} KANISHKAIMPERIA &bull; Nagpur, Maharashtra, India</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+    function redirectToSignup(e) {
+        if (e.target.closest('header')) return;
+        if (e.target.closest('.back-home-link')) return;
+
+        window.location.href = "{% url 'signup' %}";
+    }
+</script>
+</body>
+</html>

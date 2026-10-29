@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 
+{% load static %}
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,70 +11,117 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <style>
     :root {
-      --primary: #006ce4;
-      --primary-dark: #0050a8;
-      --accent: #f97316;
-      --accent-dark: #ea580c;
-      --bg-main: #f8fafc;
-      --text-dark: #1e293b;
-      --text-body: #475569;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+      --ph-navy: #16233a;
+      --ph-navy-2: #1f2f47;
+      --ph-navy-3: #0b1730;
+      --ph-gold: #c9a227;
+      --ph-gold-light: #f1d888;
+      --ph-pr2: #a5811c;
+      --ph-border: #e4e6ee;
+      --ph-text-body: #4b5568;
+      --bg-main: #f7f7f5;
+      --text-dark: #16233a;
+      --shadow: 0 20px 50px rgba(11, 23, 48, 0.14);
     }
 
     /* BODY */
     body {
       min-height: 100vh;
-      background: var(--bg-main);
-      font-family: "Poppins", sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(201,162,39,0.08), transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(22,35,58,0.06), transparent 40%),
+        var(--bg-main);
+      font-family: "DM Sans", sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 20px;
-      color: var(--text-body);
+      color: var(--ph-text-body);
       overflow-x: hidden;
     }
 
-    /* BRAND LOGO */
-    .brand-logo {
-      font-size: 1.8rem;
-      font-weight: 900;
-      color: var(--primary);
+    /* BRAND LOGO WRAPPER */
+    .brand-header-wrap {
       text-align: center;
       margin-bottom: 24px;
-      text-decoration: none;
+    }
+    .brand-circle-logo {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 10px auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ph-navy), var(--ph-navy-3));
+      border: 2px solid var(--ph-gold);
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(11, 23, 48, 0.15);
+    }
+    .brand-circle-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .brand-logo {
+      font-family: "Playfair Display", serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--ph-navy);
+      text-decoration: none;
+      line-height: 1.1;
+      letter-spacing: 0.5px;
     }
     .brand-logo span {
-      color: var(--accent);
+      display: block;
+      font-size: 1.4rem;
+      color: var(--ph-pr2);
+      letter-spacing: 2px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .brand-tagline {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ph-gold);
+      margin-top: 2px;
     }
 
     /* SIGNUP CARD */
     .signup-card {
       background: #ffffff;
       width: 100%;
-      max-width: 540px; /* Widened slightly to fit the grid nicely */
+      max-width: 540px;
       padding: 40px 32px;
       border-radius: 20px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--ph-border);
       box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .signup-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--ph-navy), var(--ph-gold), var(--ph-navy));
     }
 
     .form-title {
-      font-weight: 800;
+      font-family: "Playfair Display", serif;
+      font-weight: 700;
       text-align: center;
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       color: var(--text-dark);
       margin-bottom: 8px;
     }
@@ -80,7 +129,7 @@
     .form-subtitle {
       text-align: center;
       font-size: 0.85rem;
-      color: var(--text-body);
+      color: var(--ph-text-body);
       margin-bottom: 28px;
     }
 
@@ -93,13 +142,13 @@
     }
     
     .role-btn {
-      padding: 10px 4px;
+      padding: 12px 6px;
       text-align: center;
-      border: 1.5px solid var(--border);
+      border: 1.5px solid var(--ph-border);
       border-radius: 12px;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--text-body);
+      color: var(--ph-text-body);
       cursor: pointer;
       transition: all 0.2s;
       background: #ffffff;
@@ -110,46 +159,45 @@
       gap: 4px;
     }
     .role-btn i {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       margin-bottom: 2px;
     }
     
     .role-btn:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      background: rgba(0, 108, 228, 0.04);
+      border-color: var(--ph-gold);
+      color: var(--ph-navy);
+      background: rgba(201, 162, 39, 0.04);
     }
 
-    /* Hidden Radio Inputs */
     .role-input {
       display: none;
     }
 
-    /* Active State based on hidden radio checked */
     .role-input:checked + .role-btn {
-      background: rgba(0, 108, 228, 0.1);
-      color: var(--primary);
-      border-color: var(--primary);
+      background: rgba(201, 162, 39, 0.1);
+      color: var(--ph-navy);
+      border-color: var(--ph-gold);
+      font-weight: 700;
     }
 
     /* INPUT STYLES */
     .form-control {
-      border: 1.5px solid var(--border);
+      border: 1.5px solid var(--ph-border);
       border-radius: 12px;
       padding: 12px 15px;
       font-size: 0.95rem;
       color: var(--text-dark);
-      font-family: "Poppins", sans-serif;
+      font-family: "DM Sans", sans-serif;
       box-shadow: none !important;
       transition: all 0.2s;
     }
     .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1) !important;
+      border-color: var(--ph-gold);
+      box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15) !important;
     }
     
     .form-floating label {
-      color: var(--text-body);
+      color: var(--ph-text-body);
       font-size: 0.9rem;
       padding-left: 15px;
     }
@@ -172,13 +220,13 @@
       right: 16px;
       transform: translateY(-50%);
       cursor: pointer;
-      color: var(--text-muted);
+      color: var(--ph-text-body);
       font-size: 1.2rem;
       z-index: 10;
       transition: color 0.2s;
     }
     .password-toggle:hover {
-      color: var(--primary);
+      color: var(--ph-gold);
     }
 
     /* TERMS CHECKBOX */
@@ -193,16 +241,16 @@
       cursor: pointer;
       width: 16px;
       height: 16px;
-      accent-color: var(--primary);
+      accent-color: var(--ph-navy);
     }
     .terms-wrap label {
       font-size: 0.8rem;
-      color: var(--text-body);
+      color: var(--ph-text-body);
       line-height: 1.5;
       cursor: pointer;
     }
     .terms-wrap a {
-      color: var(--primary);
+      color: var(--ph-pr2);
       font-weight: 600;
       text-decoration: none;
     }
@@ -210,23 +258,48 @@
       text-decoration: underline;
     }
 
-    /* SIGNUP BUTTON */
+    /* BUTTONS */
     .btn-signup {
       width: 100%;
       font-weight: 800;
       font-size: 1rem;
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--ph-navy), var(--ph-navy-3));
       border: none;
       padding: 14px;
       border-radius: 12px;
       color: white;
       transition: 0.2s;
+      font-family: "DM Sans", sans-serif;
+      letter-spacing: .3px;
+      cursor: pointer;
     }
     .btn-signup:hover {
-      background: var(--primary-dark);
+      filter: brightness(1.12);
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 108, 228, 0.25);
+      box-shadow: 0 10px 24px rgba(11, 23, 48, 0.3);
+      color: white;
     }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--ph-text-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0;
+      margin-bottom: 15px;
+      transition: 0.2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .back-btn:hover { color: var(--ph-pr2); }
+
+    /* MULTI-STEP ENGINE */
+    .auth-step { display: none; }
+    .auth-step.active-step { display: block; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     /* LINKS */
     .bottom-link {
@@ -236,119 +309,135 @@
       font-weight: 500;
     }
     .bottom-link a {
-      color: var(--primary);
+      color: var(--ph-pr2);
       text-decoration: none;
       font-weight: 700;
       transition: 0.2s;
     }
     .bottom-link a:hover {
-      color: var(--primary-dark);
+      color: var(--ph-navy);
       text-decoration: underline;
     }
 
-    /* Mobile adjustments */
     @media (max-width: 480px) {
-      .role-selection {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .role-selection { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
+
+  {% include 'home_page/head_assests.html' %}
+  
 </head>
 
 <body>
 
   <div class="signup-card">
     
-    <div class="brand-logo">
-      🏠 Prop<span>CRM</span>
+    <div class="brand-header-wrap">
+      <div class="brand-circle-logo">
+        <img src="{% static 'login_logo.png' %}" alt="KanishkaImperia Logo" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'bi bi-building-fill\'></i>';">
+      </div>
+      <div class="brand-logo">
+        KANISHKA <span>IMPERIA</span>
+      </div>
+      <div class="brand-tagline">Luxury Realty &amp; Estates</div>
     </div>
 
     <div class="form-title">Create an Account</div>
     <div class="form-subtitle">Join KANISHKAIMPERIA to start managing properties</div>
 
-    <form>
+    <form onsubmit="return false;">
       {% csrf_token %}
-      <input type="hidden" name="next" >
+      <input type="hidden" name="next" value="{{ next|default:'' }}">
 
-      <label class="form-label-top">I am a... <span class="required">*</span></label>
-      <div class="role-selection">
+      <!-- STEP 1: ROLE SELECTION -->
+      <div id="step-role" class="auth-step active-step">
+        <label class="form-label-top">What brings you to KANISHKAIMPERIA? <span class="required">*</span></label>
+        <div class="role-selection">
+          <label>
+            <input class="role-input" type="radio" name="role" value="Landlord">
+            <div class="role-btn"><i class="bi bi-house-door"></i> Landlord</div>
+          </label>
+          
+          <label>
+            <input class="role-input" type="radio" name="role" value="Tenant">
+            <div class="role-btn"><i class="bi bi-person"></i> Tenant</div>
+          </label>
+          
+          <label>
+            <input class="role-input" type="radio" name="role" value="Buyer">
+            <div class="role-btn"><i class="bi bi-key"></i> Buyer</div>
+          </label>
+
+          <label>
+            <input class="role-input" type="radio" name="role" value="Relationship Manager">
+            <div class="role-btn"><i class="bi bi-person-badge"></i> Relationship Manager</div>
+          </label>
+
+          <label>
+            <input class="role-input" type="radio" name="role" value="Vendor">
+            <div class="role-btn"><i class="bi bi-megaphone-fill"></i> Vendors</div>
+          </label>
+
+          {% comment %} <label>
+            <input class="role-input" type="radio" name="role" value="Agent">
+            <div class="role-btn"><i class="bi bi-briefcase"></i> Agent</div>
+          </label>
+
+          <label>
+            <input class="role-input" type="radio" name="role" value="Agency/Builder">
+            <div class="role-btn"><i class="bi bi-buildings"></i> Agency/Builder</div>
+          </label>
+
+          <label>
+            <input class="role-input" type="radio" name="role" value="Vendor">
+            <div class="role-btn"><i class="bi bi-tools"></i> Vendor</div>
+          </label> {% endcomment %}
+        </div>
+
+        <button type="button" class="btn-signup" onclick="proceedToDetails()">Let's Continue <i class="bi bi-arrow-right"></i></button>
+      </div>
+
+      <!-- STEP 2: DETAILS FORM -->
+      <div id="step-details" class="auth-step">
+        <button type="button" class="back-btn" onclick="goToStep('step-role')"><i class="bi bi-arrow-left"></i> Change Role</button>
         
-        <label>
-          <input class="role-input" type="radio" name="role" value="Landlord">
-          <div class="role-btn"><i class="bi bi-house-door"></i> Landlord</div>
-        </label>
-        
-        <label>
-          <input class="role-input" type="radio" name="role" value="Tenant" >
-          <div class="role-btn"><i class="bi bi-person"></i> Tenant</div>
-        </label>
-        
-        <label>
-          <input class="role-input" type="radio" name="role" value="Buyer" >
-          <div class="role-btn"><i class="bi bi-key"></i> Buyer</div>
-        </label>
+        <label class="form-label-top">What should we call you? <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input name="full_name" type="text" class="form-control" id="reg_name" placeholder="Nice to meet you!" required>
+          <label>Nice to meet you!</label>
+        </div>
 
-        <label>
-          <input class="role-input" type="radio" name="role" value="Agent" >
-          <div class="role-btn"><i class="bi bi-briefcase"></i> Agent</div>
-        </label>
+        <label class="form-label-top">Where can we send your updates? <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input name="email" type="email" class="form-control" id="reg_email" placeholder="Your best email address" required>
+          <label>Your best email address</label>
+        </div>
 
-        <label>
-          <input class="role-input" type="radio" name="role" value="Agency/Builder" >
-          <div class="role-btn"><i class="bi bi-buildings"></i> Agency/Builder</div>
-        </label>
+        <label class="form-label-top">Where can we reach you? <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input name="mobile_number" type="tel" class="form-control" id="reg_mobile" placeholder="Your 10-digit mobile number" required maxlength="10">
+          <label>Your 10-digit mobile number</label>
+        </div>
 
-        <label>
-          <input class="role-input" type="radio" name="role" value="Vendor" >
-          <div class="role-btn"><i class="bi bi-tools"></i> Vendor</div>
-        </label>
-        
+        <label class="form-label-top">Create your secure password <span class="required">*</span></label>
+        <div class="form-floating mb-4 position-relative">
+          <input name="password" id="user_password" type="password" class="form-control" style="padding-right: 45px;" placeholder="Something only you know" required>
+          <label>Something only you know</label>
+          <i class="bi bi-eye-slash password-toggle" id="togglePassword"></i>
+        </div>
+
+        <div class="terms-wrap">
+          <input type="checkbox" name="agree_terms" id="termsCheck" required>
+          <label for="termsCheck">
+            I agree to KANISHKAIMPERIA's <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>.
+          </label>
+        </div>
+
+        <button type="button" class="btn-signup" onclick="Create_Account(this)">Create My Profile <i class="bi bi-arrow-right"></i></button>
       </div>
-
-      <label class="form-label-top">
-        Full Name <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-3">
-        <input name="full_name" type="text" class="form-control" placeholder="Enter Full Name" required >
-        <label>John Doe</label>
-      </div>
-
-      <label class="form-label-top">
-        Email Address <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-3">
-        <input name="email" type="email" class="form-control" placeholder="Enter Email Address" required >
-        <label>name@example.com</label>
-      </div>
-
-      <label class="form-label-top">
-        Mobile Number <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-3">
-        <input name="mobile_number" type="tel" class="form-control" placeholder="Enter Mobile Number" required maxlength=10>
-        <label>+91 98765 43210</label>
-      </div>
-
-      <label class="form-label-top">
-        Password <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-4 position-relative">
-        <input name="password" id="user_password" type="password" class="form-control" style="padding-right: 45px;" placeholder="Create Password" required>
-        <label>Create a secure password</label>
-        <i class="bi bi-eye-slash password-toggle" id="togglePassword"></i>
-      </div>
-
-      <div class="terms-wrap">
-        <input type="checkbox" name="agree_terms" id="termsCheck" required>
-        <label for="termsCheck">
-          I agree to KANISHKAIMPERIA's <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>.
-        </label>
-      </div>
-
-      <button type="button" class="btn-signup" onclick="Create_Account(this)">Create Account</button>
 
       <div class="bottom-link">
-        Already have an account? <a href="{% url 'login' %}">Sign In</a>
+        Already part of KANISHKAIMPERIA? <a href="{% url 'login' %}">Sign In</a>
       </div>
     </form>
 
@@ -357,113 +446,101 @@
   <script>
     document.getElementById('togglePassword').addEventListener('click', function () {
         const passwordInput = document.getElementById('user_password');
-        
-        // Toggle the type attribute
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
-        
-        // Toggle the icon
         this.classList.toggle('bi-eye');
         this.classList.toggle('bi-eye-slash');
     });
-  </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-
-<script>
-  function Create_Account(_this) {
-    // 1. Gather all form fields
-    var role = $("input[name='role']:checked").val();
-    var full_name = $("input[name='full_name']").val().trim();
-    var email = $("input[name='email']").val().trim();
-    var mobile_number = $("input[name='mobile_number']").val().trim();
-    var password = $("#user_password").val();
-    var agree_terms = $("#termsCheck").is(":checked");
-
-    // 2. Regular Expressions for Validation
-    // Basic email pattern: something@something.something
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // 10-digit mobile number pattern (Indian standard starting with 6,7,8,9)
-    var mobileRegex = /^[6-9]\d{9}$/;
-
-    // 3. Frontend Validation
-    if (!role) {
-      swal("Warning", "Please select your account role.", "warning");
-      return;
-    }
-    if (full_name === "") {
-      swal("Warning", "Please enter your full name.", "warning");
-      return;
-    }
-    
-    // Email Validation
-    if (email === "") {
-      swal("Warning", "Please enter your email address.", "warning");
-      return;
-    } else if (!emailRegex.test(email)) {
-      swal("Invalid Email", "Please enter a valid email address (e.g., name@example.com).", "warning");
-      return;
+    function goToStep(stepId) {
+        $('.auth-step').removeClass('active-step');$('#' + stepId).addClass('active-step');
     }
 
-    // Mobile Number Validation
-    if (mobile_number === "") {
-      swal("Warning", "Please enter your mobile number.", "warning");
-      return;
-    }
-
-    if (password === "") {
-      swal("Warning", "Please create a password.", "warning");
-      return;
-    } 
-
-    if (!agree_terms) {
-      swal("Warning", "You must agree to the Terms and Conditions to proceed.", "warning");
-      return;
-    }
-
-    // 4. Create FormData Object
-    var fd = new FormData();
-    fd.append('id', '');
-    fd.append('user_role', role);
-    fd.append('user_name', full_name);
-    fd.append('user_email', email);
-    fd.append('user_phone', mobile_number);
-    fd.append('user_password', password);
-
-
-   
-    // 5. Update Button State to Loading
-    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating Account...`);
-
-    // 6. Send AJAX POST Request
-    $.ajax({
-      method: "POST",
-      url: "{% url 'User_Ajax' %}", // Update to your actual Django URL name
-      data: fd,
-      processData: false,
-      contentType: false,
-      success: function (response) {
-        // Reset Button State
-        $(_this).prop("disabled", false).html(`Create Account`);
-        
-        // 7. Handle Backend Response
-        if (response.status == '1' || response.status == 'success') {
-          swal("Success!", response.msg || "Account created successfully!", "success").then(() => {
-            window.location.href = response.redirect_url || "{% url 'login' %}"; 
-          });
-        } else {
-          swal("Registration Failed", response.msg || "An error occurred. Please try again.", "error");
+    function proceedToDetails() {
+        var role = $("input[name='role']:checked").val();
+        if (!role) {
+            swal("Warning", "Please select your account role to proceed.", "warning");
+            return;
         }
-      },
-      error: function (xhr, status, error) {
-        // Reset Button State on Server Error
-        $(_this).prop("disabled", false).html(`Create Account`);
-        swal("Server Error", "Could not connect to the server. Please try again later.", "error");
-      }
-    });
-  }
-</script>
+        goToStep('step-details');
+    }
+
+    function Create_Account(_this) {
+        var role = $("input[name='role']:checked").val();
+        var full_name = $("#reg_name").val().trim();
+        var email = $("#reg_email").val().trim();
+        var mobile_number = $("#reg_mobile").val().trim();
+        var password = $("#user_password").val();
+        var agree_terms = $("#termsCheck").is(":checked");
+
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var mobileRegex = /^[6-9]\d{9}$/;
+
+        if (!role) {
+            goToStep('step-role');
+            swal("Warning", "Please select your account role.", "warning");
+            return;
+        }
+        if (full_name === "") {
+            swal("Warning", "Please enter your full name.", "warning");
+            return;
+        }
+        if (email === "") {
+            swal("Warning", "Please enter your email address.", "warning");
+            return;
+        } else if (!emailRegex.test(email)) {
+            swal("Invalid Email", "Please enter a valid email address.", "warning");
+            return;
+        }
+        if (mobile_number === "") {
+            swal("Warning", "Please enter your mobile number.", "warning");
+            return;
+        } else if (!mobileRegex.test(mobile_number)) {
+            swal("Invalid Mobile", "Please enter a valid 10-digit mobile number.", "warning");
+            return;
+        }
+        if (password === "") {
+            swal("Warning", "Please create a password.", "warning");
+            return;
+        }
+        if (!agree_terms) {
+            swal("Warning", "You must agree to the Terms and Conditions to proceed.", "warning");
+            return;
+        }
+
+        var originalText = _this.innerHTML;    
+        $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating Profile...`);
+
+        $.ajax({
+            method: "POST",
+            url: "{% url 'Prop_Register_Api' %}",
+            data: { 
+                'user_email': email, 
+                'user_name': full_name, 
+                'user_phone': mobile_number, 
+                'user_role': role,
+                'user_password': password
+            },
+            success: function (response) {
+                $(_this).prop("disabled", false).html(originalText);
+                if (response.status == '1' || response.status == 'success') {
+                    if (role === "Relationship Manager") {
+                        window.open(response.redirect_url || "{% url 'index' %}", '_blank');
+                        window.location.href = "{% url 'index' %}";
+                    } else {
+                        window.location.href = response.redirect_url || "{% url 'index' %}";
+                    }
+                } else {
+                    swal({icon: "error", title: "Profile Creation Denied", text: response.msg || "Registration rejected."});
+                }
+            },
+            error: function () {
+                $(_this).prop("disabled", false).html(originalText);
+                swal("Server Error", "Could not connect to the server. Please try again later.", "error");
+            }
+        });
+    }
+  </script>
 
 </body> 
 </html>

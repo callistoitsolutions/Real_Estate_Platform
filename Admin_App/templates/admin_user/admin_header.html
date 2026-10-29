@@ -1522,6 +1522,120 @@
             }
         }
 
+
+        /* =====================================================
+           MOBILE APP SHELL: bottom navigation + menu sheet
+           ===================================================== */
+        .m-bottom-nav, .m-sheet, .m-sheet-backdrop { display: none; }
+
+        @media (max-width: 768px) {
+            .main-content { padding-bottom: 96px !important; }
+            .toggle-sidebar { display: none !important; }
+
+            .m-bottom-nav {
+                display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1040;
+                background: #fff; border-top: 1px solid #e5e7eb;
+                box-shadow: 0 -6px 24px rgba(30, 41, 59, .10);
+                padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+            }
+            .m-nav-item {
+                flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                gap: 3px; padding: 6px 2px; border: 0; background: none; color: #94a3b8;
+                font: 500 .64rem 'Poppins', sans-serif; text-decoration: none; position: relative;
+                border-radius: 12px; -webkit-tap-highlight-color: transparent; cursor: pointer;
+            }
+            .m-nav-item i { font-size: 1.15rem; transition: transform .2s; }
+            .m-nav-item:active i { transform: scale(.88); }
+            .m-nav-item.active { color: #667eea; }
+            .m-nav-item.active::before {
+                content: ''; position: absolute; top: -7px; width: 26px; height: 3px;
+                border-radius: 0 0 4px 4px; background: var(--primary-gradient);
+            }
+            .m-nav-badge {
+                position: absolute; top: 1px; left: calc(50% + 6px); min-width: 17px; height: 17px;
+                padding: 0 4px; border-radius: 9px; background: #ef4444; color: #fff;
+                font-size: .6rem; font-weight: 700; display: none; align-items: center; justify-content: center;
+                border: 2px solid #fff; line-height: 1;
+            }
+            .m-nav-menu-btn i {
+                width: 40px; height: 40px; margin-top: -16px; border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                background: var(--primary-gradient); color: #fff; font-size: 1.05rem;
+                box-shadow: 0 6px 16px rgba(102, 126, 234, .45); border: 3px solid #fff;
+            }
+            .m-nav-menu-btn { color: #667eea; font-weight: 600; }
+
+            .m-sheet-backdrop {
+                display: block; position: fixed; inset: 0; z-index: 1050; background: rgba(15, 23, 42, .55);
+                opacity: 0; pointer-events: none; transition: opacity .25s; backdrop-filter: blur(2px);
+            }
+            .m-sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+
+            .m-sheet {
+                display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1060;
+                height: 88vh; background: #f8fafc; border-radius: 24px 24px 0 0;
+                transform: translateY(100%); transition: transform .32s cubic-bezier(.32, .72, 0, 1);
+                box-shadow: 0 -12px 40px rgba(0, 0, 0, .25);
+            }
+            .m-sheet.open { transform: translateY(0); }
+            .m-sheet-handle { width: 42px; height: 5px; border-radius: 3px; background: #cbd5e1; margin: 10px auto 4px; flex-shrink: 0; }
+            .m-sheet-head { padding: 6px 16px 10px; flex-shrink: 0; }
+            .m-profile-card {
+                display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px;
+                background: var(--primary-gradient); color: #fff;
+            }
+            .m-profile-avatar {
+                width: 46px; height: 46px; border-radius: 50%; background: rgba(255, 255, 255, .22);
+                display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;
+            }
+            .m-profile-info { flex: 1; min-width: 0; }
+            .m-profile-name { font-size: .85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .m-profile-role { font-size: .72rem; opacity: .85; }
+            .m-profile-edit {
+                background: rgba(255, 255, 255, .95); color: #667eea; border-radius: 10px; padding: 7px 12px;
+                font-size: .75rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+            }
+            .m-sheet-search { position: relative; margin-top: 10px; }
+            .m-sheet-search i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+            .m-sheet-search input {
+                width: 100%; border: 1px solid #e2e8f0; background: #fff; border-radius: 12px;
+                padding: 11px 14px 11px 38px; font: 400 .88rem 'Poppins', sans-serif; outline: none;
+            }
+            .m-sheet-search input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, .15); }
+            .m-sheet-body { flex: 1; overflow-y: auto; padding: 0 16px 16px; -webkit-overflow-scrolling: touch; }
+            .m-sec-title {
+                font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+                color: #94a3b8; margin: 16px 4px 8px;
+            }
+            .m-card { background: #fff; border-radius: 16px; border: 1px solid #eef2f7; overflow: hidden; }
+            .m-row {
+                display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; border: 0;
+                background: none; text-decoration: none; color: #1e293b; font: 500 .88rem 'Poppins', sans-serif;
+                text-align: left; border-bottom: 1px solid #f1f5f9; cursor: pointer;
+            }
+            .m-row:last-child { border-bottom: 0; }
+            .m-row:active { background: #f1f5f9; }
+            .m-row .m-ico {
+                width: 34px; height: 34px; border-radius: 10px; background: #eef2ff; color: #667eea;
+                display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0;
+            }
+            .m-row .m-txt { flex: 1; min-width: 0; }
+            .m-row .m-chev { color: #cbd5e1; font-size: .75rem; transition: transform .2s; }
+            .m-row.open .m-chev { transform: rotate(180deg); color: #667eea; }
+            .m-row .badge { font-size: .65rem; margin-left: 6px; }
+            .m-sub { display: none; background: #f8fafc; }
+            .m-sub.open { display: block; }
+            .m-sub .m-row { padding-left: 60px; font-size: .82rem; font-weight: 400; color: #475569; }
+            .m-row.m-danger { color: #dc2626; }
+            .m-row.m-danger .m-ico { background: #fee2e2; color: #dc2626; }
+            .m-empty { text-align: center; color: #94a3b8; padding: 30px 0; font-size: .85rem; display: none; }
+
+            /* Notification panel becomes a full-width card under the topbar */
+            .notification-dropdown {
+                position: fixed !important; left: 10px !important; right: 10px !important;
+                top: calc(var(--topbar-height) + 8px) !important; width: auto !important; max-width: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1760,7 +1874,6 @@
             </li>
 
 
-
              <li class="menu-section-title" style="color:white;">Website Home Pages</li>
             <li class="menu-item">
                 <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="SEO">
@@ -1860,6 +1973,49 @@
         </ul>
     </div>
 
+
+    <!-- ============ MOBILE APP SHELL ============ -->
+    <nav class="m-bottom-nav" id="mBottomNav" aria-label="Primary">
+        <a href="{% url 'admin_page' %}" class="m-nav-item" data-match="admin_page">
+            <i class="fas fa-house"></i><span>Home</span>
+        </a>
+        <a href="{% url 'Listing_Approval_Admin' %}" class="m-nav-item" data-match="Listing_Approval,Payment_Approval,approval">
+            <i class="fas fa-circle-check"></i><span>Approvals</span>
+            <span class="m-nav-badge" id="mApprovalBadge" {% if total_count or total_pending_count %}data-count="{{ total_count|default:0|add:total_pending_count|default:0 }}"{% endif %}></span>
+        </a>
+        <button type="button" class="m-nav-item" onclick="toggleNotification(event)">
+            <i class="fas fa-bell"></i><span>Alerts</span>
+            <span class="m-nav-badge" id="mAlertBadge"></span>
+        </button>
+        <a href="{% url 'Update_Profile_Admin' %}" class="m-nav-item" data-match="Update_Profile,profile">
+            <i class="fas fa-user"></i><span>Profile</span>
+        </a>
+        <button type="button" class="m-nav-item m-nav-menu-btn" onclick="openMobileMenu()" aria-label="Open menu">
+            <i class="fas fa-bars"></i><span>Menu</span>
+        </button>
+    </nav>
+
+    <div class="m-sheet-backdrop" id="mSheetBackdrop" onclick="closeMobileMenu()"></div>
+    <div class="m-sheet" id="mSheet" role="dialog" aria-label="Menu">
+        <div class="m-sheet-handle"></div>
+        <div class="m-sheet-head">
+            <div class="m-profile-card">
+                <div class="m-profile-avatar">RS</div>
+                <div class="m-profile-info">
+                    <div class="m-profile-name">{{admin_obj.email}}</div>
+                    <div class="m-profile-role">Administrator</div>
+                </div>
+                <a href="{% url 'Update_Profile_Admin' %}" class="m-profile-edit"><i class="fas fa-pen"></i> Edit profile</a>
+            </div>
+            <div class="m-sheet-search">
+                <i class="fas fa-search"></i>
+                <input type="search" id="mMenuSearch" placeholder="Search menu..." autocomplete="off">
+            </div>
+        </div>
+        <div class="m-sheet-body" id="mSheetBody"></div>
+    </div>
+    <!-- ============ /MOBILE APP SHELL ============ -->
+
     <div class="main-wrapper">
         <div class="topbar">
             <div class="topbar-left">
@@ -1943,9 +2099,140 @@
 
 <script>
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebarOverlay').classList.toggle('active');
+        if (window.innerWidth <= 768) { openMobileMenu(); return; }
+        document.getElementById('sidebar').classList.toggle('collapsed');
     }
+
+    // ===== Mobile app shell =====
+    function openMobileMenu() {
+        document.getElementById('mSheet').classList.add('open');
+        document.getElementById('mSheetBackdrop').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+        document.getElementById('mSheet').classList.remove('open');
+        document.getElementById('mSheetBackdrop').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Build the mobile menu from the sidebar so both always stay in sync
+    function buildMobileMenu() {
+        const body = document.getElementById('mSheetBody');
+        if (!body) return;
+        const items = document.querySelectorAll('#sidebar .sidebar-menu > li');
+        let card = null, hasSection = false;
+
+        items.forEach(li => {
+            if (li.classList.contains('menu-section-title')) {
+                const t = document.createElement('div');
+                t.className = 'm-sec-title';
+                t.textContent = li.textContent.trim();
+                body.appendChild(t);
+                card = document.createElement('div');
+                card.className = 'm-card';
+                body.appendChild(card);
+                hasSection = true;
+                return;
+            }
+            if (!hasSection) return;
+            const link = li.querySelector(':scope > .menu-link');
+            if (!link) return;
+
+            const iconEl = link.querySelector('.menu-icon');
+            const textEl = link.querySelector('.menu-text');
+            const label = textEl ? textEl.childNodes[0].textContent.replace(/\s+/g, ' ').trim() : '';
+            const badge = textEl ? textEl.querySelector('.badge') : null;
+            const sub = li.querySelector(':scope > .submenu');
+
+            const row = document.createElement(sub ? 'button' : 'a');
+            row.className = 'm-row';
+            row.dataset.label = label.toLowerCase();
+            if (!sub) row.href = link.getAttribute('href') || '#';
+            row.innerHTML = '<span class="m-ico"><i class="' + (iconEl ? iconEl.className.replace('menu-icon', '') : 'fas fa-circle') + '"></i></span>' +
+                            '<span class="m-txt"></span>';
+            row.querySelector('.m-txt').textContent = label;
+            if (badge) row.querySelector('.m-txt').appendChild(badge.cloneNode(true));
+            card.appendChild(row);
+
+            if (sub) {
+                row.insertAdjacentHTML('beforeend', '<i class="fas fa-chevron-down m-chev"></i>');
+                const wrap = document.createElement('div');
+                wrap.className = 'm-sub';
+                let subText = '';
+                sub.querySelectorAll('a.submenu-link').forEach(a => {
+                    const s = document.createElement('a');
+                    s.className = 'm-row';
+                    s.href = a.getAttribute('href');
+                    s.textContent = a.textContent.replace(/\s+/g, ' ').trim();
+                    s.dataset.label = s.textContent.toLowerCase();
+                    subText += ' ' + s.dataset.label;
+                    wrap.appendChild(s);
+                });
+                row.dataset.label += subText;
+                row.addEventListener('click', () => {
+                    row.classList.toggle('open');
+                    wrap.classList.toggle('open');
+                });
+                card.appendChild(wrap);
+            }
+        });
+
+        // Logout
+        const t = document.createElement('div'); t.className = 'm-sec-title'; t.textContent = 'Account'; body.appendChild(t);
+        const c = document.createElement('div'); c.className = 'm-card';
+        c.innerHTML = '<button class="m-row m-danger" onclick="closeMobileMenu(); Admin_Logout();"><span class="m-ico"><i class="fas fa-sign-out-alt"></i></span><span class="m-txt">Logout</span></button>';
+        body.appendChild(c);
+        body.insertAdjacentHTML('beforeend', '<div class="m-empty" id="mMenuEmpty">No menu items found</div>');
+
+        // Search
+        document.getElementById('mMenuSearch').addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            let any = false;
+            body.querySelectorAll('.m-card').forEach(cd => {
+                let vis = 0;
+                Array.from(cd.children).forEach(el => {
+                    if (el.classList.contains('m-sub')) {
+                        const prev = el.previousElementSibling;
+                        if (q && prev.style.display !== 'none') { el.classList.add('open'); prev.classList.add('open'); }
+                        if (!q) { el.classList.remove('open'); prev.classList.remove('open'); }
+                        el.style.display = (prev.style.display === 'none') ? 'none' : '';
+                        return;
+                    }
+                    const show = !q || (el.dataset.label || el.textContent.toLowerCase()).includes(q);
+                    el.style.display = show ? '' : 'none';
+                    if (show) vis++;
+                });
+                cd.style.display = vis ? '' : 'none';
+                if (cd.previousElementSibling) cd.previousElementSibling.style.display = vis ? '' : 'none';
+                if (vis) any = true;
+            });
+            document.getElementById('mMenuEmpty').style.display = any ? 'none' : 'block';
+        });
+    }
+
+    function syncMobileBadges() {
+        const setBadge = (el, n) => { if (!el) return; el.textContent = n > 99 ? '99+' : n; el.style.display = n > 0 ? 'flex' : 'none'; };
+        const ab = document.getElementById('mApprovalBadge');
+        if (ab) setBadge(ab, parseInt(ab.dataset.count || '0', 10));
+        const src = document.getElementById('notificationCount');
+        const alertBadge = document.getElementById('mAlertBadge');
+        if (src && alertBadge) {
+            const sync = () => setBadge(alertBadge, src.style.display === 'none' ? 0 : parseInt(src.textContent || '0', 10));
+            sync();
+            new MutationObserver(sync).observe(src, { childList: true, characterData: true, subtree: true, attributes: true });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        buildMobileMenu();
+        syncMobileBadges();
+        const path = location.pathname;
+        document.querySelectorAll('#mBottomNav a.m-nav-item').forEach(a => {
+            if (a.getAttribute('href') === path) a.classList.add('active');
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileMenu(); });
+        window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMobileMenu(); });
+    });
 
     function closeSidebar() {
         document.getElementById('sidebar').classList.remove('active');

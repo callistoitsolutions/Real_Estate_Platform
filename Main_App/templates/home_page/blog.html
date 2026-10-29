@@ -1,12 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+
+
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Property Guides & Insights | KANISHKAIMPERIA</title>
-<meta name="description" content="Expert guides on buying, selling, renting, RERA, home loans, investment, brokerage, interior design and more in Nagpur.">
+
+<title>{{ seo.meta_title|default:"Property Guides & Insights | KANISHKAIMPERIA" }}</title>
+<meta name="description" content="{{ seo.meta_description|default:'Expert guides on buying, selling, renting, RERA, home loans, investment, brokerage, interior design and more across India.' }}">
+
+<link rel="canonical" href="{{ seo.canonical_url|default:'https://www.kanishkaimperia.com/blogs1/' }}">
+
+<meta name="robots" content="{% if seo.noindex %}noindex, nofollow{% else %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endif %}">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KANISHKAIMPERIA">
+<meta property="og:title" content="{{ seo.meta_title|default:'Property Guides & Insights | KANISHKAIMPERIA' }}">
+<meta property="og:description" content="{{ seo.meta_description|default:'Expert guides on buying, selling, renting, RERA, home loans, investment, brokerage, interior design and more across India.' }}">
+<meta property="og:url" content="{{ seo.canonical_url|default:'https://www.kanishkaimperia.com/blogs1/' }}">
+<meta property="og:image" content="https://www.kanishkaimperia.com{% static 'images/kanishka-imperia-logo.png' %}">
+<meta property="og:locale" content="en_IN">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo.meta_title|default:'Property Guides & Insights | KANISHKAIMPERIA' }}">
+<meta name="twitter:description" content="{{ seo.meta_description|default:'Expert guides across India.' }}">
+<meta name="twitter:image" content="https://www.kanishkaimperia.com{% static 'images/kanishka-imperia-logo.png' %}">
+
+{% if seo.schema_json %}
+<script type="application/ld+json">
+{{ seo.schema_json|safe }}
+</script>
+{% endif %}
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -141,21 +169,38 @@ button, input { font-family: inherit; }
 .accordion-button:not(.collapsed) { background: #fbf4de; color: var(--pr2); box-shadow: none; }
 .accordion-body { background: white; color: var(--text-body); font-size: .86rem; line-height: 1.7; padding: 12px 16px; }
 
-footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid rgba(255,255,255,.08); }
-.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.08); }
-.footer-newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 18px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-@media(max-width: 480px) { .footer-newsletter-inner { flex-direction: column; text-align: center; } }
-@media(max-width: 480px) { .footer-bottom { flex-direction: column; text-align: center; } }
-.footer-inner { max-width: 1200px; margin: 0 auto; padding: 30px 15px; }
-.footer-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; }
+
+/* =========================================================
+   FOOTER (Standard — matches index.html)
+========================================================= */
+footer { background: var(--navy); color: rgba(255,255,255,.7); border-top: none; }
+.footer-newsletter { border-bottom: 1px solid rgba(255,255,255,.1); }
+.footer-newsletter-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 24px 0; }
+.footer-newsletter-inner h3 { font-family: var(--serif); color: #fff; font-size: 1.15rem; margin: 0; }
+.footer-newsletter-inner p { font-size: .9rem; color: rgba(255,255,255,.65); margin: 0; }
+.footer-social { display: flex; gap: 8px; }
+.footer-social a { width: 42px; height: 42px; background: rgba(255,255,255,.07); border: 1px solid rgba(201,162,39,.35); border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: var(--gold-light); font-size: 1rem; text-decoration: none; transition: background .2s, color .2s; }
+.footer-social a:hover { background: var(--gold); color: var(--navy); }
+.footer-inner { padding: 44px 0 20px; }
+.footer-grid { display: grid; grid-template-columns: 1fr; gap: 30px; margin-bottom: 30px; }
 @media(min-width: 580px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
-@media(min-width: 900px) { .footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: 30px; } }
-.fl-brand span { font-family: var(--serif); font-size: 1.1rem; font-weight: 800; color: #fff; }
-.fl-desc { font-size: .78rem; line-height: 1.6; margin-bottom: 8px; color: rgba(255,255,255,.55); }
-.fl-title { font-size: .75rem; font-weight: 700; color: var(--gold2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-.fl-link { display: block; font-size: .78rem; color: rgba(255,255,255,.55); padding: 4px 0; text-decoration: none; }
-.footer-bottom { border-top: 1px solid rgba(255,255,255,.08); padding: 14px 15px; display: flex; justify-content: space-between; font-size: .72rem; flex-wrap: wrap; gap: 8px; max-width: 1200px; margin: 0 auto; color: rgba(255,255,255,.4); }
+@media(min-width: 900px) { .footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; } }
+.fl-brand { margin-bottom: 14px; }
+.fl-brand span { font-family: var(--serif); font-size: 1.3rem; font-weight: 800; color: #fff; display: block; margin-bottom: 12px; }
+.fl-desc { font-size: .85rem; line-height: 1.7; margin-bottom: 8px; color: rgba(255,255,255,.7); }
+.fl-desc i { color: var(--gold); margin-right: 6px; }
+.fl-desc a { color: rgba(255,255,255,.7); }
+.fl-desc a:hover { color: var(--gold-light); }
+.fl-title { font-size: .85rem; font-weight: 800; color: var(--gold-light); margin-bottom: 12px; text-transform: none; letter-spacing: 0; }
+.fl-link { display: block; font-size: .88rem; color: rgba(255,255,255,.8); padding: 6px 0; font-weight: 500; text-decoration: none; }
+.fl-link:hover { color: var(--gold-light); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 18px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: .82rem; color: #fff; font-weight: 600; }
+@media(max-width: 480px) { .footer-newsletter-inner, .footer-bottom { flex-direction: column; text-align: center; } }
+
 </style>
+
+{% include 'home_page/head_assests.html' %}
+
 </head>
 <body>
 
@@ -168,8 +213,11 @@ footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid
 </div>
 
 <div class="inner-hero">
-    <h1>Property Insights &amp; <span>Guides</span></h1>
-    <p class="hero-sub">Expert advice, market trends, and step-by-step guides to help you make smarter real estate decisions in Nagpur.</p>
+   
+    <h1>Property Insights &amp; <span>Guides in India</span></h1>
+   
+
+    <p class="hero-sub">Expert advice, market trends, and step-by-step guides to help you make smarter real estate decisions across India.</p>
     <form class="hero-searchbox" method="GET" action="">
         <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search for articles, legal guides...">
         <button type="submit"><i class="bi bi-search"></i> Search</button>
@@ -213,7 +261,9 @@ footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid
     <a href="{% url 'blog_details' slug=blogs.0.seo_slug %}" class="featured-article">
         <div class="fa-img">
             {% if blogs.0.featured_image %}
-                <img src="{{ blogs.0.featured_image.url }}" alt="kanishkaimperia">
+               
+<img src="{{ blogs.0.featured_image.url }}" alt="{{ blogs.0.title }}">
+
             {% else %}
                 <i class="bi bi-journal-richtext" style="font-size:3rem;color:var(--pr2);"></i>
             {% endif %}
@@ -244,7 +294,9 @@ footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid
         <a href="{% url 'blog_details' slug=blog.seo_slug %}" class="blog-card-home">
             <div class="bc-img-home">
                 {% if blog.featured_image %}
-                    <img src="{{ blog.featured_image.url }}" alt="kanishkaimperia">
+                   
+<img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}">
+
                 {% else %}
                     <div class="bc-placeholder"><i class="bi bi-newspaper"></i></div>
                 {% endif %}
@@ -342,56 +394,116 @@ footer { background: #0b1730; color: rgba(255,255,255,.6); border-top: 1px solid
 </div>
 
 <!-- Footer -->
+
+
+<!-- ============ FOOTER (Standard — matches index.html) ============ -->
+
 <footer>
-    <div class="footer-newsletter">
-        <div class="footer-newsletter-inner">
-            <div>
-                <h3>Stay Updated!</h3>
-                <p>Subscribe to get the latest property updates.</p>
-            </div>
-            <div class="footer-social d-flex gap-2">
-                <a href="#"><i class="bi bi-facebook"></i></a>
-                <a href="#"><i class="bi bi-instagram"></i></a>
-                <a href="#"><i class="bi bi-whatsapp"></i></a>
-                <a href="#"><i class="bi bi-twitter-x"></i></a>
-            </div>
-        </div>
+  <div class="footer-newsletter">
+    <div class="wrap footer-newsletter-inner">
+      <div>
+        <h3>Follow Us</h3>
+        <p>Follow us for property updates.</p>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://wa.me/919175791501" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+      </div>
     </div>
-    <div class="footer-inner">
-        <div class="footer-grid">
-            <div>
-                <div class="fl-brand"><span>KANISHKAIMPERIA</span></div>
-                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents</div>
-                <div class="fl-desc"><i class="bi bi-telephone"></i> +91 9175791501</div>
-                <div class="fl-desc"><i class="bi bi-envelope"></i> kanishkaimperia@gmail.com</div>
-            </div>
-            <div>
-                <div class="fl-title">For Tenants</div>
-                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
-                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
-            </div>
-            <div>
-                <div class="fl-title">For Buyers</div>
-                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
-            </div>
-            <div>
-                <div class="fl-title">For Owners</div>
-                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
-            </div>
-            <div>
-                <div class="fl-title">Company</div>
-                <a href="{% url 'blog' %}" class="fl-link">News/Guide</a>
-                <a href="{% url 'services' %}" class="fl-link">Services</a>
-                <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
-            </div>
-        </div>
+  </div>
+
+  <div class="wrap footer-inner">
+    <div class="footer-grid">
+
+      <!-- Column 1: Brand -->
+      <div>
+        <div class="fl-brand"><span>KANISHKAIMPERIA</span></div>
+        <div class="fl-desc">A property platform connecting owners/landlords, tenants, buyers and agents across India</div>
+        <div class="fl-desc"><i class="bi bi-telephone"></i> <a href="tel:+919175791501">+91 9175791501</a></div>
+        <div class="fl-desc"><i class="bi bi-envelope"></i> <a href="mailto:kanishkaimperia@gmail.com">kanishkaimperia@gmail.com</a></div>
+        <a class="btn btn-gold" href="{% url 'Coming_Soon' %}" style="margin-top:12px;height:42px;font-size:.88rem;">
+          <i class="bi bi-plus-circle"></i> Post Property FREE
+        </a>
+      </div>
+
+      <!-- Column 2: For Tenants -->
+      <div>
+        <div class="fl-title">For Tenants</div>
+        <a href="/flats-for-rent/" class="fl-link">Flats for Rent</a>
+        <a href="/commercial-space-for-rent/" class="fl-link">Commercial for Rent</a>
+        <a href="/pg-coliving/" class="fl-link">PG / Co-living</a>
+        <a href="/listingpage/?type=rent" class="fl-link">All Rentals</a>
+      </div>
+
+      <!-- Column 3: For Buyers -->
+      <div>
+        <div class="fl-title">For Buyers</div>
+        <a href="/flats-for-sale/" class="fl-link">Flats for Sale</a>
+        <a href="/commercial-property-for-sale/" class="fl-link">Commercial for Sale</a>
+        <a href="/plots-for-sale/" class="fl-link">Plots &amp; Land</a>
+        <a href="/agricultural-plots-for-sale/" class="fl-link">Agricultural Land</a>
+        <a href="/industrial-plots-for-sale/" class="fl-link">Industrial Property</a>
+      </div>
+
+      <!-- Column 4: For Owners -->
+      <div>
+        <div class="fl-title">For Owners</div>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">Post Property FREE</a>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">List for Rent</a>
+        <a href="{% url 'Coming_Soon' %}" class="fl-link">List for Sale</a>
+        <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Support</a>
+      </div>
+
+      <!-- Column 5: Company & Help -->
+      <div>
+        <div class="fl-title">Company &amp; Help</div>
+        <a href="{% url 'blog' %}" class="fl-link">News / Guide</a>
+        <a href="{% url 'services' %}" class="fl-link">Services</a>
+        <a href="{% url 'about' %}" class="fl-link">About Us</a>
+        <a href="{% url 'Contact_Us' %}" class="fl-link">Contact Us</a>
+        <a href="#" class="fl-link">Privacy Policy</a>
+        <a href="#" class="fl-link">Terms &amp; Conditions</a>
+      </div>
+
     </div>
+
+          <span>Privacy Policy · Terms · <a href="/sitemap.xml" class="footer-sitemap-link">Sitemap</a></span>
+
     <div class="footer-bottom">
-        <span>© 2026 KANISHKAIMPERIA · Nagpur, Maharashtra</span>
-        <span>Privacy Policy · Terms · Sitemap</span>
+      <span>© 2026 KANISHKAIMPERIA · Designed and Developed By Nedient Technology Private Limited</span>
+
     </div>
+  </div>
 </footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Is RERA registration mandatory for a project?","acceptedAnswer":{"@type":"Answer","text":"Yes. Any project above the notified plot size/unit threshold must be registered with the state RERA authority before it can be marketed or sold."}},
+    {"@type":"Question","name":"How much down payment is required to buy a home?","acceptedAnswer":{"@type":"Answer","text":"Banks typically finance 75 to 90 percent of the property value, so buyers need to arrange 10 to 25 percent as down payment, plus stamp duty, registration and other charges separately."}},
+    {"@type":"Question","name":"Why should I pay brokerage if I can search listings myself?","acceptedAnswer":{"@type":"Answer","text":"A good broker saves time, brings market and price-negotiation expertise, coordinates site visits and supports legal verification."}},
+    {"@type":"Question","name":"What documents should I verify before buying property?","acceptedAnswer":{"@type":"Answer","text":"Key documents include the title deed, encumbrance certificate, property tax receipts, approved building plan, occupancy certificate and RERA registration for under-construction projects."}}
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.kanishkaimperia.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Property Guides", "item": "https://www.kanishkaimperia.com/blogs1/" }
+  ]
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+

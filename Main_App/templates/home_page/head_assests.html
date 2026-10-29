@@ -1,0 +1,30 @@
+{% load static %}
+
+{% if header_settings and header_settings.logo_favicon %}
+    <!-- Dynamic Favicon from Database/Settings -->
+    <link rel="icon" type="image/x-icon" href="{{ header_settings.logo_favicon.url }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ header_settings.logo_favicon.url }}">
+{% else %}
+    <!-- Fallback Static Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}?v=11">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/favicon.ico' %}?v=11">
+{% endif %}
+
+<meta name="theme-color" content="#16233a">
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KXBSXTN4');</script>
+<!-- End Google Tag Manager -->
+
+<!-- Global Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Global JS Libraries -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
